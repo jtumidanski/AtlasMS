@@ -20,7 +20,7 @@
 /**
  * @Author Ronan
  * Event - Jonathan's Test Quest
-**/
+ **/
 
 var entryMap = 912020000;
 var exitMap = 120000102;
@@ -37,7 +37,7 @@ function setLobbyRange() {
 }
 
 function init() {
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function setup(level, lobbyid) {
@@ -54,24 +54,28 @@ function setup(level, lobbyid) {
     return eim;
 }
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function respawnStages(eim) {}
+function respawnStages(eim) {
+}
 
 function playerEntry(eim, player) {
     var map = eim.getMapInstance(entryMap);
     player.changeMap(map, map.getPortal(0));
 }
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player) {
     eim.unregisterPlayer(player);
     eim.dispose();
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
-function playerLeft(eim, player) {}
+function playerLeft(eim, player) {
+}
 
 function scheduledTimeout(eim) {
     var player = eim.getPlayers().get(0);
@@ -84,7 +88,7 @@ function playerDisconnected(eim, player) {
 }
 
 function changedMap(eim, chr, mapid) {
-    if(mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
+    if (mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
 }
 
 function clearPQ(eim) {
@@ -92,24 +96,31 @@ function clearPQ(eim) {
     eim.setEventCleared();
 }
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function disbandParty(eim) {}
+function disbandParty(eim) {
+}
 
 function monsterValue(eim, mobId) {
     return 1;
 }
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose() {}
+function dispose() {
+}
 
 
 // ---------- FILLER FUNCTIONS ----------
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 

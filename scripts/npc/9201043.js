@@ -40,7 +40,7 @@ function action(mode, type, selection) {
             cm.dispose();
             return;
         }
-        if (mode == 1) 
+        if (mode == 1)
             status++;
         else
             status--;
@@ -56,8 +56,7 @@ function action(mode, type, selection) {
             if (cm.haveItem(4031592)) {
                 cm.sendOk("You already have an Entrance Ticket!");
                 cm.dispose();
-            }
-            else if (cm.haveItem(4031593, 10)) {
+            } else if (cm.haveItem(4031593, 10)) {
                 cm.sendYesNo("So you would like a Ticket?");
                 MySelection = selection;
             } else {

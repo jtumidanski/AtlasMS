@@ -21,14 +21,12 @@
 */
 
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Seruf Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Seruf Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
 
-**/
-
-importPackage(Packages.client);
+ **/
 
 function init() {
     scheduleNew();
@@ -45,50 +43,71 @@ function cancelSchedule() {
 
 function start() {
     var theSeaweedTower = em.getChannelServer().getMapFactory().getMap(230020100);
-    var seruf = Packages.server.life.MapleLifeFactory.getMonster(4220001);
-	
-	if(theSeaweedTower.getMonsterById(4220001) != null) {
-		em.schedule("start", 3 * 60 * 60 * 1000);
-		return;
-	}
-	
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var seruf = MapleLifeFactory.getMonster(4220001);
+
+    if (theSeaweedTower.getMonsterById(4220001) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
+
     var posX;
     var posY = 520;
-    posX =  Math.floor((Math.random() * 2300) - 1500);
-    theSeaweedTower.spawnMonsterOnGroundBelow(seruf, new Packages.java.awt.Point(posX, posY));
-    theSeaweedTower.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "A strange shell has appeared from a grove of seaweed"));
-	em.schedule("start", 3 * 60 * 60 * 1000);
+    posX = Math.floor((Math.random() * 2300) - 1500);
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(posX, posY);
+    theSeaweedTower.spawnMonsterOnGroundBelow(seruf, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    theSeaweedTower.broadcastMessage(MaplePacketCreator.serverNotice(6, "A strange shell has appeared from a grove of seaweed"));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

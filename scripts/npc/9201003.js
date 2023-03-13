@@ -30,13 +30,13 @@ var state = 0;
 
 function hasProofOfLoves(player) {
     var count = 0;
-    
-    for(var i = 4031367; i <= 4031372; i++) {
-        if(player.haveItem(i)) {
+
+    for (var i = 4031367; i <= 4031372; i++) {
+        if (player.haveItem(i)) {
             count++;
         }
     }
-    
+
     return count >= 4;
 }
 
@@ -66,7 +66,7 @@ function action(mode, type, selection) {
                 if (cm.getQuestProgressInt(100400, 1) == 0) {
                     cm.sendNext("Mom, dad, I have a request to do to both of you... I wanna know more about the path you've already been walking since always, the path of loving and caring for someone dear to me.", 2);
                 } else {
-                    if(!hasProofOfLoves(cm.getPlayer())) {
+                    if (!hasProofOfLoves(cm.getPlayer())) {
                         cm.sendOk("Dear, we need to make sure you are really ready to fall in love with whoever you choose to be your partner, please bring here #b4 #t4031367#'s#k.");
                         cm.dispose();
                     } else {
@@ -80,13 +80,13 @@ function action(mode, type, selection) {
                 cm.sendNextPrev("My dear! How thoughtful of you asking our help. Surely we will help you out!");
             } else {
                 cm.sendOk("Mom... Dad... Thanks a lot for your tender support!!!", 2);
-                
+
                 cm.completeQuest(100400);
                 cm.gainExp(20000 * cm.getPlayer().getExpRate());
-                for(var i = 4031367; i <= 4031372; i++) {
+                for (var i = 4031367; i <= 4031372; i++) {
                     cm.removeAll(i);
                 }
-                
+
                 cm.dispose();
             }
         } else if (status == 2) {

@@ -24,7 +24,7 @@ var menu;
 var cost = 10000;
 
 function start() {
-    cm.sendYesNo("Will you move to #b#m230000000##k now? The price is #b"+cost+" mesos#k.");
+    cm.sendYesNo("Will you move to #b#m230000000##k now? The price is #b" + cost + " mesos#k.");
 }
 
 function action(mode, type, selection) {
@@ -41,7 +41,7 @@ function action(mode, type, selection) {
         else
             status--;
         if (status == 1) {
-            if(cm.getPlayer().getMeso() < cost)
+            if (cm.getPlayer().getMeso() < cost)
                 cm.sendOk("I don't think you have enough money...");
             else {
                 cm.gainMeso(-cost);

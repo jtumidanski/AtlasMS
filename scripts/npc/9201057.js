@@ -6,23 +6,22 @@ function start() {
 }
 
 function action(mode, type, selection) {
-    if(mode != 1){
+    if (mode != 1) {
         cm.dispose();
         return;
     }
-    if (cm.c.getPlayer().getMapId() == 103000100 || cm.c.getPlayer().getMapId() == 600010001){
-	var item = 4031711 + parseInt(cm.c.getPlayer().getMapId() / 300000000);
+    if (cm.c.getPlayer().getMapId() == 103000100 || cm.c.getPlayer().getMapId() == 600010001) {
+        var item = 4031711 + parseInt(cm.c.getPlayer().getMapId() / 300000000);
 
-        if(!cm.canHold(item)) {
+        if (!cm.canHold(item)) {
             cm.sendNext("You don't have a etc. slot available.");
-	}
-	else if(cm.getMeso() >= 5000){
+        } else if (cm.getMeso() >= 5000) {
             cm.gainMeso(-5000);
             cm.gainItem(item, 1);
             cm.sendNext("There you go.");
-        }else
+        } else
             cm.sendNext("You don't have enough mesos.");
-    }else{
+    } else {
         cm.warp(cm.c.getPlayer().getMapId() == 600010002 ? 600010001 : 103000100);
     }
     cm.dispose();

@@ -32,15 +32,15 @@ function start() {
 
 function action(mode, type, selection) {
     status++;
-    if (mode != 1){
-        if(mode == 0 && status == 2){
+    if (mode != 1) {
+        if (mode == 0 && status == 2) {
             status -= 2;
             start();
-        }else if(mode == 0)
-            status-= 2;
+        } else if (mode == 0)
+            status -= 2;
         else
             cm.dispose();
-    }else{
+    } else {
         if (status == 1)
             cm.sendNextPrev("If you want to get stronger, then go to #bSouthperry#k where there's a harbor. Ride on the gigantic ship and head to the place called #bVictoria Island#k. It's incomparable in size compared to this tiny island.");
         else if (status == 2)

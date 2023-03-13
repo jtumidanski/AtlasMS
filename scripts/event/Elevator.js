@@ -22,22 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //Time Setting is in millisecond
 var beginTime = 60 * 1000; //The time to begin the ride
-var  rideTime = 60 * 1000; //The time that require move to destination
+var rideTime = 60 * 1000; //The time that require move to destination
 
 function init() {
     beginTime = em.getTransportationTime(beginTime);
-     rideTime = em.getTransportationTime(rideTime);
-    
+    rideTime = em.getTransportationTime(rideTime);
+
     em.getChannelServer().getMapFactory().getMap(222020100).resetReactors();
     em.getChannelServer().getMapFactory().getMap(222020200).resetReactors();
-    
+
     scheduleNew();
 }
 
 function scheduleNew() {
     em.setProperty("goingUp", "false");
     em.setProperty("goingDown", "true");
-    
+
     em.getChannelServer().getMapFactory().getMap(222020100).resetReactors();
     em.getChannelServer().getMapFactory().getMap(222020200).setReactorState();
     em.schedule("goingUpNow", beginTime);
@@ -55,7 +55,7 @@ function goingUpNow() {
     em.getChannelServer().getMapFactory().getMap(222020110).warpEveryone(222020111);
     em.setProperty("goingUp", "true");
     em.schedule("isUpNow", rideTime);
-    
+
     em.getChannelServer().getMapFactory().getMap(222020100).setReactorState();
 }
 
@@ -63,7 +63,7 @@ function goingDownNow() {
     em.getChannelServer().getMapFactory().getMap(222020210).warpEveryone(222020211);
     em.setProperty("goingDown", "true");
     em.schedule("isDownNow", rideTime);
-    
+
     em.getChannelServer().getMapFactory().getMap(222020200).setReactorState();
 }
 
@@ -79,41 +79,58 @@ function isDownNow() {
     em.setProperty("goingUp", "false"); // clear
     em.getChannelServer().getMapFactory().getMap(222020100).resetReactors();
     em.getChannelServer().getMapFactory().getMap(222020211).warpEveryone(222020100, 4);
-    
+
     goUp();
 }
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

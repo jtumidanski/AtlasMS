@@ -14,7 +14,7 @@ function start() {
 
 function action(mode, type, selection) {
     status++;
-    if (mode != 1){
+    if (mode != 1) {
         cm.dispose();
         return;
     }
@@ -24,7 +24,7 @@ function action(mode, type, selection) {
         else {
             var selStr = "Which ticket would you like?#b";
             for (var i = 0; i < zones; i++)
-                selStr += "\r\n#L" + i + "#Construction site B" + (i+1) + " (" + cost + " mesos)#l";
+                selStr += "\r\n#L" + i + "#Construction site B" + (i + 1) + " (" + cost + " mesos)#l";
             cm.sendSimple(selStr);
         }
     } else if (status == 1) {
@@ -32,11 +32,11 @@ function action(mode, type, selection) {
             cm.sendOk("You do not have enough mesos.");
         else {
             cm.gainMeso(-cost);
-			if(selection < 0 || selection > zones) {
-				cm.getClient().disconnect(false, false);
-				return;
-			}
-            cm.gainItem(4031036 + selection,1);
+            if (selection < 0 || selection > zones) {
+                cm.getClient().disconnect(false, false);
+                return;
+            }
+            cm.gainItem(4031036 + selection, 1);
         }
         cm.dispose();
     }

@@ -60,12 +60,12 @@ function end(mode, type, selection) {
             qm.dispose();
             return;
         }
-        
+
         if (mode == 1)
             status++;
         else
             status--;
-        
+
         if (status == 0)
             qm.sendSimple("Hello, traveler... You have finally come to see me. Have you fulfilled your duties? \r\n #b#L0#What duties? Who are you?#l#k");
         else if (selection == 0 && status == 1) {
@@ -84,7 +84,7 @@ function end(mode, type, selection) {
                 qm.sendNext("Please free a slot in your CASH inventory before you try to receive the pet...");
                 return;
             }
-            
+
             qm.sendNext("This snail will only be alive for #b5 hours#k. Shower it with love. Your love will be reciprocated in the end.");
         } else if (status == 7) {
             if (canComplete) {
@@ -92,7 +92,7 @@ function end(mode, type, selection) {
                 qm.forceCompleteQuest();
                 qm.gainItem(5000054, 1, false, true, 5 * 60 * 60 * 1000);  // rune snail (5hrs), missing expiration time detected thanks to cljnilsson
             }
-            
+
             qm.dispose();
         }
     }

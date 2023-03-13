@@ -20,24 +20,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-importPackage(Packages.server.life);
-
 function spawnJrBoss(mobObj) {
     mobObj.getMap().killMonster(mobObj.getId());
     var spawnid = mobObj.getId() - 17;
-    
+
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
     var mob = MapleLifeFactory.getMonster(spawnid);
     mobObj.getMap().spawnMonsterOnGroundBelow(mob, mobObj.getPosition());
 }
 
 function hit() {
     var mapObj = rm.getMap();
-    
+
     //spawnJrBoss(mapObj.getMonsterById(8820019));
     //spawnJrBoss(mapObj.getMonsterById(8820020));
     //spawnJrBoss(mapObj.getMonsterById(8820021));
     //spawnJrBoss(mapObj.getMonsterById(8820022));
     //spawnJrBoss(mapObj.getMonsterById(8820023));
-    
+
     mapObj.killMonster(8820000);
 }

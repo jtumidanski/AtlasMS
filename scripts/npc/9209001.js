@@ -27,7 +27,7 @@ function start() {
     cm.sendOk("Hello, the Maple 7th Day Market is currently unavailable.");
     cm.dispose();
     return;
-    
+
     cm.sendSimple("Hello, the Maple 7th Day Market opens today.#b\r\n#L0#Move to Maple 7th Day Market map\r\n#L1#Listen for an explanation about the Maple 7th Day Market");
 }
 
@@ -52,9 +52,9 @@ function action(mode, type, selection) {
             cm.sendNext("Okay, we will send you to the Maple 7th Day Market map.");
         } else
             cm.sendSimple("What would you like to know about the Maple 7th Day Market?#b\r\n#L0#Where does the Maple 7th Day Market take place?\r\n#L1#What can you do at the Maple 7th Day Market?\r\n#L2#I do not have any questions.");
-    } else if(status == 1) {
+    } else if (status == 1) {
         if (sel == 0) {
-        	cm.getPlayer().saveLocation("EVENT");
+            cm.getPlayer().saveLocation("EVENT");
             cm.warp(680100000 + parseInt(Math.random() * 3));
             cm.dispose();
         } else if (selection == 0) {

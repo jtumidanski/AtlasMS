@@ -1,12 +1,9 @@
 /**
--- Version Info -----------------------------------------------------------------------------------
-	1.0 - First Version by Drago (MapleStorySA)
-        2.0 - Second Version by Jayd - translated CPQ contents to English
----------------------------------------------------------------------------------------------------
-**/
-
-importPackage(Packages.constants.game);
-
+ -- Version Info -----------------------------------------------------------------------------------
+ 1.0 - First Version by Drago (MapleStorySA)
+ 2.0 - Second Version by Jayd - translated CPQ contents to English
+ ---------------------------------------------------------------------------------------------------
+ **/
 var status = 0;
 var party;
 
@@ -36,11 +33,12 @@ function action(mode, type, selection) {
             status++;
         else
             status--;
-        
+
         if (status == 0) {
             if (cm.getParty().getMembers().size() == party.size()) {
                 cm.getPlayer().setChallenged(true);
                 var snd = "";
+                const GameConstants = Java.type('constants.game.GameConstants');
                 for (var i = 0; i < party.size(); i++)
                     snd += "#bName: " + party.get(i).getName() + " / (Level: " + party.get(i).getLevel() + ") / " + GameConstants.getJobName(party.get(i).getJobId()) + "#k\r\n\r\n";
                 cm.sendAcceptDecline(snd + "Would you like to fight this party at the Monster Carnival?");

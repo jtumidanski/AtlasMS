@@ -20,14 +20,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Faust2 Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Faust2 Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
 
-**/
-
-importPackage(Packages.client);
+ **/
 
 function init() {
     scheduleNew();
@@ -44,47 +42,68 @@ function cancelSchedule() {
 
 function start() {
     var theForestOfEvil2 = em.getChannelServer().getMapFactory().getMap(100040106);
-    var faust2 = Packages.server.life.MapleLifeFactory.getMonster(5220002);
-	
-	if(theForestOfEvil2.getMonsterById(5220002) != null) {
-		em.schedule("start", 3 * 60 *60 * 1000);
-		return;
-	}
-	
-    theForestOfEvil2.spawnMonsterOnGroundBelow(faust2, new Packages.java.awt.Point(474, 278));
-    theForestOfEvil2.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "Faust appeared amidst the blue fog."));
-	em.schedule("start", 3 * 60 *60 * 1000);
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var faust2 = MapleLifeFactory.getMonster(5220002);
+
+    if (theForestOfEvil2.getMonsterById(5220002) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
+
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(474, 278);
+    theForestOfEvil2.spawnMonsterOnGroundBelow(faust2, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    theForestOfEvil2.broadcastMessage(MaplePacketCreator.serverNotice(6, "Faust appeared amidst the blue fog."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

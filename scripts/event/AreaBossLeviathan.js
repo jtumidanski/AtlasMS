@@ -20,14 +20,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Leviathan Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Leviathan Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
 
-**/
-
-importPackage(Packages.client);
+ **/
 
 function init() {
     scheduleNew();
@@ -44,49 +42,70 @@ function cancelSchedule() {
 
 function start() {
     var leviathansCanyon = em.getChannelServer().getMapFactory().getMap(240040401);
-    var leviathan = Packages.server.life.MapleLifeFactory.getMonster(8220003);
-    if(leviathansCanyon.getMonsterById(8220003) != null) {
-		em.schedule("start", 3 * 60 *60 * 1000);
-		return;
-	}
-	
-	var posX;
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var leviathan = MapleLifeFactory.getMonster(8220003);
+    if (leviathansCanyon.getMonsterById(8220003) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
+
+    var posX;
     var posY = 1125;
-    posX =  Math.floor((Math.random() * 600) - 300);
-    leviathansCanyon.spawnMonsterOnGroundBelow(leviathan, new Packages.java.awt.Point(posX, posY));
-    leviathansCanyon.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "Leviathan emerges from the canyon and the cold icy wind blows."));
-	em.schedule("start", 3 * 60 *60 * 1000);
+    posX = Math.floor((Math.random() * 600) - 300);
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(posX, posY);
+    leviathansCanyon.spawnMonsterOnGroundBelow(leviathan, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    leviathansCanyon.broadcastMessage(MaplePacketCreator.serverNotice(6, "Leviathan emerges from the canyon and the cold icy wind blows."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

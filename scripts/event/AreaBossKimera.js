@@ -20,14 +20,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Chimera/Kimera Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Chimera/Kimera Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
 
-**/
-
-importPackage(Packages.client);
+ **/
 
 function init() {
     scheduleNew();
@@ -44,50 +42,71 @@ function cancelSchedule() {
 
 function start() {
     var labSecretBasementPath = em.getChannelServer().getMapFactory().getMap(261030000);
-    var chimera = Packages.server.life.MapleLifeFactory.getMonster(8220002);
-	
-	if(labSecretBasementPath.getMonsterById(8220002) != null) {
-		em.schedule("start", 3 * 60 *60 * 1000);
-		return;
-	}
-	
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var chimera = MapleLifeFactory.getMonster(8220002);
+
+    if (labSecretBasementPath.getMonsterById(8220002) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
+
     var posX;
     var posY = 180;
-    posX =  (Math.floor(Math.random() * 900) - 900);
-    labSecretBasementPath.spawnMonsterOnGroundBelow(chimera, new Packages.java.awt.Point(posX, posY));
-    labSecretBasementPath.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "Kimera has appeared out of the darkness of the underground with a glitter in her eyes."));
-	em.schedule("start", 3 * 60 *60 * 1000);
+    posX = (Math.floor(Math.random() * 900) - 900);
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(posX, posY);
+    labSecretBasementPath.spawnMonsterOnGroundBelow(chimera, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    labSecretBasementPath.broadcastMessage(MaplePacketCreator.serverNotice(6, "Kimera has appeared out of the darkness of the underground with a glitter in her eyes."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

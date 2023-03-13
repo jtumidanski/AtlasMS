@@ -18,15 +18,16 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 /*
 Author: kevintjuh93
-*/ 
+*/
 
 function enter(pi) {
     var mapid = pi.getPlayer().getSavedLocation("MIRROR");
-    
+
     pi.playPortalSound();
-    if(mapid == 260020500) pi.warp(mapid, 3);
+    if (mapid == 260020500) pi.warp(mapid, 3);
     else pi.warp(mapid);
     return true;
 }

@@ -20,8 +20,7 @@
 /**
  * @Author Ronan
  * Event - Wolves' Mount Quest
-**/
-importPackage(Packages.tools);
+ **/
 
 var entryMap = 914030000;
 var exitMap = 140010210;
@@ -38,40 +37,43 @@ function setLobbyRange() {
 }
 
 function init() {
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function setup(level, lobbyid) {
     var eim = em.newInstance("Aran_3rdmount_" + lobbyid);
     eim.setProperty("level", level);
     eim.setProperty("boss", "0");
-    
+
     return eim;
 }
 
-function respawnStages(eim) {}
+function respawnStages(eim) {
+}
 
 function playerEntry(eim, player) {
     var mapObj = eim.getInstanceMap(entryMap);
-    
+
     mapObj.resetPQ(1);
     mapObj.instanceMapForceRespawn();
     mapObj.closeMapSpawnPoints();
     respawnStages(eim);
-    
+
     player.changeMap(entryMap, 1);
-    em.setProperty("noEntry","true");
-    
+    em.setProperty("noEntry", "true");
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
     player.getClient().announce(MaplePacketCreator.getClock(eventTime * 60));
     eim.startEventTimer(eventTime * 60000);
 }
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player) {
     eim.unregisterPlayer(player);
     eim.dispose();
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function scheduledTimeout(eim) {
@@ -85,53 +87,60 @@ function playerDisconnected(eim, player) {
 }
 
 function changedMap(eim, chr, mapid) {
-    if(mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
+    if (mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
 }
 
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
-    
+
     var player = eim.getPlayers().get(0);
     eim.unregisterPlayer(player);
     player.changeMap(exitMap);
-    
+
     eim.dispose();
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function monsterKilled(mob, eim) {
-    if(eim.getInstanceMap(entryMap).countMonsters() == 0) {
+    if (eim.getInstanceMap(entryMap).countMonsters() == 0) {
         eim.showClearEffect();
     }
 }
 
 function monsterValue(eim, mobId) {
-        return 1;
+    return 1;
 }
 
 function friendlyKilled(mob, eim) {
-    if(em.getProperty("noEntry") != "false") {
+    if (em.getProperty("noEntry") != "false") {
         var player = eim.getPlayers().get(0);
         playerExit(eim, player);
         player.changeMap(exitMap);
     }
 }
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose() {}
+function dispose() {
+}
 
 
 // ---------- FILLER FUNCTIONS ----------
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 

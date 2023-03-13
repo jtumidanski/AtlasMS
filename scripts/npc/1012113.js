@@ -25,6 +25,7 @@
  * @npc Tommy (HPQ)
  */
 var status = 0;
+
 function start() {
     status = -1;
     action(1, 0, 0);
@@ -41,8 +42,7 @@ function action(mode, type, selection) {
             } else if (status == 1) {
                 if (cm.isEventLeader()) {
                     cm.sendYesNo("What do you think about making your way there with your party members and teach those rowdy pigs a lesson?");
-                }
-                else {
+                } else {
                     cm.sendOk("Interessed? Tell your party leader to talk to me to head there!");
                     cm.dispose();
                     return;

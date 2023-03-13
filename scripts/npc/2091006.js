@@ -35,7 +35,7 @@ function start() {
 
 function action(mode, type, selection) {
     status++;
-    if(mode == 0 && type == 0)
+    if (mode == 0 && type == 0)
         status -= 2;
     if (mode >= 0) {
         if (selection == 1 || readNotice == 1) {

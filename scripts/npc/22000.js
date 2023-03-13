@@ -32,11 +32,11 @@ function start() {
 
 function action(mode, type, selection) {
     status++;
-    if (mode != 1){
-        if(mode == 0 && type != 1)
+    if (mode != 1) {
+        if (mode == 0 && type != 1)
             status -= 2;
-        else if(type == 1 || (mode == -1 && type != 1)){
-            if(mode == 0)
+        else if (type == 1 || (mode == -1 && type != 1)) {
+            if (mode == 0)
                 cm.sendOk("Hmm... I guess you still have things to do here?");
             cm.dispose();
             return;
@@ -50,8 +50,7 @@ function action(mode, type, selection) {
     } else if (status == 2) {
         if (cm.haveItem(4031801))
             cm.sendNextPrev("Since you have the recommendation letter, I won't charge you for this. Alright, buckle up, because we're going to head to Victoria Island right now, and it might get a bit turbulent!!");
-        else
-        if (cm.getLevel() > 6) {
+        else if (cm.getLevel() > 6) {
             if (cm.getMeso() < 150) {
                 cm.sendOk("What? You're telling me you wanted to go without any money? You're one weirdo...");
                 cm.dispose();

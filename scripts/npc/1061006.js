@@ -60,7 +60,7 @@ function action(mode, type, selection) {
                 cm.sendSimple(selStr);
             }
         } else if (status == 2) {
-            cm.warp(maps[selection],0);
+            cm.warp(maps[selection], 0);
             cm.dispose();
         }
     }

@@ -20,21 +20,21 @@
 */
 
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Weaver - Ludibrium : Ludibrium Pet Walkway (220000006)
--- By ---------------------------------------------------------------------------------------------
-	Xterminator
--- Version Info -----------------------------------------------------------------------------------
-	1.0 - First Version by Xterminator
----------------------------------------------------------------------------------------------------
-**/
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Weaver - Ludibrium : Ludibrium Pet Walkway (220000006)
+ -- By ---------------------------------------------------------------------------------------------
+ Xterminator
+ -- Version Info -----------------------------------------------------------------------------------
+ 1.0 - First Version by Xterminator
+ ---------------------------------------------------------------------------------------------------
+ **/
 
 function start() {
     cm.sendYesNo("This is the road where you can go take a walk with your pet. You can walk around with it, or you can train your pet to go through obstacles here. If you aren't too close with your pet yet, that may present a problem and he will not follow your command as much... So, what do you think? Wanna train your pet?");
 }
 
 function action(mode, type, selection) {
-    if (mode == -1){
+    if (mode == -1) {
     } else if (mode == 0) {
         cm.sendNext("Hmmm ... too busy to do it right now? If you feel like doing it, though, come back and find me.");
     } else if (mode == 1) {

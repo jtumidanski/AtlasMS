@@ -20,18 +20,13 @@
 /* Pelvis Bebop
 	Marriage NPC
  */
-
-importPackage(Packages.config);
-importPackage(Packages.net.server.channel.handlers);
-importPackage(Packages.tools);
-importPackage(Packages.tools.packets);
-
 var status;
 var state;
 var eim;
 var weddingEventName = "WeddingChapel";
 var cathedralWedding = false;
 var weddingIndoors;
+const YamlConfig = Java.type('config.YamlConfig');
 var weddingBlessingExp = YamlConfig.config.server.WEDDING_BLESS_EXP;
 
 function detectPlayerItemid(player) {
@@ -40,7 +35,7 @@ function detectPlayerItemid(player) {
             return x;
         }
     }
-    
+
     return -1;
 }
 
@@ -50,31 +45,31 @@ function getRingId(boxItemId) {
 
 function isSuitedForWedding(player, equipped) {
     var baseid = (player.getGender() == 0) ? 1050131 : 1051150;
-    
-    if(equipped) {
-        for(var i = 0; i < 4; i++) {
-            if(player.haveItemEquipped(baseid + i)) {
+
+    if (equipped) {
+        for (var i = 0; i < 4; i++) {
+            if (player.haveItemEquipped(baseid + i)) {
                 return true;
             }
         }
     } else {
-        for(var i = 0; i < 4; i++) {
-            if(player.haveItemWithId(baseid + i, true)) {
+        for (var i = 0; i < 4; i++) {
+            if (player.haveItemWithId(baseid + i, true)) {
                 return true;
             }
         }
     }
-    
+
     return false;
 }
 
 function getWeddingPreparationStatus(player, partner) {
-    if(!player.haveItem(4000313)) return -3;
-    if(!partner.haveItem(4000313)) return 3;
-    
-    if(!isSuitedForWedding(player, true)) return -4;
-    if(!isSuitedForWedding(partner, true)) return 4;
-    
+    if (!player.haveItem(4000313)) return -3;
+    if (!partner.haveItem(4000313)) return 3;
+
+    if (!isSuitedForWedding(player, true)) return -4;
+    if (!isSuitedForWedding(partner, true)) return 4;
+
     var hasEngagement = false;
     for (var x = 4031357; x <= 4031364; x++) {
         if (player.haveItem(x)) {
@@ -82,7 +77,7 @@ function getWeddingPreparationStatus(player, partner) {
             break;
         }
     }
-    if(!hasEngagement) return -1;
+    if (!hasEngagement) return -1;
 
     hasEngagement = false;
     for (var x = 4031357; x <= 4031364; x++) {
@@ -91,22 +86,22 @@ function getWeddingPreparationStatus(player, partner) {
             break;
         }
     }
-    if(!hasEngagement) return -2;
+    if (!hasEngagement) return -2;
 
-    if(!player.canHold(1112803)) return 1;
-    if(!partner.canHold(1112803)) return 2;
+    if (!player.canHold(1112803)) return 1;
+    if (!partner.canHold(1112803)) return 2;
 
     return 0;
 }
 
 function giveCoupleBlessings(eim, player, partner) {
     var blessCount = eim.gridSize();
-    
+
     player.gainExp(blessCount * weddingBlessingExp);
     partner.gainExp(blessCount * weddingBlessingExp);
 }
 
-function start() {  
+function start() {
     eim = cm.getEventInstance();
 
     status = -1;
@@ -127,20 +122,20 @@ function action(mode, type, selection) {
             status--;
 
         if (status == 0) {
-            if(eim == null) {
-                cm.warp(680000000,0);
+            if (eim == null) {
+                cm.warp(680000000, 0);
                 cm.dispose();
                 return;
             }
 
             var playerId = cm.getPlayer().getId();
-            if(playerId == eim.getIntProperty("groomId") || playerId == eim.getIntProperty("brideId")) {
+            if (playerId == eim.getIntProperty("groomId") || playerId == eim.getIntProperty("brideId")) {
                 var wstg = eim.getIntProperty("weddingStage");
 
-                if(wstg == 2) {
+                if (wstg == 2) {
                     cm.sendYesNo("Awhoooooooooosh~, the guests have proclaimed their love to y'all. The time has come baby~, #rshould I make you Husband and Wife#k?");
                     state = 1;
-                } else if(wstg == 1) {
+                } else if (wstg == 1) {
                     cm.sendOk("W-whoah wait a bit alright? Your guests are currently giving their love to y'all. Let's shake this place up, baby~~.");
                     cm.dispose();
                 } else {
@@ -149,12 +144,12 @@ function action(mode, type, selection) {
                 }
             } else {
                 var wstg = eim.getIntProperty("weddingStage");
-                if(wstg == 1) {
-                    if(eim.gridCheck(cm.getPlayer()) != -1) {
+                if (wstg == 1) {
+                    if (eim.gridCheck(cm.getPlayer()) != -1) {
                         cm.sendOk("Everyone let's shake this place up! Let's rock 'n' roll!!");
                         cm.dispose();
                     } else {
-                        if(eim.getIntProperty("guestBlessings") == 1) {
+                        if (eim.getIntProperty("guestBlessings") == 1) {
                             cm.sendYesNo("Will you manifest your love to the superstars here present?");
                             state = 0;
                         } else {
@@ -162,7 +157,7 @@ function action(mode, type, selection) {
                             cm.dispose();
                         }
                     }
-                } else if(wstg == 3) {
+                } else if (wstg == 3) {
                     cm.sendOk("Whooooooo-hoo! The couple's love now are like one super big shiny heart right now! And it shall go on ever after this festival. Please #rget ready for the afterparty#k, baby~. Follow the married couple's lead!");
                     cm.dispose();
                 } else {
@@ -171,10 +166,11 @@ function action(mode, type, selection) {
                 }
             }
         } else if (status == 1) {
-            if(state == 0) {    // give player blessings
+            if (state == 0) {    // give player blessings
                 eim.gridInsert(cm.getPlayer(), 1);
 
-                if(YamlConfig.config.server.WEDDING_BLESSER_SHOWFX) {
+                const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+                if (YamlConfig.config.server.WEDDING_BLESSER_SHOWFX) {
                     var target = cm.getPlayer();
                     target.announce(MaplePacketCreator.showSpecialEffect(9));
                     target.getMap().broadcastMessage(target, MaplePacketCreator.showForeignEffect(target.getId(), 9), false);
@@ -182,7 +178,7 @@ function action(mode, type, selection) {
                     var target = eim.getPlayerById(eim.getIntProperty("groomId"));
                     target.announce(MaplePacketCreator.showSpecialEffect(9));
                     target.getMap().broadcastMessage(target, MaplePacketCreator.showForeignEffect(target.getId(), 9), false);
-                    
+
                     target = eim.getPlayerById(eim.getIntProperty("brideId"));
                     target.announce(MaplePacketCreator.showSpecialEffect(9));
                     target.getMap().broadcastMessage(target, MaplePacketCreator.showForeignEffect(target.getId(), 9), false);
@@ -193,9 +189,9 @@ function action(mode, type, selection) {
             } else {            // couple wants to complete the wedding
                 var wstg = eim.getIntProperty("weddingStage");
 
-                if(wstg == 2) {
+                if (wstg == 2) {
                     var pid = cm.getPlayer().getPartnerId();
-                    if(pid <= 0) {
+                    if (pid <= 0) {
                         cm.sendOk("Huh~.... Wait wait, did you just break that thing you had right now?? Oh my, what happened?");
                         cm.dispose();
                         return;
@@ -203,14 +199,14 @@ function action(mode, type, selection) {
 
                     var player = cm.getPlayer();
                     var partner = cm.getMap().getCharacterById(cm.getPlayer().getPartnerId());
-                    if(partner != null) {
+                    if (partner != null) {
                         state = getWeddingPreparationStatus(player, partner);
 
-                        switch(state) {
+                        switch (state) {
                             case 0:
                                 var pid = eim.getIntProperty("confirmedVows");
-                                if(pid != -1) {
-                                    if(pid == player.getId()) {
+                                if (pid != -1) {
+                                    if (pid == player.getId()) {
                                         cm.sendOk("You have already confirmed your vows. All that is left is for your partner to confirm now.");
                                     } else {
                                         eim.setIntProperty("weddingStage", 3);
@@ -224,6 +220,7 @@ function action(mode, type, selection) {
                                         cm.gainItem(playerItemId, -1);
                                         cmPartner.gainItem(partnerItemId, -1);
 
+                                        const RingActionHandler = Java.type('net.server.channel.handlers.RingActionHandler');
                                         RingActionHandler.giveMarriageRings(player, partner, marriageRingId);
                                         player.setMarriageItemId(marriageRingId);
                                         partner.setMarriageItemId(marriageRingId);
@@ -241,7 +238,7 @@ function action(mode, type, selection) {
                                     eim.setIntProperty("confirmedVows", player.getId());
                                     cm.getMap().dropMessage(6, "Wedding Assistant: " + player.getName() + " has confirmed vows! Alright, one step away to make it official. Tighten your seatbelts!");
                                 }
-                                
+
                                 break;
 
                             case -1:

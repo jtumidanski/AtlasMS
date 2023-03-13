@@ -41,7 +41,7 @@ function start(mode, type, selection) {
     else if (status == 1) {
         qm.forceStartQuest();
         qm.forceCompleteQuest();
-        
+
         qm.sendOk("Now look to the left. The leaders of the Knights will be waiting for you. There will be 5 paths for you to choose from. All you need to do is choose one of them. All 5 of them will lead you to the path of a Knight, so... I suggest you pay attention to what each path offers, and select the one you'd most like to take.");
     } else if (status == 2) {
         qm.dispose();

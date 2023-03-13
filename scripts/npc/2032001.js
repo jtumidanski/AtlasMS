@@ -47,14 +47,14 @@ function action(mode, type, selection) {
         cm.sendGetNumber("Okay, so how many do you want me to make?", 1, 1, 100);
     else if (status == 2) {
         var complete = true;
-        
-        if (cm.getMeso() < 500000 * selection){
+
+        if (cm.getMeso() < 500000 * selection) {
             cm.sendOk("I'm sorry, but I am NOT doing this for free.");
             cm.dispose();
             return;
         } else if (!cm.haveItem(4004004, 10 * selection)) {
             complete = false;
-        } else if(!cm.canHold(4005004, selection)) {
+        } else if (!cm.canHold(4005004, selection)) {
             cm.sendOk("Are you having trouble with no empty slots on your inventory? Sort that out first!");
             cm.dispose();
             return;

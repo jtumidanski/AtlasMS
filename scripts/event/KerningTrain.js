@@ -1,5 +1,3 @@
-importPackage(Packages.tools);
-
 var returnTo = new Array(103000100, 103000310);
 var rideTo = new Array(103000310, 103000100);
 var trainRide = new Array(103000301, 103000302);
@@ -17,72 +15,86 @@ function init() {
 }
 
 function setup(level, lobbyid) {
-	var eim = em.newInstance("KerningTrain_" + lobbyid);
-	return eim;
+    var eim = em.newInstance("KerningTrain_" + lobbyid);
+    return eim;
 }
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
 function playerEntry(eim, player) {
-	if (player.getMapId() == returnTo[0]) {
-		myRide = 0;
-	} else {
-		myRide = 1;
-	}
-        
-	exitMap = eim.getEm().getChannelServer().getMapFactory().getMap(rideTo[myRide]);
-        returnMap = eim.getMapFactory().getMap(returnTo[myRide]);
-        onRide = eim.getMapFactory().getMap(trainRide[myRide]);
-        player.changeMap(onRide, onRide.getPortal(0));
-        
-        player.getClient().announce(MaplePacketCreator.getClock(rideTime / 1000));
-        player.getClient().announce(MaplePacketCreator.earnTitleMessage("The next stop is at Kerning " + (myRide == 0 ? "Square" : "Subway") + " Station. The exit is to your left."));
-        eim.schedule("timeOut", rideTime);
+    if (player.getMapId() == returnTo[0]) {
+        myRide = 0;
+    } else {
+        myRide = 1;
+    }
+
+    exitMap = eim.getEm().getChannelServer().getMapFactory().getMap(rideTo[myRide]);
+    returnMap = eim.getMapFactory().getMap(returnTo[myRide]);
+    onRide = eim.getMapFactory().getMap(trainRide[myRide]);
+    player.changeMap(onRide, onRide.getPortal(0));
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    player.getClient().announce(MaplePacketCreator.getClock(rideTime / 1000));
+    player.getClient().announce(MaplePacketCreator.earnTitleMessage("The next stop is at Kerning " + (myRide == 0 ? "Square" : "Subway") + " Station. The exit is to your left."));
+    eim.schedule("timeOut", rideTime);
 }
 
 function timeOut(eim) {
-	end(eim);
+    end(eim);
 }
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player, success) {
-        eim.unregisterPlayer(player);
-        player.changeMap(success ? exitMap.getId() : returnMap.getId(), 0);
+    eim.unregisterPlayer(player);
+    player.changeMap(success ? exitMap.getId() : returnMap.getId(), 0);
 }
 
 function end(eim) {
-        var party = eim.getPlayers();
-        for (var i = 0; i < party.size(); i++) {
-            playerExit(eim, party.get(i), true);
-        }
-        eim.dispose();
+    var party = eim.getPlayers();
+    for (var i = 0; i < party.size(); i++) {
+        playerExit(eim, party.get(i), true);
+    }
+    eim.dispose();
 }
 
 function playerDisconnected(eim, player) {
-        playerExit(eim, player, false);
+    playerExit(eim, player, false);
 }
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose(eim) {}
+function dispose(eim) {
+}
 
 
 // ---------- FILLER FUNCTIONS ----------
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 

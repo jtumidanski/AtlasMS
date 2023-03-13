@@ -20,13 +20,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Timer1 Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
-**/
-
-importPackage(Packages.client);
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Timer1 Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
+ **/
 
 function init() {
     scheduleNew();
@@ -43,50 +41,71 @@ function cancelSchedule() {
 
 function start() {
     var whirlpoolOfTime = em.getChannelServer().getMapFactory().getMap(220050100);
-    var timer1 = Packages.server.life.MapleLifeFactory.getMonster(5220003);
-	
-	if(whirlpoolOfTime.getMonsterById(5220003) != null) {
-		em.schedule("start", 3 * 60 * 60 * 1000);
-		return;
-	}
-	
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var timer1 = MapleLifeFactory.getMonster(5220003);
+
+    if (whirlpoolOfTime.getMonsterById(5220003) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
+
     var posX;
     var posY = 1030;
-    posX =  Math.floor((Math.random() * 770) - 770);
-    whirlpoolOfTime.spawnMonsterOnGroundBelow(timer1, new Packages.java.awt.Point(posX, posY));
-    whirlpoolOfTime.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "Tick-Tock Tick-Tock! Timer makes it's presence known."));
-	em.schedule("start", 3 * 60 * 60 * 1000);
+    posX = Math.floor((Math.random() * 770) - 770);
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(posX, posY);
+    whirlpoolOfTime.spawnMonsterOnGroundBelow(timer1, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    whirlpoolOfTime.broadcastMessage(MaplePacketCreator.serverNotice(6, "Tick-Tock Tick-Tock! Timer makes it's presence known."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

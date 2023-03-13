@@ -1,8 +1,6 @@
 var arena;
 var status = 0;
 
-importPackage(Packages.client);
-
 function start() {
     arena = cm.getPlayer().getAriantColiseum();
     if (arena == null) {
@@ -10,7 +8,7 @@ function start() {
         cm.dispose();
         return;
     }
-    
+
     status = -1;
     action(1, 0, 0);
 }

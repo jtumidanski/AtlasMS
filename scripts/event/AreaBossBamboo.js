@@ -20,12 +20,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Bamboo Warrior Spawner
--- Edited by --------------------------------------------------------------------------------------
-	Ronan - based on xQuasar's King Clang spawner
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Bamboo Warrior Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ Ronan - based on xQuasar's King Clang spawner
 
-**/
+ **/
 function init() {
     scheduleNew();
 }
@@ -40,48 +40,67 @@ function cancelSchedule() {
 }
 
 function start() {
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    const Point = Java.type('java.awt.Point');
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
     var mapObj = em.getChannelServer().getMapFactory().getMap(800020120);   // original mapid was 251010101
-    var mobObj = Packages.server.life.MapleLifeFactory.getMonster(6090002);
-	
-	if(mapObj.getMonsterById(6090002) != null) {
-		em.schedule("start", 3 * 60 *60 * 1000);
-		return;
-	}
-	
-    mapObj.spawnMonsterOnGroundBelow(mobObj, new Packages.java.awt.Point(560, 50));
-    mapObj.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "From amongst the ruins shrouded by the mists, Bamboo Warrior appears."));
-	em.schedule("start", 3 * 60 *60 * 1000);
+    var mobObj = MapleLifeFactory.getMonster(6090002);
+
+    if (mapObj.getMonsterById(6090002) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
+
+    mapObj.spawnMonsterOnGroundBelow(mobObj, new Point(560, 50));
+    mapObj.broadcastMessage(MaplePacketCreator.serverNotice(6, "From amongst the ruins shrouded by the mists, Bamboo Warrior appears."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

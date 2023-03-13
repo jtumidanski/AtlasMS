@@ -1,10 +1,10 @@
 /**
--- Version Info -----------------------------------------------------------------------------------
-	1.0 - First Version by Drago (MapleStorySA)
-        2.0 - Second Version by Ronan (HeavenMS)
-        3.0 - Third Version by Jayd - translated CPQ contents to English and added Pirate items
----------------------------------------------------------------------------------------------------
-**/
+ -- Version Info -----------------------------------------------------------------------------------
+ 1.0 - First Version by Drago (MapleStorySA)
+ 2.0 - Second Version by Ronan (HeavenMS)
+ 3.0 - Third Version by Jayd - translated CPQ contents to English and added Pirate items
+ ---------------------------------------------------------------------------------------------------
+ **/
 
 var status = 0;
 var rnk = -1;
@@ -28,19 +28,20 @@ var feeMultiplier = 7.0;
 
 function start() {
     status = -1;
-    
-    if (!Packages.config.YamlConfig.config.server.USE_CPQ) {
-        if (Packages.config.YamlConfig.config.server.USE_ENABLE_CUSTOM_NPC_SCRIPT) {
+
+    const YamlConfig = Java.type('config.YamlConfig');
+    if (!YamlConfig.config.server.USE_CPQ) {
+        if (YamlConfig.config.server.USE_ENABLE_CUSTOM_NPC_SCRIPT) {
             status = 0;
             action(1, 0, 4);
         } else {
             cm.sendOk("The Monster Carnival is currently unavailable.");
             cm.dispose();
         }
-        
+
         return;
     }
-    
+
     action(1, 0, 0);
 }
 
@@ -56,7 +57,7 @@ function action(mode, type, selection) {
             status++;
         else
             status--;
-        
+
         if (cm.getPlayer().getMapId() == 980000010) {
             if (status == 0) {
                 cm.sendNext("I hope you had fun at the Monster Carnival!");
@@ -234,8 +235,9 @@ function action(mode, type, selection) {
             }
         } else {
             if (status == 0) {
+                const YamlConfig = Java.type('config.YamlConfig');
                 var talk = "What would you like to do? If you have never participate in the Monster Carnival, you will need to know a few things before participating! \r\n#b#L0# Go to the Monster Carnival 1.#l \r\n#L3# Go to the Monster Carnival 2.#l \r\n#L1# Learn about the Monster Carnival.#l\r\n#L2# Trade #t4001129#.#l";
-                if (Packages.config.YamlConfig.config.server.USE_ENABLE_CUSTOM_NPC_SCRIPT) {
+                if (YamlConfig.config.server.USE_ENABLE_CUSTOM_NPC_SCRIPT) {
                     talk += "\r\n#L4# ... Can I just refine my ores?#l";
                 }
                 cm.sendSimple(talk);
@@ -268,20 +270,20 @@ function action(mode, type, selection) {
                 } else if (selection == 4) {
                     var selStr = "Very well, instead I offer a steadfast #bore refining#k service for you, taxing #r" + ((feeMultiplier * 100) | 0) + "%#k over the usual fee to synthetize them. What will you do?#b";
 
-                    var options = new Array("Refine mineral ores","Refine jewel ores");
-                    if(refineCrystals) {
+                    var options = new Array("Refine mineral ores", "Refine jewel ores");
+                    if (refineCrystals) {
                         options.push("Refine crystal ores");
                     }
-                    if(refineRocks) {
+                    if (refineRocks) {
                         options.push("Refine plates/jewels");
                     }
 
-                    for (var i = 0; i < options.length; i++){
+                    for (var i = 0; i < options.length; i++) {
                         selStr += "\r\n#L" + i + "# " + options[i] + "#l";
                     }
 
                     cm.sendSimple(selStr);
-                    
+
                     status = 76;
                 }
             } else if (status == 2) {
@@ -454,7 +456,7 @@ function action(mode, type, selection) {
                     allDone = refineRockItems(); // moon/star rock
                 }
 
-                if(allDone) {
+                if (allDone) {
                     cm.sendOk("Done. Thanks for showing up~.");
                 } else {
                     cm.sendOk("Done. Be aware some of the items #rcould not be synthetized#k because either you have a lack of space on your ETC inventory or there's not enough mesos to cover the fee.");
@@ -470,67 +472,68 @@ function getRefineFee(fee) {
 }
 
 function isRefineTarget(refineType, refineItemid) {
-    if(refineType == 0) { //mineral refine
+    if (refineType == 0) { //mineral refine
         return refineItemid >= 4010000 && refineItemid <= 4010007 && !(refineItemid == 4010007 && !refineSpecials);
-    } else if(refineType == 1) { //jewel refine
+    } else if (refineType == 1) { //jewel refine
         return refineItemid >= 4020000 && refineItemid <= 4020008 && !(refineItemid == 4020008 && !refineSpecials);
-    } else if(refineType == 2) { //crystal refine
+    } else if (refineType == 2) { //crystal refine
         return refineItemid >= 4004000 && refineItemid <= 4004004 && !(refineItemid == 4004004 && !refineSpecials);
     }
-    
+
     return false;
 }
 
 function getRockRefineTarget(refineItemid) {
-    if(refineItemid >= 4011000 && refineItemid <= 4011006) {
+    if (refineItemid >= 4011000 && refineItemid <= 4011006) {
         return 0;
-    } else if(refineItemid >= 4021000 && refineItemid <= 4021008) {
+    } else if (refineItemid >= 4021000 && refineItemid <= 4021008) {
         return 1;
     }
-    
+
     return -1;
 }
 
 function refineItems(refineType) {
     var allDone = true;
-    
-    var refineFees = [[300,300,300,500,500,500,800,270],[500,500,500,500,500,500,500,1000,3000],[5000,5000,5000,5000,1000000]];
+
+    var refineFees = [[300, 300, 300, 500, 500, 500, 800, 270], [500, 500, 500, 500, 500, 500, 500, 1000, 3000], [5000, 5000, 5000, 5000, 1000000]];
     var itemCount = {};
-    
-    var iter = cm.getPlayer().getInventory(Packages.client.inventory.MapleInventoryType.ETC).iterator();
+
+    const MapleInventoryType = Java.type('client.inventory.MapleInventoryType');
+    var iter = cm.getPlayer().getInventory(MapleInventoryType.ETC).iterator();
     while (iter.hasNext()) {
         var it = iter.next();
         var itemid = it.getItemId();
 
-        if(isRefineTarget(refineType, itemid)) {
+        if (isRefineTarget(refineType, itemid)) {
             var ic = itemCount[itemid];
-            
-            if(ic != undefined) {
+
+            if (ic != undefined) {
                 itemCount[itemid] += it.getQuantity();
             } else {
                 itemCount[itemid] = it.getQuantity();
             }
         }
     }
-    
-    for(var key in itemCount) {
+
+    for (var key in itemCount) {
         var itemqty = itemCount[key];
         var itemid = parseInt(key);
-        
+
         var refineQty = ((itemqty / 10) | 0);
-        if(refineQty <= 0) continue;
-        
-        while(true) {
+        if (refineQty <= 0) continue;
+
+        while (true) {
             itemqty = refineQty * 10;
-        
+
             var fee = getRefineFee(refineFees[refineType][(itemid % 100) | 0] * refineQty);
-            if(cm.canHold(itemid + 1000, refineQty, itemid, itemqty) && cm.getMeso() >= fee) {
+            if (cm.canHold(itemid + 1000, refineQty, itemid, itemqty) && cm.getMeso() >= fee) {
                 cm.gainMeso(-fee);
                 cm.gainItem(itemid, -itemqty);
                 cm.gainItem(itemid + (itemid != 4010007 ? 1000 : 1001), refineQty);
-                
+
                 break;
-            } else if(refineQty <= 1) {
+            } else if (refineQty <= 1) {
                 allDone = false;
                 break;
             } else {
@@ -538,7 +541,7 @@ function refineItems(refineType) {
             }
         }
     }
-    
+
     return allDone;
 }
 
@@ -546,52 +549,53 @@ function refineRockItems() {
     var allDone = true;
     var minItems = [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0]];
     var minRocks = [2147483647, 2147483647];
-    
+
     var rockItems = [4011007, 4021009];
     var rockFees = [10000, 15000];
 
-    var iter = cm.getPlayer().getInventory(Packages.client.inventory.MapleInventoryType.ETC).iterator();
+    const MapleInventoryType = Java.type('client.inventory.MapleInventoryType');
+    var iter = cm.getPlayer().getInventory(MapleInventoryType.ETC).iterator();
     while (iter.hasNext()) {
         var it = iter.next();
         var itemid = it.getItemId();
         var rockRefine = getRockRefineTarget(itemid);
-        if(rockRefine >= 0) {
+        if (rockRefine >= 0) {
             var rockItem = ((itemid % 100) | 0);
             var itemqty = it.getQuantity();
-            
+
             minItems[rockRefine][rockItem] += itemqty;
         }
     }
-    
-    for(var i = 0; i < minRocks.length; i++) {
-        for(var j = 0; j < minItems[i].length; j++) {
-            if(minRocks[i] > minItems[i][j]) {
+
+    for (var i = 0; i < minRocks.length; i++) {
+        for (var j = 0; j < minItems[i].length; j++) {
+            if (minRocks[i] > minItems[i][j]) {
                 minRocks[i] = minItems[i][j];
             }
         }
-        if(minRocks[i] <= 0 || minRocks[i] == 2147483647) continue;
-        
+        if (minRocks[i] <= 0 || minRocks[i] == 2147483647) continue;
+
         var refineQty = minRocks[i];
-        while(true) {
+        while (true) {
             var fee = getRefineFee(rockFees[i] * refineQty);
-            if(cm.canHold(rockItems[i], refineQty) && cm.getMeso() >= fee) {
+            if (cm.canHold(rockItems[i], refineQty) && cm.getMeso() >= fee) {
                 cm.gainMeso(-fee);
 
                 var j;
-                if(i == 0) {
-                    for(j = 4011000; j < 4011007; j++) {
+                if (i == 0) {
+                    for (j = 4011000; j < 4011007; j++) {
                         cm.gainItem(j, -refineQty);
                     }
                     cm.gainItem(j, refineQty);
                 } else {
-                    for(j = 4021000; j < 4021009; j++) {
+                    for (j = 4021000; j < 4021009; j++) {
                         cm.gainItem(j, -refineQty);
                     }
                     cm.gainItem(j, refineQty);
                 }
-                
+
                 break;
-            } else if(refineQty <= 1) {
+            } else if (refineQty <= 1) {
                 allDone = false;
                 break;
             } else {
@@ -599,6 +603,6 @@ function refineRockItems() {
             }
         }
     }
-    
+
     return allDone;
 }

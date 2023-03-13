@@ -28,26 +28,27 @@
 */
 
 status = -1;
+
 function start() {
-    if((cm.getPlayer().getLevel() < 19 || cm.getPlayer().getLevel() > 30) && !cm.getPlayer().isGM()){
+    if ((cm.getPlayer().getLevel() < 19 || cm.getPlayer().getLevel() > 30) && !cm.getPlayer().isGM()) {
         cm.sendNext("You're not between level 20 and 30. Sorry, you may not participate.");
         cm.dispose();
         return;
     }
-    action(1,0,0);
+    action(1, 0, 0);
 }
 
-function action(mode, type, selection){
+function action(mode, type, selection) {
     status++;
-    if (status == 4){
+    if (status == 4) {
         cm.getPlayer().saveLocation("MIRROR");
         cm.warp(980010000, 3);
         cm.dispose();
     }
-    if(mode != 1){
-        if(mode == 0 && type == 0)
+    if (mode != 1) {
+        if (mode == 0 && type == 0)
             status -= 2;
-        else{
+        else {
             cm.dispose();
             return;
         }

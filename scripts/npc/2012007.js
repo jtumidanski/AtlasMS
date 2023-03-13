@@ -56,7 +56,7 @@ function action(mode, type, selection) {
                 beauty = 4;
                 hairnew = Array();
                 if (cm.getPlayer().getGender() == 0)
-                    for(var i = 0; i < mhair_d.length; i++)
+                    for (var i = 0; i < mhair_d.length; i++)
                         pushIfItemExists(hairnew, mhair_d[i] + parseInt(cm.getPlayer().getHair() % 10));
                 else
                     for (var i = 0; i < fhair_d.length; i++)
@@ -66,7 +66,7 @@ function action(mode, type, selection) {
                 beauty = 3;
                 hairnew = Array();
                 if (cm.getPlayer().getGender() == 0)
-                    for(var i = 0; i < mhair_r.length; i++)
+                    for (var i = 0; i < mhair_r.length; i++)
                         pushIfItemExists(hairnew, mhair_r[i] + parseInt(cm.getPlayer().getHair() % 10));
                 else
                     for (var i = 0; i < fhair_r.length; i++)
@@ -76,7 +76,7 @@ function action(mode, type, selection) {
                 beauty = 1;
                 hairnew = Array();
                 if (cm.getPlayer().getGender() == 0)
-                    for(var i = 0; i < mhair_e.length; i++)
+                    for (var i = 0; i < mhair_e.length; i++)
                         pushIfItemExists(hairnew, mhair_e[i] + parseInt(cm.getPlayer().getHair() % 10));
                 else
                     for (var i = 0; i < fhair_e.length; i++)
@@ -90,38 +90,37 @@ function action(mode, type, selection) {
                     pushIfItemExists(haircolor, current + i);
                 cm.sendYesNo("If you use a regular coupon your hair color will change RANDOMLY. Do you still want to use #b#t5151004##k and change it up?");
             }
-        }
-        else if (status == 2){
+        } else if (status == 2) {
             cm.dispose();
-            if (beauty == 1){
-                if (cm.haveItem(5150013)){
+            if (beauty == 1) {
+                if (cm.haveItem(5150013)) {
                     cm.gainItem(5150013, -1);
                     cm.setHair(hairnew[Math.floor(Math.random() * hairnew.length)]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");
                 } else
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't give you a haircut without it. I'm sorry...");
-            } else if (beauty == 2){
-                if (cm.haveItem(5151004)){
+            } else if (beauty == 2) {
+                if (cm.haveItem(5151004)) {
                     cm.gainItem(5151004, -1);
                     cm.setHair(haircolor[Math.floor(Math.random() * haircolor.length)]);
                     cm.sendOk("Enjoy your new and improved haircolor!");
                 } else
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't dye your hair without it. I'm sorry...");
-            } else if (beauty == 3){
-                if (cm.haveItem(5150004)){
+            } else if (beauty == 3) {
+                if (cm.haveItem(5150004)) {
                     cm.gainItem(5150004, -1);
                     cm.setHair(hairnew[Math.floor(Math.random() * hairnew.length)]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");
                 } else
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't give you a haircut without it. I'm sorry...");
-            } else if (beauty == 4){
-                if (cm.haveItem(5154000)){
+            } else if (beauty == 4) {
+                if (cm.haveItem(5154000)) {
                     cm.gainItem(5154000, -1);
                     cm.setHair(hairnew[Math.floor(Math.random() * hairnew.length)]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");
                 } else
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't give you a haircut without it. I'm sorry...");
-            } else if (beauty == 0){
+            } else if (beauty == 0) {
                 if (selection == 0 && cm.getMeso() >= hairprice) {
                     cm.gainMeso(-hairprice);
                     cm.gainItem(5150013, 1);

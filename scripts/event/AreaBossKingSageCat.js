@@ -20,14 +20,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	King Sage Cat Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ King Sage Cat Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
 
-**/
-
-importPackage(Packages.client);
+ **/
 
 function init() {
     scheduleNew();
@@ -44,49 +42,70 @@ function cancelSchedule() {
 
 function start() {
     var goblinForest2 = em.getChannelServer().getMapFactory().getMap(250010504);
-    var kingSageCat = Packages.server.life.MapleLifeFactory.getMonster(7220002);
-	
-	if(goblinForest2.getMonsterById(7220002) != null) {
-		em.schedule("start", 3 * 60 *60 * 1000);
-		return;
-	}
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var kingSageCat = MapleLifeFactory.getMonster(7220002);
+
+    if (goblinForest2.getMonsterById(7220002) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
     var posX;
     var posY = 540;
-    posX =  Math.floor((Math.random() * 1300) - 500);
-    goblinForest2.spawnMonsterOnGroundBelow(kingSageCat, new Packages.java.awt.Point(posX, posY));
-    goblinForest2.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "The ghostly air around here has become stronger. The unpleasant sound of a cat crying can be heard."));
-	em.schedule("start", 3 * 60 *60 * 1000);
+    posX = Math.floor((Math.random() * 1300) - 500);
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(posX, posY);
+    goblinForest2.spawnMonsterOnGroundBelow(kingSageCat, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    goblinForest2.broadcastMessage(MaplePacketCreator.serverNotice(6, "The ghostly air around here has become stronger. The unpleasant sound of a cat crying can be heard."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

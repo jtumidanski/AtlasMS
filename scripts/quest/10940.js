@@ -15,7 +15,7 @@ function start(mode, type, selection) {
         } else if (status == 1) {
             qm.sendOk("Open your inventory and double-click on it! These gifts will make you look stylish. Oh, one more thing! You'll get another gift at level 30. Good luck!");
             qm.forceStartQuest();
-	    qm.forceCompleteQuest();
+            qm.forceCompleteQuest();
             qm.gainItem(2430191, 1, true);
         } else if (status == 2) {
             qm.dispose();

@@ -19,11 +19,9 @@
 */
 /* Steal queen's silk
  */
-
-importPackage(Packages.client);
-
 function isTigunMorphed(ch) {
-        return ch.getBuffSource(MapleBuffStat.MORPH) == 2210005;
+    const MapleBuffStat = Java.type('client.MapleBuffStat');
+    return ch.getBuffSource(MapleBuffStat.MORPH) == 2210005;
 }
 
 var status = -1;
@@ -32,18 +30,18 @@ function start(mode, type, selection) {
     if (mode == -1) {
         qm.dispose();
     } else {
-        if(mode == 0 && type > 0) {
+        if (mode == 0 && type > 0) {
             qm.dispose();
             return;
         }
-        
+
         if (mode == 1)
             status++;
         else
             status--;
-        
+
         if (status == 0) {
-            if(!isTigunMorphed(qm.getPlayer())) {
+            if (!isTigunMorphed(qm.getPlayer())) {
                 qm.sendNext("What's this? I can't simply give the Queen's silk to anyone, claiming they will hand it at once to the queen. Get out of my sights.");
                 status = 1;
                 return;
@@ -51,7 +49,7 @@ function start(mode, type, selection) {
 
             qm.sendNext("Tigun, what are you doing here?");
         } else if (status == 1) {
-            if(!isTigunMorphed(qm.getPlayer())) {
+            if (!isTigunMorphed(qm.getPlayer())) {
                 qm.sendNext("What's this? I can't simply give the Queen's silk to anyone, claiming they will hand it at once to the queen. Get out of my sights.");
                 return;
             }
@@ -68,26 +66,26 @@ function end(mode, type, selection) {
     if (mode == -1) {
         qm.dispose();
     } else {
-        if(mode == 0 && type > 0) {
+        if (mode == 0 && type > 0) {
             qm.dispose();
             return;
         }
-        
+
         if (mode == 1)
             status++;
         else
             status--;
-        
+
         if (status == 0) {
-            if(!isTigunMorphed(qm.getPlayer())) {
+            if (!isTigunMorphed(qm.getPlayer())) {
                 qm.sendNext("What's this? I can't simply give the Queen's silk to anyone, claiming they will hand it at once to the queen. Get out of my sights.");
                 qm.dispose();
                 return;
             }
 
-            if(qm.canHold(4031571, 1)) {
+            if (qm.canHold(4031571, 1)) {
                 qm.gainItem(4031571);
-                
+
                 qm.sendNext("There you go. Please deliver to the queen as soon as possible, Tigun, she gets really mad if things get delayed.");
                 qm.forceCompleteQuest();
             } else {

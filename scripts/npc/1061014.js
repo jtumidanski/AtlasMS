@@ -23,15 +23,12 @@
  *@author Ronan
  */
 
-importPackage(Packages.server.expeditions);
-importPackage(Packages.tools);
-importPackage(Packages.scripting.event);
-
 var status = 0;
 var expedition;
 var expedMembers;
 var player;
 var em;
+const MapleExpeditionType = Java.type('server.expeditions.MapleExpeditionType');
 var exped = MapleExpeditionType.BALROG_NORMAL;
 var expedName = "Balrog";
 var expedBoss = "Balrog";
@@ -83,12 +80,12 @@ function action(mode, type, selection) {
             } else if (expedition.isInProgress()) { //Only if the expedition is in progress
                 if (expedition.contains(player)) { //If you're registered, warp you in
                     var eim = em.getInstance(expedName + player.getClient().getChannel());
-                    if(eim.getIntProperty("canJoin") == 1) {
+                    if (eim.getIntProperty("canJoin") == 1) {
                         eim.registerPlayer(player);
                     } else {
                         cm.sendOk("Your expedition already started the battle against " + expedBoss + ". Lets pray for those brave souls.");
                     }
-                    
+
                     cm.dispose();
                 } else { //If you're not in by now, tough luck
                     cm.sendOk("Another expedition has taken the initiative to challenge " + expedBoss + ", lets pray for those brave souls.");
@@ -98,12 +95,12 @@ function action(mode, type, selection) {
         } else if (status == 1) {
             if (selection == 1) {
                 expedition = cm.getExpedition(exped);
-                if(expedition != null) {
+                if (expedition != null) {
                     cm.sendOk("Someone already taken the initiative to be the leader of the expedition. Try joining them!");
                     cm.dispose();
                     return;
                 }
-                
+
                 var res = cm.createExpedition(exped);
                 if (res == 0) {
                     cm.sendOk("The #r" + expedBoss + " Expedition#k has been created.\r\n\r\nTalk to me again to view the current team, or start the fight!");
@@ -112,7 +109,7 @@ function action(mode, type, selection) {
                 } else {
                     cm.sendOk("An unexpected error has occurred when starting the expedition, please try again later.");
                 }
-                
+
                 cm.dispose();
                 return;
             } else if (selection == 2) {
@@ -121,9 +118,9 @@ function action(mode, type, selection) {
                 return;
             } else {
                 cm.sendSimple("Hi there. I am #b#nMu Young#n#k, the temple Keeper. This temple is currently under siege by the Balrog troops. We currently do not know who gave the orders. " +
-                            "For a few weeks now, the #e#b Order of the Altair#n#k has been sending mercenaries, but they were eliminated every time." +
-                            " So, traveler, would you like to try your luck at defeating this unspeakable horror?\r\n  #L1#What is the #eOrder of the Altair?");
-                    
+                    "For a few weeks now, the #e#b Order of the Altair#n#k has been sending mercenaries, but they were eliminated every time." +
+                    " So, traveler, would you like to try your luck at defeating this unspeakable horror?\r\n  #L1#What is the #eOrder of the Altair?");
+
                 status = 10;
             }
         } else if (status == 2) {
@@ -155,10 +152,11 @@ function action(mode, type, selection) {
                     cm.dispose();
                     return;
                 }
-                
+
                 cm.sendOk("The expedition will begin and you will now be escorted to the #b" + expedMap + "#k.");
                 status = 4;
             } else if (selection == 3) {
+                const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
                 player.getMap().broadcastMessage(MaplePacketCreator.serverNotice(6, expedition.getLeader().getName() + " has ended the expedition."));
                 cm.endExpedition(expedition);
                 cm.sendOk("The expedition has now ended. Sometimes the best strategy is to run away.");
@@ -174,12 +172,12 @@ function action(mode, type, selection) {
 
             em.setProperty("leader", player.getName());
             em.setProperty("channel", player.getClient().getChannel());
-            if(!em.startInstance(expedition)) {
+            if (!em.startInstance(expedition)) {
                 cm.sendOk("Another expedition has taken the initiative to challenge " + expedBoss + ", lets pray for those brave souls.");
                 cm.dispose();
                 return;
             }
-            
+
             cm.dispose();
             return;
         } else if (status == 6) {

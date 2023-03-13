@@ -20,8 +20,7 @@
 /**
  * @Author Ronan
  * 3rd Job Event - Kenta's Mount Quest
-**/
-importPackage(Packages.tools);
+ **/
 
 var entryMap = 923010000;
 var exitMap = 923010100;
@@ -40,7 +39,7 @@ function setLobbyRange() {
 }
 
 function init() {
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function checkHogHealth(eim) {
@@ -48,7 +47,7 @@ function checkHogHealth(eim) {
     if (watchHog != null) {
         var hp = watchHog.getHp();
         var oldHp = eim.getIntProperty("whog_hp");
-        
+
         if (oldHp - hp > 1000) {    // or 800, if using mobHP / eventTime
             eim.dropMessage(6, "Please protect the pig from the aliens!");  // thanks Vcoc
         }
@@ -62,7 +61,7 @@ function respawnStages(eim) {
         eim.getInstanceMap(eventMaps[i]).instanceMapRespawn();
     }
     checkHogHealth(eim);
-    
+
     eim.schedule("respawnStages", 10 * 1000);
 }
 
@@ -71,34 +70,36 @@ function setup(level, lobbyid) {
     eim.setProperty("level", level);
     eim.setProperty("boss", "0");
     eim.setProperty("whog_hp", "0");
-    
+
     return eim;
 }
 
 function playerEntry(eim, player) {
     var mapObj = eim.getInstanceMap(entryMap);
-    
+
     mapObj.resetPQ(1);
     mapObj.instanceMapForceRespawn();
     respawnStages(eim);
-    
+
     player.changeMap(entryMap, 0);
-    em.setProperty("noEntry","true");
-    
+    em.setProperty("noEntry", "true");
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
     player.getClient().announce(MaplePacketCreator.getClock(eventTime * 60));
     eim.startEventTimer(eventTime * 60000);
 }
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player) {
     var api = player.getAbstractPlayerInteraction();
     api.removeAll(4031507);
     api.removeAll(4031508);
-    
+
     eim.unregisterPlayer(player);
     eim.dispose();
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function scheduledTimeout(eim) {
@@ -112,49 +113,57 @@ function playerDisconnected(eim, player) {
 }
 
 function changedMap(eim, chr, mapid) {
-    if(mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
+    if (mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
 }
 
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
-    
+
     var player = eim.getPlayers().get(0);
     eim.unregisterPlayer(player);
     player.changeMap(exitMap);
-    
+
     eim.dispose();
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
 function monsterValue(eim, mobId) {
-        return 1;
+    return 1;
 }
 
 function friendlyKilled(mob, eim) {
-    if(em.getProperty("noEntry") != "false") {
+    if (em.getProperty("noEntry") != "false") {
         var player = eim.getPlayers().get(0);
         playerExit(eim, player);
         player.changeMap(exitMap);
     }
 }
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose() {}
+function dispose() {
+}
 
 
 // ---------- FILLER FUNCTIONS ----------
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 

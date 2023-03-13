@@ -41,8 +41,7 @@ function action(mode, type, selection) {
                 else
                     cm.sendOk("You must be the Guild Leader to change the Emblem. Please tell your leader to speak with me.");
             }
-        }
-        else if (status == 2 && sel == 0) {
+        } else if (status == 2 && sel == 0) {
             cm.getPlayer().genericGuildMessage(17);
             cm.dispose();
         } else

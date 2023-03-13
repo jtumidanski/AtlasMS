@@ -20,19 +20,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	King Clang Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ King Clang Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
 
-**/
-
-importPackage(Packages.client);
+ **/
 
 var hotSand;
 
 function init() {
-	hotSand = em.getChannelServer().getMapFactory().getMap(110040000);
+    hotSand = em.getChannelServer().getMapFactory().getMap(110040000);
     scheduleNew();
 }
 
@@ -46,48 +44,69 @@ function cancelSchedule() {
 }
 
 function start() {
-    if(hotSand.getMonsterById(5220001) != null) {
-		em.schedule("start", 3 * 60 *60 * 1000);
-		return;
-	}
-    var kingClang = Packages.server.life.MapleLifeFactory.getMonster(5220001);
+    if (hotSand.getMonsterById(5220001) != null) {
+        em.schedule("start", 3 * 60 * 60 * 1000);
+        return;
+    }
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var kingClang = MapleLifeFactory.getMonster(5220001);
     var posX;
     var posY = 140;
-    posX =  Math.floor((Math.random() * 2400) - 1600);
-    hotSand.spawnMonsterOnGroundBelow(kingClang, new Packages.java.awt.Point(posX, posY));
-    hotSand.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "A strange turban shell has appeared on the beach."));
-	em.schedule("start", 3 * 60 * 60 * 1000);
+    posX = Math.floor((Math.random() * 2400) - 1600);
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(posX, posY);
+    hotSand.spawnMonsterOnGroundBelow(kingClang, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    hotSand.broadcastMessage(MaplePacketCreator.serverNotice(6, "A strange turban shell has appeared on the beach."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

@@ -21,15 +21,15 @@
 */
 
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Shane - Ellinia (101000000)
--- By ---------------------------------------------------------------------------------------------
-	Unknown
--- Version Info -----------------------------------------------------------------------------------
-	1.1 - Statement fix [Information]
-	1.0 - First Version by Unknown
----------------------------------------------------------------------------------------------------
-**/
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Shane - Ellinia (101000000)
+ -- By ---------------------------------------------------------------------------------------------
+ Unknown
+ -- Version Info -----------------------------------------------------------------------------------
+ 1.1 - Statement fix [Information]
+ 1.0 - First Version by Unknown
+ ---------------------------------------------------------------------------------------------------
+ **/
 
 var status = 0;
 var check = 0;
@@ -39,8 +39,7 @@ function start() {
         cm.sendOk("You must be a higher level to enter the Forest of Patience.");
         cm.dispose();
         check = 1;
-    }
-    else
+    } else
         cm.sendYesNo("Hi, i'm Shane. I can let you into the Forest of Patience for a small fee. Would you like to enter for #b5000#k mesos?");
 }
 
@@ -62,8 +61,7 @@ function action(mode, type, selection) {
                 if (cm.getPlayer().getMeso() < 5000) {
                     cm.sendOk("Sorry but it doesn't like you have enough mesos!")
                     cm.dispose();
-                }
-                else {
+                } else {
                     if (cm.isQuestStarted(2050))
                         cm.warp(101000100, 0);
                     else if (cm.isQuestStarted(2051))

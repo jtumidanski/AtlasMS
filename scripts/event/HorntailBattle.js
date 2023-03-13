@@ -21,9 +21,7 @@
 /**
  * @author: Ronan
  * @event: Horntail Battle
-*/
-
-importPackage(Packages.server.life);
+ */
 
 var isPq = true;
 var minPlayers = 6, maxPlayers = 30;
@@ -41,51 +39,52 @@ var eventTime = 120;     // 120 minutes
 var lobbyRange = [0, 0];
 
 function init() {
-        setEventRequirements();
+    setEventRequirements();
 }
 
 function setLobbyRange() {
-        return lobbyRange;
+    return lobbyRange;
 }
 
 function setEventRequirements() {
-        var reqStr = "";
-        
-        reqStr += "\r\n    Number of players: ";
-        if(maxPlayers - minPlayers >= 1) reqStr += minPlayers + " ~ " + maxPlayers;
-        else reqStr += minPlayers;
-        
-        reqStr += "\r\n    Level range: ";
-        if(maxLevel - minLevel >= 1) reqStr += minLevel + " ~ " + maxLevel;
-        else reqStr += minLevel;
-        
-        reqStr += "\r\n    Time limit: ";
-        reqStr += eventTime + " minutes";
-        
-        em.setProperty("party", reqStr);
+    var reqStr = "";
+
+    reqStr += "\r\n    Number of players: ";
+    if (maxPlayers - minPlayers >= 1) reqStr += minPlayers + " ~ " + maxPlayers;
+    else reqStr += minPlayers;
+
+    reqStr += "\r\n    Level range: ";
+    if (maxLevel - minLevel >= 1) reqStr += minLevel + " ~ " + maxLevel;
+    else reqStr += minLevel;
+
+    reqStr += "\r\n    Time limit: ";
+    reqStr += eventTime + " minutes";
+
+    em.setProperty("party", reqStr);
 }
 
 function setEventExclusives(eim) {
-        var itemSet = [];
-        eim.setExclusiveItems(itemSet);
+    var itemSet = [];
+    eim.setExclusiveItems(itemSet);
 }
 
 function setEventRewards(eim) {
-        var itemSet, itemQty, evLevel, expStages, mesoStages;
+    var itemSet, itemQty, evLevel, expStages, mesoStages;
 
-        evLevel = 1;    //Rewards at clear PQ
-        itemSet = [];
-        itemQty = [];
-        eim.setEventRewards(evLevel, itemSet, itemQty);
-        
-        expStages = [];    //bonus exp given on CLEAR stage signal
-        eim.setEventClearStageExp(expStages);
-        
-        mesoStages = [];    //bonus meso given on CLEAR stage signal
-        eim.setEventClearStageMeso(mesoStages);
+    evLevel = 1;    //Rewards at clear PQ
+    itemSet = [];
+    itemQty = [];
+    eim.setEventRewards(evLevel, itemSet, itemQty);
+
+    expStages = [];    //bonus exp given on CLEAR stage signal
+    eim.setEventClearStageExp(expStages);
+
+    mesoStages = [];    //bonus meso given on CLEAR stage signal
+    eim.setEventClearStageMeso(mesoStages);
 }
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
 function setup(channel) {
     var eim = em.newInstance("Horntail" + channel);     // thanks Thora (Arufonsu) for reporting an issue with misleading event name here
@@ -97,20 +96,22 @@ function setup(channel) {
     eim.getInstanceMap(240060000).resetPQ(level);
     eim.getInstanceMap(240060100).resetPQ(level);
     eim.getInstanceMap(240060200).resetPQ(level);
-    
+
     var map, mob;
     map = eim.getInstanceMap(240060000);
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    const Point = Java.type('java.awt.Point');
     mob = MapleLifeFactory.getMonster(8810000);
-    map.spawnMonsterOnGroundBelow(mob, new java.awt.Point(960, 120));
-    
+    map.spawnMonsterOnGroundBelow(mob, new Point(960, 120));
+
     map = eim.getInstanceMap(240060100);
     mob = MapleLifeFactory.getMonster(8810001);
-    map.spawnMonsterOnGroundBelow(mob, new java.awt.Point(-420, 120));
-    
+    map.spawnMonsterOnGroundBelow(mob, new Point(-420, 120));
+
     eim.startEventTimer(eventTime * 60000);
     setEventRewards(eim);
     setEventExclusives(eim);
-    
+
     return eim;
 }
 
@@ -126,29 +127,29 @@ function scheduledTimeout(eim) {
 
 function changedMap(eim, player, mapid) {
     if (mapid < minMapId || mapid > maxMapId) {
-	if (eim.isExpeditionTeamLackingNow(true, minPlayers, player)) {
+        if (eim.isExpeditionTeamLackingNow(true, minPlayers, player)) {
             eim.unregisterPlayer(player);
             eim.dropMessage(5, "[Expedition] Either the leader has quit the expedition or there is no longer the minimum number of members required to continue it.");
             end(eim);
-        }
-        else {
+        } else {
             eim.dropMessage(5, "[Expedition] " + player.getName() + " has left the instance.");
             eim.unregisterPlayer(player);
         }
     }
 }
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerDead(eim, player) {}
+function playerDead(eim, player) {
+}
 
 function playerRevive(eim, player) {
     if (eim.isExpeditionTeamLackingNow(true, minPlayers, player)) {
         eim.unregisterPlayer(player);
         eim.dropMessage(5, "[Expedition] Either the leader has quit the expedition or there is no longer the minimum number of members required to continue it.");
         end(eim);
-    }
-    else {
+    } else {
         eim.dropMessage(5, "[Expedition] " + player.getName() + " has left the instance.");
         eim.unregisterPlayer(player);
     }
@@ -159,22 +160,24 @@ function playerDisconnected(eim, player) {
         eim.unregisterPlayer(player);
         eim.dropMessage(5, "[Expedition] Either the leader has quit the expedition or there is no longer the minimum number of members required to continue it.");
         end(eim);
-    }
-    else {
+    } else {
         eim.dropMessage(5, "[Expedition] " + player.getName() + " has left the instance.");
         eim.unregisterPlayer(player);
     }
 }
 
-function leftParty (eim, player) {}
+function leftParty(eim, player) {
+}
 
-function disbandParty (eim) {}
+function disbandParty(eim) {
+}
 
 function monsterValue(eim, mobId) {
     return 1;
 }
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player) {
     eim.unregisterPlayer(player);
@@ -209,22 +212,25 @@ function isHorntail(mob) {
 }
 
 function monsterKilled(mob, eim) {
-    if(isHorntail(mob)) {
+    if (isHorntail(mob)) {
         eim.setIntProperty("defeatedBoss", 1);
         eim.showClearEffect(mob.getMap().getId());
         eim.clearPQ();
-        
+
         eim.dispatchRaiseQuestMobCount(8810018, 240060200);
         mob.getMap().broadcastHorntailVictory();
-    } else if(isHorntailHead(mob)) {
+    } else if (isHorntailHead(mob)) {
         var killed = eim.getIntProperty("defeatedHead");
         eim.setIntProperty("defeatedHead", killed + 1);
         eim.showClearEffect(mob.getMap().getId());
     }
 }
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose(eim) {}
+function dispose(eim) {
+}

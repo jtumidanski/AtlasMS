@@ -35,7 +35,7 @@ function action(mode, type, selection) {
         cm.dispose();
     } else {
         status++;
-        if (status == 1) 
+        if (status == 1)
             cm.sendNextPrev("But remember, once you get out of here, you will enter a village full with monsters. Well them, good bye!");
         else if (status == 2) {
             cm.warp(40000, 0);

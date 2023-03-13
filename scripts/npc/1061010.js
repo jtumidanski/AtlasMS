@@ -12,24 +12,24 @@ function action(mode, type, selection) {
         cm.dispose();//ExitChat
     else if (mode == 0)
         cm.dispose();//No
-    else{		    //Regular Talk
+    else {		    //Regular Talk
         if (mode == 1)
             status++;
         else
             status--;
-		
-        if(status == 0){
-                cm.sendYesNo("Would you like to leave?");
-        }else if(status == 1){
-                var mapid = cm.getMapId(), exitid = mapid;
-                if(mapid == 108010101) exitid = 105040305;
-                else if(mapid == 108010201) exitid = 100040106;
-                else if(mapid == 108010301) exitid = 105070001;
-                else if(mapid == 108010401) exitid = 107000402;
-                else if(mapid == 108010501) exitid = 105070200;
 
-                if (mapid != exitid) cm.getPlayer().changeMap(exitid);
-                cm.dispose();
+        if (status == 0) {
+            cm.sendYesNo("Would you like to leave?");
+        } else if (status == 1) {
+            var mapid = cm.getMapId(), exitid = mapid;
+            if (mapid == 108010101) exitid = 105040305;
+            else if (mapid == 108010201) exitid = 100040106;
+            else if (mapid == 108010301) exitid = 105070001;
+            else if (mapid == 108010401) exitid = 107000402;
+            else if (mapid == 108010501) exitid = 105070200;
+
+            if (mapid != exitid) cm.getPlayer().changeMap(exitid);
+            cm.dispose();
         }
     }
 }

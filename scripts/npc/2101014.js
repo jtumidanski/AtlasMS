@@ -2,9 +2,6 @@
  * @author Jvlaple
  * For Jvlaple's AriantPQ
  */
-
-importPackage(Packages.server.expeditions);
-
 var status = 0;
 var toBan = -1;
 var choice;
@@ -13,6 +10,7 @@ var arena;
 var arenaName;
 var type;
 var map;
+const MapleExpeditionType = Java.type('server.expeditions.MapleExpeditionType');
 var exped = MapleExpeditionType.ARIANT;
 var exped1 = MapleExpeditionType.ARIANT1;
 var exped2 = MapleExpeditionType.ARIANT2;
@@ -41,12 +39,12 @@ function action(mode, type, selection) {
                 cm.dispose();
                 return;
             }
-            
+
             if (status == 0) {
                 var expedicao = cm.getExpedition(exped);
                 var expedicao1 = cm.getExpedition(exped1);
                 var expedicao2 = cm.getExpedition(exped2);
-                
+
                 var channelMaps = cm.getClient().getChannelServer().getMapFactory();
                 var startSnd = "What would you like to do? \r\n\r\n\t#e#r(Choose a Battle Arena)#n#k\r\n#b";
                 var toSnd = startSnd;
@@ -79,7 +77,7 @@ function action(mode, type, selection) {
                     cm.dispose();
                     return;
                 }
-                
+
                 if (expedicao != null) {
                     enterArena(-1);
                 } else {
@@ -95,7 +93,7 @@ function action(mode, type, selection) {
                     status = 0;
                 } else {
                     enterArena(players);
-                } 
+                }
             }
         }
     }
@@ -123,7 +121,7 @@ function fetchArenaType() {
             map = 0;
             expedicao = "";
     }
-    
+
     return expedicao;
 }
 
@@ -146,7 +144,7 @@ function enterArena(arenaPlayers) {
         } else {
             cm.sendOk("An unexpected error has occurred when locating the expedition, please try again later.");
         }
-        
+
         cm.dispose();
     } else {
         if (playerAlreadyInLobby(cm.getPlayer())) {
@@ -176,6 +174,6 @@ function enterArena(arenaPlayers) {
 
 function playerAlreadyInLobby(player) {
     return cm.getExpedition(MapleExpeditionType.ARIANT) != null && cm.getExpedition(MapleExpeditionType.ARIANT).contains(player) ||
-            cm.getExpedition(MapleExpeditionType.ARIANT1) != null && cm.getExpedition(MapleExpeditionType.ARIANT1).contains(player) ||
-            cm.getExpedition(MapleExpeditionType.ARIANT2) != null && cm.getExpedition(MapleExpeditionType.ARIANT2).contains(player);
+        cm.getExpedition(MapleExpeditionType.ARIANT1) != null && cm.getExpedition(MapleExpeditionType.ARIANT1).contains(player) ||
+        cm.getExpedition(MapleExpeditionType.ARIANT2) != null && cm.getExpedition(MapleExpeditionType.ARIANT2).contains(player);
 }

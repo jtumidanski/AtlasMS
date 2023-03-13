@@ -36,6 +36,7 @@ function pushIfItemExists(array, itemid) {
         array.push(itemid);
     }
 }
+
 function start() {
     status = -1;
     action(1, 0, 0);
@@ -55,14 +56,14 @@ function action(mode, type, selection) {
             if (selection == 2) {
                 facenew = Array();
                 if (cm.getPlayer().getGender() == 0) {
-                    for(var i = 0; i < mface_r.length; i++) {
+                    for (var i = 0; i < mface_r.length; i++) {
                         pushIfItemExists(facenew, mface_r[i] + cm.getPlayer().getFace()
                             % 1000 - (cm.getPlayer().getFace()
                                 % 100));
                     }
                 }
                 if (cm.getPlayer().getGender() == 1) {
-                    for(var i = 0; i < fface_r.length; i++) {
+                    for (var i = 0; i < fface_r.length; i++) {
                         pushIfItemExists(facenew, fface_r[i] + cm.getPlayer().getFace()
                             % 1000 - (cm.getPlayer().getFace()
                                 % 100));
@@ -70,10 +71,9 @@ function action(mode, type, selection) {
                 }
                 cm.sendYesNo("If you use the regular coupon, your face may transform into a random new look...do you still want to do it using #b#t5152000##k?");
             }
-        }
-        else if (status == 2){
+        } else if (status == 2) {
             cm.dispose();
-            if (cm.haveItem(5152000) == true){
+            if (cm.haveItem(5152000) == true) {
                 cm.gainItem(5152000, -1);
                 cm.setFace(facenew[Math.floor(Math.random() * facenew.length)]);
                 cm.sendOk("Enjoy your new and improved face!");

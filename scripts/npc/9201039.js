@@ -50,17 +50,17 @@ function action(mode, type, selection) {
         if (type == 7) {
             cm.sendNext("Ok, I'll give you a minute.");
         }
-        
+
         cm.dispose();
     }
     status++;
     if (status == 1) {
         hairnew = Array();
         if (cm.getPlayer().getGender() == 0)
-            for(var i = 0; i < mhair_q.length; i++)
+            for (var i = 0; i < mhair_q.length; i++)
                 pushIfItemExists(hairnew, mhair_q[i]);
         else
-            for(var j = 0; j < fhair_q.length; j++)
+            for (var j = 0; j < fhair_q.length; j++)
                 pushIfItemExists(hairnew, fhair_q[j]);
         cm.sendNext("Here we go!");
     } else {

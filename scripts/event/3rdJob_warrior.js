@@ -20,8 +20,7 @@
 /**
  * @Author Ronan
  * 3rd Job Event - Warrior
-**/
-importPackage(Packages.tools);
+ **/
 
 var entryMap = 108010300;
 var exitMap = 105070001;
@@ -34,37 +33,39 @@ var eventTime = 20; //20 minutes
 var lobbyRange = [0, 7];
 
 function setLobbyRange() {
-        return lobbyRange;
+    return lobbyRange;
 }
 
 function init() {
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function setup(level, lobbyid) {
     var eim = em.newInstance("3rdJob_warrior_" + lobbyid);
     eim.setProperty("level", level);
     eim.setProperty("boss", "0");
-    
+
     return eim;
 }
 
 function playerEntry(eim, player) {
     eim.getInstanceMap(maxMapId).resetPQ(1);
-    
+
     player.changeMap(entryMap, 0);
-    em.setProperty("noEntry","true");
-    
+    em.setProperty("noEntry", "true");
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
     player.getClient().announce(MaplePacketCreator.getClock(eventTime * 60));
     eim.startEventTimer(eventTime * 60000);
 }
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player) {
     eim.unregisterPlayer(player);
     eim.dispose();
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function scheduledTimeout(eim) {
@@ -81,37 +82,46 @@ function clear(eim) {
     var player = eim.getPlayers().get(0);
     eim.unregisterPlayer(player);
     player.changeMap(exitMap);
-    
+
     eim.dispose();
-    em.setProperty("noEntry","false");
+    em.setProperty("noEntry", "false");
 }
 
 function changedMap(eim, chr, mapid) {
-    if(mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
+    if (mapid < minMapId || mapid > maxMapId) playerExit(eim, chr);
 }
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
 function monsterValue(eim, mobId) {
-        return 1;
+    return 1;
 }
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose() {}
+function dispose() {
+}
 
 
 // ---------- FILLER FUNCTIONS ----------
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 

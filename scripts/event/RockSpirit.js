@@ -19,8 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-importPackage(Packages.tools);
-
 var entryMap;
 var exitMap;
 var otherMap;
@@ -42,13 +40,14 @@ function setup(level, lobbyid) {
     var eim = em.newInstance("RockSpirit_" + lobbyid);
     eim.setProperty("level", level);
     eim.setProperty("boss", "0");
-    
+
     respawn(eim);
-    eim.startEventTimer(timer);    
+    eim.startEventTimer(timer);
     return eim;
 }
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
 function respawn(eim) {
     var map = eim.getMapInstance(entryMap.getId());
@@ -72,14 +71,14 @@ function playerRevive(eim, player) {
     return false;
 }
 
-function playerDead(eim, player) {}
+function playerDead(eim, player) {
+}
 
 function playerDisconnected(eim, player) {
     if (eim.isEventTeamLackingNow(true, minPlayers, player)) {
         eim.unregisterPlayer(player);
         end(eim);
-    }
-    else
+    } else
         eim.unregisterPlayer(player);
 }
 
@@ -88,13 +87,12 @@ function changedMap(eim, player, mapid) {
         if (eim.isEventTeamLackingNow(true, minPlayers, player)) {
             eim.unregisterPlayer(player);
             end(eim);
-        }
-        else
+        } else
             eim.unregisterPlayer(player);
     }
 }
 
-function monsterValue(eim,mobId) { 
+function monsterValue(eim, mobId) {
     return -1;
 }
 
@@ -106,26 +104,34 @@ function end(eim) {
     eim.dispose();
 }
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function disbandParty(eim) {}
+function disbandParty(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player) {
     eim.unregisterPlayer(player);
     player.changeMap(exitMap, exitMap.getPortal(0));
 }
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose() {}
+function dispose() {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
 function timeOut(eim) {
     end(eim);
@@ -133,7 +139,9 @@ function timeOut(eim) {
 
 // ---------- FILLER FUNCTIONS ----------
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 

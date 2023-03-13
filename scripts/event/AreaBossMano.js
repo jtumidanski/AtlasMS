@@ -20,13 +20,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Mano Spawner
--- Edited by --------------------------------------------------------------------------------------
-	ThreeStep - based on xQuasar's King Clang spawner
-**/
-
-importPackage(Packages.client);
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Mano Spawner
+ -- Edited by --------------------------------------------------------------------------------------
+ ThreeStep - based on xQuasar's King Clang spawner
+ **/
 
 function init() {
     scheduleNew();
@@ -43,46 +41,67 @@ function cancelSchedule() {
 
 function start() {
     var thicketAroundTheBeach3 = em.getChannelServer().getMapFactory().getMap(104000400);
-    var mano = Packages.server.life.MapleLifeFactory.getMonster(2220000);
-    if(thicketAroundTheBeach3.getMonsterById(2220000) != null) {
+    const MapleLifeFactory = Java.type('server.life.MapleLifeFactory');
+    var mano = MapleLifeFactory.getMonster(2220000);
+    if (thicketAroundTheBeach3.getMonsterById(2220000) != null) {
         em.schedule("start", 3 * 60 * 60 * 1000);
         return;
     }
-	
-    thicketAroundTheBeach3.spawnMonsterOnGroundBelow(mano, new Packages.java.awt.Point(279, -496));
-    thicketAroundTheBeach3.broadcastMessage(Packages.tools.MaplePacketCreator.serverNotice(6, "A cool breeze was felt when Mano appeared."));
-    em.schedule("start", 3 * 60 *60 * 1000);
+
+    const Point = Java.type('java.awt.Point');
+    const spawnpoint = new Point(279, -496);
+    thicketAroundTheBeach3.spawnMonsterOnGroundBelow(mano, spawnpoint);
+
+    const MaplePacketCreator = Java.type('tools.MaplePacketCreator');
+    thicketAroundTheBeach3.broadcastMessage(MaplePacketCreator.serverNotice(6, "A cool breeze was felt when Mano appeared."));
+    em.schedule("start", 3 * 60 * 60 * 1000);
 }
 
 // ---------- FILLER FUNCTIONS ----------
 
-function dispose() {}
+function dispose() {
+}
 
-function setup(eim, leaderid) {}
+function setup(eim, leaderid) {
+}
 
-function monsterValue(eim, mobid) {return 0;}
+function monsterValue(eim, mobid) {
+    return 0;
+}
 
-function disbandParty(eim, player) {}
+function disbandParty(eim, player) {
+}
 
-function playerDisconnected(eim, player) {}
+function playerDisconnected(eim, player) {
+}
 
-function playerEntry(eim, player) {}
+function playerEntry(eim, player) {
+}
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function scheduledTimeout(eim) {}
+function scheduledTimeout(eim) {
+}
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
-function playerExit(eim, player) {}
+function playerExit(eim, player) {
+}
 
-function leftParty(eim, player) {}
+function leftParty(eim, player) {
+}
 
-function clearPQ(eim) {}
+function clearPQ(eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 

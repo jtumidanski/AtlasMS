@@ -1,9 +1,9 @@
 /**
--- Version Info -----------------------------------------------------------------------------------
-	1.0 - First Version by Drago (MapleStorySA)
-        2.0 - Second Version by Jayd - translated CPQ contents to English
----------------------------------------------------------------------------------------------------
-**/
+ -- Version Info -----------------------------------------------------------------------------------
+ 1.0 - First Version by Drago (MapleStorySA)
+ 2.0 - Second Version by Jayd - translated CPQ contents to English
+ ---------------------------------------------------------------------------------------------------
+ **/
 
 var cpqMinLvl = 51;
 var cpqMaxLvl = 70;
@@ -43,7 +43,7 @@ function action(mode, type, selection) {
                 for (var i = 0; i < party.size(); i++) {
                     if (party.get(i).getLevel() >= cpqMinLvl && party.get(i).getLevel() <= cpqMaxLvl) {
                         lvlOk++;
-                        
+
                         if (party.get(i).getPlayer().getMapId() != leaderMapid) {
                             isOutMap++;
                         }
@@ -77,9 +77,10 @@ function action(mode, type, selection) {
                 }
             } else {
                 var party = cm.getParty().getMembers();
-                if ((selection === 0 || selection === 1 ) && party.size() < (Packages.config.YamlConfig.config.server.USE_ENABLE_SOLO_EXPEDITIONS ? 1 : 2)) {
+                const YamlConfig = Java.type('config.YamlConfig');
+                if ((selection === 0 || selection === 1) && party.size() < (YamlConfig.config.server.USE_ENABLE_SOLO_EXPEDITIONS ? 1 : 2)) {
                     cm.sendOk("You need at least 2 players to participate in the battle!");
-                } else if ((selection === 2 ) && party.size() < (Packages.config.YamlConfig.config.server.USE_ENABLE_SOLO_EXPEDITIONS ? 1 : 3)) {
+                } else if ((selection === 2) && party.size() < (YamlConfig.config.server.USE_ENABLE_SOLO_EXPEDITIONS ? 1 : 3)) {
                     cm.sendOk("You need at least 3 players to participate in the battle!");
                 } else {
                     cm.cpqLobby2(selection);

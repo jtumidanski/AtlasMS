@@ -20,17 +20,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
--- Odin JavaScript --------------------------------------------------------------------------------
-	Hotel Receptionist - Sleepywood Hotel(105040400)
--- By ---------------------------------------------------------------------------------------------
-	Unknown
--- Version Info -----------------------------------------------------------------------------------
-        1.3 - More Cleanup by Moogra - 12/17/09
-        1.2 - Cleanup and Statement fix by Moogra
-	1.1 - Statement fix [Information]
-	1.0 - First Version by Unknown
----------------------------------------------------------------------------------------------------
-**/
+ -- Odin JavaScript --------------------------------------------------------------------------------
+ Hotel Receptionist - Sleepywood Hotel(105040400)
+ -- By ---------------------------------------------------------------------------------------------
+ Unknown
+ -- Version Info -----------------------------------------------------------------------------------
+ 1.3 - More Cleanup by Moogra - 12/17/09
+ 1.2 - Cleanup and Statement fix by Moogra
+ 1.1 - Statement fix [Information]
+ 1.0 - First Version by Unknown
+ ---------------------------------------------------------------------------------------------------
+ **/
 
 var status = 0;
 var regcost = 499;
@@ -59,7 +59,7 @@ function action(mode, type, selection) {
                 cm.sendYesNo("You have chosen the regular sauna. Your HP and MP will recover fast and you can even purchase some items there. Are you sure you want to go in?");
             else if (selection == 1) {
                 cm.sendYesNo("You've chosen the VIP sauna. Your HP and MP will recover even faster than that of the regular sauna and you can even find a special item in there. Are you sure you want to go in?");
-		iwantreg = 0;
+                iwantreg = 0;
             }
         } else if (status == 3) {
             if (iwantreg == 1) {

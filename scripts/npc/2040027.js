@@ -19,6 +19,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 /*      Author: Xterminator, Moogra
 	NPC Name: 		Fourth Eos Rock
 	Map(s): 		Ludibrium : Eos Tower 1st Floor (221020000)

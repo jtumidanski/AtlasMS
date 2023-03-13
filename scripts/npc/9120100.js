@@ -58,30 +58,29 @@ function action(mode, type, selection) {
                 beauty = 1;
                 hairnew = Array();
                 if (cm.getPlayer().getGender() == 0) {
-                    for(var i = 0; i < mhair_v.length; i++) {
-                        pushIfItemExists(hairnew, mhair_v[i] + parseInt(cm.getPlayer().getHair()% 10));
+                    for (var i = 0; i < mhair_v.length; i++) {
+                        pushIfItemExists(hairnew, mhair_v[i] + parseInt(cm.getPlayer().getHair() % 10));
                     }
                 }
                 if (cm.getPlayer().getGender() == 1) {
-                    for(var i = 0; i < fhair_v.length; i++) {
-                        pushIfItemExists(hairnew, fhair_v[i] + parseInt(cm.getPlayer().getHair()% 10));
+                    for (var i = 0; i < fhair_v.length; i++) {
+                        pushIfItemExists(hairnew, fhair_v[i] + parseInt(cm.getPlayer().getHair() % 10));
                     }
                 }
                 cm.sendStyle("I can totally change up your hairstyle and make it look so good. Why don't you change it up a bit? With #b#t5150009##k, I'll take care of the rest for you. Choose the style of your liking!", hairnew);
             } else if (selection == 2) {
                 beauty = 2;
                 haircolor = Array();
-                var current = parseInt(cm.getPlayer().getHair()/10)*10;
-                for(var i = 0; i < 8; i++) {
+                var current = parseInt(cm.getPlayer().getHair() / 10) * 10;
+                for (var i = 0; i < 8; i++) {
                     pushIfItemExists(haircolor, current + i);
                 }
                 cm.sendStyle("I can totally change your haircolor and make it look so good. Why don't you change it up a bit? With #b#t5151009##k, I'll take care of the rest. Choose the color of your liking!", haircolor);
             }
-        }
-        else if (status == 2){
+        } else if (status == 2) {
             cm.dispose();
-            if (beauty == 1){
-                if (cm.haveItem(5150009)){
+            if (beauty == 1) {
+                if (cm.haveItem(5150009)) {
                     cm.gainItem(5150009, -1);
                     cm.setHair(hairnew[selection]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");
@@ -89,8 +88,8 @@ function action(mode, type, selection) {
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't give you a haircut without it. I'm sorry...");
                 }
             }
-            if (beauty == 2){
-                if (cm.haveItem(5151009)){
+            if (beauty == 2) {
+                if (cm.haveItem(5151009)) {
                     cm.gainItem(5151009, -1);
                     cm.setHair(haircolor[selection]);
                     cm.sendOk("Enjoy your new and improved haircolor!");
@@ -98,7 +97,7 @@ function action(mode, type, selection) {
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't dye your hair without it. I'm sorry...");
                 }
             }
-            if (beauty == 0){
+            if (beauty == 0) {
                 if (selection == 0 && cm.getMeso() >= hairprice) {
                     cm.gainMeso(-hairprice);
                     cm.gainItem(5150009, 1);

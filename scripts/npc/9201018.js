@@ -56,20 +56,19 @@ function action(mode, type, selection) {
             if (selection == 2) {
                 facenew = Array();
                 if (cm.getPlayer().getGender() == 0) {
-                    for(var i = 0; i < mface_v.length; i++) {
+                    for (var i = 0; i < mface_v.length; i++) {
                         pushIfItemExists(facenew, mface_v[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
                 if (cm.getPlayer().getGender() == 1) {
-                    for(var i = 0; i < fface_v.length; i++) {
+                    for (var i = 0; i < fface_v.length; i++) {
                         pushIfItemExists(facenew, fface_v[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
                 cm.sendStyle("Let's see... I can totally transform your face into something new. Don't you want to try it? For #b#t5152022##k, you can get the face of your liking. Take your time in choosing the face of your preference.", facenew);
             }
-        }
-        else if (status == 2){			
-            if (cm.haveItem(5152022) == true){
+        } else if (status == 2) {
+            if (cm.haveItem(5152022) == true) {
                 cm.gainItem(5152022, -1);
                 cm.setFace(facenew[selection]);
                 cm.sendOk("Enjoy your new and improved face!");

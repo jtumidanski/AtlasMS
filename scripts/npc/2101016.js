@@ -1,8 +1,5 @@
 var arena;
 var status = 0;
-
-importPackage(Packages.client);
-
 function start() {
     arena = cm.getPlayer().getAriantColiseum();
     if (arena == null) {
@@ -10,7 +7,7 @@ function start() {
         cm.dispose();
         return;
     }
-    
+
     status = -1;
     action(1, 0, 0);
 }
@@ -41,10 +38,10 @@ function action(mode, type, selection) {
             arena.clearAriantRewardTier(cm.getPlayer());
             arena.clearAriantScore(cm.getPlayer());
             cm.removeAll(4031868);
-            
+
             cm.getPlayer().gainExp(92.7 * cm.getPlayer().getExpRate() * copns, true, true);
             cm.getPlayer().gainAriantPoints(copns);
-            cm.sendOk("Alright! Make me more jewels next time! Ahahahahah!"); 
+            cm.sendOk("Alright! Make me more jewels next time! Ahahahahah!");
             cm.dispose();
         }
     }

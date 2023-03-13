@@ -41,10 +41,9 @@ function action(mode, type, selection) {
         if (status == 1) {
             if (selection == 2)
                 cm.sendStyle("With our specialized machine, you can see the way you'll look after the treatment PRIOR to the procedure. What kind of a look are you looking for? Go ahead and choose the style of your liking~!", skin);
-        }
-        else if (status == 2){
+        } else if (status == 2) {
             cm.dispose();
-            if (cm.haveItem(5153001)){
+            if (cm.haveItem(5153001)) {
                 cm.gainItem(5153001, -1);
                 cm.setSkin(selection + 1);
                 cm.sendOk("Enjoy your new and improved skin!");

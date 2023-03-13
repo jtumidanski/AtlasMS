@@ -59,7 +59,7 @@ function action(mode, type, selection) {
                     cm.dispose();
                 } else {
                     var MapleGuild = Java.type("net.server.guild.MapleGuild");  // thanks Conrad for noticing an issue due to call on a static method here
-                    cm.sendYesNo("Increasing your Guild capacity by #b5#k costs #b " + MapleGuild.getIncreaseGuildCost(cm.getPlayer().getGuild().getCapacity()) +" mesos#k, are you sure you want to continue?");
+                    cm.sendYesNo("Increasing your Guild capacity by #b5#k costs #b " + MapleGuild.getIncreaseGuildCost(cm.getPlayer().getGuild().getCapacity()) + " mesos#k, are you sure you want to continue?");
                 }
             }
         } else if (status == 2) {

@@ -38,9 +38,9 @@ function action(mode, type, selection) {
                 cm.sendYesNo("Hmm, I see you have been recommended by Neinheart to come to Victoria Island to improve your knightly skills. Well, just this time the ride will be free of charges. Will you take the ride?");
                 hasCoupon = true;
             } else {
-                cm.sendYesNo("You don't have anything else to do here, huh? Do you really want to go to #b#m" + maps[selection] + "##k? It'll cost you #b"+ (cm.getJobId() == 0 ? cost[selection] / 10 : cost[selection]) + " mesos#k.");
+                cm.sendYesNo("You don't have anything else to do here, huh? Do you really want to go to #b#m" + maps[selection] + "##k? It'll cost you #b" + (cm.getJobId() == 0 ? cost[selection] / 10 : cost[selection]) + " mesos#k.");
             }
-            
+
             selectedMap = selection;
         } else if (status == 3) {
             if (!hasCoupon) {
@@ -60,7 +60,7 @@ function action(mode, type, selection) {
             } else {
                 cm.gainItem(4032288, -1);
             }
-            
+
             cm.warp(maps[selectedMap], 0);
             cm.dispose();
         }

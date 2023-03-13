@@ -57,16 +57,15 @@ function action(mode, type, selection) {
                         pushIfItemExists(facenew, fface_r[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                 cm.sendYesNo("If you use the regular coupon, your face may transform into a random new look...do you still want to do it using #b#t5152004##k?");
             }
-        }
-        else if (status == 2){
-            if (cm.haveItem(5152004)){
+        } else if (status == 2) {
+            if (cm.haveItem(5152004)) {
                 cm.gainItem(5152004, -1);
                 cm.setFace(facenew[Math.floor(Math.random() * facenew.length)]);
                 cm.sendOk("Enjoy your new and improved face!");
             } else {
                 cm.sendOk("Hmm ... it looks like you don't have the coupon specifically for this place. Sorry to say this, but without the coupon, there's no plastic surgery for you...");
             }
-            
+
             cm.dispose();
         }
     }

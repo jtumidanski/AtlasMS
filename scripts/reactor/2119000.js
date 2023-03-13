@@ -23,4 +23,5 @@ function hit() {
     rm.hitMonsterWithReactor(6090000, 14);
 }
 
-function act() {}
+function act() {
+}

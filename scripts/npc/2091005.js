@@ -24,10 +24,6 @@
 * @Name:   So Gong
 * @Map(s): Dojo Hall
 */
-
-importPackage(Packages.config);
-importPackage(Packages.constants.game);
-
 var disabled = false;
 var belts = Array(1132000, 1132001, 1132002, 1132003, 1132004);
 var belt_level = Array(25, 35, 45, 60, 75);
@@ -44,14 +40,15 @@ function start() {
         cm.dispose();
         return;
     }
-    
+
+    const YamlConfig = Java.type('config.YamlConfig');
     belt_points = YamlConfig.config.server.USE_FAST_DOJO_UPGRADE ? Array(10, 90, 200, 460, 850) : Array(200, 1800, 4000, 9200, 17000);
-    
+
     belt_on_inventory = new Array();
     for (var i = 0; i < belts.length; i++) {
         belt_on_inventory.push(cm.haveItemWithId(belts[i], true));
     }
-                            
+
     action(1, 0, 0);
 }
 
@@ -66,10 +63,12 @@ function action(mode, type, selection) {
         }
         if (mode == 1)
             status++;
-        
-        if(status == 0) {
+
+        if (status == 0) {
             if (isRestingSpot(cm.getPlayer().getMap().getId())) {
                 var text = "I'm surprised you made it this far! But it won't be easy from here on out. You still want the challenge?\r\n\r\n#b#L0#I want to continue#l\r\n#L1#I want to leave#l\r\n";
+
+                const GameConstants = Java.type('constants.game.GameConstants');
                 if (!GameConstants.isDojoPartyArea(cm.getPlayer().getMapId())) {
                     text += "#L2#I want to record my score up to this point#l";
                 }
@@ -102,13 +101,12 @@ function action(mode, type, selection) {
                                 } else {
                                     var avDojo = cm.getClient().getChannelServer().ingressDojo(true, 0);
 
-                                    if(avDojo < 0) {
-                                        if(avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
+                                    if (avDojo < 0) {
+                                        if (avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
                                         else cm.sendOk("Either your party is already using the Dojo or your party's allotted time on the Dojo has not expired yet. Wait for them to finish to enter.");
-                                    }
-                                    else {
+                                    } else {
                                         cm.getClient().getChannelServer().getMapFactory().getMap(925020010 + avDojo).resetMapObjects();
-                                        
+
                                         cm.resetDojoEnergy();
                                         cm.warp(925020010 + avDojo, 0);
                                     }
@@ -120,21 +118,21 @@ function action(mode, type, selection) {
                         } else if (cm.getPlayer().getDojoStage() > 0) {
                             dojoWarp = cm.getPlayer().getDojoStage();
                             cm.getPlayer().setDojoStage(0);
-                            
+
                             var stageWarp = ((dojoWarp / 6) | 0) * 5;
                             cm.sendYesNo("The last time you took the challenge by yourself, you went up to round #b" + stageWarp + "#k. I can take you there right now. Do you want to go there? (Select #rNo#k to erase this record.)");
                         } else {
                             var avDojo = cm.getClient().getChannelServer().ingressDojo(false, dojoWarp);
 
-                            if(avDojo < 0) {
-                                if(avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
+                            if (avDojo < 0) {
+                                if (avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
                                 else cm.sendOk("Either your party is already using the Dojo or your party's allotted time on the Dojo has not expired yet. Wait for them to finish to enter.");
-                                
+
                                 cm.getPlayer().setDojoStage(dojoWarp);
                             } else {
                                 var warpDojoMap = 925020000 + (dojoWarp + 1) * 100 + avDojo;
                                 cm.getClient().getChannelServer().resetDojoMap(warpDojoMap);
-                                
+
                                 cm.resetDojoEnergy();
                                 cm.warp(warpDojoMap, 0);
                             }
@@ -149,15 +147,15 @@ function action(mode, type, selection) {
                             cm.dispose();
                             return;
                         }
-                        
+
                         if (party.getLeader().getId() != cm.getPlayer().getId()) {
                             cm.sendNext("Where do you think you're going? You're not even the party leader! Go tell your party leader to talk to me.");
                             cm.dispose();
                             return;
                         }
 
-                        //else if (party.getMembers().size() == 1) {
-                        //    cm.sendNext("You're going to take on the challenge as a one-man party?");
+                            //else if (party.getMembers().size() == 1) {
+                            //    cm.sendNext("You're going to take on the challenge as a one-man party?");
                         //}
 
                         else if (!isBetween(party, 30)) {
@@ -167,12 +165,12 @@ function action(mode, type, selection) {
                         } else {
                             var avDojo = cm.getClient().getChannelServer().ingressDojo(true, cm.getParty(), 0);
 
-                            if(avDojo < 0) {
-                                if(avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
+                            if (avDojo < 0) {
+                                if (avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
                                 else cm.sendOk("Either your party is already using the Dojo or your party's allotted time on the Dojo has not expired yet. Wait for them to finish to enter.");
                             } else {
                                 cm.getClient().getChannelServer().resetDojoMap(925030100 + avDojo);
-                                
+
                                 cm.resetPartyDojoEnergy();
                                 cm.warpParty(925030100 + avDojo);
                             }
@@ -204,17 +202,17 @@ function action(mode, type, selection) {
                             var belt = belts[selection];
                             var level = belt_level[selection];
                             var points = belt_points[selection];
-                            
+
                             var oldbelt = (selection > 0) ? belts[selection - 1] : -1;
                             var haveOldbelt = (oldbelt == -1 || cm.haveItemWithId(oldbelt, false));
-                            
+
                             if (selection > 0 && !belt_on_inventory[selection - 1]) {
                                 sendBeltRequirements(belt, oldbelt, haveOldbelt, level, points);
                             } else if (cm.getPlayer().getDojoPoints() >= points) {
                                 if (selection > 0 && !haveOldbelt) {
                                     sendBeltRequirements(belt, oldbelt, haveOldbelt, level, points);
                                 } else if (cm.getPlayer().getLevel() > level) {
-                                    if(selection > 0) cm.gainItem(oldbelt, -1);
+                                    if (selection > 0) cm.gainItem(oldbelt, -1);
                                     cm.gainItem(belt, 1);
                                     cm.getPlayer().setDojoPoints(cm.getPlayer().getDojoPoints() - points);
                                     cm.sendNext("There is the #i" + belt + "# #b#t" + belt + "##k. You have proven your valor to ascend on the Dojo ranks. Well done!");
@@ -278,47 +276,47 @@ function action(mode, type, selection) {
             } else if (isRestingSpot(cm.getPlayer().getMap().getId())) {
                 if (selectedMenu == -1)
                     selectedMenu = selection;
-                
+
                 if (selectedMenu == 0) {
                     var hasParty = (cm.getParty() != null);
-                    
+
                     var firstEnter = false;
                     var avDojo = cm.getClient().getChannelServer().lookupPartyDojo(cm.getParty());
-                    if(avDojo < 0) {
-                        if(hasParty) {
-                            if(!cm.isPartyLeader()) {
+                    if (avDojo < 0) {
+                        if (hasParty) {
+                            if (!cm.isPartyLeader()) {
                                 cm.sendOk("You are not the leader! Call your party leader to talk to me if you wish to continue.");
                                 cm.dispose();
                                 return;
                             }
-                            
-                            if(!isBetween(cm.getParty(), 35)) {
+
+                            if (!isBetween(cm.getParty(), 35)) {
                                 cm.sendOk("Your partys level ranges are too broad to enter. Please make sure all of your party members are within #r35 levels#k of each other.");
                                 cm.dispose();
                                 return;
                             }
                         }
-                        
+
                         avDojo = cm.getClient().getChannelServer().ingressDojo(hasParty, cm.getParty(), Math.floor((cm.getPlayer().getMap().getId()) / 100) % 100);
                         firstEnter = true;
                     }
 
-                    if(avDojo < 0) {
-                        if(avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
+                    if (avDojo < 0) {
+                        if (avDojo == -1) cm.sendOk("All Dojo's are being used already. Wait for awhile before trying again.");
                         else cm.sendOk("Your party already registered for the dojo. Wait for the end of the registration time to enter again.");
                     } else {
                         var baseStg = hasParty ? 925030000 : 925020000;
                         var nextStg = Math.floor((cm.getPlayer().getMap().getId() + 100) / 100) % 100;
 
                         var dojoWarpMap = baseStg + (nextStg * 100) + avDojo;
-                        if(firstEnter) {
+                        if (firstEnter) {
                             cm.getClient().getChannelServer().resetDojoMap(dojoWarpMap);
                         }
-                        
+
                         //non-leader party members can progress whilst having the record saved if they don't command to enter the next stage
                         cm.getPlayer().setDojoStage(0);
-                        
-                        if(!hasParty || !cm.isLeader()) cm.warp(dojoWarpMap, 0);
+
+                        if (!hasParty || !cm.isLeader()) cm.warp(dojoWarpMap, 0);
                         else cm.warpParty(dojoWarpMap, 0);
                     }
 
@@ -355,10 +353,10 @@ function action(mode, type, selection) {
                     cm.sendNext("Stop changing your mind! Soon, you'll be crying, begging me to go back.");
                 } else if (mode == 1) {
                     var dojoMapId = cm.getPlayer().getMap().getId();
-                    
+
                     cm.warp(925020002, 0);
                     cm.getPlayer().message("Can you make up your mind please?");
-                    
+
                     cm.getClient().getChannelServer().freeDojoSectionIfEmpty(dojoMapId);
                 }
                 cm.dispose();
@@ -369,11 +367,11 @@ function action(mode, type, selection) {
 
 function sendBeltRequirements(belt, oldbelt, haveOldbelt, level, points) {
     var beltReqStr = (oldbelt != -1) ? " you must have the #i" + oldbelt + "# belt in your inventory," : "";
-    
+
     var pointsLeftStr = (points - cm.getPlayer().getDojoPoints() > 0) ? " you need #r" + (points - cm.getPlayer().getDojoPoints()) + "#k more training points" : "";
     var beltLeftStr = (!haveOldbelt) ? " you must have the needed belt unequipped and available in your EQP inventory" : "";
     var conjStr = (pointsLeftStr.length > 0 && beltLeftStr.length > 0) ? " and" : "";
-        
+
     cm.sendNext("In order to receive #i" + belt + "# #b#t" + belt + "##k," + beltReqStr + " you have to be at least over level #b" + level + "#k and you need to have earned at least #b" + points + " training points#k.\r\n\r\nIf you want to obtain this belt," + beltLeftStr + conjStr + pointsLeftStr + ".");
 }
 

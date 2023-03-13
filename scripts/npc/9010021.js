@@ -22,11 +22,12 @@
 /* 9010021 - Wolf Spirit Ryko
     @author Ronan
  */
- var status;
+var status;
 
 function start() {
     status = -1;
-    if (!Packages.config.YamlConfig.config.server.USE_REBIRTH_SYSTEM) {
+    const YamlConfig = Java.type('config.YamlConfig');
+    if (!YamlConfig.config.server.USE_REBIRTH_SYSTEM) {
         cm.sendOk("... I came from distant planes to assist the fight against the #rBlack Magician#k. Right now I search my master, have you seen him?");
         cm.dispose();
         return;

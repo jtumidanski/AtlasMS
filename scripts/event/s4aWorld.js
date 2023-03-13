@@ -13,24 +13,24 @@ function monsterValue(eim, mobId) {
 }
 
 function getEligibleParty(party) {      //selects, from the given party, the team that is allowed to attempt this event
-        var eligible = [];
-        var hasLeader = false;
-        
-        if(party.size() > 0) {
-                var partyList = party.toArray();
+    var eligible = [];
+    var hasLeader = false;
 
-                for(var i = 0; i < party.size(); i++) {
-                        var ch = partyList[i];
+    if (party.size() > 0) {
+        var partyList = party.toArray();
 
-                        if(ch.getMapId() == 105090200 && ch.getLevel() >= 120) {
-                                if(ch.isLeader()) hasLeader = true;
-                                eligible.push(ch);
-                        }
-                }
+        for (var i = 0; i < party.size(); i++) {
+            var ch = partyList[i];
+
+            if (ch.getMapId() == 105090200 && ch.getLevel() >= 120) {
+                if (ch.isLeader()) hasLeader = true;
+                eligible.push(ch);
+            }
         }
-        
-        if(!(hasLeader && eligible.length >= minPlayers)) eligible = [];
-        return eligible;
+    }
+
+    if (!(hasLeader && eligible.length >= minPlayers)) eligible = [];
+    return eligible;
 }
 
 function setup(level, lobbyid) {
@@ -47,11 +47,12 @@ function setup(level, lobbyid) {
     return eim;
 }
 
-function afterSetup(eim) {}
+function afterSetup(eim) {
+}
 
-function respawnStages(eim) {    
-        eim.getMapInstance(910500000).instanceMapRespawn();
-        eim.schedule("respawnStages", 15 * 1000);
+function respawnStages(eim) {
+    eim.getMapInstance(910500000).instanceMapRespawn();
+    eim.schedule("respawnStages", 15 * 1000);
 }
 
 function playerEntry(eim, player) {
@@ -73,11 +74,11 @@ function scheduledTimeout(eim) {
 
 function changedMap(eim, player, mapid) {
     if (mapid != 910500000) {
-	eim.unregisterPlayer(player);
+        eim.unregisterPlayer(player);
 
-	if (eim.disposeIfPlayerBelow(minPlayers, 105090200)) {
-	    em.setProperty("started", "false");
-	}
+        if (eim.disposeIfPlayerBelow(minPlayers, 105090200)) {
+            em.setProperty("started", "false");
+        }
     }
 }
 
@@ -97,7 +98,8 @@ function disbandParty(eim) {
     em.setProperty("started", "false");
 }
 
-function playerUnregistered(eim, player) {}
+function playerUnregistered(eim, player) {
+}
 
 function playerExit(eim, player) {
     eim.unregisterPlayer(player);
@@ -111,15 +113,20 @@ function clearPQ(eim) {
     em.setProperty("started", "false");
 }
 
-function monsterKilled(mob, eim) {}
+function monsterKilled(mob, eim) {
+}
 
-function allMonstersDead(eim) {}
+function allMonstersDead(eim) {
+}
 
-function cancelSchedule() {}
+function cancelSchedule() {
+}
 
-function dispose() {}
+function dispose() {
+}
 
 // ---------- FILLER FUNCTIONS ----------
 
-function changedLeader(eim, leader) {}
+function changedLeader(eim, leader) {
+}
 
