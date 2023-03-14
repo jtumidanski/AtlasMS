@@ -33,7 +33,7 @@ public class PartySearchCharacter {
     private boolean queued;
 
     public PartySearchCharacter(MapleCharacter chr) {
-        player = new WeakReference(chr);
+        player = new WeakReference<>(chr);
         level = chr.getLevel();
         queued = true;
     }

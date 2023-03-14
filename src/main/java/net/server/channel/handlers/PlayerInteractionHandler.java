@@ -33,7 +33,7 @@ import config.YamlConfig;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleTrade;
 import server.maps.FieldLimit;
 import server.maps.MapleHiredMerchant;
@@ -118,7 +118,7 @@ public final class PlayerInteractionHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (!c.tryacquireClient()) {    // thanks GabrielSin for pointing dupes within player interactions
             c.announce(MaplePacketCreator.enableActions());
             return;
@@ -468,7 +468,7 @@ public final class PlayerInteractionHandler extends AbstractMaplePacketHandler {
             } else if (mode == Action.SET_MESO.getCode()) {
                 chr.getTrade().setMeso(slea.readInt());
             } else if (mode == Action.SET_ITEMS.getCode()) {
-                MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                ItemInformationProvider ii = ItemInformationProvider.getInstance();
                 Optional<MapleInventoryType> ivType = MapleInventoryType.getByType(slea.readByte());
                 if (ivType.isEmpty()) {
                     c.announce(MaplePacketCreator.enableActions());
@@ -574,7 +574,7 @@ public final class PlayerInteractionHandler extends AbstractMaplePacketHandler {
                     c.announce(MaplePacketCreator.serverNotice(1, "Could not perform shop operation with that item."));
                     c.announce(MaplePacketCreator.enableActions());
                     return;
-                } else if (MapleItemInformationProvider.getInstance().isUnmerchable(ivItem.getItemId())) {
+                } else if (ItemInformationProvider.getInstance().isUnmerchable(ivItem.getItemId())) {
                     if (ItemConstants.isPet(ivItem.getItemId())) {
                         c.announce(MaplePacketCreator.serverNotice(1, "Pets are not allowed to be sold on the Player Store."));
                     } else {

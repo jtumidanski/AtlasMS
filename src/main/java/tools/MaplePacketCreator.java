@@ -74,7 +74,7 @@ import server.CashShop.CashItemFactory;
 import server.CashShop.SpecialCashItem;
 import server.DueyPackage;
 import server.MTSItemInfo;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleShopItem;
 import server.MapleTrade;
 import server.events.gm.MapleSnowball;
@@ -289,7 +289,7 @@ public class MaplePacketCreator {
 
     private static void addCharEquips(final MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
         MapleInventory equip = chr.getInventory(MapleInventoryType.EQUIPPED);
-        Collection<Item> ii = MapleItemInformationProvider.getInstance().canWearEquipment(chr, equip.list());
+        Collection<Item> ii = ItemInformationProvider.getInstance().canWearEquipment(chr, equip.list());
         Map<Short, Integer> myEquip = new LinkedHashMap<>();
         Map<Short, Integer> maskedEquip = new LinkedHashMap<>();
         for (Item item : ii) {
@@ -389,7 +389,7 @@ public class MaplePacketCreator {
     }
 
     protected static void addItemInfo(final MaplePacketLittleEndianWriter mplew, Item item, boolean zeroPosition) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         boolean isCash = ii.isCash(item.getItemId());
         boolean isPet = item.getPetId() > -1;
         boolean isRing = false;
@@ -1936,7 +1936,7 @@ public class MaplePacketCreator {
         }
         if (chr.getBuffedValue(MapleBuffStat.COMBO) != null) {
             buffmask |= MapleBuffStat.COMBO.getValue();
-            buffvalue = chr.getBuffedValue(MapleBuffStat.COMBO).intValue();
+            buffvalue = chr.getBuffedValue(MapleBuffStat.COMBO);
         }
         if (chr.getBuffedValue(MapleBuffStat.SHADOWPARTNER) != null) {
             buffmask |= MapleBuffStat.SHADOWPARTNER.getValue();
@@ -1945,7 +1945,7 @@ public class MaplePacketCreator {
             buffmask |= MapleBuffStat.SOULARROW.getValue();
         }
         if (chr.getBuffedValue(MapleBuffStat.MORPH) != null) {
-            buffvalue = chr.getBuffedValue(MapleBuffStat.MORPH).intValue();
+            buffvalue = chr.getBuffedValue(MapleBuffStat.MORPH);
         }
         mplew.writeInt((int) ((buffmask >> 32) & 0xffffffffL));
         if (buffvalue != null) {
@@ -2488,7 +2488,7 @@ public class MaplePacketCreator {
     }
 
     public static byte[] getNPCShop(MapleClient c, int sid, List<MapleShopItem> items) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.OPEN_NPC_SHOP.getValue());
         mplew.writeInt(sid);
@@ -2865,7 +2865,7 @@ public class MaplePacketCreator {
         mplew.write(0); //end of pets
 
         Item mount;     //mounts can potentially crash the client if the player's level is not properly checked
-        if (chr.getMount().isPresent() && (mount = chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -18)) != null && MapleItemInformationProvider.getInstance().getEquipLevelReq(mount.getItemId()) <= chr.getLevel()) {
+        if (chr.getMount().isPresent() && (mount = chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -18)) != null && ItemInformationProvider.getInstance().getEquipLevelReq(mount.getItemId()) <= chr.getLevel()) {
             mplew.write(chr.getMount().map(MapleMount::getId).orElse(0));
             mplew.writeInt(chr.getMount().map(MapleMount::getLevel).orElse(0));
             mplew.writeInt(chr.getMount().map(MapleMount::getExp).orElse(0));
@@ -2883,7 +2883,7 @@ public class MaplePacketCreator {
         mplew.writeInt(book.getNormalCard());
         mplew.writeInt(book.getSpecialCard());
         mplew.writeInt(book.getTotalCards());
-        mplew.writeInt(chr.getMonsterBookCover() > 0 ? MapleItemInformationProvider.getInstance().getCardMobId(chr.getMonsterBookCover()) : 0);
+        mplew.writeInt(chr.getMonsterBookCover() > 0 ? ItemInformationProvider.getInstance().getCardMobId(chr.getMonsterBookCover()) : 0);
         Item medal = chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -49);
         if (medal != null) {
             mplew.writeInt(medal.getItemId());

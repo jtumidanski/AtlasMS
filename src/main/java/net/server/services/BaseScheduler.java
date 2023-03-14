@@ -169,7 +169,7 @@ public abstract class BaseScheduler {
     }
 
     private void dispatchRemovedEntries(List<Object> toRemove, boolean fromUpdate) {
-        for (SchedulerListener listener : listeners.toArray(new SchedulerListener[listeners.size()])) {
+        for (SchedulerListener listener : listeners.toArray(new SchedulerListener[0])) {
             listener.removedScheduledEntries(toRemove, fromUpdate);
         }
     }

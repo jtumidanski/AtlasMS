@@ -31,7 +31,7 @@ import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import constants.inventory.ItemConstants;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 
 public class ProItemCommand extends Command {
     {
@@ -67,7 +67,7 @@ public class ProItemCommand extends Command {
             return;
         }
 
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         int itemid = Integer.parseInt(params[0]);
 
         if (ii.getName(itemid) == null) {

@@ -38,7 +38,7 @@ import java.sql.SQLException;
 public final class DeleteCharHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         String pic = slea.readMapleAsciiString();
         int cid = slea.readInt();
         if (c.checkPic(pic)) {

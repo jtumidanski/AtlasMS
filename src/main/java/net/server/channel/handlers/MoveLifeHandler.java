@@ -53,7 +53,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter player = c.getPlayer();
         MapleMap map = player.getMap();
 

@@ -44,7 +44,7 @@ import net.server.world.MaplePartyCharacter;
 import provider.MapleData;
 import provider.MapleDataProviderFactory;
 import scripting.AbstractPlayerInteraction;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleMarriage;
 import server.MapleShop;
 import server.MapleShopFactory;
@@ -384,7 +384,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public MapleStatEffect getItemEffect(int itemId) {
-        return MapleItemInformationProvider.getInstance().getItemEffect(itemId);
+        return ItemInformationProvider.getInstance().getItemEffect(itemId);
     }
 
     public void resetStats() {
@@ -532,9 +532,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
         for (byte b = 0; b < 5; b++) {//They cannot warp to the next map before the timer ends (:
             map = mapManager.getMap(mapid + b);
-            if (map.getCharacters().size() > 0) {
-                continue;
-            } else {
+            if (map.getCharacters().size() == 0) {
                 break;
             }
         }
@@ -555,7 +553,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public boolean itemExists(int itemid) {
-        return MapleItemInformationProvider.getInstance().getName(itemid) != null;
+        return ItemInformationProvider.getInstance().getName(itemid) != null;
     }
 
     public int getCosmeticItem(int itemid) {
@@ -590,18 +588,18 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public Object[] getAvailableMasteryBooks() {
-        return MapleItemInformationProvider.getInstance().usableMasteryBooks(this.getPlayer()).toArray();
+        return ItemInformationProvider.getInstance().usableMasteryBooks(this.getPlayer()).toArray();
     }
 
     public Object[] getAvailableSkillBooks() {
-        List<Integer> ret = MapleItemInformationProvider.getInstance().usableSkillBooks(this.getPlayer());
+        List<Integer> ret = ItemInformationProvider.getInstance().usableSkillBooks(this.getPlayer());
         ret.addAll(MapleSkillbookInformationProvider.getInstance().getTeachableSkills(this.getPlayer()));
 
         return ret.toArray();
     }
 
     public Object[] getNamesWhoDropsItem(Integer itemId) {
-        return MapleItemInformationProvider.getInstance().getWhoDrops(itemId).toArray();
+        return ItemInformationProvider.getInstance().getWhoDrops(itemId).toArray();
     }
 
     public String getSkillBookInfo(int itemid) {
@@ -806,36 +804,33 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
             }
             final int mapid = c.getPlayer().getMapId() + 1;
             TimerManager tMan = TimerManager.getInstance();
-            tMan.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        getPlayer().getParty()
-                                .map(MapleParty::getMembers)
-                                .orElse(Collections.emptyList()).stream()
-                                .map(MaplePartyCharacter::getPlayer)
-                                .flatMap(Optional::stream)
-                                .forEach(c -> c.setMonsterCarnival(null));
-                        challenger.getParty()
-                                .map(MapleParty::getMembers)
-                                .orElse(Collections.emptyList()).stream()
-                                .map(MaplePartyCharacter::getPlayer)
-                                .flatMap(Optional::stream)
-                                .forEach(c -> c.setMonsterCarnival(null));
-                    } catch (NullPointerException npe) {
-                        warpoutCPQLobby(lobbyMap);
-                        return;
-                    }
-
-                    getPlayer().getParty().ifPresent(lobbyParty -> challenger.getParty().ifPresent(challengerParty -> {
-                        int status = canStartCPQ(lobbyMap, lobbyParty, challengerParty);
-                        if (status == 0) {
-                            new MonsterCarnival(lobbyParty, challengerParty, mapid, true, (field / 100) % 10);
-                        } else {
-                            warpoutCPQLobby(lobbyMap);
-                        }
-                    }));
+            tMan.schedule(() -> {
+                try {
+                    getPlayer().getParty()
+                            .map(MapleParty::getMembers)
+                            .orElse(Collections.emptyList()).stream()
+                            .map(MaplePartyCharacter::getPlayer)
+                            .flatMap(Optional::stream)
+                            .forEach(c -> c.setMonsterCarnival(null));
+                    challenger.getParty()
+                            .map(MapleParty::getMembers)
+                            .orElse(Collections.emptyList()).stream()
+                            .map(MaplePartyCharacter::getPlayer)
+                            .flatMap(Optional::stream)
+                            .forEach(c -> c.setMonsterCarnival(null));
+                } catch (NullPointerException npe) {
+                    warpoutCPQLobby(lobbyMap);
+                    return;
                 }
+
+                getPlayer().getParty().ifPresent(lobbyParty -> challenger.getParty().ifPresent(challengerParty -> {
+                    int status = canStartCPQ(lobbyMap, lobbyParty, challengerParty);
+                    if (status == 0) {
+                        new MonsterCarnival(lobbyParty, challengerParty, mapid, true, (field / 100) % 10);
+                    } else {
+                        warpoutCPQLobby(lobbyMap);
+                    }
+                }));
             }, 11000);
         } catch (Exception e) {
             e.printStackTrace();
@@ -864,36 +859,33 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
             }
             final int mapid = c.getPlayer().getMapId() + 100;
             TimerManager tMan = TimerManager.getInstance();
-            tMan.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        getPlayer().getParty()
-                                .map(MapleParty::getMembers)
-                                .orElse(Collections.emptyList()).stream()
-                                .map(MaplePartyCharacter::getPlayer)
-                                .flatMap(Optional::stream)
-                                .forEach(c -> c.setMonsterCarnival(null));
-                        challenger.getParty()
-                                .map(MapleParty::getMembers)
-                                .orElse(Collections.emptyList()).stream()
-                                .map(MaplePartyCharacter::getPlayer)
-                                .flatMap(Optional::stream)
-                                .forEach(c -> c.setMonsterCarnival(null));
-                    } catch (NullPointerException npe) {
-                        warpoutCPQLobby(lobbyMap);
-                        return;
-                    }
-
-                    getPlayer().getParty().ifPresent(lobbyParty -> challenger.getParty().ifPresent(challengerParty -> {
-                        int status = canStartCPQ(lobbyMap, lobbyParty, challengerParty);
-                        if (status == 0) {
-                            new MonsterCarnival(lobbyParty, challengerParty, mapid, false, (field / 1000) % 10);
-                        } else {
-                            warpoutCPQLobby(lobbyMap);
-                        }
-                    }));
+            tMan.schedule(() -> {
+                try {
+                    getPlayer().getParty()
+                            .map(MapleParty::getMembers)
+                            .orElse(Collections.emptyList()).stream()
+                            .map(MaplePartyCharacter::getPlayer)
+                            .flatMap(Optional::stream)
+                            .forEach(c -> c.setMonsterCarnival(null));
+                    challenger.getParty()
+                            .map(MapleParty::getMembers)
+                            .orElse(Collections.emptyList()).stream()
+                            .map(MaplePartyCharacter::getPlayer)
+                            .flatMap(Optional::stream)
+                            .forEach(c -> c.setMonsterCarnival(null));
+                } catch (NullPointerException npe) {
+                    warpoutCPQLobby(lobbyMap);
+                    return;
                 }
+
+                getPlayer().getParty().ifPresent(lobbyParty -> challenger.getParty().ifPresent(challengerParty -> {
+                    int status = canStartCPQ(lobbyMap, lobbyParty, challengerParty);
+                    if (status == 0) {
+                        new MonsterCarnival(lobbyParty, challengerParty, mapid, false, (field / 1000) % 10);
+                    } else {
+                        warpoutCPQLobby(lobbyMap);
+                    }
+                }));
             }, 10000);
         } catch (Exception e) {
             e.printStackTrace();

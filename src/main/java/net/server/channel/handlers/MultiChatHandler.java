@@ -36,7 +36,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class MultiChatHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter player = c.getPlayer();
         if (player.getAutobanManager().getLastSpam(7) + 200 > currentServerTime()) {
             return;

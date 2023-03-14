@@ -28,7 +28,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class UseDeathItemHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int itemId = slea.readInt();
         c.getPlayer().setItemEffect(itemId);
         c.announce(MaplePacketCreator.itemEffect(c.getPlayer().getId(), itemId));

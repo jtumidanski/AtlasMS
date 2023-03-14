@@ -99,8 +99,8 @@ import scripting.AbstractPlayerInteraction;
 import scripting.event.EventInstanceManager;
 import scripting.item.ItemScriptManager;
 import server.CashShop;
-import server.MapleItemInformationProvider;
-import server.MapleItemInformationProvider.ScriptedItem;
+import server.ItemInformationProvider;
+import server.ItemInformationProvider.ScriptedItem;
 import server.MapleMarriage;
 import server.MapleShop;
 import server.MapleStatEffect;
@@ -185,7 +185,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MapleCharacter extends AbstractMapleCharacterObject {
-    private static final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+    private static final ItemInformationProvider ii = ItemInformationProvider.getInstance();
     private static final String LEVEL_200 = "[Congrats] %s has reached Level %d! Congratulate %s on such an amazing achievement!";
     private static final String[] BLOCKED_NAMES = {"admin", "owner", "moderator", "intern", "donor", "administrator", "FREDRICK", "help", "helper", "alert", "notice", "maplestory", "fuck", "wizet", "fucking", "negro", "fuk", "fuc", "penis", "pussy", "asshole", "gay",
             "nigger", "homo", "suck", "cum", "shit", "shitty", "condom", "security", "official", "rape", "nigga", "sex", "tit", "boner", "orgy", "clit", "asshole", "fatass", "bitch", "support", "gamemaster", "cock", "gaay", "gm",
@@ -1064,12 +1064,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             }
         }
 
-        Comparator cmp = new Comparator<Pair<MapleStatEffect, Integer>>() {
-            @Override
-            public int compare(Pair<MapleStatEffect, Integer> o1, Pair<MapleStatEffect, Integer> o2) {
-                return o2.getRight().compareTo(o1.getRight());
-            }
-        };
+        Comparator<Pair<MapleStatEffect, Integer>> cmp = (o1, o2) -> o2.getRight().compareTo(o1.getRight());
 
         for (Entry<MapleBuffStat, List<Pair<MapleStatEffect, Integer>>> statBuffs : buffEffects.entrySet()) {
             statBuffs.getValue().sort(cmp);
@@ -2483,7 +2478,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             return;
         }
 
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         for (MapleInventoryType invType : MapleInventoryType.values()) {
             MapleInventory inv = this.getInventory(invType);
 
@@ -4160,7 +4155,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                                 MapleInventoryManipulator.removeFromSlot(client, inv.getType(), item.getPosition(), item.getQuantity(), true);
                             }
 
-                            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                            ItemInformationProvider ii = ItemInformationProvider.getInstance();
                             for (Item item : toberemove) {
                                 List<Integer> toadd = new ArrayList<>();
                                 Pair<Integer, String> replace = ii.getReplaceOnExpire(item.getItemId());
@@ -4609,20 +4604,10 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             }
         }
 
-        ret.sort(new Comparator<>() {
-            @Override
-            public int compare(Pair<MapleBuffStat, Integer> p1, Pair<MapleBuffStat, Integer> p2) {
-                return p1.getLeft().compareTo(p2.getLeft());
-            }
-        });
+        ret.sort(Comparator.comparing(Pair::getLeft));
 
         if (!singletonStatups.isEmpty()) {
-            singletonStatups.sort(new Comparator<>() {
-                @Override
-                public int compare(Pair<MapleBuffStat, Integer> p1, Pair<MapleBuffStat, Integer> p2) {
-                    return p1.getLeft().compareTo(p2.getLeft());
-                }
-            });
+            singletonStatups.sort(Comparator.comparing(Pair::getLeft));
 
             ret.addAll(singletonStatups);
         }
@@ -4734,7 +4719,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
             System.out.println("IN ACTION:");
             for (Entry<MapleBuffStat, MapleBuffStatValueHolder> bpl : effects.entrySet()) {
-                System.out.println(bpl.getKey().name() + " -> " + MapleItemInformationProvider.getInstance().getName(bpl.getValue().effect.getSourceId()));
+                System.out.println(bpl.getKey().name() + " -> " + ItemInformationProvider.getInstance().getName(bpl.getValue().effect.getSourceId()));
             }
         } finally {
             chrLock.unlock();
@@ -6811,7 +6796,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
     public long getSkillExpiration(int skill) {
         return SkillFactory.getSkill(skill)
-                .map(s -> skills.get(s))
+                .map(skills::get)
                 .map(s -> s.expiration)
                 .orElse((long) -1);
     }
@@ -6909,7 +6894,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     }
 
     public MapleMapObject[] getVisibleMapObjects() {
-        return visibleMapObjects.toArray(new MapleMapObject[visibleMapObjects.size()]);
+        return visibleMapObjects.toArray(new MapleMapObject[0]);
     }
 
     public int getWorld() {
@@ -7422,12 +7407,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             if (level == maxClassLevel) {
                 if (!this.isGM()) {
                     if (YamlConfig.config.server.PLAYERNPC_AUTODEPLOY) {
-                        ThreadManager.getInstance().newTask(new Runnable() {
-                            @Override
-                            public void run() {
-                                MaplePlayerNPC.spawnPlayerNPC(GameConstants.getHallOfFameMapid(job), MapleCharacter.this);
-                            }
-                        });
+                        ThreadManager.getInstance().newTask(() -> MaplePlayerNPC.spawnPlayerNPC(GameConstants.getHallOfFameMapid(job), MapleCharacter.this));
                     }
 
                     final String names = (getMedalText() + name);
@@ -8477,7 +8457,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     public void resetEnteredScript(String script) {
         entered.keySet().stream()
                 .filter(mapId -> entered.get(mapId).equals(script))
-                .forEach(mapId -> entered.remove(mapId));
+                .forEach(entered::remove);
     }
 
     public synchronized void saveCooldowns() {
@@ -8738,12 +8718,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
     public void saveCharToDB() {
         if (YamlConfig.config.server.USE_AUTOSAVE) {
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    saveCharToDB(true);
-                }
-            };
+            Runnable r = () -> saveCharToDB(true);
 
             CharacterSaveService service = (CharacterSaveService) getWorldServer().getServiceAccess(WorldServices.SAVE_CHARACTER);
             service.registerSaveCharacter(this.getId(), r);
@@ -9166,12 +9141,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     public void sendPolice(int greason, String reason, int duration) {
         announce(MaplePacketCreator.sendPolice(String.format("You have been blocked by the#b %s Police for %s.#k", "HeavenMS", reason)));
         this.isbanned = true;
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                client.disconnect(false, false);
-            }
-        }, duration);
+        TimerManager.getInstance().schedule(() -> client.disconnect(false, false), duration);
     }
 
     public void sendPolice(String text) {
@@ -9588,7 +9558,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         }
     }
 
-    public int sellAllItemsFromPosition(MapleItemInformationProvider ii, MapleInventoryType type, short pos) {
+    public int sellAllItemsFromPosition(ItemInformationProvider ii, MapleInventoryType type, short pos) {
         int mesoGain = 0;
 
         MapleInventory inv = getInventory(type);
@@ -9607,7 +9577,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         return (mesoGain);
     }
 
-    private int standaloneSell(MapleClient c, MapleItemInformationProvider ii, MapleInventoryType type, short slot, short quantity) {
+    private int standaloneSell(MapleClient c, ItemInformationProvider ii, MapleInventoryType type, short slot, short quantity) {
         if (quantity == 0xFFFF || quantity == 0) {
             quantity = 1;
         }
@@ -9716,7 +9686,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                     Equip eqp = eqpUpg.getKey();
                     setMergeFlag(eqp);
 
-                    String showStr = " '" + MapleItemInformationProvider.getInstance().getName(eqp.getItemId()) + "': ";
+                    String showStr = " '" + ItemInformationProvider.getInstance().getName(eqp.getItemId()) + "': ";
                     String upgdStr = eqp.gainStats(eqpStatups).getLeft();
 
                     this.forceUpdateItem(eqp);
@@ -9926,12 +9896,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     public void startMapEffect(String msg, int itemId, int duration) {
         final MapleMapEffect mapEffect = new MapleMapEffect(msg, itemId);
         getClient().announce(mapEffect.makeStartData());
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                getClient().announce(mapEffect.makeDestroyData());
-            }
-        }, duration);
+        TimerManager.getInstance().schedule(() -> getClient().announce(mapEffect.makeDestroyData()), duration);
     }
 
     public void unequipAllPets() {
@@ -10332,12 +10297,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
         this.ban(reason);
         announce(MaplePacketCreator.sendPolice(String.format("You have been blocked by the#b %s Police for HACK reason.#k", "HeavenMS")));
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                client.disconnect(false, false);
-            }
-        }, 5000);
+        TimerManager.getInstance().schedule(() -> client.disconnect(false, false), 5000);
 
         Server.getInstance().broadcastGMMessage(this.getWorld(), MaplePacketCreator.serverNotice(6, MapleCharacter.makeMapleReadable(this.name) + " was autobanned for " + reason));
     }
@@ -10477,15 +10437,12 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
     private void equipPendantOfSpirit() {
         if (pendantOfSpirit == null) {
-            pendantOfSpirit = TimerManager.getInstance().register(new Runnable() {
-                @Override
-                public void run() {
-                    if (pendantExp < 3) {
-                        pendantExp++;
-                        message("Pendant of the Spirit has been equipped for " + pendantExp + " hour(s), you will now receive " + pendantExp + "0% bonus exp.");
-                    } else {
-                        pendantOfSpirit.cancel(false);
-                    }
+            pendantOfSpirit = TimerManager.getInstance().register(() -> {
+                if (pendantExp < 3) {
+                    pendantExp++;
+                    message("Pendant of the Spirit has been equipped for " + pendantExp + " hour(s), you will now receive " + pendantExp + "0% bonus exp.");
+                } else {
+                    pendantOfSpirit.cancel(false);
                 }
             }, 3600000); //1 hour
         }
@@ -10557,7 +10514,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         this.partyQuest = pq;
     }
 
-    public void setCpqTimer(ScheduledFuture timer) {
+    public void setCpqTimer(ScheduledFuture<?> timer) {
         this.cpqSchedule = timer;
     }
 
@@ -10655,19 +10612,16 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                 setFamilyEntry(null);
             }
 
-            getWorldServer().registerTimedMapObject(new Runnable() {
-                @Override
-                public void run() {
-                    client = null;  // clients still triggers handlers a few times after disconnecting
-                    map = null;
-                    setListener(null);
+            getWorldServer().registerTimedMapObject(() -> {
+                client = null;  // clients still triggers handlers a few times after disconnecting
+                map = null;
+                setListener(null);
 
-                    // thanks Shavit for noticing a memory leak with inventories holding owner object
-                    for (int i = 0; i < inventory.length; i++) {
-                        inventory[i].dispose();
-                    }
-                    inventory = null;
+                // thanks Shavit for noticing a memory leak with inventories holding owner object
+                for (int i = 0; i < inventory.length; i++) {
+                    inventory[i].dispose();
                 }
+                inventory = null;
             }, 5 * 60 * 1000);
         }
     }

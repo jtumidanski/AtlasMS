@@ -34,7 +34,7 @@ import client.inventory.ModifyInventory;
 import client.newyear.NewYearCardRecord;
 import config.YamlConfig;
 import constants.inventory.ItemConstants;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.maps.MapleMap;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
@@ -81,7 +81,7 @@ public class MapleInventoryManipulator {
     }
 
     private static boolean addByIdInternal(MapleClient c, MapleCharacter chr, MapleInventoryType type, MapleInventory inv, int itemId, short quantity, String owner, int petid, short flag, long expiration) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         if (!type.equals(MapleInventoryType.EQUIP)) {
             short slotMax = ii.getSlotMax(c, itemId);
             List<Item> existing = inv.listById(itemId);
@@ -190,7 +190,7 @@ public class MapleInventoryManipulator {
     }
 
     private static boolean addFromDropInternal(MapleClient c, MapleCharacter chr, MapleInventoryType type, MapleInventory inv, Item item, boolean show, int petId) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         int itemid = item.getItemId();
         if (ii.isPickupRestricted(itemid) && chr.haveItemWithId(itemid, true)) {
             c.announce(MaplePacketCreator.getInventoryFull());
@@ -290,7 +290,7 @@ public class MapleInventoryManipulator {
     }
 
     public static boolean checkSpace(MapleClient c, int itemid, int quantity, String owner) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         MapleInventoryType type = ItemConstants.getInventoryType(itemid);
         MapleCharacter chr = c.getPlayer();
         MapleInventory inv = chr.getInventory(type);
@@ -345,7 +345,7 @@ public class MapleInventoryManipulator {
 
         int returnValue;
 
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         MapleInventoryType type = !useProofInv ? ItemConstants.getInventoryType(itemid) : MapleInventoryType.CANHOLD;
         MapleCharacter chr = c.getPlayer();
         MapleInventory inv = chr.getInventory(type);
@@ -490,7 +490,7 @@ public class MapleInventoryManipulator {
         if (dst > inv.getSlotLimit()) {
             return;
         }
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         Item source = inv.getItem(src);
         Item initialTarget = inv.getItem(dst);
         if (source == null) {
@@ -519,7 +519,7 @@ public class MapleInventoryManipulator {
     }
 
     public static void equip(MapleClient c, short src, short dst) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         MapleCharacter chr = c.getPlayer();
         MapleInventory eqpInv = chr.getInventory(MapleInventoryType.EQUIP);
@@ -677,7 +677,7 @@ public class MapleInventoryManipulator {
     }
 
     private static boolean isDisappearingItemDrop(Item it) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         if (ii.isDropRestricted(it.getItemId())) {
             return true;
         } else if (ii.isCash(it.getItemId())) {

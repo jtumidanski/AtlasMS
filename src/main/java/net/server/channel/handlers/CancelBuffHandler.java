@@ -39,7 +39,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class CancelBuffHandler extends AbstractMaplePacketHandler implements MaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int sourceid = slea.readInt();
 
         switch (sourceid) {

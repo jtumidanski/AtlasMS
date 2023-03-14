@@ -26,7 +26,7 @@ import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import net.AbstractMaplePacketHandler;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.life.MapleLifeFactory;
 import tools.MaplePacketCreator;
 import tools.Randomizer;
@@ -38,7 +38,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class UseSummonBagHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         //[4A 00][6C 4C F2 02][02 00][63 0B 20 00]
         if (!c.getPlayer().isAlive()) {
             c.announce(MaplePacketCreator.enableActions());
@@ -50,7 +50,7 @@ public final class UseSummonBagHandler extends AbstractMaplePacketHandler {
         Item toUse = c.getPlayer().getInventory(MapleInventoryType.USE).getItem(slot);
         if (toUse != null && toUse.getQuantity() > 0 && toUse.getItemId() == itemId) {
             MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (short) 1, false);
-            int[][] toSpawn = MapleItemInformationProvider.getInstance().getSummonMobs(itemId);
+            int[][] toSpawn = ItemInformationProvider.getInstance().getSummonMobs(itemId);
             for (int z = 0; z < toSpawn.length; z++) {
                 int[] toSpawnChild = toSpawn[z];
                 if (Randomizer.nextInt(100) < toSpawnChild[1]) {

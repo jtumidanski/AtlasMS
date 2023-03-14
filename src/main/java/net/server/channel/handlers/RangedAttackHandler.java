@@ -41,7 +41,7 @@ import constants.skills.NightWalker;
 import constants.skills.Shadower;
 import constants.skills.ThunderBreaker;
 import constants.skills.WindArcher;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleStatEffect;
 import tools.MaplePacketCreator;
 import tools.Randomizer;
@@ -51,7 +51,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class RangedAttackHandler extends AbstractDealDamageHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
         
         /*long timeElapsed = currentServerTime() - chr.getAutobanManager().getLastSpam(8);
@@ -99,7 +99,7 @@ public final class RangedAttackHandler extends AbstractDealDamageHandler {
             }
         } else {
             Item weapon = chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -11);
-            MapleWeaponType type = MapleItemInformationProvider.getInstance().getWeaponType(weapon.getItemId());
+            MapleWeaponType type = ItemInformationProvider.getInstance().getWeaponType(weapon.getItemId());
             if (type == MapleWeaponType.NOT_A_WEAPON) {
                 return;
             }

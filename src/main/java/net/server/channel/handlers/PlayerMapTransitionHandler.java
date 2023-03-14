@@ -39,7 +39,7 @@ import java.util.List;
 public final class PlayerMapTransitionHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
         chr.setMapTransitionComplete();
 

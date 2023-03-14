@@ -29,7 +29,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class MonsterBombHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int oid = slea.readInt();
         MapleMonster monster = c.getPlayer().getMap().getMonsterByOid(oid);
         if (!c.getPlayer().isAlive() || monster == null) {

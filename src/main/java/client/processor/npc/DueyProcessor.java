@@ -36,7 +36,7 @@ import config.YamlConfig;
 import constants.inventory.ItemConstants;
 import net.server.channel.Channel;
 import server.DueyPackage;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleTrade;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
@@ -272,7 +272,7 @@ public class DueyProcessor {
 
     private static int addPackageItemFromInventory(int packageId, MapleClient c, byte invTypeId, short itemPos, short amount) {
         if (invTypeId > 0) {
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
             Optional<MapleInventoryType> invType = MapleInventoryType.getByType(invTypeId);
             if (invType.isEmpty()) {
@@ -449,7 +449,7 @@ public class DueyProcessor {
 
                         if (!MapleInventoryManipulator.checkSpace(c, dpItem.getItemId(), dpItem.getQuantity(), dpItem.getOwner())) {
                             int itemid = dpItem.getItemId();
-                            if (MapleItemInformationProvider.getInstance().isPickupRestricted(itemid) && c.getPlayer().getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid).isPresent()) {
+                            if (ItemInformationProvider.getInstance().isPickupRestricted(itemid) && c.getPlayer().getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid).isPresent()) {
                                 c.announce(MaplePacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_RECEIVER_WITH_UNIQUE.getCode()));
                             } else {
                                 c.announce(MaplePacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_NO_FREE_SLOTS.getCode()));

@@ -91,12 +91,7 @@ public class MaplePlayerNPCPodium {
                 playerNpcs.add((MaplePlayerNPC) mmo);
             }
 
-            playerNpcs.sort(new Comparator<>() {
-                @Override
-                public int compare(MaplePlayerNPC p1, MaplePlayerNPC p2) {
-                    return p1.getScriptId() - p2.getScriptId(); // scriptid as playernpc history
-                }
-            });
+            playerNpcs.sort(Comparator.comparingInt(MaplePlayerNPC::getScriptId));
 
             for (Channel ch : Server.getInstance().getChannelsFromWorld(map.getWorld())) {
                 MapleMap m = ch.getMapFactory().getMap(map.getId());

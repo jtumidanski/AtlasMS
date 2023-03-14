@@ -72,7 +72,7 @@ public final class NewYearCardHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         final MapleCharacter player = c.getPlayer();
         byte reqMode = slea.readByte();                 //[00] -> NewYearReq (0 = Send)
 

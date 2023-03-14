@@ -29,7 +29,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class DistributeAPHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readInt();
         int num = slea.readInt();
 

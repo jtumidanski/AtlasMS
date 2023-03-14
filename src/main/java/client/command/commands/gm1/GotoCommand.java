@@ -73,12 +73,7 @@ public class GotoCommand extends Command {
     }
 
     private static void sortGotoEntries(List<Entry<String, Integer>> listEntries) {
-        listEntries.sort(new Comparator<>() {
-            @Override
-            public int compare(Entry<String, Integer> e1, Entry<String, Integer> e2) {
-                return e1.getValue().compareTo(e2.getValue());
-            }
-        });
+        listEntries.sort(Entry.comparingByValue());
     }
 
     @Override

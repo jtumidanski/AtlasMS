@@ -31,7 +31,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class ServerStatusRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         byte world = (byte) slea.readShort();
         World wserv = Server.getInstance().getWorld(world);
         if (wserv != null) {

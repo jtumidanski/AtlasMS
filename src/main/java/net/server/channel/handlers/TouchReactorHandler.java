@@ -33,7 +33,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class TouchReactorHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int oid = slea.readInt();
         MapleReactor reactor = c.getPlayer().getMap().getReactorByOid(oid);
         if (reactor != null) {

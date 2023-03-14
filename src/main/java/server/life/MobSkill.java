@@ -77,12 +77,9 @@ public class MobSkill {
     }
 
     public void applyDelayedEffect(final MapleCharacter player, final MapleMonster monster, final boolean skill, int animationTime) {
-        Runnable toRun = new Runnable() {
-            @Override
-            public void run() {
-                if (monster.isAlive()) {
-                    applyEffect(player, monster, skill, null);
-                }
+        Runnable toRun = () -> {
+            if (monster.isAlive()) {
+                applyEffect(player, monster, skill, null);
             }
         };
 

@@ -34,7 +34,7 @@ import java.util.List;
 public final class ServerlistRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         Server server = Server.getInstance();
         List<World> worlds = server.getWorlds();
         c.requestedServerlist(worlds.size());

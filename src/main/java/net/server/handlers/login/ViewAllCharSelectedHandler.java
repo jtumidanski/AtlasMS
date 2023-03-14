@@ -57,7 +57,7 @@ public final class ViewAllCharSelectedHandler extends AbstractMaplePacketHandler
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int charId = slea.readInt();
         slea.readInt(); // please don't let the client choose which world they should login
 

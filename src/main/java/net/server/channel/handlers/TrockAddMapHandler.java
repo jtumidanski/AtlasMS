@@ -34,7 +34,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class TrockAddMapHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
         byte type = slea.readByte();
         boolean vip = slea.readByte() == 1;

@@ -32,7 +32,7 @@ import client.inventory.ModifyInventory;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -68,7 +68,7 @@ public final class ScrollHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (c.tryacquireClient()) {
             try {
                 slea.readInt(); // whatever...
@@ -81,7 +81,7 @@ public final class ScrollHandler extends AbstractMaplePacketHandler {
                     whiteScroll = true;
                 }
 
-                MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                ItemInformationProvider ii = ItemInformationProvider.getInstance();
                 MapleCharacter chr = c.getPlayer();
                 Equip toScroll = (Equip) chr.getInventory(MapleInventoryType.EQUIPPED).getItem(dst);
                 if (chr.getSkillLevel(1003) > 0 && dst >= 0) {

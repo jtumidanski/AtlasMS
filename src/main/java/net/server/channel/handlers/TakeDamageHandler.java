@@ -59,7 +59,7 @@ import java.util.List;
 public final class TakeDamageHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         List<MapleCharacter> banishPlayers = new ArrayList<>();
 
         MapleCharacter chr = c.getPlayer();

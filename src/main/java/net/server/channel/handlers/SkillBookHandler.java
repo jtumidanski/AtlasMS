@@ -30,7 +30,7 @@ import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import net.AbstractMaplePacketHandler;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -38,7 +38,7 @@ import java.util.Map;
 
 public final class SkillBookHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (!c.getPlayer().isAlive()) {
             c.announce(MaplePacketCreator.enableActions());
             return;
@@ -61,7 +61,7 @@ public final class SkillBookHandler extends AbstractMaplePacketHandler {
                 if (toUse == null || toUse.getItemId() != itemId) {
                     return;
                 }
-                Map<String, Integer> skilldata = MapleItemInformationProvider.getInstance().getSkillStats(toUse.getItemId(), c.getPlayer().getJob().getId());
+                Map<String, Integer> skilldata = ItemInformationProvider.getInstance().getSkillStats(toUse.getItemId(), c.getPlayer().getJob().getId());
                 if (skilldata == null) {
                     return;
                 }
@@ -82,7 +82,7 @@ public final class SkillBookHandler extends AbstractMaplePacketHandler {
                     }
 
                     canuse = true;
-                    if (MapleItemInformationProvider.rollSuccessChance(skilldata.get("success"))) {
+                    if (ItemInformationProvider.rollSuccessChance(skilldata.get("success"))) {
                         success = true;
                         player.changeSkillLevel(skill2, player.getSkillLevel(skill2), Math.max(skilldata.get("masterLevel"), player.getMasterLevel(skill2)), -1);
                     } else {

@@ -37,10 +37,8 @@ import java.util.Set;
  */
 public class MobAnimationService extends BaseService {
 
-    private static Runnable r = new Runnable() {
-        @Override
-        public void run() {
-        }    // do nothing
+    // do nothing
+    private static Runnable r = () -> {
     };
     private MobAnimationScheduler[] mobAnimationSchedulers = new MobAnimationScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
 
@@ -71,18 +69,15 @@ public class MobAnimationService extends BaseService {
         public MobAnimationScheduler() {
             super(MonitoredLockType.CHANNEL_MOBACTION);
 
-            super.addListener(new SchedulerListener() {
-                @Override
-                public void removedScheduledEntries(List<Object> toRemove, boolean update) {
-                    animationLock.lock();
-                    try {
-                        for (Object hashObj : toRemove) {
-                            Integer mobHash = (Integer) hashObj;
-                            onAnimationMobs.remove(mobHash);
-                        }
-                    } finally {
-                        animationLock.unlock();
+            super.addListener((toRemove, update) -> {
+                animationLock.lock();
+                try {
+                    for (Object hashObj : toRemove) {
+                        Integer mobHash = (Integer) hashObj;
+                        onAnimationMobs.remove(mobHash);
                     }
+                } finally {
+                    animationLock.unlock();
                 }
             });
         }

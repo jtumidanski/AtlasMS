@@ -118,12 +118,7 @@ public class TrackerReentrantLock extends ReentrantLock implements MonitoredReen
 
             if (reentrantCount.incrementAndGet() == 1) {
                 final Thread t = Thread.currentThread();
-                timeoutSchedule = TimerManager.getInstance().schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        issueDeadlock(t);
-                    }
-                }, YamlConfig.config.server.LOCK_MONITOR_TIME);
+                timeoutSchedule = TimerManager.getInstance().schedule(() -> issueDeadlock(t), YamlConfig.config.server.LOCK_MONITOR_TIME);
             }
         } finally {
             state.unlock();

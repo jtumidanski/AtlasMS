@@ -29,7 +29,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class UseChairHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int itemId = slea.readInt();
 
         // thanks Darter (YungMoozi) for reporting unchecked chair item

@@ -1153,7 +1153,7 @@ public class World {
                 foundsChars.add(new CharacterIdChannelPair(charid, ch.getId()));
             }
         }
-        return foundsChars.toArray(new CharacterIdChannelPair[foundsChars.size()]);
+        return foundsChars.toArray(new CharacterIdChannelPair[0]);
     }
 
     public MapleMessenger getMessenger(int messengerid) {
@@ -1459,12 +1459,8 @@ public class World {
     private List<Integer> getMostSellerOnTab(List<Pair<Integer, Integer>> tabSellers) {
         List<Integer> tabLeaderboards;
 
-        Comparator<Pair<Integer, Integer>> comparator = new Comparator<>() {  // descending order
-            @Override
-            public int compare(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
-                return p2.getRight().compareTo(p1.getRight());
-            }
-        };
+        // descending order
+        Comparator<Pair<Integer, Integer>> comparator = (p1, p2) -> p2.getRight().compareTo(p1.getRight());
 
         PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(Math.max(1, tabSellers.size()), comparator);
         queue.addAll(tabSellers);
@@ -1661,12 +1657,9 @@ public class World {
     }
 
     public List<MaplePlayerShop> getActivePlayerShops() {
-        List<MaplePlayerShop> psList = new ArrayList<>();
         activePlayerShopsLock.lock();
         try {
-            psList.addAll(activePlayerShops.values());
-
-            return psList;
+            return new ArrayList<>(activePlayerShops.values());
         } finally {
             activePlayerShopsLock.unlock();
         }
@@ -1948,12 +1941,7 @@ public class World {
             }
         }
 
-        hmsAvailable.sort(new Comparator<>() {
-            @Override
-            public int compare(Pair<MaplePlayerShopItem, AbstractMapleMapObject> p1, Pair<MaplePlayerShopItem, AbstractMapleMapObject> p2) {
-                return p1.getLeft().getPrice() - p2.getLeft().getPrice();
-            }
-        });
+        hmsAvailable.sort(Comparator.comparingInt(p -> p.getLeft().getPrice()));
 
         hmsAvailable.subList(0, Math.min(hmsAvailable.size(), 200));    //truncates the list to have up to 200 elements
         return hmsAvailable;

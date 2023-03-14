@@ -42,7 +42,7 @@ import java.util.Arrays;
  */
 public final class HiredMerchantRequest extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
 
         try {

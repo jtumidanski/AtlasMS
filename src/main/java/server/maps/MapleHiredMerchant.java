@@ -34,7 +34,7 @@ import config.YamlConfig;
 import net.server.Server;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleTrade;
 import tools.DatabaseConnection;
 import tools.MaplePacketCreator;
@@ -353,7 +353,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
 
     private void announceItemSold(Item item, int mesos, int inStore) {
         String qtyStr = (item.getQuantity() > 1) ? " x " + item.getQuantity() : "";
-        String itemName = MapleItemInformationProvider.getInstance().getName(item.getItemId());
+        String itemName = ItemInformationProvider.getInstance().getName(item.getItemId());
         String message = "[Hired Merchant] Item '" + itemName + "'" + qtyStr + " has been sold for " + mesos + " mesos. (" + inStore + " left)";
 
         Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(ownerId)
@@ -628,14 +628,14 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
 
     public List<MaplePlayerShopItem> sendAvailableBundles(int itemid) {
         List<MaplePlayerShopItem> list = new LinkedList<>();
-        List<MaplePlayerShopItem> all = new ArrayList<>();
+        List<MaplePlayerShopItem> all;
 
         if (!open.get()) {
             return list;
         }
 
         synchronized (items) {
-            all.addAll(items);
+            all = new ArrayList<>(items);
         }
 
         for (MaplePlayerShopItem mpsi : all) {
@@ -692,10 +692,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
 
     public List<Pair<String, Byte>> getMessages() {
         synchronized (messages) {
-            List<Pair<String, Byte>> msgList = new LinkedList<>();
-            msgList.addAll(messages);
-
-            return msgList;
+            return new LinkedList<>(messages);
         }
     }
 

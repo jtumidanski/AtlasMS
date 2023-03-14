@@ -27,7 +27,7 @@ import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class MonsterBookCoverHandler extends AbstractMaplePacketHandler {
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int id = slea.readInt();
         if (id == 0 || id / 10000 == 238) {
             c.getPlayer().setMonsterBookCover(id);

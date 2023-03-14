@@ -31,7 +31,7 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import client.inventory.manipulator.MapleKarmaManipulator;
 import config.YamlConfig;
 import constants.inventory.ItemConstants;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleStorage;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
@@ -46,7 +46,7 @@ import java.util.Optional;
 public class StorageProcessor {
 
     public static void storageAction(SeekableLittleEndianAccessor slea, MapleClient c) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         MapleCharacter chr = c.getPlayer();
         MapleStorage storage = chr.getStorage();
         byte mode = slea.readByte();

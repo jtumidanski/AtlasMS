@@ -564,10 +564,10 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
 
     public List<MaplePlayerShopItem> sendAvailableBundles(int itemid) {
         List<MaplePlayerShopItem> list = new LinkedList<>();
-        List<MaplePlayerShopItem> all = new ArrayList<>();
+        List<MaplePlayerShopItem> all;
 
         synchronized (items) {
-            all.addAll(items);
+            all = new ArrayList<>(items);
         }
 
         for (MaplePlayerShopItem mpsi : all) {

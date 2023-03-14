@@ -16,7 +16,7 @@ public final class AcceptToSHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (slea.available() == 0 || slea.readByte() != 1 || c.acceptToS()) {
             c.disconnect(false, false);//Client dc's but just because I am cool I do this (:
             return;

@@ -32,7 +32,7 @@ import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import net.server.channel.Channel;
 import server.MTSItemInfo;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.DatabaseConnection;
 import tools.MaplePacketCreator;
 import tools.Pair;
@@ -129,7 +129,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         // TODO add karma-to-untradeable flag on sold items here
 
         if (!c.getPlayer().getCashShop().isOpened()) {
@@ -808,7 +808,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
 
     public byte[] getMTSSearch(int tab, int type, int cOi, String search, int page) {
         List<MTSItemInfo> items = new ArrayList<>();
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         String listaitems = "";
         if (cOi != 0) {
             List<String> retItems = new ArrayList<>();

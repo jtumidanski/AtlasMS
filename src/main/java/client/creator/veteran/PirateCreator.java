@@ -25,7 +25,7 @@ import client.creator.CharacterFactory;
 import client.creator.CharacterFactoryRecipe;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 
 /**
  * @author RonanLana
@@ -37,7 +37,7 @@ public class PirateCreator extends CharacterFactory {
 
     private static CharacterFactoryRecipe createRecipe(MapleJob job, int level, int map, int top, int bottom, int shoes, int weapon) {
         CharacterFactoryRecipe recipe = new CharacterFactoryRecipe(job, level, map, top, bottom, shoes, weapon);
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         recipe.setDex(20);
         recipe.setRemainingAp(138);
@@ -63,7 +63,7 @@ public class PirateCreator extends CharacterFactory {
         return recipe;
     }
 
-    private static void giveEquipment(CharacterFactoryRecipe recipe, MapleItemInformationProvider ii, int equipid) {
+    private static void giveEquipment(CharacterFactoryRecipe recipe, ItemInformationProvider ii, int equipid) {
         Item nEquip = ii.getEquipById(equipid);
         recipe.addStartingEquipment(nEquip);
     }

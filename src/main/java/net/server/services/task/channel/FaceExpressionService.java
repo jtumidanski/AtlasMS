@@ -72,12 +72,9 @@ public class FaceExpressionService extends BaseService {
     public void registerFaceExpression(final MapleMap map, final MapleCharacter chr, int emote) {
         int lockid = getChannelSchedulerIndex(map.getId());
 
-        Runnable cancelAction = new Runnable() {
-            @Override
-            public void run() {
-                if (chr.isLoggedinWorld()) {
-                    map.broadcastMessage(chr, MaplePacketCreator.facialExpression(chr, 0), false);
-                }
+        Runnable cancelAction = () -> {
+            if (chr.isLoggedinWorld()) {
+                map.broadcastMessage(chr, MaplePacketCreator.facialExpression(chr, 0), false);
             }
         };
 

@@ -30,7 +30,7 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import config.YamlConfig;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -39,7 +39,7 @@ import java.util.Optional;
 public final class InventoryMergeHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
         slea.readInt();
         chr.getAutobanManager().setTimestamp(2, Server.getInstance().getCurrentTimestamp(), 4);
@@ -65,7 +65,7 @@ public final class InventoryMergeHandler extends AbstractMaplePacketHandler {
         try {
             //------------------- RonanLana's SLOT MERGER -----------------
 
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
             Item srcItem, dstItem;
 
             for (short dst = 1; dst <= inventory.getSlotLimit(); dst++) {

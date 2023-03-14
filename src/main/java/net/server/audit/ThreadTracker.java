@@ -257,12 +257,7 @@ public class ThreadTracker {
     }
 
     public void registerThreadTrackerTask() {
-        threadTrackerSchedule = TimerManager.getInstance().register(new Runnable() {
-            @Override
-            public void run() {
-                accessThreadTracker(true, false, MonitoredLockType.UNDEFINED, -1);
-            }
-        }, 10000, 10000);
+        threadTrackerSchedule = TimerManager.getInstance().register(() -> accessThreadTracker(true, false, MonitoredLockType.UNDEFINED, -1), 10000, 10000);
     }
 
     public void cancelThreadTrackerTask() {

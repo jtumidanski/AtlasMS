@@ -42,7 +42,7 @@ import java.util.Calendar;
 public final class TransferNameHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readInt(); //cid
         int birthday = slea.readInt();
         if (!CashOperationHandler.checkBirthday(c, birthday)) {

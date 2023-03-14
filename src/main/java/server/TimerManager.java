@@ -79,12 +79,9 @@ public class TimerManager implements TimerManagerMBean {
     }
 
     public Runnable purge() {//Yay?
-        return new Runnable() {
-            @Override
-            public void run() {
-                Server.getInstance().forceUpdateCurrentTime();
-                ses.purge();
-            }
+        return () -> {
+            Server.getInstance().forceUpdateCurrentTime();
+            ses.purge();
         };
     }
 

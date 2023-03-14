@@ -33,7 +33,7 @@ import net.AbstractMaplePacketHandler;
 import net.server.channel.Channel;
 import net.server.world.World;
 import scripting.event.EventInstanceManager;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.DatabaseConnection;
 import tools.MaplePacketCreator;
 import tools.Pair;
@@ -280,7 +280,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
 
     public static void giveMarriageRings(MapleCharacter player, MapleCharacter partner, int marriageRingId) {
         Pair<Integer, Integer> rings = MapleRing.createRing(marriageRingId, player, partner);
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         Item ringObj = ii.getEquipById(marriageRingId);
         Equip ringEqp = (Equip) ringObj;
@@ -298,7 +298,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         byte mode = slea.readByte();
         String name;
         byte slot;

@@ -86,12 +86,7 @@ public class MapleDoor {
                 MapleMap town = destroyDoor.getTown();
 
                 OverallService service = (OverallService) town.getChannelServer().getServiceAccess(ChannelServices.OVERALL);
-                service.registerOverallAction(town.getId(), new Runnable() {
-                    @Override
-                    public void run() {
-                        destroyDoor.broadcastRemoveDoor(owner);   // thanks BHB88 for noticing doors crashing players when instantly cancelling buff
-                    }
-                }, effectTimeLeft);
+                service.registerOverallAction(town.getId(), () -> destroyDoor.broadcastRemoveDoor(owner), effectTimeLeft);
             } else {
                 destroyDoor.broadcastRemoveDoor(owner);
             }

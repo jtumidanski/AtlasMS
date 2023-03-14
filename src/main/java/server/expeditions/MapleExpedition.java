@@ -133,17 +133,14 @@ public class MapleExpedition {
         final MapleExpedition exped = this;
         startTime = System.currentTimeMillis() + (long) type.getRegistrationTime() * 60 * 1000;
 
-        schedule = TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                if (registering) {
-                    exped.removeChannelExpedition(startMap.getChannelServer());
-                    if (!silent) {
-                        startMap.broadcastMessage(MaplePacketCreator.serverNotice(6, "[Expedition] The time limit has been reached. Expedition has been disbanded."));
-                    }
-
-                    dispose(false);
+        schedule = TimerManager.getInstance().schedule(() -> {
+            if (registering) {
+                exped.removeChannelExpedition(startMap.getChannelServer());
+                if (!silent) {
+                    startMap.broadcastMessage(MaplePacketCreator.serverNotice(6, "[Expedition] The time limit has been reached. Expedition has been disbanded."));
                 }
+
+                dispose(false);
             }
         }, (long) type.getRegistrationTime() * 60 * 1000);
     }

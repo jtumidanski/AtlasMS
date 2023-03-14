@@ -52,7 +52,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter mc = c.getPlayer();
         byte type = slea.readByte();
         int allianceId;

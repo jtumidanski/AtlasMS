@@ -28,7 +28,6 @@ import client.MapleClient;
 import client.MapleDisease;
 import client.MapleFamily;
 import client.MapleFamilyEntry;
-import client.MapleMount;
 import client.inventory.Equip;
 import client.inventory.Item;
 import client.inventory.MapleInventory;
@@ -133,12 +132,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
             timedBuffs.add(new Pair<>(curtime - pb.usedTime, pb));
         }
 
-        timedBuffs.sort(new Comparator<>() {
-            @Override
-            public int compare(Pair<Long, PlayerBuffValueHolder> p1, Pair<Long, PlayerBuffValueHolder> p2) {
-                return p1.getLeft().compareTo(p2.getLeft());
-            }
-        });
+        timedBuffs.sort(Comparator.comparing(Pair::getLeft));
 
         return timedBuffs;
     }
@@ -174,12 +168,12 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final boolean validateState(MapleClient c) {
+    public boolean validateState(MapleClient c) {
         return !c.isLoggedIn();
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         final int cid = slea.readInt();
         final Server server = Server.getInstance();
 

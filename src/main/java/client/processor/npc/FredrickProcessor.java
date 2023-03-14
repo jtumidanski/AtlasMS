@@ -32,7 +32,7 @@ import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import net.server.Server;
 import net.server.world.World;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.maps.MapleHiredMerchant;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
@@ -305,7 +305,7 @@ public class FredrickProcessor {
                         for (Pair<Item, MapleInventoryType> it : items) {
                             Item item = it.getLeft();
                             MapleInventoryManipulator.addFromDrop(chr.getClient(), item, false);
-                            String itemName = MapleItemInformationProvider.getInstance().getName(item.getItemId());
+                            String itemName = ItemInformationProvider.getInstance().getName(item.getItemId());
                             FilePrinter.print(FilePrinter.FREDRICK + chr.getName() + ".txt", chr.getName() + " gained " + item.getQuantity() + " " + itemName + " (" + item.getItemId() + ")");
                         }
 

@@ -65,26 +65,23 @@ public class MapleSnowball {
             }
         }
         hittable = true;
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                if (map.getSnowball(team).getPosition() > map.getSnowball(team == 0 ? 1 : 0).getPosition()) {
-                    for (MapleCharacter chr : characters) {
-                        if (chr != null) {
-                            chr.announce(MaplePacketCreator.rollSnowBall(false, 3, map.getSnowball(0), map.getSnowball(0)));
-                        }
+        TimerManager.getInstance().schedule(() -> {
+            if (map.getSnowball(team).getPosition() > map.getSnowball(team == 0 ? 1 : 0).getPosition()) {
+                for (MapleCharacter chr : characters) {
+                    if (chr != null) {
+                        chr.announce(MaplePacketCreator.rollSnowBall(false, 3, map.getSnowball(0), map.getSnowball(0)));
                     }
-                    winner = true;
-                } else if (map.getSnowball(team == 0 ? 1 : 0).getPosition() > map.getSnowball(team).getPosition()) {
-                    for (MapleCharacter chr : characters) {
-                        if (chr != null) {
-                            chr.announce(MaplePacketCreator.rollSnowBall(false, 4, map.getSnowball(0), map.getSnowball(0)));
-                        }
+                }
+                winner = true;
+            } else if (map.getSnowball(team == 0 ? 1 : 0).getPosition() > map.getSnowball(team).getPosition()) {
+                for (MapleCharacter chr : characters) {
+                    if (chr != null) {
+                        chr.announce(MaplePacketCreator.rollSnowBall(false, 4, map.getSnowball(0), map.getSnowball(0)));
                     }
-                    winner = true;
-                } //Else
-                warpOut();
-            }
+                }
+                winner = true;
+            } //Else
+            warpOut();
         }, 600000);
 
     }
@@ -117,13 +114,9 @@ public class MapleSnowball {
                 if (this.snowmanhp - damage < 0) {
                     this.snowmanhp = 0;
 
-                    TimerManager.getInstance().schedule(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            setSnowmanHP(7500);
-                            message(5);
-                        }
+                    TimerManager.getInstance().schedule(() -> {
+                        setSnowmanHP(7500);
+                        message(5);
                     }, 10000);
                 } else {
                     this.snowmanhp -= damage;
@@ -158,18 +151,14 @@ public class MapleSnowball {
     }
 
     public void warpOut() {
-        TimerManager.getInstance().schedule(new Runnable() {
-
-            @Override
-            public void run() {
-                if (winner == true) {
-                    map.warpOutByTeam(team, 109050000);
-                } else {
-                    map.warpOutByTeam(team, 109050001);
-                }
-
-                map.setSnowball(team, null);
+        TimerManager.getInstance().schedule(() -> {
+            if (winner == true) {
+                map.warpOutByTeam(team, 109050000);
+            } else {
+                map.warpOutByTeam(team, 109050001);
             }
+
+            map.setSnowball(team, null);
         }, 10000);
     }
 }

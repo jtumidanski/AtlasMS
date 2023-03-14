@@ -25,7 +25,7 @@ import client.MapleClient;
 import config.YamlConfig;
 import constants.game.ExpTable;
 import constants.inventory.ItemConstants;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
@@ -56,7 +56,7 @@ public class Equip extends Item {
         this.itemExp = 0;
         this.itemLevel = 1;
 
-        this.isElemental = (MapleItemInformationProvider.getInstance().getEquipLevel(id, false) > 1);
+        this.isElemental = (ItemInformationProvider.getInstance().getEquipLevel(id, false) > 1);
     }
 
     private static int getStatModifier(boolean isAttribute) {
@@ -93,7 +93,7 @@ public class Equip extends Item {
     }
 
     private static boolean isPhysicalWeapon(int itemid) {
-        Equip eqp = (Equip) MapleItemInformationProvider.getInstance().getEquipById(itemid);
+        Equip eqp = (Equip) ItemInformationProvider.getInstance().getEquipById(itemid);
         return eqp.getWatk() >= eqp.getMatk();
     }
 
@@ -541,9 +541,9 @@ public class Equip extends Item {
         List<Pair<StatUpgrade, Integer>> stats = new LinkedList<>();
 
         if (isElemental) {
-            MapleItemInformationProvider.getInstance().getItemLevelupStats(getItemId(), itemLevel).stream()
+            ItemInformationProvider.getInstance().getItemLevelupStats(getItemId(), itemLevel).stream()
                     .filter(p -> p.getRight() > 0)
-                    .map(p -> new Pair(StatUpgrade.valueOf(p.getLeft()), p.getRight()))
+                    .map(p -> new Pair<>(StatUpgrade.valueOf(p.getLeft()), p.getRight()))
                     .forEach(stats::add);
         }
 
@@ -580,8 +580,8 @@ public class Equip extends Item {
 
         itemLevel++;
 
-        String lvupStr = "'" + MapleItemInformationProvider.getInstance().getName(this.getItemId()) + "' is now level " + itemLevel + "! ";
-        String showStr = "#e'" + MapleItemInformationProvider.getInstance().getName(this.getItemId()) + "'#b is now #elevel #r" + itemLevel + "#k#b!";
+        String lvupStr = "'" + ItemInformationProvider.getInstance().getName(this.getItemId()) + "' is now level " + itemLevel + "! ";
+        String showStr = "#e'" + ItemInformationProvider.getInstance().getName(this.getItemId()) + "'#b is now #elevel #r" + itemLevel + "#k#b!";
 
         Pair<String, Pair<Boolean, Boolean>> res = this.gainStats(stats);
         lvupStr += res.getLeft();
@@ -616,7 +616,7 @@ public class Equip extends Item {
     }
 
     public synchronized void gainItemExp(MapleClient c, int gain) {  // Ronan's Equip Exp gain method
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         if (!ii.isUpgradeable(this.getItemId())) {
             return;
         }
@@ -660,7 +660,7 @@ public class Equip extends Item {
 
     private boolean reachedMaxLevel() {
         if (isElemental) {
-            if (itemLevel < MapleItemInformationProvider.getInstance().getEquipLevel(getItemId(), true)) {
+            if (itemLevel < ItemInformationProvider.getInstance().getEquipLevel(getItemId(), true)) {
                 return false;
             }
         }
@@ -669,7 +669,7 @@ public class Equip extends Item {
     }
 
     public String showEquipFeatures(MapleClient c) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         if (!ii.isUpgradeable(this.getItemId())) {
             return "";
         }

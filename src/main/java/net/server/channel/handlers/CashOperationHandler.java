@@ -36,7 +36,7 @@ import net.server.Server;
 import server.CashShop;
 import server.CashShop.CashItem;
 import server.CashShop.CashItemFactory;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
 import tools.Pair;
@@ -62,7 +62,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
 
     private static boolean canBuy(MapleCharacter chr, CashItem item, int cash) {
         if (item != null && item.isOnSale() && item.getPrice() <= cash) {
-            FilePrinter.print(FilePrinter.CASHITEM_BOUGHT, chr + " bought " + MapleItemInformationProvider.getInstance().getName(item.getItemId()) + " (SN " + item.getSN() + ") for " + item.getPrice());
+            FilePrinter.print(FilePrinter.CASHITEM_BOUGHT, chr + " bought " + ItemInformationProvider.getInstance().getName(item.getItemId()) + " (SN " + item.getSN() + ") for " + item.getPrice());
             return true;
         } else {
             return false;
@@ -70,7 +70,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
         CashShop cs = chr.getCashShop();
 

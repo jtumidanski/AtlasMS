@@ -24,7 +24,7 @@ package server.partyquest;
 
 import client.MapleCharacter;
 import net.server.world.MapleParty;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.TimerManager;
 import tools.MaplePacketCreator;
 
@@ -65,15 +65,12 @@ public class Pyramid extends PartyQuest {
         if (gaugeSchedule == null) {
             gauge = 100;
             count = 0;
-            gaugeSchedule = TimerManager.getInstance().register(new Runnable() {
-                @Override
-                public void run() {
-                    gauge -= decrease;
-                    if (gauge <= 0) {
-                        warp(926010001);
-                    }
-
+            gaugeSchedule = TimerManager.getInstance().register(() -> {
+                gauge -= decrease;
+                if (gauge <= 0) {
+                    warp(926010001);
                 }
+
             }, 1000);
         }
     }
@@ -122,12 +119,9 @@ public class Pyramid extends PartyQuest {
             value = 120;
         }
 
-        timer = TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                stage++;
-                warp(map + (stage * 100));//Should work :D
-            }
+        timer = TimerManager.getInstance().schedule(() -> {
+            stage++;
+            warp(map + (stage * 100));//Should work :D
         }, value * 1000);//, 4000
         broadcastInfo("party", getParticipants().size() > 1 ? 1 : 0);
         broadcastInfo("hit", kill);
@@ -174,14 +168,14 @@ public class Pyramid extends PartyQuest {
         int total = (kill + cool);
         if (buffcount == 0 && total >= 250) {
             buffcount++;
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
             for (MapleCharacter chr : getParticipants())
                 ii.getItemEffect(2022585).applyTo(chr);
 
         } else if (buffcount == 1 && total >= 500) {
             buffcount++;
             skill++;
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
             for (MapleCharacter chr : getParticipants()) {
                 chr.announce(MaplePacketCreator.getEnergy("massacre_skill", skill));
                 ii.getItemEffect(2022586).applyTo(chr);
@@ -189,7 +183,7 @@ public class Pyramid extends PartyQuest {
         } else if (buffcount == 2 && total >= 1000) {
             buffcount++;
             skill++;
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
             for (MapleCharacter chr : getParticipants()) {
                 chr.announce(MaplePacketCreator.getEnergy("massacre_skill", skill));
                 ii.getItemEffect(2022587).applyTo(chr);
@@ -200,7 +194,7 @@ public class Pyramid extends PartyQuest {
         } else if (buffcount == 4 && total >= 2000) {
             buffcount++;
             skill++;
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
             for (MapleCharacter chr : getParticipants()) {
                 chr.announce(MaplePacketCreator.getEnergy("massacre_skill", skill));
                 ii.getItemEffect(2022588).applyTo(chr);

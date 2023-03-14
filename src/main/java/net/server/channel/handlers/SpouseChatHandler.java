@@ -43,7 +43,7 @@ public final class SpouseChatHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readMapleAsciiString();//recipient
         String msg = slea.readMapleAsciiString();
 

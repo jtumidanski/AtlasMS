@@ -29,7 +29,7 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import constants.inventory.ItemConstants;
 import provider.MapleData;
 import provider.MapleDataTool;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.quest.MapleQuest;
 import server.quest.MapleQuestActionType;
 import tools.FilePrinter;
@@ -82,12 +82,7 @@ public class ItemAction extends MapleQuestAction {
             items.add(new ItemData(Integer.parseInt(iEntry.getName()), id, count, prop, job, gender, period));
         }
 
-        items.sort(new Comparator<>() {
-            @Override
-            public int compare(ItemData o1, ItemData o2) {
-                return o1.map - o2.map;
-            }
-        });
+        items.sort(Comparator.comparingInt(o -> o.map));
     }
 
     @Override
@@ -169,7 +164,7 @@ public class ItemAction extends MapleQuestAction {
         List<Pair<Item, MapleInventoryType>> selectList = new LinkedList<>();
         List<Pair<Item, MapleInventoryType>> randomList = new LinkedList<>();
 
-        List<Integer> allSlotUsed = new ArrayList(5);
+        List<Integer> allSlotUsed = new ArrayList<>(5);
         for (byte i = 0; i < 5; i++) allSlotUsed.add(0);
 
         for (ItemData item : items) {
@@ -216,7 +211,7 @@ public class ItemAction extends MapleQuestAction {
             int result;
             MapleClient c = chr.getClient();
 
-            List<Integer> rndUsed = new ArrayList(5);
+            List<Integer> rndUsed = new ArrayList<>(5);
             for (byte i = 0; i < 5; i++) rndUsed.add(allSlotUsed.get(i));
 
             for (Pair<Item, MapleInventoryType> it : randomList) {
@@ -251,7 +246,7 @@ public class ItemAction extends MapleQuestAction {
 
     private void announceInventoryLimit(List<Integer> itemids, MapleCharacter chr) {
         for (Integer id : itemids) {
-            if (MapleItemInformationProvider.getInstance().isPickupRestricted(id) && chr.haveItemWithId(id, true)) {
+            if (ItemInformationProvider.getInstance().isPickupRestricted(id) && chr.haveItemWithId(id, true)) {
                 chr.dropMessage(1, "Please check if you already have a similar one-of-a-kind item in your inventory.");
                 return;
             }
@@ -303,7 +298,7 @@ public class ItemAction extends MapleQuestAction {
     }
 
     public boolean restoreLostItem(MapleCharacter chr, int itemid) {
-        if (!MapleItemInformationProvider.getInstance().isQuestItem(itemid)) {
+        if (!ItemInformationProvider.getInstance().isQuestItem(itemid)) {
             return false;
         }
 

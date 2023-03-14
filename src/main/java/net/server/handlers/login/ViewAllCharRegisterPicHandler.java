@@ -36,7 +36,7 @@ public final class ViewAllCharRegisterPicHandler extends AbstractMaplePacketHand
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readByte();
         int charId = slea.readInt();
         slea.readInt(); // please don't let the client choose which world they should login

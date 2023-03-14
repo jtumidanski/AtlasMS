@@ -40,7 +40,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
  */
 public final class FamilyUseHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (!YamlConfig.config.server.USE_FAMILY_SYSTEM) {
             return;
         }

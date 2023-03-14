@@ -42,7 +42,7 @@ import java.sql.Timestamp;
 public final class TransferWorldHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readInt(); //cid
         int birthday = slea.readInt();
         if (!CashOperationHandler.checkBirthday(c, birthday)) {

@@ -31,7 +31,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class DueyHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (!YamlConfig.config.server.USE_DUEY) {
             c.announce(MaplePacketCreator.enableActions());
             return;

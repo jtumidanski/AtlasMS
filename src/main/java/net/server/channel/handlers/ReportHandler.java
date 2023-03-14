@@ -40,7 +40,7 @@ import java.util.Calendar;
  * @author BubblesDev
  */
 public final class ReportHandler extends AbstractMaplePacketHandler {
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int type = slea.readByte(); //01 = Conversation claim 00 = illegal program
         String victim = slea.readMapleAsciiString();
         int reason = slea.readByte();

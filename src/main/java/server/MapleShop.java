@@ -172,7 +172,7 @@ public class MapleShop {
         } else {
             return;
         }
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         if (item.getPrice() > 0) {
             int amount = (int) Math.min((float) item.getPrice() * quantity, Integer.MAX_VALUE);
             if (c.getPlayer().getMeso() >= amount) {
@@ -250,7 +250,7 @@ public class MapleShop {
             quantity = getSellingQuantity(item, quantity);
             MapleInventoryManipulator.removeFromSlot(c, type, (byte) slot, quantity, false);
 
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
             int recvMesos = ii.getPrice(item.getItemId(), quantity);
             if (recvMesos > 0) {
                 c.getPlayer().gainMeso(recvMesos, false);
@@ -262,7 +262,7 @@ public class MapleShop {
     }
 
     public void recharge(MapleClient c, short slot) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         Item item = c.getPlayer().getInventory(MapleInventoryType.USE).getItem(slot);
         if (item == null || !ItemConstants.isRechargeable(item.getItemId())) {
             return;

@@ -32,7 +32,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
  */
 public final class RegisterPinHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         byte c2 = slea.readByte();
         if (c2 == 0) {
             MapleSessionCoordinator.getInstance().closeSession(c.getSession(), null);

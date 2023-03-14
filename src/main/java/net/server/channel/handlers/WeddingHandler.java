@@ -31,7 +31,7 @@ import java.util.List;
 public final class WeddingHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
 
         if (c.tryacquireClient()) {
             try {

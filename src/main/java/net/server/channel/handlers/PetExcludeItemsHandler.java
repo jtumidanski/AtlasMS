@@ -35,7 +35,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class PetExcludeItemsHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         final int petId = slea.readInt();
         slea.skip(4);
 

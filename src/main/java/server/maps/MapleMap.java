@@ -52,7 +52,7 @@ import net.server.world.MapleParty;
 import net.server.world.World;
 import scripting.event.EventInstanceManager;
 import scripting.map.MapScriptManager;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleStatEffect;
 import server.TimerManager;
 import server.events.gm.MapleCoconut;
@@ -87,7 +87,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -109,8 +108,8 @@ public class MapleMap {
     private static final Lock bndLock = MonitoredReentrantLockFactory.createLock(MonitoredLockType.MAP_BOUNDS, true);
     private final List<Point> takenSpawns = new LinkedList<>();
     private final List<GuardianSpawnPoint> guardianSpawns = new LinkedList<>();
-    private final List<MCSkill> blueTeamBuffs = new ArrayList();
-    private final List<MCSkill> redTeamBuffs = new ArrayList();
+    private final List<MCSkill> blueTeamBuffs = new ArrayList<>();
+    private final List<MCSkill> redTeamBuffs = new ArrayList<>();
     private Map<Integer, MapleMapObject> mapobjects = new LinkedHashMap<>();
     private Set<Integer> selfDestructives = new LinkedHashSet<>();
     private Collection<SpawnPoint> monsterSpawn = Collections.synchronizedList(new LinkedList<>());
@@ -124,8 +123,8 @@ public class MapleMap {
     private Map<String, Integer> environment = new LinkedHashMap<>();
     private Map<MapleMapItem, Long> droppedItems = new LinkedHashMap<>();
     private LinkedList<WeakReference<MapleMapObject>> registeredDrops = new LinkedList<>();
-    private Map<MobLootEntry, Long> mobLootEntries = new HashMap(20);
-    private List<Runnable> statUpdateRunnables = new ArrayList(50);
+    private Map<MobLootEntry, Long> mobLootEntries = new HashMap<>(20);
+    private List<Runnable> statUpdateRunnables = new ArrayList<>(50);
     private List<Rectangle> areas = new ArrayList<>();
     private MapleFootholdTree footholds = null;
     private Pair<Integer, Integer> xLimits;  // caches the min and max x's with available footholds
@@ -187,8 +186,8 @@ public class MapleMap {
     private MonitoredReadLock objectRLock;
     private MonitoredWriteLock objectWLock;
     private Lock lootLock = MonitoredReentrantLockFactory.createLock(MonitoredLockType.MAP_LOOT, true);
-    private List<Integer> skillIds = new ArrayList();
-    private List<Pair<Integer, Integer>> mobsToSpawn = new ArrayList();
+    private List<Integer> skillIds = new ArrayList<>();
+    private List<Pair<Integer, Integer>> mobsToSpawn = new ArrayList<>();
 
     public MapleMap(int mapid, int world, int channel, int returnMapId, float monsterRate) {
         this.mapid = mapid;
@@ -251,7 +250,7 @@ public class MapleMap {
     }
 
     private static void sortDropEntries(List<MonsterDropEntry> from, List<MonsterDropEntry> item, List<MonsterDropEntry> visibleQuest, List<MonsterDropEntry> otherQuest, MapleCharacter chr) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         for (MonsterDropEntry mde : from) {
             if (!ii.isQuestItem(mde.itemId)) {
@@ -698,7 +697,7 @@ public class MapleMap {
         Collections.shuffle(dropEntry);
 
         Item idrop;
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         for (final MonsterDropEntry de : dropEntry) {
             float cardRate = chr.getCardRate(de.itemId);
@@ -743,7 +742,7 @@ public class MapleMap {
         Collections.shuffle(globalEntry);
 
         Item idrop;
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         for (final MonsterGlobalDropEntry de : globalEntry) {
             if (Randomizer.nextInt(999999) < de.chance) {
@@ -1471,7 +1470,7 @@ public class MapleMap {
 
                     int buff = monster.getBuffToGive();
                     if (buff > -1) {
-                        MapleItemInformationProvider mii = MapleItemInformationProvider.getInstance();
+                        ItemInformationProvider mii = ItemInformationProvider.getInstance();
                         for (MapleMapObject mmo : this.getPlayers()) {
                             MapleCharacter character = (MapleCharacter) mmo;
                             if (character.isAlive()) {
@@ -1753,7 +1752,7 @@ public class MapleMap {
     public List<MapleMapObject> getMapObjects() {
         objectRLock.lock();
         try {
-            return new LinkedList(mapobjects.values());
+            return new LinkedList<>(mapobjects.values());
         } finally {
             objectRLock.unlock();
         }
@@ -1936,12 +1935,7 @@ public class MapleMap {
             getEventInstance().registerMonster(monster);
         }
 
-        spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
-            @Override
-            public void sendPackets(MapleClient c) {
-                c.announce(MaplePacketCreator.spawnMonster(monster, false));
-            }
-        });
+        spawnAndAddRangedMapObject(monster, c -> c.announce(MaplePacketCreator.spawnMonster(monster, false)));
 
         monster.aggroUpdateController();
         updateBossSpawn(monster);
@@ -1957,22 +1951,10 @@ public class MapleMap {
             Runnable removeAfterAction;
 
             if (selfDestruction == null) {
-                removeAfterAction = new Runnable() {
-                    @Override
-                    public void run() {
-                        killMonster(monster, null, false);
-                    }
-                };
-
+                removeAfterAction = () -> killMonster(monster, null, false);
                 registerMapSchedule(removeAfterAction, monster.getStats().removeAfter() * 1000L);
             } else {
-                removeAfterAction = new Runnable() {
-                    @Override
-                    public void run() {
-                        killMonster(monster, null, false, selfDestruction.getAction());
-                    }
-                };
-
+                removeAfterAction = () -> killMonster(monster, null, false, selfDestruction.getAction());
                 registerMapSchedule(removeAfterAction, selfDestruction.removeAfter() * 1000L);
             }
 
@@ -2038,12 +2020,7 @@ public class MapleMap {
             getEventInstance().registerMonster(monster);
         }
 
-        spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
-            @Override
-            public void sendPackets(MapleClient c) {
-                c.announce(MaplePacketCreator.spawnMonster(monster, true));
-            }
-        }, null);
+        spawnAndAddRangedMapObject(monster, c -> c.announce(MaplePacketCreator.spawnMonster(monster, true)), null);
 
         monster.aggroUpdateController();
         updateBossSpawn(monster);
@@ -2104,12 +2081,7 @@ public class MapleMap {
         monster.setPosition(spos);
         monster.setSpawnEffect(effect);
 
-        spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
-            @Override
-            public void sendPackets(MapleClient c) {
-                c.announce(MaplePacketCreator.spawnMonster(monster, true, effect));
-            }
-        });
+        spawnAndAddRangedMapObject(monster, c -> c.announce(MaplePacketCreator.spawnMonster(monster, true, effect)));
 
         monster.aggroUpdateController();
         updateBossSpawn(monster);
@@ -2122,12 +2094,7 @@ public class MapleMap {
     public void spawnFakeMonster(final MapleMonster monster) {
         monster.setMap(this);
         monster.setFake(true);
-        spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
-            @Override
-            public void sendPackets(MapleClient c) {
-                c.announce(MaplePacketCreator.spawnFakeMonster(monster, 0));
-            }
-        });
+        spawnAndAddRangedMapObject(monster, c -> c.announce(MaplePacketCreator.spawnFakeMonster(monster, 0)));
 
         spawnedMonstersOnMap.incrementAndGet();
         addSelfDestructive(monster);
@@ -2142,30 +2109,17 @@ public class MapleMap {
 
     public void spawnReactor(final MapleReactor reactor) {
         reactor.setMap(this);
-        spawnAndAddRangedMapObject(reactor, new DelayedPacketCreation() {
-            @Override
-            public void sendPackets(MapleClient c) {
-                c.announce(reactor.makeSpawnData());
-            }
-        });
+        spawnAndAddRangedMapObject(reactor, c -> c.announce(reactor.makeSpawnData()));
     }
 
     public void spawnDoor(final MapleDoorObject door) {
-        spawnAndAddRangedMapObject(door, new DelayedPacketCreation() {
-            @Override
-            public void sendPackets(MapleClient c) {
-                MapleCharacter chr = c.getPlayer();
-                if (chr != null) {
-                    door.sendSpawnData(c, false);
-                    chr.addVisibleMapObject(door);
-                }
+        spawnAndAddRangedMapObject(door, c -> {
+            MapleCharacter chr = c.getPlayer();
+            if (chr != null) {
+                door.sendSpawnData(c, false);
+                chr.addVisibleMapObject(door);
             }
-        }, new SpawnCondition() {
-            @Override
-            public boolean canSpawn(MapleCharacter chr) {
-                return chr.getMapId() == door.getFrom().getId();
-            }
-        });
+        }, chr -> chr.getMapId() == door.getFrom().getId());
     }
 
     public MaplePortal getDoorPortal(int doorid) {
@@ -2179,12 +2133,9 @@ public class MapleMap {
     }
 
     public void spawnSummon(final MapleSummon summon) {
-        spawnAndAddRangedMapObject(summon, new DelayedPacketCreation() {
-            @Override
-            public void sendPackets(MapleClient c) {
-                if (summon != null) {
-                    c.announce(MaplePacketCreator.spawnSummon(summon, true));
-                }
+        spawnAndAddRangedMapObject(summon, c -> {
+            if (summon != null) {
+                c.announce(MaplePacketCreator.spawnSummon(summon, true));
             }
         }, null);
     }
@@ -2312,7 +2263,7 @@ public class MapleMap {
 
         Collections.shuffle(list);
 
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         Random rnd = new Random();
 
         final Point dropPos = new Point(pos);
@@ -3658,20 +3609,15 @@ public class MapleMap {
     }
 
     public final int getNumPlayersInRect(final Rectangle rect) {
-        int ret = 0;
-
         chrRLock.lock();
         try {
-            final Iterator<MapleCharacter> ltr = characters.iterator();
-            while (ltr.hasNext()) {
-                if (rect.contains(ltr.next().getPosition())) {
-                    ret++;
-                }
-            }
+            return (int) characters.stream()
+                    .map(AbstractMapleMapObject::getPosition)
+                    .filter(rect::contains)
+                    .count();
         } finally {
             chrRLock.unlock();
         }
-        return ret;
     }
 
     public final int getNumPlayersItemsInArea(final int index) {
@@ -4247,9 +4193,7 @@ public class MapleMap {
         if (takenSpawns.size() > 0) {
             for (SpawnPoint sp : monsterSpawn) {
                 for (Point pt : takenSpawns) {
-                    if ((sp.getPosition().x == pt.x && sp.getPosition().y == pt.y) || (sp.getTeam() != team && !this.isBlueCPQMap())) {
-                        continue;
-                    } else {
+                    if ((sp.getPosition().x != pt.x || sp.getPosition().y != pt.y) && (sp.getTeam() == team || this.isBlueCPQMap())) {
                         takenSpawns.add(pt);
                         return sp.getPosition();
                     }

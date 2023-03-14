@@ -145,12 +145,9 @@ public class MapleMonsterAggroCoordinator {
                 return;
             }
 
-            aggroMonitor = TimerManager.getInstance().register(new Runnable() {
-                @Override
-                public void run() {
-                    runAggroUpdate(1);
-                    runSortLeadingCharactersAggro();
-                }
+            aggroMonitor = TimerManager.getInstance().register(() -> {
+                runAggroUpdate(1);
+                runSortLeadingCharactersAggro();
             }, YamlConfig.config.server.MOB_STATUS_AGGRO_INTERVAL, YamlConfig.config.server.MOB_STATUS_AGGRO_INTERVAL);
         } finally {
             idleLock.unlock();
@@ -259,12 +256,8 @@ public class MapleMonsterAggroCoordinator {
                         }
 
                         if (!toRemoveIdx.isEmpty()) {
-                            toRemoveIdx.sort(new Comparator<>() {   // last to first indexes
-                                @Override
-                                public int compare(Integer p1, Integer p2) {
-                                    return p1 < p2 ? 1 : p1.equals(p2) ? 0 : -1;
-                                }
-                            });
+                            // last to first indexes
+                            toRemoveIdx.sort((p1, p2) -> p1 < p2 ? 1 : p1.equals(p2) ? 0 : -1);
 
                             for (int idx : toRemoveIdx) {
                                 sortedAggro.remove(idx);

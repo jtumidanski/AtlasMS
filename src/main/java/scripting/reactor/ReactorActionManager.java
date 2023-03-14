@@ -31,7 +31,7 @@ import constants.inventory.ItemConstants;
 import scripting.AbstractPlayerInteraction;
 import scripting.event.EventInstanceManager;
 import scripting.event.EventManager;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.TimerManager;
 import server.life.MapleLifeFactory;
 import server.life.MapleMonster;
@@ -69,7 +69,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
     }
 
     private static void sortDropEntries(List<ReactorDropEntry> from, List<ReactorDropEntry> item, List<ReactorDropEntry> visibleQuest, List<ReactorDropEntry> otherQuest, MapleCharacter chr) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         for (ReactorDropEntry mde : from) {
             if (!ii.isQuestItem(mde.itemId())) {
@@ -169,7 +169,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
         final Point dropPos = new Point(posX, posY);
 
         if (!delayed) {
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
             byte p = 1;
             for (ReactorDropEntry d : items) {
@@ -200,35 +200,32 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
 
             dropPos.x -= (12 * items.size());
 
-            sprayTask = TimerManager.getInstance().register(new Runnable() {
-                @Override
-                public void run() {
-                    if (dropItems.isEmpty()) {
-                        sprayTask.cancel(false);
-                        return;
-                    }
-
-                    ReactorDropEntry d = dropItems.remove(0);
-                    if (d.itemId() == 0) {
-                        int range = maxMeso - minMeso;
-                        int displayDrop = (int) (Math.random() * range) + minMeso;
-                        int mesoDrop = (displayDrop * worldMesoRate);
-                        r.getMap().spawnMesoDrop(mesoDrop, r.getMap().calcDropPos(dropPos, r.getPosition()), r, chr, false, (byte) 2);
-                    } else {
-                        Item drop;
-
-                        if (ItemConstants.getInventoryType(d.itemId()) != MapleInventoryType.EQUIP) {
-                            drop = new Item(d.itemId(), (short) 0, (short) 1);
-                        } else {
-                            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-                            drop = ii.randomizeStats((Equip) ii.getEquipById(d.itemId()));
-                        }
-
-                        r.getMap().dropFromReactor(getPlayer(), r, drop, dropPos, (short) d.questId());
-                    }
-
-                    dropPos.x += 25;
+            sprayTask = TimerManager.getInstance().register(() -> {
+                if (dropItems.isEmpty()) {
+                    sprayTask.cancel(false);
+                    return;
                 }
+
+                ReactorDropEntry d = dropItems.remove(0);
+                if (d.itemId() == 0) {
+                    int range = maxMeso - minMeso;
+                    int displayDrop = (int) (Math.random() * range) + minMeso;
+                    int mesoDrop = (displayDrop * worldMesoRate);
+                    r.getMap().spawnMesoDrop(mesoDrop, r.getMap().calcDropPos(dropPos, r.getPosition()), r, chr, false, (byte) 2);
+                } else {
+                    Item drop;
+
+                    if (ItemConstants.getInventoryType(d.itemId()) != MapleInventoryType.EQUIP) {
+                        drop = new Item(d.itemId(), (short) 0, (short) 1);
+                    } else {
+                        ItemInformationProvider ii = ItemInformationProvider.getInstance();
+                        drop = ii.randomizeStats((Equip) ii.getEquipById(d.itemId()));
+                    }
+
+                    r.getMap().dropFromReactor(getPlayer(), r, drop, dropPos, (short) d.questId());
+                }
+
+                dropPos.x += 25;
             }, 200);
         }
     }
@@ -324,27 +321,21 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
     }
 
     public ScheduledFuture<?> schedule(final String methodName, final EventInstanceManager eim, long delay) {
-        return TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    iv.invokeFunction(methodName, eim);
-                } catch (ScriptException | NoSuchMethodException ex) {
-                    Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        return TimerManager.getInstance().schedule(() -> {
+            try {
+                iv.invokeFunction(methodName, eim);
+            } catch (ScriptException | NoSuchMethodException ex) {
+                Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }, delay);
     }
 
     public ScheduledFuture<?> scheduleAtTimestamp(final String methodName, long timestamp) {
-        return TimerManager.getInstance().scheduleAtTimestamp(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    iv.invokeFunction(methodName, (Object) null);
-                } catch (ScriptException | NoSuchMethodException ex) {
-                    Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        return TimerManager.getInstance().scheduleAtTimestamp(() -> {
+            try {
+                iv.invokeFunction(methodName, (Object) null);
+            } catch (ScriptException | NoSuchMethodException ex) {
+                Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }, timestamp);
     }

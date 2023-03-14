@@ -193,14 +193,11 @@ public class EventManager {
     }
 
     public EventScheduledFuture schedule(final String methodName, final EventInstanceManager eim, long delay) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    iv.invokeFunction(methodName, eim);
-                } catch (ScriptException | NoSuchMethodException ex) {
-                    Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        Runnable r = () -> {
+            try {
+                iv.invokeFunction(methodName, eim);
+            } catch (ScriptException | NoSuchMethodException ex) {
+                Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         };
 
@@ -211,14 +208,11 @@ public class EventManager {
     }
 
     public EventScheduledFuture scheduleAtTimestamp(final String methodName, long timestamp) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    iv.invokeFunction(methodName, (Object) null);
-                } catch (ScriptException | NoSuchMethodException ex) {
-                    Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        Runnable r = () -> {
+            try {
+                iv.invokeFunction(methodName, (Object) null);
+            } catch (ScriptException | NoSuchMethodException ex) {
+                Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         };
 
@@ -281,14 +275,11 @@ public class EventManager {
     }
 
     public void disposeInstance(final String name) {
-        ess.registerEntry(new Runnable() {
-            @Override
-            public void run() {
-                freeLobbyInstance(name);
+        ess.registerEntry(() -> {
+            freeLobbyInstance(name);
 
-                synchronized (instances) {
-                    instances.remove(name);
-                }
+            synchronized (instances) {
+                instances.remove(name);
             }
         }, YamlConfig.config.server.EVENT_LOBBY_DELAY * 1000);
     }

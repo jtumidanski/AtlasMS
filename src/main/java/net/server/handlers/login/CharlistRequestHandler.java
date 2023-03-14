@@ -32,7 +32,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class CharlistRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readByte();
         int world = slea.readByte();
 

@@ -120,12 +120,9 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         }
 
         if (animationTime > 0) { // be sure to only use LIMITED ATTACKS with animation time here
-            TimerManager.getInstance().schedule(new Runnable() {
-                @Override
-                public void run() {
-                    map.broadcastMessage(MaplePacketCreator.damageMonster(monster.getObjectId(), damage), monster.getPosition());
-                    map.damageMonster(attacker, monster, damage);
-                }
+            TimerManager.getInstance().schedule(() -> {
+                map.broadcastMessage(MaplePacketCreator.damageMonster(monster.getObjectId(), damage), monster.getPosition());
+                map.damageMonster(attacker, monster, damage);
             }, animationTime);
         } else {
             map.broadcastMessage(MaplePacketCreator.damageMonster(monster.getObjectId(), damage), monster.getPosition());
@@ -225,18 +222,15 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                             if (mapitem.isPickedUp()) {
                                 return;
                             }
-                            TimerManager.getInstance().schedule(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mapitem.lockItem();
-                                    try {
-                                        if (mapitem.isPickedUp()) {
-                                            return;
-                                        }
-                                        map.pickItemDrop(MaplePacketCreator.removeItemFromMap(mapitem.getObjectId(), 4, 0), mapitem);
-                                    } finally {
-                                        mapitem.unlockItem();
+                            TimerManager.getInstance().schedule(() -> {
+                                mapitem.lockItem();
+                                try {
+                                    if (mapitem.isPickedUp()) {
+                                        return;
                                     }
+                                    map.pickItemDrop(MaplePacketCreator.removeItemFromMap(mapitem.getObjectId(), 4, 0), mapitem);
+                                } finally {
+                                    mapitem.unlockItem();
                                 }
                             }, delay);
                             delay += 100;
@@ -333,12 +327,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                                         eachdf = eachd;
                                     }
 
-                                    TimerManager.getInstance().schedule(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            map.spawnMesoDrop(Math.min((int) Math.max(((double) eachdf / (double) 20000) * (double) maxmeso, 1), maxmeso), new Point((int) (monster.getPosition().getX() + Randomizer.nextInt(100) - 50), (int) (monster.getPosition().getY())), monster, player, true, (byte) 2);
-                                        }
-                                    }, delay);
+                                    TimerManager.getInstance().schedule(() -> map.spawnMesoDrop(Math.min((int) Math.max(((double) eachdf / (double) 20000) * (double) maxmeso, 1), maxmeso), new Point((int) (monster.getPosition().getX() + Randomizer.nextInt(100) - 50), (int) (monster.getPosition().getY())), monster, player, true, (byte) 2), delay);
                                     delay += 100;
                                 }
                             }

@@ -31,7 +31,7 @@ import client.inventory.MapleInventoryType;
 import client.inventory.MapleWeaponType;
 import client.status.MonsterStatusEffect;
 import constants.skills.Outlaw;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleStatEffect;
 import server.life.MapleMonster;
 import server.life.MapleMonsterInformationProvider;
@@ -57,7 +57,7 @@ public final class SummonDamageHandler extends AbstractDealDamageHandler {
 
             int maxBaseDmg;  // thanks Conrad, Atoot for detecting some summons legitimately hitting over the calculated limit
             if (weapon_item != null) {
-                maxBaseDmg = player.calculateMaxBaseDamage(watk, MapleItemInformationProvider.getInstance().getWeaponType(weapon_item.getItemId()));
+                maxBaseDmg = player.calculateMaxBaseDamage(watk, ItemInformationProvider.getInstance().getWeaponType(weapon_item.getItemId()));
             } else {
                 maxBaseDmg = player.calculateMaxBaseDamage(watk, MapleWeaponType.SWORD1H);
             }

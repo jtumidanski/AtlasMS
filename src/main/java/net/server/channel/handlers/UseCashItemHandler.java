@@ -48,7 +48,7 @@ import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleShop;
 import server.MapleShopFactory;
 import server.TimerManager;
@@ -110,7 +110,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         final MapleCharacter player = c.getPlayer();
 
         long timeNow = currentServerTime();
@@ -121,7 +121,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
         }
         player.setLastUsedCashItem(timeNow);
 
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         short position = slea.readShort();
         int itemId = slea.readInt();
         int itemType = itemId / 10000;
@@ -511,12 +511,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
 
             final int world = c.getWorld();
             Server.getInstance().broadcastMessage(world, MaplePacketCreator.getAvatarMega(player, medal, c.getChannel(), itemId, strLines, (slea.readByte() != 0)));
-            TimerManager.getInstance().schedule(new Runnable() {
-                @Override
-                public void run() {
-                    Server.getInstance().broadcastMessage(world, MaplePacketCreator.byeAvatarMega());
-                }
-            }, 1000 * 10);
+            TimerManager.getInstance().schedule(() -> Server.getInstance().broadcastMessage(world, MaplePacketCreator.byeAvatarMega()), 1000 * 10);
             remove(c, position, itemId);
         } else if (itemType == 540) {
             slea.readByte();
@@ -666,28 +661,25 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
             remove(c, position, itemId);
 
             final MapleClient client = c;
-            TimerManager.getInstance().schedule(new Runnable() {
-                @Override
-                public void run() {
-                    if (!player.isLoggedin()) {
-                        return;
-                    }
-
-                    player.toggleBlockCashShop();
-
-                    final List<ModifyInventory> mods = new ArrayList<>();
-                    mods.add(new ModifyInventory(3, scrolled));
-                    mods.add(new ModifyInventory(0, scrolled));
-                    client.announce(MaplePacketCreator.modifyInventory(true, mods));
-
-                    ScrollResult scrollResult = scrolled.getLevel() > curlevel ? ScrollResult.SUCCESS : ScrollResult.FAIL;
-                    player.getMap().broadcastMessage(MaplePacketCreator.getScrollEffect(player.getId(), scrollResult, false, false));
-                    if (eSlot < 0 && (scrollResult == ScrollResult.SUCCESS)) {
-                        player.equipChanged();
-                    }
-
-                    client.announce(MaplePacketCreator.enableActions());
+            TimerManager.getInstance().schedule(() -> {
+                if (!player.isLoggedin()) {
+                    return;
                 }
+
+                player.toggleBlockCashShop();
+
+                final List<ModifyInventory> mods = new ArrayList<>();
+                mods.add(new ModifyInventory(3, scrolled));
+                mods.add(new ModifyInventory(0, scrolled));
+                client.announce(MaplePacketCreator.modifyInventory(true, mods));
+
+                ScrollResult scrollResult = scrolled.getLevel() > curlevel ? ScrollResult.SUCCESS : ScrollResult.FAIL;
+                player.getMap().broadcastMessage(MaplePacketCreator.getScrollEffect(player.getId(), scrollResult, false, false));
+                if (eSlot < 0 && (scrollResult == ScrollResult.SUCCESS)) {
+                    player.equipChanged();
+                }
+
+                client.announce(MaplePacketCreator.enableActions());
             }, 1000 * 3);
         } else {
             System.out.println("NEW CASH ITEM: " + itemType + "\n" + slea);

@@ -40,7 +40,6 @@ import net.server.world.PartyOperation;
 import net.server.world.World;
 import org.apache.mina.core.session.IoSession;
 import scripting.AbstractPlayerInteraction;
-import scripting.event.EventInstanceManager;
 import scripting.event.EventManager;
 import scripting.npc.NPCConversationManager;
 import scripting.npc.NPCScriptManager;
@@ -952,12 +951,7 @@ public class MapleClient {
 
     public final void disconnect(final boolean shutdown, final boolean cashshop) {
         if (canDisconnect()) {
-            ThreadManager.getInstance().newTask(new Runnable() {
-                @Override
-                public void run() {
-                    disconnectInternal(shutdown, cashshop);
-                }
-            });
+            ThreadManager.getInstance().newTask(() -> disconnectInternal(shutdown, cashshop));
         }
     }
 

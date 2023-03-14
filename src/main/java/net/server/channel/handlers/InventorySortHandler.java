@@ -31,7 +31,7 @@ import client.inventory.ModifyInventory;
 import config.YamlConfig;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -46,7 +46,7 @@ import java.util.Optional;
 
 class PairedQuicksort {
     private final ArrayList<Integer> intersect;
-    MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+    ItemInformationProvider ii = ItemInformationProvider.getInstance();
     private int i = 0;
     private int j = 0;
 
@@ -271,7 +271,7 @@ class PairedQuicksort {
 
 public final class InventorySortHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
         slea.readInt();
         chr.getAutobanManager().setTimestamp(3, Server.getInstance().getCurrentTimestamp(), 4);

@@ -36,7 +36,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class MobDamageMobFriendlyHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int attacker = slea.readInt();
         slea.readInt();
         int damaged = slea.readInt();

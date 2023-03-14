@@ -102,63 +102,54 @@ public class EventScriptScheduler {
 
     public void registerEntry(final Runnable scheduledAction, final long duration) {
 
-        ThreadManager.getInstance().newTask(new Runnable() {
-            @Override
-            public void run() {
-                schedulerLock.lock();
-                try {
-                    idleProcs = 0;
-                    if (schedulerTask == null) {
-                        if (disposed) {
-                            return;
-                        }
-
-                        schedulerTask = TimerManager.getInstance().register(monitorTask, YamlConfig.config.server.MOB_STATUS_MONITOR_PROC, YamlConfig.config.server.MOB_STATUS_MONITOR_PROC);
+        ThreadManager.getInstance().newTask(() -> {
+            schedulerLock.lock();
+            try {
+                idleProcs = 0;
+                if (schedulerTask == null) {
+                    if (disposed) {
+                        return;
                     }
 
-                    registeredEntries.put(scheduledAction, Server.getInstance().getCurrentTime() + duration);
-                } finally {
-                    schedulerLock.unlock();
+                    schedulerTask = TimerManager.getInstance().register(monitorTask, YamlConfig.config.server.MOB_STATUS_MONITOR_PROC, YamlConfig.config.server.MOB_STATUS_MONITOR_PROC);
                 }
+
+                registeredEntries.put(scheduledAction, Server.getInstance().getCurrentTime() + duration);
+            } finally {
+                schedulerLock.unlock();
             }
         });
     }
 
     public void cancelEntry(final Runnable scheduledAction) {
 
-        ThreadManager.getInstance().newTask(new Runnable() {
-            @Override
-            public void run() {
-                schedulerLock.lock();
-                try {
-                    registeredEntries.remove(scheduledAction);
-                } finally {
-                    schedulerLock.unlock();
-                }
+        ThreadManager.getInstance().newTask(() -> {
+            schedulerLock.lock();
+            try {
+                registeredEntries.remove(scheduledAction);
+            } finally {
+                schedulerLock.unlock();
             }
         });
     }
 
     public void dispose() {
 
-        ThreadManager.getInstance().newTask(new Runnable() {
-            @Override
-            public void run() {
-                schedulerLock.lock();
-                try {
-                    if (schedulerTask != null) {
-                        schedulerTask.cancel(false);
-                        schedulerTask = null;
-                    }
-
-                    registeredEntries.clear();
-                    disposed = true;
-                } finally {
-                    schedulerLock.unlock();
+        ThreadManager.getInstance().newTask(() -> {
+            schedulerLock.lock();
+            try {
+                if (schedulerTask != null) {
+                    schedulerTask.cancel(false);
+                    schedulerTask = null;
                 }
 
-                disposeLocks();
+                registeredEntries.clear();
+                disposed = true;
+            } finally {
+                schedulerLock.unlock();
             }
+
+            disposeLocks();
         });
     }
 

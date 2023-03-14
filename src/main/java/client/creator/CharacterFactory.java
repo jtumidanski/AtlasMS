@@ -27,7 +27,7 @@ import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import config.YamlConfig;
 import net.server.Server;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
 
@@ -58,7 +58,7 @@ public abstract class CharacterFactory {
         newchar.setMapId(recipe.getMap());
 
         MapleInventory equipped = newchar.getInventory(MapleInventoryType.EQUIPPED);
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
         int top = recipe.getTop(), bottom = recipe.getBottom(), shoes = recipe.getShoes(), weapon = recipe.getWeapon();
 

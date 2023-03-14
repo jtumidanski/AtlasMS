@@ -28,8 +28,8 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import server.MapleItemInformationProvider;
-import server.MapleItemInformationProvider.RewardItem;
+import server.ItemInformationProvider;
+import server.ItemInformationProvider.RewardItem;
 import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
@@ -43,7 +43,7 @@ import java.util.List;
  */
 public final class ItemRewardHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         byte slot = (byte) slea.readShort();
         int itemId = slea.readInt(); // will load from xml I don't care.
 
@@ -52,7 +52,7 @@ public final class ItemRewardHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         Pair<Integer, List<RewardItem>> rewards = ii.getItemReward(itemId);
         for (RewardItem reward : rewards.getRight()) {
             if (!MapleInventoryManipulator.checkSpace(c, reward.itemid, reward.quantity, "")) {

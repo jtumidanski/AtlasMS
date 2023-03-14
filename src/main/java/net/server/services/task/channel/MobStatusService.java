@@ -77,32 +77,29 @@ public class MobStatusService extends BaseService {
         public MobStatusScheduler() {
             super(MonitoredLockType.CHANNEL_MOBSTATUS);
 
-            super.addListener(new SchedulerListener() {
-                @Override
-                public void removedScheduledEntries(List<Object> toRemove, boolean update) {
-                    List<Runnable> toRun = new ArrayList<>();
+            super.addListener((toRemove, update) -> {
+                List<Runnable> toRun = new ArrayList<>();
 
-                    overtimeStatusLock.lock();
-                    try {
-                        for (Object mseo : toRemove) {
-                            MonsterStatusEffect mse = (MonsterStatusEffect) mseo;
-                            registeredMobStatusOvertime.remove(mse);
-                        }
-
-                        if (update) {
-                            // it's probably ok to use one thread for both management & overtime actions
-                            List<MobStatusOvertimeEntry> mdoeList = new ArrayList<>(registeredMobStatusOvertime.values());
-                            for (MobStatusOvertimeEntry mdoe : mdoeList) {
-                                mdoe.update(toRun);
-                            }
-                        }
-                    } finally {
-                        overtimeStatusLock.unlock();
+                overtimeStatusLock.lock();
+                try {
+                    for (Object mseo : toRemove) {
+                        MonsterStatusEffect mse = (MonsterStatusEffect) mseo;
+                        registeredMobStatusOvertime.remove(mse);
                     }
 
-                    for (Runnable r : toRun) {
-                        r.run();
+                    if (update) {
+                        // it's probably ok to use one thread for both management & overtime actions
+                        List<MobStatusOvertimeEntry> mdoeList = new ArrayList<>(registeredMobStatusOvertime.values());
+                        for (MobStatusOvertimeEntry mdoe : mdoeList) {
+                            mdoe.update(toRun);
+                        }
                     }
+                } finally {
+                    overtimeStatusLock.unlock();
+                }
+
+                for (Runnable r : toRun) {
+                    r.run();
                 }
             });
         }

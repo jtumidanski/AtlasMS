@@ -585,12 +585,7 @@ public class MapleSessionCoordinator {
     public void printSessionTrace() {
         if (!onlineClients.isEmpty()) {
             List<Entry<Integer, MapleClient>> elist = new ArrayList<>(onlineClients.entrySet());
-            elist.sort(new Comparator<>() {
-                @Override
-                public int compare(Entry<Integer, MapleClient> e1, Entry<Integer, MapleClient> e2) {
-                    return e1.getKey().compareTo(e2.getKey());
-                }
-            });
+            elist.sort(Entry.comparingByKey());
 
             System.out.println("Current online clients: ");
             for (Entry<Integer, MapleClient> e : elist) {
@@ -611,12 +606,7 @@ public class MapleSessionCoordinator {
         if (!loginRemoteHosts.isEmpty()) {
             List<Entry<String, Set<IoSession>>> elist = new ArrayList<>(loginRemoteHosts.entrySet());
 
-            elist.sort(new Comparator<>() {
-                @Override
-                public int compare(Entry<String, Set<IoSession>> e1, Entry<String, Set<IoSession>> e2) {
-                    return e1.getKey().compareTo(e2.getKey());
-                }
-            });
+            elist.sort(Entry.comparingByKey());
 
             System.out.println("Current login sessions: ");
             for (Entry<String, Set<IoSession>> e : elist) {
@@ -630,12 +620,7 @@ public class MapleSessionCoordinator {
 
         if (!onlineClients.isEmpty()) {
             List<Entry<Integer, MapleClient>> elist = new ArrayList<>(onlineClients.entrySet());
-            elist.sort(new Comparator<>() {
-                @Override
-                public int compare(Entry<Integer, MapleClient> e1, Entry<Integer, MapleClient> e2) {
-                    return e1.getKey().compareTo(e2.getKey());
-                }
-            });
+            elist.sort(Entry.comparingByKey());
 
             str += ("Current online clients:\r\n");
             for (Entry<Integer, MapleClient> e : elist) {
@@ -656,12 +641,7 @@ public class MapleSessionCoordinator {
         if (!loginRemoteHosts.isEmpty()) {
             List<Entry<String, Set<IoSession>>> elist = new ArrayList<>(loginRemoteHosts.entrySet());
 
-            elist.sort(new Comparator<>() {
-                @Override
-                public int compare(Entry<String, Set<IoSession>> e1, Entry<String, Set<IoSession>> e2) {
-                    return e1.getKey().compareTo(e2.getKey());
-                }
-            });
+            elist.sort(Entry.comparingByKey());
 
             str += ("Current login sessions:\r\n");
             for (Entry<String, Set<IoSession>> e : elist) {

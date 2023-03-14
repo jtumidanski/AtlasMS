@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public final class UseItemEffectHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         Optional<Item> toUse;
         int itemId = slea.readInt();
         if (itemId == 4290001 || itemId == 4290000) {

@@ -23,15 +23,15 @@ package net.server.channel.handlers;
 
 import client.MapleClient;
 import net.AbstractMaplePacketHandler;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class CancelItemEffectHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int itemId = -slea.readInt();
-        if (MapleItemInformationProvider.getInstance().noCancelMouse(itemId)) {
+        if (ItemInformationProvider.getInstance().noCancelMouse(itemId)) {
             return;
         }
         c.getPlayer().cancelEffect(itemId);

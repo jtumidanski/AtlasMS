@@ -30,7 +30,7 @@ import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import server.MakerItemFactory;
 import server.MakerItemFactory.MakerItemCreateEntry;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
 import tools.Pair;
@@ -46,7 +46,7 @@ import java.util.Map;
  */
 public class MakerProcessor {
 
-    private static MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+    private static ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
     public static void makerAction(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (c.tryacquireClient()) {
@@ -353,7 +353,7 @@ public class MakerProcessor {
     }
 
     private static boolean addBoostedMakerItem(MapleClient c, int itemid, int stimulantid, Map<Integer, Short> reagentids) {
-        if (stimulantid != -1 && !MapleItemInformationProvider.rollSuccessChance(90.0)) {
+        if (stimulantid != -1 && !ItemInformationProvider.rollSuccessChance(90.0)) {
             return false;
         }
 
@@ -371,7 +371,7 @@ public class MakerProcessor {
             if (!(c.getPlayer().isGM() && YamlConfig.config.server.USE_PERFECT_GM_SCROLL)) {
                 eqp.setUpgradeSlots((byte) (eqp.getUpgradeSlots() + 1));
             }
-            item = MapleItemInformationProvider.getInstance().scrollEquipWithId(eqp, 2049100, true, 2049100, c.getPlayer().isGM());
+            item = ItemInformationProvider.getInstance().scrollEquipWithId(eqp, 2049100, true, 2049100, c.getPlayer().isGM());
         }
 
         if (!reagentids.isEmpty()) {
@@ -411,7 +411,7 @@ public class MakerProcessor {
                 }
             }
 
-            MapleItemInformationProvider.improveEquipStats(eqp, stats);
+            ItemInformationProvider.improveEquipStats(eqp, stats);
 
             for (Short sh : randStat) {
                 ii.scrollOptionEquipWithChaos(eqp, sh, false);

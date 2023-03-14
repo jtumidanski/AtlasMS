@@ -40,7 +40,7 @@ import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import scripting.AbstractPlayerInteraction;
 import scripting.event.scheduler.EventScriptScheduler;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleStatEffect;
 import server.ThreadManager;
 import server.TimerManager;
@@ -149,7 +149,7 @@ public class EventInstanceManager {
 
     public void applyEventPlayersItemBuff(int itemId) {
         List<MapleCharacter> players = getPlayerList();
-        MapleStatEffect mse = MapleItemInformationProvider.getInstance().getItemEffect(itemId);
+        MapleStatEffect mse = ItemInformationProvider.getInstance().getItemEffect(itemId);
 
         if (mse != null) {
             for (MapleCharacter player : players) {
@@ -288,16 +288,13 @@ public class EventInstanceManager {
             chr.announce(MaplePacketCreator.getClock((int) (time / 1000)));
         }
 
-        event_schedule = TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                dismissEventTimer();
+        event_schedule = TimerManager.getInstance().schedule(() -> {
+            dismissEventTimer();
 
-                try {
-                    invokeScriptFunction("scheduledTimeout", EventInstanceManager.this);
-                } catch (ScriptException | NoSuchMethodException ex) {
-                    Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, "Event '" + em.getName() + "' does not implement scheduledTimeout function.", ex);
-                }
+            try {
+                invokeScriptFunction("scheduledTimeout", EventInstanceManager.this);
+            } catch (ScriptException | NoSuchMethodException ex) {
+                Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, "Event '" + em.getName() + "' does not implement scheduledTimeout function.", ex);
             }
         }, time);
     }
@@ -308,16 +305,13 @@ public class EventInstanceManager {
                 long nextTime = getTimeLeft() + time;
                 eventTime += time;
 
-                event_schedule = TimerManager.getInstance().schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        dismissEventTimer();
+                event_schedule = TimerManager.getInstance().schedule(() -> {
+                    dismissEventTimer();
 
-                        try {
-                            invokeScriptFunction("scheduledTimeout", EventInstanceManager.this);
-                        } catch (ScriptException | NoSuchMethodException ex) {
-                            Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, "Event '" + em.getName() + "' does not implement scheduledTimeout function.", ex);
-                        }
+                    try {
+                        invokeScriptFunction("scheduledTimeout", EventInstanceManager.this);
+                    } catch (ScriptException | NoSuchMethodException ex) {
+                        Logger.getLogger(EventManager.class.getName()).log(Level.SEVERE, "Event '" + em.getName() + "' does not implement scheduledTimeout function.", ex);
                     }
                 }, nextTime);
             }
@@ -535,14 +529,11 @@ public class EventInstanceManager {
     }
 
     public void playerKilled(final MapleCharacter chr) {
-        ThreadManager.getInstance().newTask(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    invokeScriptFunction("playerDead", EventInstanceManager.this, chr);
-                } catch (ScriptException | NoSuchMethodException ex) {
-                } // optional
-            }
+        ThreadManager.getInstance().newTask(() -> {
+            try {
+                invokeScriptFunction("playerDead", EventInstanceManager.this, chr);
+            } catch (ScriptException | NoSuchMethodException ex) {
+            } // optional
         });
     }
 
@@ -663,20 +654,17 @@ public class EventInstanceManager {
             sL.unlock();
         }
 
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                mapManager.dispose();   // issues from instantly disposing some event objects found thanks to MedicOP
-                wL.lock();
-                try {
-                    mapManager = null;
-                    em = null;
-                } finally {
-                    wL.unlock();
-                }
-
-                disposeLocks();
+        TimerManager.getInstance().schedule(() -> {
+            mapManager.dispose();   // issues from instantly disposing some event objects found thanks to MedicOP
+            wL.lock();
+            try {
+                mapManager = null;
+                em = null;
+            } finally {
+                wL.unlock();
             }
+
+            disposeLocks();
         }, 60 * 1000);
     }
 
@@ -697,14 +685,11 @@ public class EventInstanceManager {
         rL.lock();
         try {
             if (ess != null) {
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            invokeScriptFunction(methodName, EventInstanceManager.this);
-                        } catch (ScriptException | NoSuchMethodException ex) {
-                            ex.printStackTrace();
-                        }
+                Runnable r = () -> {
+                    try {
+                        invokeScriptFunction(methodName, EventInstanceManager.this);
+                    } catch (ScriptException | NoSuchMethodException ex) {
+                        ex.printStackTrace();
                     }
                 };
 

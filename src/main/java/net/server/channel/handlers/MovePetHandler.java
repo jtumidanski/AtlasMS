@@ -32,7 +32,7 @@ import java.util.List;
 
 public final class MovePetHandler extends AbstractMovementPacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int petId = slea.readInt();
         slea.readLong();
 //        Point startPos = StreamUtil.readShortPoint(slea);

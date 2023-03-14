@@ -27,7 +27,7 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import constants.inventory.ItemConstants;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.ThreadManager;
 import tools.FilePrinter;
 import tools.Pair;
@@ -72,7 +72,7 @@ public class MapleInventory implements Iterable<Item> {
     private static boolean checkItemRestricted(List<Pair<Item, MapleInventoryType>> items) {
         return items.stream()
                 .map(Pair::getLeft)
-                .filter(i -> MapleItemInformationProvider.getInstance().isPickupRestricted(i.getItemId()))
+                .filter(i -> ItemInformationProvider.getInstance().isPickupRestricted(i.getItemId()))
                 .noneMatch(i -> i.getQuantity() > 1);
     }
 
@@ -282,7 +282,7 @@ public class MapleInventory implements Iterable<Item> {
     }
 
     public Optional<Item> findByName(String name) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         for (Item item : list()) {
             String itemName = ii.getName(item.getItemId());
             if (itemName == null) {
@@ -464,12 +464,8 @@ public class MapleInventory implements Iterable<Item> {
         }
 
         if (ItemConstants.isRateCoupon(item.getItemId())) {
-            ThreadManager.getInstance().newTask(new Runnable() {    // deadlocks with coupons rates found thanks to GabrielSin & Masterrulax
-                @Override
-                public void run() {
-                    owner.updateCouponRates();
-                }
-            });
+            // deadlocks with coupons rates found thanks to GabrielSin & Masterrulax
+            ThreadManager.getInstance().newTask(() -> owner.updateCouponRates());
         }
 
         return slotId;
@@ -484,12 +480,7 @@ public class MapleInventory implements Iterable<Item> {
         }
 
         if (ItemConstants.isRateCoupon(item.getItemId())) {
-            ThreadManager.getInstance().newTask(new Runnable() {
-                @Override
-                public void run() {
-                    owner.updateCouponRates();
-                }
-            });
+            ThreadManager.getInstance().newTask(() -> owner.updateCouponRates());
         }
     }
 
@@ -503,12 +494,7 @@ public class MapleInventory implements Iterable<Item> {
         }
 
         if (item != null && ItemConstants.isRateCoupon(item.getItemId())) {
-            ThreadManager.getInstance().newTask(new Runnable() {
-                @Override
-                public void run() {
-                    owner.updateCouponRates();
-                }
-            });
+            ThreadManager.getInstance().newTask(() -> owner.updateCouponRates());
         }
     }
 

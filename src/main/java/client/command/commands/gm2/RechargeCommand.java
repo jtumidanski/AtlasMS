@@ -29,7 +29,7 @@ import client.command.Command;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import constants.inventory.ItemConstants;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 
 public class RechargeCommand extends Command {
     {
@@ -39,7 +39,7 @@ public class RechargeCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
         for (Item torecharge : c.getPlayer().getInventory(MapleInventoryType.USE).list()) {
             if (ItemConstants.isThrowingStar(torecharge.getItemId())) {
                 torecharge.setQuantity(ii.getSlotMax(c, torecharge.getItemId()));

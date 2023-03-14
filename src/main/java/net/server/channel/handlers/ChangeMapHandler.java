@@ -40,7 +40,7 @@ import java.util.Calendar;
 public final class ChangeMapHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
 
         if (chr.isChangingMaps() || chr.isBanned()) {

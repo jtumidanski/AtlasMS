@@ -46,7 +46,7 @@ import java.util.List;
 
 public final class EnterMTSHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
 
         if (!chr.isAlive() && YamlConfig.config.server.USE_BUYBACK_SYSTEM) {

@@ -26,7 +26,7 @@ package client.command.commands.gm1;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.life.MapleMonsterInformationProvider;
 import server.life.MonsterDropEntry;
 import tools.Pair;
@@ -57,7 +57,7 @@ public class WhatDropsFromCommand extends Command {
                 output += mobName + " drops the following items:\r\n\r\n";
                 for (MonsterDropEntry drop : MapleMonsterInformationProvider.getInstance().retrieveDrop(mobId)) {
                     try {
-                        String name = MapleItemInformationProvider.getInstance().getName(drop.itemId);
+                        String name = ItemInformationProvider.getInstance().getName(drop.itemId);
                         if (name == null || name.equals("null") || drop.chance == 0) {
                             continue;
                         }
@@ -65,7 +65,6 @@ public class WhatDropsFromCommand extends Command {
                         output += "- " + name + " (1/" + (int) chance + ")\r\n";
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        continue;
                     }
                 }
                 output += "\r\n";

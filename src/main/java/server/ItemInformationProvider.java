@@ -1,24 +1,3 @@
-/*
- This file is part of the OdinMS Maple Story Server
- Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc>
- Matthias Butz <matze@odinms.de>
- Jan Christian Meyer <vimes@odinms.de>
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU Affero General Public License as
- published by the Free Software Foundation version 3 as published by
- the Free Software Foundation. You may not use, modify or distribute
- this program under any other version of the GNU Affero General Public
- License.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Affero General Public License for more details.
-
- You should have received a copy of the GNU Affero General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
 import client.MapleCharacter;
@@ -72,11 +51,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * @author Matze
- */
-public class MapleItemInformationProvider {
-    private final static MapleItemInformationProvider instance = new MapleItemInformationProvider();
+public class ItemInformationProvider {
+    private final static ItemInformationProvider instance = new ItemInformationProvider();
     protected MapleDataProvider itemData;
     protected MapleDataProvider equipData;
     protected MapleDataProvider stringData;
@@ -134,7 +110,7 @@ public class MapleItemInformationProvider {
     protected Map<Integer, Pair<Integer, Set<Integer>>> cashPetFoodCache = new HashMap<>();
     protected Map<Integer, QuestConsItem> questItemConsCache = new HashMap<>();
 
-    private MapleItemInformationProvider() {
+    private ItemInformationProvider() {
         loadCardIdData();
         itemData = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/Item.wz"));
         equipData = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/Character.wz"));
@@ -151,7 +127,7 @@ public class MapleItemInformationProvider {
         isPartyQuestItemCache.put(0, false);
     }
 
-    public static MapleItemInformationProvider getInstance() {
+    public static ItemInformationProvider getInstance() {
         return instance;
     }
 
@@ -1874,7 +1850,7 @@ public class MapleItemInformationProvider {
         String islot = getEquipmentSlot(id);
         if (!EquipSlot.getFromTextSlot(islot).isAllowed(dst, isCash(id))) {
             equip.wear(false);
-            String itemName = MapleItemInformationProvider.getInstance().getName(equip.getItemId());
+            String itemName = ItemInformationProvider.getInstance().getName(equip.getItemId());
             Server.getInstance().broadcastGMMessage(chr.getWorld(), MaplePacketCreator.sendYellowTip("[Warning]: " + chr.getName() + " tried to equip " + itemName + " into slot " + dst + "."));
             AutobanFactory.PACKET_EDIT.alert(chr, chr.getName() + " tried to forcibly equip an item.");
             FilePrinter.printError(FilePrinter.EXPLOITS + chr.getName() + ".txt", chr.getName() + " tried to equip " + itemName + " into " + dst + " slot.");
@@ -1935,7 +1911,7 @@ public class MapleItemInformationProvider {
 
     public ArrayList<Pair<Integer, String>> getItemDataByName(String name) {
         ArrayList<Pair<Integer, String>> ret = new ArrayList<>();
-        for (Pair<Integer, String> itemPair : MapleItemInformationProvider.getInstance().getAllItems()) {
+        for (Pair<Integer, String> itemPair : ItemInformationProvider.getInstance().getAllItems()) {
             if (itemPair.getRight().toLowerCase().contains(name.toLowerCase())) {
                 ret.add(itemPair);
             }

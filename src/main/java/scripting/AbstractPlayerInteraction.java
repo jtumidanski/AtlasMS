@@ -47,7 +47,7 @@ import net.server.world.MaplePartyCharacter;
 import scripting.event.EventInstanceManager;
 import scripting.event.EventManager;
 import scripting.npc.NPCScriptManager;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.MapleMarriage;
 import server.expeditions.MapleExpedition;
 import server.expeditions.MapleExpeditionBossLog;
@@ -617,7 +617,7 @@ public class AbstractPlayerInteraction {
                     evolved.setStance(0);
                     evolved.setSummoned(true);
 
-                    evolved.setName(from.getName().compareTo(MapleItemInformationProvider.getInstance().getName(from.getItemId())) != 0 ? from.getName() : MapleItemInformationProvider.getInstance().getName(id));
+                    evolved.setName(from.getName().compareTo(ItemInformationProvider.getInstance().getName(from.getItemId())) != 0 ? from.getName() : ItemInformationProvider.getInstance().getName(id));
                     evolved.setCloseness(from.getCloseness());
                     evolved.setFullness(from.getFullness());
                     evolved.setLevel(from.getLevel());
@@ -628,7 +628,7 @@ public class AbstractPlayerInteraction {
                 //MapleInventoryManipulator.addById(c, id, (short) 1, null, petId, expires == -1 ? -1 : System.currentTimeMillis() + expires);
             }
 
-            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
             if (ItemConstants.getInventoryType(id).equals(MapleInventoryType.EQUIP)) {
                 item = ii.getEquipById(id);
@@ -644,7 +644,7 @@ public class AbstractPlayerInteraction {
                         if (!(c.getPlayer().isGM() && YamlConfig.config.server.USE_PERFECT_GM_SCROLL)) {
                             eqp.setUpgradeSlots((byte) (eqp.getUpgradeSlots() + 1));
                         }
-                        item = MapleItemInformationProvider.getInstance().scrollEquipWithId(item, 2049100, true, 2049100, c.getPlayer().isGM());
+                        item = ItemInformationProvider.getInstance().scrollEquipWithId(item, 2049100, true, 2049100, c.getPlayer().isGM());
                     }
                 }
             } else {
@@ -941,12 +941,12 @@ public class AbstractPlayerInteraction {
     }
 
     public void useItem(int id) {
-        MapleItemInformationProvider.getInstance().getItemEffect(id).applyTo(c.getPlayer());
+        ItemInformationProvider.getInstance().getItemEffect(id).applyTo(c.getPlayer());
         c.announce(MaplePacketCreator.getItemMessage(id));//Useful shet :3
     }
 
     public void cancelItem(final int id) {
-        getPlayer().cancelEffect(MapleItemInformationProvider.getInstance().getItemEffect(id), false, -1);
+        getPlayer().cancelEffect(ItemInformationProvider.getInstance().getItemEffect(id), false, -1);
     }
 
     public void teachSkill(int skillid, byte level, byte masterLevel, long expiration) {
@@ -981,7 +981,7 @@ public class AbstractPlayerInteraction {
         if (old != null) {
             MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.EQUIPPED, slot, old.getQuantity(), false, false);
         }
-        final Item newItem = MapleItemInformationProvider.getInstance().getEquipById(itemid);
+        final Item newItem = ItemInformationProvider.getInstance().getEquipById(itemid);
         newItem.setPosition(slot);
         c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).addItemFromDB(newItem);
         c.announce(MaplePacketCreator.modifyInventory(false, Collections.singletonList(new ModifyInventory(0, newItem))));
@@ -989,15 +989,13 @@ public class AbstractPlayerInteraction {
 
     public void spawnNpc(int npcId, Point pos, MapleMap map) {
         MapleNPC npc = MapleLifeFactory.getNPC(npcId);
-        if (npc != null) {
-            npc.setPosition(pos);
-            npc.setCy(pos.y);
-            npc.setRx0(pos.x + 50);
-            npc.setRx1(pos.x - 50);
-            npc.setFh(map.getFootholds().findBelow(pos).getId());
-            map.addMapObject(npc);
-            map.broadcastMessage(MaplePacketCreator.spawnNPC(npc));
-        }
+        npc.setPosition(pos);
+        npc.setCy(pos.y);
+        npc.setRx0(pos.x + 50);
+        npc.setRx1(pos.x - 50);
+        npc.setFh(map.getFootholds().findBelow(pos).getId());
+        map.addMapObject(npc);
+        map.broadcastMessage(MaplePacketCreator.spawnNPC(npc));
     }
 
     public void spawnMonster(int id, int x, int y) {

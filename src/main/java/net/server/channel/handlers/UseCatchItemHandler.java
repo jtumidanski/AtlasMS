@@ -29,7 +29,7 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import server.life.MapleMonster;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
@@ -39,7 +39,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
  */
 public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
         AutobanManager abm = chr.getAutobanManager();
         slea.readInt();
@@ -188,7 +188,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
             default:
                 // proper Fish catch, thanks to Dragohe4rt
 
-                MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                ItemInformationProvider ii = ItemInformationProvider.getInstance();
                 int itemGanho = ii.getCreateItem(itemId);
                 int mobItem = ii.getMobItem(itemId);
 

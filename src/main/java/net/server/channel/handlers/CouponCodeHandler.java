@@ -30,7 +30,7 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.CashShop;
-import server.MapleItemInformationProvider;
+import server.ItemInformationProvider;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
@@ -80,7 +80,7 @@ public final class CouponCodeHandler extends AbstractMaplePacketHandler {
             for (Entry<Integer, Integer> e : couponItems.entrySet()) {
                 int item = e.getKey(), qty = e.getValue();
 
-                if (MapleItemInformationProvider.getInstance().getName(item) == null) {
+                if (ItemInformationProvider.getInstance().getName(item) == null) {
                     item = 4000000;
                     qty = 1;
 
@@ -173,7 +173,7 @@ public final class CouponCodeHandler extends AbstractMaplePacketHandler {
     }
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.skip(2);
         String code = slea.readMapleAsciiString();
 
@@ -232,7 +232,7 @@ public final class CouponCodeHandler extends AbstractMaplePacketHandler {
                                     qty = (short) quantity;
                                 }
 
-                                if (MapleItemInformationProvider.getInstance().isCash(item)) {
+                                if (ItemInformationProvider.getInstance().isCash(item)) {
                                     Item it = CashShop.generateCouponItem(item, qty);
 
                                     cs.addToInventory(it);

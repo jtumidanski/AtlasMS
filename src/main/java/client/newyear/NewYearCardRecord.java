@@ -337,25 +337,22 @@ public class NewYearCardRecord {
             return;
         }
 
-        sendTask = TimerManager.getInstance().register(new Runnable() {
-            @Override
-            public void run() {
-                Server server = Server.getInstance();
+        sendTask = TimerManager.getInstance().register(() -> {
+            Server server = Server.getInstance();
 
-                int world = server.getCharacterWorld(receiverId);
-                if (world == -1) {
-                    sendTask.cancel(false);
-                    sendTask = null;
+            int world = server.getCharacterWorld(receiverId);
+            if (world == -1) {
+                sendTask.cancel(false);
+                sendTask = null;
 
-                    return;
-                }
-
-                server.getWorld(world)
-                        .getPlayerStorage()
-                        .getCharacterById(receiverId)
-                        .filter(MapleCharacter::isLoggedinWorld)
-                        .ifPresent(t -> t.announce(MaplePacketCreator.onNewYearCardRes(t, NewYearCardRecord.this, 0xC, 0)));
+                return;
             }
+
+            server.getWorld(world)
+                    .getPlayerStorage()
+                    .getCharacterById(receiverId)
+                    .filter(MapleCharacter::isLoggedinWorld)
+                    .ifPresent(t -> t.announce(MaplePacketCreator.onNewYearCardRes(t, NewYearCardRecord.this, 0xC, 0)));
         }, 1000 * 60 * 60); //1 Hour
     }
 

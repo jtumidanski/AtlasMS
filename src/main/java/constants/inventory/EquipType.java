@@ -63,7 +63,7 @@ public enum EquipType {
     KNUCKLER(1482),
     PISTOL(1492);
 
-    private static final Map<Integer, EquipType> map = new HashMap(34);
+    private static final Map<Integer, EquipType> map = new HashMap<>(34);
 
     static {
         Arrays.stream(EquipType.values()).forEach(e -> map.put(e.i, e));

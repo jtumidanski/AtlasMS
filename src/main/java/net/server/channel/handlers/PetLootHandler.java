@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public final class PetLootHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
 
         int petIndex = chr.getPetIndex(slea.readInt());

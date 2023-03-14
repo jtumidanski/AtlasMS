@@ -274,13 +274,10 @@ public class AriantColiseum {
                 chr.changeMap(980010000, 0);
             }
 
-            map.getWorldServer().registerTimedMapObject(new Runnable() {
-                @Override
-                public void run() {
-                    score.clear();
-                    exped = null;
-                    map = null;
-                }
+            map.getWorldServer().registerTimedMapObject(() -> {
+                score.clear();
+                exped = null;
+                map = null;
             }, 5 * 60 * 1000);
         }
     }

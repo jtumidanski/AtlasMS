@@ -58,51 +58,10 @@ public class MapleCoconut extends MapleEvent {
         setCoconutsHittable(true);
         map.broadcastMessage(MaplePacketCreator.getClock(300));
 
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                if (map.getId() == 109080000) {
-                    if (getMapleScore() == getStoryScore()) {
-                        bonusTime();
-                    } else if (getMapleScore() > getStoryScore()) {
-                        for (MapleCharacter chr : map.getCharacters()) {
-                            if (chr.getTeam() == 0) {
-                                chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/victory"));
-                                chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Victory"));
-                            } else {
-                                chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/lose"));
-                                chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Failed"));
-                            }
-                        }
-                        warpOut();
-                    } else {
-                        for (MapleCharacter chr : map.getCharacters()) {
-                            if (chr.getTeam() == 1) {
-                                chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/victory"));
-                                chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Victory"));
-                            } else {
-                                chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/lose"));
-                                chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Failed"));
-                            }
-                        }
-                        warpOut();
-                    }
-                }
-            }
-        }, 300000);
-    }
-
-    public void bonusTime() {
-        map.broadcastMessage(MaplePacketCreator.getClock(120));
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
+        TimerManager.getInstance().schedule(() -> {
+            if (map.getId() == 109080000) {
                 if (getMapleScore() == getStoryScore()) {
-                    for (MapleCharacter chr : map.getCharacters()) {
-                        chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/lose"));
-                        chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Failed"));
-                    }
-                    warpOut();
+                    bonusTime();
                 } else if (getMapleScore() > getStoryScore()) {
                     for (MapleCharacter chr : map.getCharacters()) {
                         if (chr.getTeam() == 0) {
@@ -127,26 +86,58 @@ public class MapleCoconut extends MapleEvent {
                     warpOut();
                 }
             }
+        }, 300000);
+    }
+
+    public void bonusTime() {
+        map.broadcastMessage(MaplePacketCreator.getClock(120));
+        TimerManager.getInstance().schedule(() -> {
+            if (getMapleScore() == getStoryScore()) {
+                for (MapleCharacter chr : map.getCharacters()) {
+                    chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/lose"));
+                    chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Failed"));
+                }
+                warpOut();
+            } else if (getMapleScore() > getStoryScore()) {
+                for (MapleCharacter chr : map.getCharacters()) {
+                    if (chr.getTeam() == 0) {
+                        chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/victory"));
+                        chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Victory"));
+                    } else {
+                        chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/lose"));
+                        chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Failed"));
+                    }
+                }
+                warpOut();
+            } else {
+                for (MapleCharacter chr : map.getCharacters()) {
+                    if (chr.getTeam() == 1) {
+                        chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/victory"));
+                        chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Victory"));
+                    } else {
+                        chr.getClient().announce(MaplePacketCreator.showEffect("event/coconut/lose"));
+                        chr.getClient().announce(MaplePacketCreator.playSound("Coconut/Failed"));
+                    }
+                }
+                warpOut();
+            }
         }, 120000);
 
     }
 
     public void warpOut() {
         setCoconutsHittable(false);
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                List<MapleCharacter> chars = new ArrayList<>(map.getCharacters());
+        TimerManager.getInstance().schedule(() -> {
+            List<MapleCharacter> chars = new ArrayList<>(map.getCharacters());
 
-                for (MapleCharacter chr : chars) {
-                    if ((getMapleScore() > getStoryScore() && chr.getTeam() == 0) || (getStoryScore() > getMapleScore() && chr.getTeam() == 1)) {
-                        chr.changeMap(109050000);
-                    } else {
-                        chr.changeMap(109050001);
-                    }
+            for (MapleCharacter chr : chars) {
+                if ((getMapleScore() > getStoryScore() && chr.getTeam() == 0) || (getStoryScore() > getMapleScore() && chr.getTeam() == 1)) {
+                    chr.changeMap(109050000);
+                } else {
+                    chr.changeMap(109050001);
                 }
-                map.setCoconut(null);
             }
+            map.setCoconut(null);
         }, 12000);
     }
 
