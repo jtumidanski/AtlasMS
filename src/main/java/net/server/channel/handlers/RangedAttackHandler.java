@@ -98,7 +98,7 @@ public final class RangedAttackHandler extends AbstractDealDamageHandler {
             short bulletCount = 1;
             MapleStatEffect effect = null;
             if (attack.skill != 0) {
-                effect = attack.getAttackEffect(chr, null);
+                effect = attack.getAttackEffect(chr, null).orElseThrow();
                 bulletCount = effect.getBulletCount();
                 if (effect.getCooldown() > 0) {
                     c.announce(MaplePacketCreator.skillCooldown(attack.skill, effect.getCooldown()));
@@ -165,9 +165,11 @@ public final class RangedAttackHandler extends AbstractDealDamageHandler {
                         bulletConsume = (byte) (effect.getBulletConsume() * (hasShadowPartner ? 2 : 1));
                     }
 
-                    if (slot < 0) System.out.println("<ERROR> Projectile to use was unable to be found.");
-                    else
+                    if (slot < 0) {
+                        System.out.println("<ERROR> Projectile to use was unable to be found.");
+                    } else {
                         MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, bulletConsume, false, true);
+                    }
                 }
             }
 
@@ -203,22 +205,22 @@ public final class RangedAttackHandler extends AbstractDealDamageHandler {
                 chr.getMap().broadcastMessage(chr, packet, false, true);
 
                 if (attack.skill != 0) {
-                    Skill skill = SkillFactory.getSkill(attack.skill);
+                    Skill skill = SkillFactory.getSkill(attack.skill).orElseThrow();
                     MapleStatEffect effect_ = skill.getEffect(chr.getSkillLevel(skill));
                     if (effect_.getCooldown() > 0) {
                         if (chr.skillIsCooling(attack.skill)) {
                             return;
                         } else {
                             c.announce(MaplePacketCreator.skillCooldown(attack.skill, effect_.getCooldown()));
-                            chr.addCooldown(attack.skill, currentServerTime(), effect_.getCooldown() * 1000);
+                            chr.addCooldown(attack.skill, currentServerTime(), effect_.getCooldown() * 1000L);
                         }
                     }
                 }
 
-                if (chr.getSkillLevel(SkillFactory.getSkill(NightWalker.VANISH)) > 0 && chr.getBuffedValue(MapleBuffStat.DARKSIGHT) != null && attack.numAttacked > 0 && chr.getBuffSource(MapleBuffStat.DARKSIGHT) != 9101004) {
+                if (chr.getSkillLevel(SkillFactory.getSkill(NightWalker.VANISH).orElseThrow()) > 0 && chr.getBuffedValue(MapleBuffStat.DARKSIGHT) != null && attack.numAttacked > 0 && chr.getBuffSource(MapleBuffStat.DARKSIGHT) != 9101004) {
                     chr.cancelEffectFromBuffStat(MapleBuffStat.DARKSIGHT);
                     chr.cancelBuffStats(MapleBuffStat.DARKSIGHT);
-                } else if (chr.getSkillLevel(SkillFactory.getSkill(WindArcher.WIND_WALK)) > 0 && chr.getBuffedValue(MapleBuffStat.WIND_WALK) != null && attack.numAttacked > 0) {
+                } else if (chr.getSkillLevel(SkillFactory.getSkill(WindArcher.WIND_WALK).orElseThrow()) > 0 && chr.getBuffedValue(MapleBuffStat.WIND_WALK) != null && attack.numAttacked > 0) {
                     chr.cancelEffectFromBuffStat(MapleBuffStat.WIND_WALK);
                     chr.cancelBuffStats(MapleBuffStat.WIND_WALK);
                 }

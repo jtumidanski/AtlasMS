@@ -142,7 +142,7 @@ public class MapleShop {
                 }
             }
             for (Integer recharge : recharges) {
-                ret.addItem(new MapleShopItem((short) 1000, recharge.intValue(), 0, 0));
+                ret.addItem(new MapleShopItem((short) 1000, recharge, 0, 0));
             }
             rs.close();
             ps.close();
@@ -181,17 +181,18 @@ public class MapleShop {
                         MapleInventoryManipulator.addById(c, itemId, quantity, "", -1);
                         c.getPlayer().gainMeso(-amount, false);
                     } else {
-                        short slotMax = ii.getSlotMax(c, item.getItemId());
-                        quantity = slotMax;
+                        quantity = ii.getSlotMax(c, item.getItemId());
                         MapleInventoryManipulator.addById(c, itemId, quantity, "", -1);
                         c.getPlayer().gainMeso(-item.getPrice(), false);
                     }
                     c.announce(MaplePacketCreator.shopTransaction((byte) 0));
-                } else
+                } else {
                     c.announce(MaplePacketCreator.shopTransaction((byte) 3));
+                }
 
-            } else
+            } else {
                 c.announce(MaplePacketCreator.shopTransaction((byte) 2));
+            }
 
         } else if (item.getPitch() > 0) {
             int amount = (int) Math.min((float) item.getPitch() * quantity, Integer.MAX_VALUE);
@@ -202,14 +203,14 @@ public class MapleShop {
                         MapleInventoryManipulator.addById(c, itemId, quantity, "", -1);
                         MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, 4310000, amount, false, false);
                     } else {
-                        short slotMax = ii.getSlotMax(c, item.getItemId());
-                        quantity = slotMax;
+                        quantity = ii.getSlotMax(c, item.getItemId());
                         MapleInventoryManipulator.addById(c, itemId, quantity, "", -1);
                         MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, 4310000, amount, false, false);
                     }
                     c.announce(MaplePacketCreator.shopTransaction((byte) 0));
-                } else
+                } else {
                     c.announce(MaplePacketCreator.shopTransaction((byte) 3));
+                }
             }
 
         } else if (c.getPlayer().getInventory(MapleInventoryType.CASH).countById(token) != 0) {
@@ -244,7 +245,7 @@ public class MapleShop {
             return;
         }
 
-        Item item = c.getPlayer().getInventory(type).getItem((short) slot);
+        Item item = c.getPlayer().getInventory(type).getItem(slot);
         if (canSell(item, quantity)) {
             quantity = getSellingQuantity(item, quantity);
             MapleInventoryManipulator.removeFromSlot(c, type, (byte) slot, quantity, false);

@@ -25,8 +25,11 @@ package client.command.commands.gm2;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import client.Skill;
 import client.SkillFactory;
 import client.command.Command;
+
+import java.util.Optional;
 
 public class BuffMapCommand extends Command {
     {
@@ -36,11 +39,18 @@ public class BuffMapCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        SkillFactory.getSkill(9101001).getEffect(SkillFactory.getSkill(9101001).getMaxLevel()).applyTo(player, true);
-        SkillFactory.getSkill(9101002).getEffect(SkillFactory.getSkill(9101002).getMaxLevel()).applyTo(player, true);
-        SkillFactory.getSkill(9101003).getEffect(SkillFactory.getSkill(9101003).getMaxLevel()).applyTo(player, true);
-        SkillFactory.getSkill(9101008).getEffect(SkillFactory.getSkill(9101008).getMaxLevel()).applyTo(player, true);
-        SkillFactory.getSkill(1005).getEffect(SkillFactory.getSkill(1005).getMaxLevel()).applyTo(player, true);
+        buff(9101001, player);
+        buff(9101002, player);
+        buff(9101003, player);
+        buff(9101008, player);
+        buff(1005, player);
+    }
 
+    private void buff(int skillId, MapleCharacter character) {
+        Optional<Skill> skill = SkillFactory.getSkill(skillId);
+        if (skill.isEmpty()) {
+            return;
+        }
+        skill.get().getEffect(skill.get().getMaxLevel()).applyTo(character, true);
     }
 }

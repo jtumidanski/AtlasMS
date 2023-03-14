@@ -67,7 +67,9 @@ public class SummonCommand extends Command {
 
             try {
                 for (int i = 0; i < 7; i++) {   // poll for a while until the player reconnects
-                    if (victim.isLoggedinWorld()) break;
+                    if (victim.isLoggedinWorld()) {
+                        break;
+                    }
                     Thread.sleep(1777);
                 }
             } catch (InterruptedException e) {

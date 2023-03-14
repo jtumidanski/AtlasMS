@@ -126,7 +126,7 @@ public class MapleClient {
         long ipAddress = 0;
         for (int i = 0; i < 4; i++) {
             int quad = Integer.parseInt(quads[i]);
-            ipAddress += (long) (quad % 256) * (long) Math.pow(256, (double) (4 - i));
+            ipAddress += (long) (quad % 256) * (long) Math.pow(256, 4 - i);
         }
         return ipAddress;
     }
@@ -294,8 +294,9 @@ public class MapleClient {
             ps.setString(1, hwid);
             ResultSet rs = ps.executeQuery();
             if (rs != null && rs.next()) {
-                if (rs.getInt(1) > 0)
+                if (rs.getInt(1) > 0) {
                     ret = true;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -418,7 +419,7 @@ public class MapleClient {
     }
 
     public void banMacs() {
-        Connection con = null;
+        Connection con;
         try {
             loadMacsIfNescessary();
 
@@ -705,7 +706,7 @@ public class MapleClient {
 
             int len = convert.length();
             for (int i = len - 2; i >= 0; i -= 2) {
-                hwid.append(convert.substring(i, i + 2));
+                hwid.append(convert, i, i + 2);
             }
             hwid.insert(4, "-");
 
@@ -869,22 +870,22 @@ public class MapleClient {
 
     private void removePartyPlayer(World wserv) {
         MapleMap map = player.getMap();
-        final MapleParty party = player.getParty();
+        final Optional<MapleParty> party = player.getParty();
         final int idz = player.getId();
 
-        if (party != null) {
+        if (party.isPresent()) {
             final MaplePartyCharacter chrp = new MaplePartyCharacter(player);
             chrp.setOnline(false);
-            wserv.updateParty(party.getId(), PartyOperation.LOG_ONOFF, chrp);
-            if (party.getLeader().getId() == idz && map != null) {
+            wserv.updateParty(party.get().getId(), PartyOperation.LOG_ONOFF, chrp);
+            if (party.get().getLeader().getId() == idz && map != null) {
                 MaplePartyCharacter lchr = null;
-                for (MaplePartyCharacter pchr : party.getMembers()) {
+                for (MaplePartyCharacter pchr : party.get().getMembers()) {
                     if (pchr != null && pchr.getId() != idz && (lchr == null || lchr.getLevel() <= pchr.getLevel()) && map.getCharacterById(pchr.getId()) != null) {
                         lchr = pchr;
                     }
                 }
                 if (lchr != null) {
-                    wserv.updateParty(party.getId(), PartyOperation.CHANGE_LEADER, lchr);
+                    wserv.updateParty(party.get().getId(), PartyOperation.CHANGE_LEADER, lchr);
                 }
             }
         }
@@ -1018,7 +1019,9 @@ public class MapleClient {
                     player.saveCharToDB(true);
 
                     player.logOff();
-                    if (YamlConfig.config.server.INSTANT_NAME_CHANGE) player.doPendingNameChange();
+                    if (YamlConfig.config.server.INSTANT_NAME_CHANGE) {
+                        player.doPendingNameChange();
+                    }
                     clear();
                 } else {
                     getChannelServer().removePlayer(player);
@@ -1102,10 +1105,9 @@ public class MapleClient {
             if (partyid != null) {
                 this.setPlayer(chr);
 
-                MapleParty party = chr.getWorldServer().getParty(partyid);
-                chr.setParty(party);
+                chr.getWorldServer().getParty(partyid).ifPresent(chr::setParty);
                 chr.getMPC();
-                chr.leaveParty();   // thanks Vcoc for pointing out deleted characters would still stay in a party
+                chr.leaveParty();
 
                 this.setPlayer(null);
             }
@@ -1350,7 +1352,7 @@ public class MapleClient {
 
     public synchronized boolean gainCharacterSlot() {
         if (canGainCharacterSlot()) {
-            Connection con = null;
+            Connection con;
             try {
                 con = DatabaseConnection.getConnection();
 
@@ -1407,7 +1409,7 @@ public class MapleClient {
 
     public void setGender(byte m) {
         this.gender = m;
-        Connection con = null;
+        Connection con;
         try {
             con = DatabaseConnection.getConnection();
             try (PreparedStatement ps = con.prepareStatement("UPDATE accounts SET gender = ? WHERE id = ?")) {

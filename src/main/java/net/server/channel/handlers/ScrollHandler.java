@@ -23,8 +23,6 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
-import client.Skill;
-import client.SkillFactory;
 import client.inventory.*;
 import client.inventory.Equip.ScrollResult;
 import client.inventory.manipulator.MapleInventoryManipulator;
@@ -37,6 +35,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Matze
@@ -81,8 +80,7 @@ public final class ScrollHandler extends AbstractMaplePacketHandler {
                 MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
                 MapleCharacter chr = c.getPlayer();
                 Equip toScroll = (Equip) chr.getInventory(MapleInventoryType.EQUIPPED).getItem(dst);
-                Skill LegendarySpirit = SkillFactory.getSkill(1003);
-                if (chr.getSkillLevel(LegendarySpirit) > 0 && dst >= 0) {
+                if (chr.getSkillLevel(1003) > 0 && dst >= 0) {
                     legendarySpirit = true;
                     toScroll = (Equip) chr.getInventory(MapleInventoryType.EQUIP).getItem(dst);
                 }
@@ -90,7 +88,7 @@ public final class ScrollHandler extends AbstractMaplePacketHandler {
                 byte oldSlots = toScroll.getUpgradeSlots();
                 MapleInventory useInventory = chr.getInventory(MapleInventoryType.USE);
                 Item scroll = useInventory.getItem(slot);
-                Item wscroll = null;
+                Optional<Item> wscroll = Optional.empty();
 
                 if (ItemConstants.isCleanSlate(scroll.getItemId())) {
                     Map<String, Integer> eqStats = ii.getEquipStats(toScroll.getItemId());  // clean slate issue found thanks to Masterrulax
@@ -98,7 +96,7 @@ public final class ScrollHandler extends AbstractMaplePacketHandler {
                         announceCannotScroll(c, legendarySpirit);
                         return;
                     }
-                } else if (!ItemConstants.isModifierScroll(scroll.getItemId()) && ((Equip) toScroll).getUpgradeSlots() < 1) {
+                } else if (!ItemConstants.isModifierScroll(scroll.getItemId()) && toScroll.getUpgradeSlots() < 1) {
                     announceCannotScroll(c, legendarySpirit);   // thanks onechord for noticing zero upgrade slots freezing Legendary Scroll UI
                     return;
                 }
@@ -110,7 +108,7 @@ public final class ScrollHandler extends AbstractMaplePacketHandler {
                 }
                 if (whiteScroll) {
                     wscroll = useInventory.findById(2340000);
-                    if (wscroll == null) {
+                    if (wscroll.isEmpty()) {
                         whiteScroll = false;
                     }
                 }
@@ -143,12 +141,12 @@ public final class ScrollHandler extends AbstractMaplePacketHandler {
                     }
 
                     if (whiteScroll && !ItemConstants.isCleanSlate(scroll.getItemId())) {
-                        if (wscroll.getQuantity() < 1) {
+                        if (wscroll.get().getQuantity() < 1) {
                             announceCannotScroll(c, legendarySpirit);
                             return;
                         }
 
-                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, wscroll.getPosition(), (short) 1, false, false);
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, wscroll.get().getPosition(), (short) 1, false, false);
                     }
 
                     MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, scroll.getPosition(), (short) 1, false);

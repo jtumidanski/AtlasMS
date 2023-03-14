@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class MobStatusService extends BaseService {
 
-    private MobStatusScheduler mobStatusSchedulers[] = new MobStatusScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
+    private MobStatusScheduler[] mobStatusSchedulers = new MobStatusScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
 
     public MobStatusService() {
         for (int i = 0; i < YamlConfig.config.server.CHANNEL_LOCKS; i++) {
@@ -133,12 +133,7 @@ public class MobStatusService extends BaseService {
         }
 
         private void disposeLocks() {
-            LockCollector.getInstance().registerDisposeAction(new Runnable() {
-                @Override
-                public void run() {
-                    emptyLocks();
-                }
-            });
+            LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
         }
 
         private void emptyLocks() {

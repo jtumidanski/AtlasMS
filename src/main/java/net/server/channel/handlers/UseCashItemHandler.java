@@ -48,6 +48,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public final class UseCashItemHandler extends AbstractMaplePacketHandler {
 
@@ -56,14 +57,14 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
         cashInv.lockInventory();
         try {
             Item it = cashInv.getItem(position);
+            short adjustedPosition = position;
             if (it == null || it.getItemId() != itemid) {
-                it = cashInv.findById(itemid);
-                if (it != null) {
-                    position = it.getPosition();
-                }
+                adjustedPosition = cashInv.findById(itemid)
+                        .map(Item::getPosition)
+                        .orElse(position);
             }
 
-            MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.CASH, position, (short) 1, true, false);
+            MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.CASH, adjustedPosition, (short) 1, true, false);
         } finally {
             cashInv.unlockInventory();
         }
@@ -78,7 +79,12 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                 amount = quantitys[i];
             }
         }
-        if (c.getPlayer().getInventory(MapleInventoryType.getByType((byte) (id / 1000000))).isFull()) {
+        Optional<MapleInventoryType> type = MapleInventoryType.getByType((byte) (id / 1000000));
+        if (type.isEmpty()) {
+            return false;
+        }
+
+        if (c.getPlayer().getInventory(type.get()).isFull()) {
             return false;
         }
         MapleInventoryManipulator.addById(c, id, (short) amount);
@@ -103,19 +109,19 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
         int itemType = itemId / 10000;
 
         MapleInventory cashInv = player.getInventory(MapleInventoryType.CASH);
-        Item toUse = cashInv.getItem(position);
-        if (toUse == null || toUse.getItemId() != itemId) {
+        Optional<Item> toUse = Optional.ofNullable(cashInv.getItem(position));
+        if (toUse.isEmpty() || toUse.get().getItemId() != itemId) {
             toUse = cashInv.findById(itemId);
 
-            if (toUse == null) {
+            if (toUse.isEmpty()) {
                 c.announce(MaplePacketCreator.enableActions());
                 return;
             }
 
-            position = toUse.getPosition();
+            position = toUse.get().getPosition();
         }
 
-        if (toUse.getQuantity() < 1) {
+        if (toUse.get().getQuantity() < 1) {
             c.announce(MaplePacketCreator.enableActions());
             return;
         }
@@ -182,8 +188,8 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                 }
 
                 int SPFrom = slea.readInt();
-                Skill skillSPTo = SkillFactory.getSkill(SPTo);
-                Skill skillSPFrom = SkillFactory.getSkill(SPFrom);
+                Skill skillSPTo = SkillFactory.getSkill(SPTo).orElseThrow();
+                Skill skillSPFrom = SkillFactory.getSkill(SPFrom).orElseThrow();
                 byte curLevel = player.getSkillLevel(skillSPTo);
                 byte curLevelSPFrom = player.getSkillLevel(skillSPFrom);
                 if ((curLevel < skillSPTo.getMaxLevel()) && curLevelSPFrom > 0) {
@@ -194,7 +200,9 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                     if ((curLevelSPFrom - 1) == 0) {
                         boolean updated = false;
                         for (SkillMacro macro : player.getMacros()) {
-                            if (macro == null) continue;
+                            if (macro == null) {
+                                continue;
+                            }
 
                             boolean update = false;// cleaner?
                             if (macro.getSkill1() == SPFrom) {
@@ -214,7 +222,9 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                                 player.updateMacros(macro.getPosition(), macro);
                             }
                         }
-                        if (updated) player.sendMacros();
+                        if (updated) {
+                            player.sendMacros();
+                        }
                     }
                 }
             } else {
@@ -236,8 +246,12 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                 eq = player.getInventory(MapleInventoryType.EQUIPPED).getItem((short) equipSlot);
                 eq.setOwner(player.getName());
             } else if (itemId == 5060001 || itemId == 5061000 || itemId == 5061001 || itemId == 5061002 || itemId == 5061003) { // Sealing lock
-                MapleInventoryType type = MapleInventoryType.getByType((byte) slea.readInt());
-                eq = player.getInventory(type).getItem((short) slea.readInt());
+                Optional<MapleInventoryType> type = MapleInventoryType.getByType((byte) slea.readInt());
+                if (type.isEmpty()) {
+                    return;
+                }
+
+                eq = player.getInventory(type.get()).getItem((short) slea.readInt());
                 if (eq == null) { //Check if the type is EQUIPMENT?
                     return;
                 }
@@ -267,13 +281,17 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
             } else if (itemId == 5060002) { // Incubator
                 byte inventory2 = (byte) slea.readInt();
                 short slot2 = (short) slea.readInt();
-                Item item2 = player.getInventory(MapleInventoryType.getByType(inventory2)).getItem(slot2);
-                if (item2 == null) // hacking
-                {
+                Optional<MapleInventoryType> type = MapleInventoryType.getByType(inventory2);
+                if (type.isEmpty()) {
+                    return;
+                }
+
+                Item item2 = player.getInventory(type.get()).getItem(slot2);
+                if (item2 == null) {
                     return;
                 }
                 if (getIncubatedItem(c, itemId)) {
-                    MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.getByType(inventory2), slot2, (short) 1, false);
+                    MapleInventoryManipulator.removeFromSlot(c, type.get(), slot2, (short) 1, false);
                     remove(c, position, itemId);
                 }
                 return;
@@ -333,7 +351,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                     }
 
                     if (megassenger) {
-                        Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.serverNotice(3, c.getChannel(), medal + player.getName() + " : " + builder.toString(), ear));
+                        Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.serverNotice(3, c.getChannel(), medal + player.getName() + " : " + builder, ear));
                     }
 
                     break;
@@ -342,12 +360,15 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                     whisper = slea.readByte() == 1;
                     Item item = null;
                     if (slea.readByte() == 1) { //item
-                        item = player.getInventory(MapleInventoryType.getByType((byte) slea.readInt())).getItem((short) slea.readInt());
-                        if (item == null) //hack
-                        {
+                        Optional<MapleInventoryType> type = MapleInventoryType.getByType((byte) slea.readInt());
+                        if (type.isEmpty()) {
                             return;
                         }
 
+                        item = player.getInventory(type.get()).getItem((short) slea.readInt());
+                        if (item == null) {
+                            return;
+                        }
                         // thanks Conrad for noticing that untradeable items should be allowed in megas
                     }
                     Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.itemMegaphone(msg, whisper, c.getChannel(), item));
@@ -407,8 +428,9 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
             pet.saveToDb();
 
             Item item = player.getInventory(MapleInventoryType.CASH).getItem(pet.getPosition());
-            if (item != null)
+            if (item != null) {
                 player.forceUpdateItem(item);
+            }
 
             player.getMap().broadcastMessage(player, MaplePacketCreator.changePetName(player, newName, 1), true);
             c.announce(MaplePacketCreator.enableActions());
@@ -420,10 +442,14 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
         } else if (itemType == 523) {
             int itemid = slea.readInt();
 
-            if (!YamlConfig.config.server.USE_ENFORCE_ITEM_SUGGESTION) c.getWorldServer().addOwlItemSearch(itemid);
+            if (!YamlConfig.config.server.USE_ENFORCE_ITEM_SUGGESTION) {
+                c.getWorldServer().addOwlItemSearch(itemid);
+            }
             player.setOwlSearch(itemid);
             List<Pair<MaplePlayerShopItem, AbstractMapleMapObject>> hmsAvailable = c.getWorldServer().getAvailableItemBundles(itemid);
-            if (!hmsAvailable.isEmpty()) remove(c, position, itemId);
+            if (!hmsAvailable.isEmpty()) {
+                remove(c, position, itemId);
+            }
 
             c.announce(MaplePacketCreator.owlOfMinerva(c, itemid, hmsAvailable));
             c.announce(MaplePacketCreator.enableActions());
@@ -548,9 +574,14 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
         } else if (itemType == 550) { //Extend item expiration
             c.announce(MaplePacketCreator.enableActions());
         } else if (itemType == 552) {
-            MapleInventoryType type = MapleInventoryType.getByType((byte) slea.readInt());
+            Optional<MapleInventoryType> type = MapleInventoryType.getByType((byte) slea.readInt());
+            if (type.isEmpty()) {
+                c.announce(MaplePacketCreator.enableActions());
+                return;
+            }
+
             short slot = (short) slea.readInt();
-            Item item = player.getInventory(type).getItem(slot);
+            Item item = player.getInventory(type.get()).getItem(slot);
             if (item == null || item.getQuantity() <= 0 || MapleKarmaManipulator.hasKarmaFlag(item) || !ii.isKarmaAble(item.getItemId())) {
                 c.announce(MaplePacketCreator.enableActions());
                 return;
@@ -567,7 +598,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
             int itemSlot = slea.readInt();
             slea.readInt();
             final Equip equip = (Equip) player.getInventory(MapleInventoryType.EQUIP).getItem((short) itemSlot);
-            if (equip.getVicious() >= 2 || player.getInventory(MapleInventoryType.CASH).findById(5570000) == null) {
+            if (equip.getVicious() >= 2 || player.getInventory(MapleInventoryType.CASH).findById(5570000).isEmpty()) {
                 return;
             }
             equip.setVicious(equip.getVicious() + 1);
@@ -601,7 +632,9 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
             }
 
             //should have a check here against PE hacks
-            if (itemId / 1000000 != 5) itemId = 0;
+            if (itemId / 1000000 != 5) {
+                itemId = 0;
+            }
 
             player.toggleBlockCashShop();
 
@@ -619,7 +652,9 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
             TimerManager.getInstance().schedule(new Runnable() {
                 @Override
                 public void run() {
-                    if (!player.isLoggedin()) return;
+                    if (!player.isLoggedin()) {
+                        return;
+                    }
 
                     player.toggleBlockCashShop();
 
@@ -638,7 +673,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                 }
             }, 1000 * 3);
         } else {
-            System.out.println("NEW CASH ITEM: " + itemType + "\n" + slea.toString());
+            System.out.println("NEW CASH ITEM: " + itemType + "\n" + slea);
             c.announce(MaplePacketCreator.enableActions());
         }
     }

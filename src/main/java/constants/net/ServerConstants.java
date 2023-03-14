@@ -7,7 +7,7 @@ public class ServerConstants {
     //Server Version
     public static short VERSION = 83;
     //Debug Variables
-    public static int DEBUG_VALUES[] = new int[10];             // Field designed for packet testing purposes
+    public static int[] DEBUG_VALUES = new int[10];             // Field designed for packet testing purposes
 
     // https://github.com/openstreetmap/josm/blob/a3a6e8a6b657cf4c5b4c64ea14d6e87be6280d65/src/org/openstreetmap/josm/tools/Utils.java#L1566-L1585
     // Added by kolakcc (Familiar)

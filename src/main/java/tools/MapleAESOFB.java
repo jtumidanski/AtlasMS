@@ -49,17 +49,15 @@ public class MapleAESOFB {
             (byte) 0x1F, (byte) 0x3A, (byte) 0x43, (byte) 0x8A, (byte) 0x96, (byte) 0x41, (byte) 0x74, (byte) 0xAC, (byte) 0x52, (byte) 0x33, (byte) 0xF0, (byte) 0xD9, (byte) 0x29, (byte) 0x80, (byte) 0xB1, (byte) 0x16,
             (byte) 0xD3, (byte) 0xAB, (byte) 0x91, (byte) 0xB9, (byte) 0x84, (byte) 0x7F, (byte) 0x61, (byte) 0x1E, (byte) 0xCF, (byte) 0xC5, (byte) 0xD1, (byte) 0x56, (byte) 0x3D, (byte) 0xCA, (byte) 0xF4, (byte) 0x05,
             (byte) 0xC6, (byte) 0xE5, (byte) 0x08, (byte) 0x49};
-    private byte iv[];
+    private byte[] iv;
     private Cipher cipher;
     private short mapleVersion;
 
-    public MapleAESOFB(byte iv[], short mapleVersion) {
+    public MapleAESOFB(byte[] iv, short mapleVersion) {
         try {
             cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, skey);
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("ERROR " + e);
-        } catch (NoSuchPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             System.out.println("ERROR " + e);
         } catch (InvalidKeyException e) {
             System.out.println("Error initializing the encryption cipher.  Make sure you're using the Unlimited Strength cryptography jar files.");
@@ -82,7 +80,7 @@ public class MapleAESOFB {
         return packetLength;
     }
 
-    public static byte[] getNewIv(byte oldIv[]) {
+    public static byte[] getNewIv(byte[] oldIv) {
         byte[] in = {(byte) 0xf2, 0x53, (byte) 0x50, (byte) 0xc6};
         for (int x = 0; x < 4; x++) {
             funnyShit(oldIv[x], in);
@@ -144,9 +142,7 @@ public class MapleAESOFB {
                         for (int j = 0; j < myIv.length; j++) {
                             myIv[j] = newIv[j];
                         }
-                    } catch (IllegalBlockSizeException e) {
-                        e.printStackTrace();
-                    } catch (BadPaddingException e) {
+                    } catch (IllegalBlockSizeException | BadPaddingException e) {
                         e.printStackTrace();
                     }
                 }
@@ -183,7 +179,7 @@ public class MapleAESOFB {
     }
 
     public boolean checkPacket(int packetHeader) {
-        byte packetHeaderBuf[] = new byte[2];
+        byte[] packetHeaderBuf = new byte[2];
         packetHeaderBuf[0] = (byte) ((packetHeader >> 24) & 0xFF);
         packetHeaderBuf[1] = (byte) ((packetHeader >> 16) & 0xFF);
         return checkPacket(packetHeaderBuf);

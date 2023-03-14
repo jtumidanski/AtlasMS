@@ -41,7 +41,6 @@ public class NoblesseCreator extends CharacterFactory {
     }
 
     public static int createCharacter(MapleClient c, String name, int face, int hair, int skin, int top, int bottom, int shoes, int weapon, int gender) {
-        int status = createNewCharacter(c, name, face, hair, skin, gender, createRecipe(MapleJob.NOBLESSE, 1, 130030000, top, bottom, shoes, weapon));
-        return status;
+        return createNewCharacter(c, name, face, hair, skin, gender, createRecipe(MapleJob.NOBLESSE, 1, 130030000, top, bottom, shoes, weapon));
     }
 }

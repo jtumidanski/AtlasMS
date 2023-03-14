@@ -85,7 +85,7 @@ public final class SummonDamageHandler extends AbstractDealDamageHandler {
         if (summon == null) {
             return;
         }
-        Skill summonSkill = SkillFactory.getSkill(summon.getSkill());
+        Skill summonSkill = SkillFactory.getSkill(summon.getSkill()).orElseThrow();
         MapleStatEffect summonEffect = summonSkill.getEffect(summon.getSkillLevel());
         slea.skip(4);
         List<SummonAttackEntry> allDamage = new ArrayList<>();

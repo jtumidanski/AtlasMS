@@ -161,13 +161,9 @@ public class MakerItemFactory {
             this.reqLevel = mi.reqLevel;
             this.reqMakerLevel = mi.reqMakerLevel;
 
-            for (Pair<Integer, Integer> p : mi.reqItems) {
-                reqItems.add(p);
-            }
+            reqItems.addAll(mi.reqItems);
 
-            for (Pair<Integer, Integer> p : mi.gainItems) {
-                gainItems.add(p);
-            }
+            gainItems.addAll(mi.gainItems);
         }
 
         public List<Pair<Integer, Integer>> getReqItems() {

@@ -19,6 +19,7 @@
 */
 package constants.inventory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,14 +66,12 @@ public enum EquipType {
     private static final Map<Integer, EquipType> map = new HashMap(34);
 
     static {
-        for (EquipType eqEnum : EquipType.values()) {
-            map.put(eqEnum.i, eqEnum);
-        }
+        Arrays.stream(EquipType.values()).forEach(e -> map.put(e.i, e));
     }
 
     private final int i;
 
-    private EquipType(int val) {
+    EquipType(int val) {
         this.i = val;
     }
 

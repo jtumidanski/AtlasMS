@@ -21,6 +21,9 @@
 */
 package client.inventory;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * @author Matze
  */
@@ -35,32 +38,25 @@ public enum MapleInventoryType {
     EQUIPPED(-1); //Seems nexon screwed something when removing an item T_T
     final byte type;
 
-    private MapleInventoryType(int type) {
+    MapleInventoryType(int type) {
         this.type = (byte) type;
     }
 
-    public static MapleInventoryType getByType(byte type) {
-        for (MapleInventoryType l : MapleInventoryType.values()) {
-            if (l.getType() == type) {
-                return l;
-            }
-        }
-        return null;
+    public static Optional<MapleInventoryType> getByType(byte type) {
+        return Arrays.stream(MapleInventoryType.values())
+                .filter(t -> t.getType() == type)
+                .findFirst();
     }
 
     public static MapleInventoryType getByWZName(String name) {
-        if (name.equals("Install")) {
-            return SETUP;
-        } else if (name.equals("Consume")) {
-            return USE;
-        } else if (name.equals("Etc")) {
-            return ETC;
-        } else if (name.equals("Cash")) {
-            return CASH;
-        } else if (name.equals("Pet")) {
-            return CASH;
-        }
-        return UNDEFINED;
+        return switch (name) {
+            case "Install" -> SETUP;
+            case "Consume" -> USE;
+            case "Etc" -> ETC;
+            case "Cash" -> CASH;
+            case "Pet" -> CASH;
+            default -> UNDEFINED;
+        };
     }
 
     public byte getType() {

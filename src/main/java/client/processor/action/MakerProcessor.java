@@ -183,14 +183,14 @@ public class MakerProcessor {
                         if (toDisassemble != -1) {
                             MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.EQUIP, (short) pos, (short) 1, false);
                         } else {
-                            for (Pair<Integer, Integer> p : recipe.getReqItems()) {
-                                c.getAbstractPlayerInteraction().gainItem(p.getLeft(), (short) -p.getRight(), false);
-                            }
+                            recipe.getReqItems().forEach(p -> c.getAbstractPlayerInteraction().gainItem(p.getLeft(), (short) -p.getRight(), false));
                         }
 
                         int cost = recipe.getCost();
                         if (stimulantid == -1 && reagentids.isEmpty()) {
-                            if (cost > 0) c.getPlayer().gainMeso(-cost, false);
+                            if (cost > 0) {
+                                c.getPlayer().gainMeso(-cost, false);
+                            }
 
                             for (Pair<Integer, Integer> p : recipe.getGainItems()) {
                                 c.getPlayer().setCS(true);
@@ -200,15 +200,16 @@ public class MakerProcessor {
                         } else {
                             toCreate = recipe.getGainItems().get(0).getLeft();
 
-                            if (stimulantid != -1)
+                            if (stimulantid != -1) {
                                 c.getAbstractPlayerInteraction().gainItem(stimulantid, (short) -1, false);
+                            }
                             if (!reagentids.isEmpty()) {
-                                for (Map.Entry<Integer, Short> r : reagentids.entrySet()) {
-                                    c.getAbstractPlayerInteraction().gainItem(r.getKey(), (short) (-1 * r.getValue()), false);
-                                }
+                                reagentids.forEach((key, value) -> c.getAbstractPlayerInteraction().gainItem(key, (short) (-1 * value), false));
                             }
 
-                            if (cost > 0) c.getPlayer().gainMeso(-cost, false);
+                            if (cost > 0) {
+                                c.getPlayer().gainMeso(-cost, false);
+                            }
                             makerSucceeded = addBoostedMakerItem(c, toCreate, stimulantid, reagentids);
                         }
 
@@ -264,15 +265,10 @@ public class MakerProcessor {
         }
 
         // removing less effective gems of repeated type
-        for (Integer i : toRemove) {
-            reagentids.remove(i);
-        }
+        toRemove.forEach(reagentids::remove);
 
         // the Maker skill will use only one of each gem
-        for (Integer i : reagentids.keySet()) {
-            reagentids.put(i, (short) 1);
-        }
-
+        reagentids.keySet().forEach(i -> reagentids.put(i, (short) 1));
         return true;
     }
 
@@ -352,25 +348,24 @@ public class MakerProcessor {
     }
 
     private static boolean hasItems(MapleClient c, MakerItemCreateEntry recipe) {
-        for (Pair<Integer, Integer> p : recipe.getReqItems()) {
-            int itemId = p.getLeft();
-            if (c.getPlayer().getInventory(ItemConstants.getInventoryType(itemId)).countById(itemId) < p.getRight()) {
-                return false;
-            }
-        }
-        return true;
+        return recipe.getReqItems().stream()
+                .noneMatch(p -> c.getPlayer().getInventory(ItemConstants.getInventoryType(p.getLeft())).countById(p.getLeft()) < p.getRight());
     }
 
     private static boolean addBoostedMakerItem(MapleClient c, int itemid, int stimulantid, Map<Integer, Short> reagentids) {
-        if (stimulantid != -1 && !ii.rollSuccessChance(90.0)) {
+        if (stimulantid != -1 && !MapleItemInformationProvider.rollSuccessChance(90.0)) {
             return false;
         }
 
         Item item = ii.getEquipById(itemid);
-        if (item == null) return false;
+        if (item == null) {
+            return false;
+        }
 
         Equip eqp = (Equip) item;
-        if (ItemConstants.isAccessory(item.getItemId()) && eqp.getUpgradeSlots() <= 0) eqp.setUpgradeSlots(3);
+        if (ItemConstants.isAccessory(item.getItemId()) && eqp.getUpgradeSlots() <= 0) {
+            eqp.setUpgradeSlots(3);
+        }
 
         if (YamlConfig.config.server.USE_ENHANCED_CRAFTING == true) {
             if (!(c.getPlayer().isGM() && YamlConfig.config.server.USE_PERFECT_GM_SCROLL)) {
@@ -410,18 +405,13 @@ public class MakerProcessor {
                                     break;
                             }
 
-                            Integer d = stats.get(stat);
-                            if (d == null) {
-                                stats.put(stat, reagentBuff.getRight() * r.getValue());
-                            } else {
-                                stats.put(stat, d + (reagentBuff.getRight() * r.getValue()));
-                            }
+                            stats.merge(stat, reagentBuff.getRight() * r.getValue(), Integer::sum);
                         }
                     }
                 }
             }
 
-            ii.improveEquipStats(eqp, stats);
+            MapleItemInformationProvider.improveEquipStats(eqp, stats);
 
             for (Short sh : randStat) {
                 ii.scrollOptionEquipWithChaos(eqp, sh, false);

@@ -93,7 +93,9 @@ public class MapleQuest {
                 autoComplete = MapleDataTool.getInt("autoComplete", reqInfo, 0) == 1;
 
                 int medalid = MapleDataTool.getInt("viewMedalItem", reqInfo, 0);
-                if (medalid != 0) medals.put(this.id, medalid);
+                if (medalid != 0) {
+                    medals.put(this.id, medalid);
+                }
             } else {
                 System.out.println("no data " + id);
             }
@@ -148,8 +150,9 @@ public class MapleQuest {
                 MapleQuestActionType questActionType = MapleQuestActionType.getByWZName(startAct.getName());
                 MapleQuestAction act = this.getAction(questActionType, startAct);
 
-                if (act == null)
+                if (act == null) {
                     continue;
+                }
 
                 startActs.put(questActionType, act);
             }
@@ -160,8 +163,9 @@ public class MapleQuest {
                 MapleQuestActionType questActionType = MapleQuestActionType.getByWZName(completeAct.getName());
                 MapleQuestAction act = this.getAction(questActionType, completeAct);
 
-                if (act == null)
+                if (act == null) {
                     continue;
+                }
 
                 completeActs.put(questActionType, act);
             }
@@ -187,9 +191,7 @@ public class MapleQuest {
     }
 
     public static void clearCache(int quest) {
-        if (quests.containsKey(quest)) {
-            quests.remove(quest);
-        }
+        quests.remove(quest);
     }
 
     public static void clearCache() {
@@ -247,7 +249,9 @@ public class MapleQuest {
     }
 
     public boolean isSameDayRepeatable() {
-        if (!repeatable) return false;
+        if (!repeatable) {
+            return false;
+        }
 
         IntervalRequirement ir = (IntervalRequirement) startReqs.get(MapleQuestRequirementType.INTERVAL);
         return ir.getInterval() < YamlConfig.config.server.QUEST_POINT_REPEATABLE_INTERVAL * 60 * 60 * 1000;
@@ -397,7 +401,7 @@ public class MapleQuest {
         newStatus.setCompleted(chr.getQuest(this).getCompleted());
 
         if (timeLimit > 0) {
-            newStatus.setExpirationTime(System.currentTimeMillis() + (timeLimit * 1000));
+            newStatus.setExpirationTime(System.currentTimeMillis() + (timeLimit * 1000L));
             chr.questTimeLimit(this, timeLimit);
         }
         if (timeLimit2 > 0) {
@@ -436,8 +440,9 @@ public class MapleQuest {
 
     public int getStartItemAmountNeeded(int itemid) {
         MapleQuestRequirement req = startReqs.get(MapleQuestRequirementType.ITEM);
-        if (req == null)
+        if (req == null) {
             return Integer.MIN_VALUE;
+        }
 
         ItemRequirement ireq = (ItemRequirement) req;
         return ireq.getItemAmountNeeded(itemid, false);
@@ -445,8 +450,9 @@ public class MapleQuest {
 
     public int getCompleteItemAmountNeeded(int itemid) {
         MapleQuestRequirement req = completeReqs.get(MapleQuestRequirementType.ITEM);
-        if (req == null)
+        if (req == null) {
             return Integer.MAX_VALUE;
+        }
 
         ItemRequirement ireq = (ItemRequirement) req;
         return ireq.getItemAmountNeeded(itemid, true);
@@ -454,8 +460,9 @@ public class MapleQuest {
 
     public int getMobAmountNeeded(int mid) {
         MapleQuestRequirement req = completeReqs.get(MapleQuestRequirementType.MOB);
-        if (req == null)
+        if (req == null) {
             return 0;
+        }
 
         MobRequirement mreq = (MobRequirement) req;
 

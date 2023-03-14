@@ -354,9 +354,9 @@ public enum SendOpcode {
     MAPLELIFE_ERROR(0x15E),
     VICIOUS_HAMMER(0x162),
     VEGA_SCROLL(0x166);
-    private int code = -2;
+    private int code;
 
-    private SendOpcode(int code) {
+    SendOpcode(int code) {
         this.code = code;
     }
 

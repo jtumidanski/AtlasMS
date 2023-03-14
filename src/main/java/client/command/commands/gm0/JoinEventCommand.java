@@ -44,8 +44,9 @@ public class JoinEventCommand extends Command {
                     if (event.getLimit() > 0) {
                         player.saveLocation("EVENT");
 
-                        if (event.getMapId() == 109080000 || event.getMapId() == 109060001)
+                        if (event.getMapId() == 109080000 || event.getMapId() == 109060001) {
                             player.setTeam(event.getLimit() % 2);
+                        }
 
                         event.minusLimit();
 

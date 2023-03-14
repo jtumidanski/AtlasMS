@@ -297,8 +297,9 @@ public class FredrickProcessor {
                     if (deleteFredrickItems(chr.getId())) {
                         MapleHiredMerchant merchant = chr.getHiredMerchant();
 
-                        if (merchant != null)
+                        if (merchant != null) {
                             merchant.clearItems();
+                        }
 
                         for (Pair<Item, MapleInventoryType> it : items) {
                             Item item = it.getLeft();

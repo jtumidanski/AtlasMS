@@ -209,7 +209,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     public void addSummonedMob(MapleMonster mob) {
         Set<Integer> calledOids = this.calledMobOids;
         if (calledOids == null) {
-            calledOids = Collections.synchronizedSet(new HashSet<Integer>());
+            calledOids = Collections.synchronizedSet(new HashSet<>());
             this.calledMobOids = calledOids;
         }
 
@@ -407,16 +407,18 @@ public class MapleMonster extends AbstractLoadedMapleLife {
         } else if (!isBoss()) {
             int remainingHP = (int) Math.max(1, hp.get() * 100f / getMaxHp());
             byte[] packet = MaplePacketCreator.showMonsterHP(getObjectId(), remainingHP);
-            if (from.getParty() != null) {
-                for (MaplePartyCharacter mpc : from.getParty().getMembers()) {
-                    MapleCharacter member = from.getMap().getCharacterById(mpc.getId()); // god bless
-                    if (member != null) {
-                        member.announce(packet.clone()); // clone it just in case of crypto
-                    }
-                }
-            } else {
+            if (from.getParty().isEmpty()) {
                 from.announce(packet);
+                return;
             }
+
+            from.getParty()
+                    .map(MapleParty::getMembers)
+                    .orElse(Collections.emptyList()).stream()
+                    .map(MaplePartyCharacter::getId)
+                    .map(id -> from.getMap().getCharacterById(id))
+                    .filter(Objects::nonNull)
+                    .forEach(c -> c.announce(packet.clone()));
         }
     }
 
@@ -524,7 +526,9 @@ public class MapleMonster extends AbstractLoadedMapleLife {
 
     private void distributePlayerExperience(MapleCharacter chr, float exp, float partyBonusMod, int totalPartyLevel, boolean highestPartyDamager, boolean whiteExpGain, boolean hasPartySharers) {
         float playerExp = (YamlConfig.config.server.EXP_SPLIT_COMMON_MOD * chr.getLevel()) / totalPartyLevel;
-        if (highestPartyDamager) playerExp += YamlConfig.config.server.EXP_SPLIT_MVP_MOD;
+        if (highestPartyDamager) {
+            playerExp += YamlConfig.config.server.EXP_SPLIT_MVP_MOD;
+        }
 
         playerExp *= exp;
         float bonusExp = partyBonusMod * playerExp;
@@ -603,12 +607,12 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             if (chr != null) {
                 long damage = e.getValue().longValue();
 
-                MapleParty p = chr.getParty();
-                if (p != null) {
-                    Map<MapleCharacter, Long> partyParticipation = partyExpDist.get(p);
+                Optional<MapleParty> p = chr.getParty();
+                if (p.isPresent()) {
+                    Map<MapleCharacter, Long> partyParticipation = partyExpDist.get(p.get());
                     if (partyParticipation == null) {
                         partyParticipation = new HashMap<>(6);
-                        partyExpDist.put(p, partyParticipation);
+                        partyExpDist.put(p.get(), partyParticipation);
 
                         totalEntries += 1;
                     }
@@ -792,7 +796,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
                             reviveMap.spawnMonster(mob);
 
                             if (mob.getId() >= 8810010 && mob.getId() <= 8810017 && reviveMap.isHorntailDefeated()) {
-                                boolean htKilled = false;
+                                boolean htKilled;
                                 MapleMonster ht = reviveMap.getMonsterById(8810018);
 
                                 if (ht != null) {
@@ -847,7 +851,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
                 MapleMap map = m.getMap();
                 List<MapleCharacter> chrList = map.getAllPlayers();
                 if (!chrList.isEmpty()) {
-                    MapleCharacter chr = (MapleCharacter) chrList.get(0);
+                    MapleCharacter chr = chrList.get(0);
 
                     EventInstanceManager eim = map.getEventInstance();
                     if (eim != null) {
@@ -952,7 +956,9 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     private void giveFamilyRep(MapleFamilyEntry entry) {
         if (entry != null) {
             int repGain = isBoss() ? YamlConfig.config.server.FAMILY_REP_PER_BOSS_KILL : YamlConfig.config.server.FAMILY_REP_PER_KILL;
-            if (getMaxHp() <= 1) repGain = 0; //don't count trash mobs
+            if (getMaxHp() <= 1) {
+                repGain = 0; //don't count trash mobs
+            }
             entry.giveReputationToSenior(repGain, true);
         }
     }
@@ -991,7 +997,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     }
 
     public boolean isControllerHasAggro() {
-        return fake ? false : controllerHasAggro;
+        return !fake && controllerHasAggro;
     }
 
     private void setControllerHasAggro(boolean controllerHasAggro) {
@@ -1001,7 +1007,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     }
 
     public boolean isControllerKnowsAboutAggro() {
-        return fake ? false : controllerKnowsAboutAggro;
+        return !fake && controllerKnowsAboutAggro;
     }
 
     private void setControllerKnowsAboutAggro(boolean controllerKnowsAboutAggro) {
@@ -1208,7 +1214,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
         if (poison) {
             int poisonLevel = from.getSkillLevel(status.getSkill());
             int poisonDamage = Math.min(Short.MAX_VALUE, (int) (getMaxHp() / (70.0 - poisonLevel) + 0.999));
-            status.setValue(MonsterStatus.POISON, Integer.valueOf(poisonDamage));
+            status.setValue(MonsterStatus.POISON, poisonDamage);
             animationTime = broadcastStatusEffect(status);
 
             overtimeAction = new DamageTask(poisonDamage, from, status, 0);
@@ -1217,11 +1223,11 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             if (from.getJob() == MapleJob.NIGHTLORD || from.getJob() == MapleJob.SHADOWER || from.getJob().isA(MapleJob.NIGHTWALKER3)) {
                 int poisonLevel, matk, jobid = from.getJob().getId();
                 int skillid = (jobid == 412 ? NightLord.VENOMOUS_STAR : (jobid == 422 ? Shadower.VENOMOUS_STAB : NightWalker.VENOM));
-                poisonLevel = from.getSkillLevel(SkillFactory.getSkill(skillid));
+                poisonLevel = from.getSkillLevel(SkillFactory.getSkill(skillid).orElseThrow());
                 if (poisonLevel <= 0) {
                     return false;
                 }
-                matk = SkillFactory.getSkill(skillid).getEffect(poisonLevel).getMatk();
+                matk = SkillFactory.getSkill(skillid).orElseThrow().getEffect(poisonLevel).getMatk();
                 int luk = from.getLuk();
                 int maxDmg = (int) Math.ceil(Math.min(Short.MAX_VALUE, 0.2 * luk * matk));
                 int minDmg = (int) Math.ceil(Math.min(Short.MAX_VALUE, 0.1 * luk * matk));
@@ -1234,8 +1240,8 @@ public class MapleMonster extends AbstractLoadedMapleLife {
                     poisonDamage += (Randomizer.nextInt(gap) + minDmg);
                 }
                 poisonDamage = Math.min(Short.MAX_VALUE, poisonDamage);
-                status.setValue(MonsterStatus.VENOMOUS_WEAPON, Integer.valueOf(poisonDamage));
-                status.setValue(MonsterStatus.POISON, Integer.valueOf(poisonDamage));
+                status.setValue(MonsterStatus.VENOMOUS_WEAPON, poisonDamage);
+                status.setValue(MonsterStatus.POISON, poisonDamage);
                 animationTime = broadcastStatusEffect(status);
 
                 overtimeAction = new DamageTask(poisonDamage, from, status, 0);
@@ -1253,11 +1259,11 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             overtimeDelay = 3500;
             */
         } else if (status.getSkill().getId() == 4121004 || status.getSkill().getId() == 4221004) { // Ninja Ambush
-            final Skill skill = SkillFactory.getSkill(status.getSkill().getId());
+            final Skill skill = SkillFactory.getSkill(status.getSkill().getId()).orElseThrow();
             final byte level = from.getSkillLevel(skill);
             final int damage = (int) ((from.getStr() + from.getLuk()) * ((3.7 * skill.getEffect(level).getDamage()) / 100));
 
-            status.setValue(MonsterStatus.NINJA_AMBUSH, Integer.valueOf(damage));
+            status.setValue(MonsterStatus.NINJA_AMBUSH, damage);
             animationTime = broadcastStatusEffect(status);
 
             overtimeAction = new DamageTask(damage, from, status, 2);
@@ -1282,7 +1288,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     }
 
     public final void dispelSkill(final MobSkill skillId) {
-        List<MonsterStatus> toCancel = new ArrayList<MonsterStatus>();
+        List<MonsterStatus> toCancel = new ArrayList<>();
         for (Entry<MonsterStatus, MonsterStatusEffect> effects : stati.entrySet()) {
             MonsterStatusEffect mse = effects.getValue();
             if (mse.getMobSkill() != null && mse.getMobSkill().getSkillId() == skillId.getSkillId()) { //not checking for level.
@@ -1861,7 +1867,9 @@ public class MapleMonster extends AbstractLoadedMapleLife {
         }
 
         if (chrController != null) { // this can/should only happen when a hidden gm attacks the monster
-            if (!this.isFake()) chrController.announce(MaplePacketCreator.stopControllingMonster(this.getObjectId()));
+            if (!this.isFake()) {
+                chrController.announce(MaplePacketCreator.stopControllingMonster(this.getObjectId()));
+            }
             chrController.stopControllingMonster(this);
         }
 
@@ -2168,12 +2176,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     }
 
     private void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {

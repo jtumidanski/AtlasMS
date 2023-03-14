@@ -40,21 +40,20 @@ public class MaxSkillCommand extends Command {
         MapleCharacter player = c.getPlayer();
         for (MapleData skill_ : MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/" + "String.wz")).getData("Skill.img").getChildren()) {
             try {
-                Skill skill = SkillFactory.getSkill(Integer.parseInt(skill_.getName()));
-                player.changeSkillLevel(skill, (byte) skill.getMaxLevel(), skill.getMaxLevel(), -1);
+                SkillFactory.getSkill(Integer.parseInt(skill_.getName()))
+                        .ifPresent(s -> player.changeSkillLevel(s, (byte) s.getMaxLevel(), s.getMaxLevel(), -1));
             } catch (NumberFormatException nfe) {
                 nfe.printStackTrace();
                 break;
-            } catch (NullPointerException npe) {
             }
         }
 
         if (player.getJob().isA(MapleJob.ARAN1) || player.getJob().isA(MapleJob.LEGEND)) {
-            Skill skill = SkillFactory.getSkill(5001005);
-            player.changeSkillLevel(skill, (byte) -1, -1, -1);
+            SkillFactory.getSkill(5001005)
+                    .ifPresent(s -> player.changeSkillLevel(s, (byte) -1, -1, -1));
         } else {
-            Skill skill = SkillFactory.getSkill(21001001);
-            player.changeSkillLevel(skill, (byte) -1, -1, -1);
+            SkillFactory.getSkill(21001001)
+                    .ifPresent(s -> player.changeSkillLevel(s, (byte) -1, -1, -1));
         }
 
         player.yellowMessage("Skills maxed out.");

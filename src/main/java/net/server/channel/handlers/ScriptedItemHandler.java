@@ -42,7 +42,9 @@ public final class ScriptedItemHandler extends AbstractMaplePacketHandler {
 
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         ScriptedItem info = ii.getScriptedItemInfo(itemId);
-        if (info == null) return;
+        if (info == null) {
+            return;
+        }
 
         Item item = c.getPlayer().getInventory(ItemConstants.getInventoryType(itemId)).getItem(itemSlot);
         if (item == null || item.getItemId() != itemId || item.getQuantity() < 1) {

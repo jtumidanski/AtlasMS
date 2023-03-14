@@ -34,7 +34,7 @@ public class MatchCheckerListenerFactory {
 
         private final AbstractMatchCheckerListener listener;
 
-        private MatchCheckerType(AbstractMatchCheckerListener listener) {
+        MatchCheckerType(AbstractMatchCheckerListener listener) {
             this.listener = listener;
         }
 

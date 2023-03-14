@@ -54,7 +54,9 @@ public class ReactorScriptManager extends AbstractScriptManager {
     public void onHit(MapleClient c, MapleReactor reactor) {
         try {
             Invocable iv = initializeInvocable(c, reactor);
-            if (iv == null) return;
+            if (iv == null) {
+                return;
+            }
 
             ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
             iv.invokeFunction("hit");
@@ -69,7 +71,9 @@ public class ReactorScriptManager extends AbstractScriptManager {
     public void act(MapleClient c, MapleReactor reactor) {
         try {
             Invocable iv = initializeInvocable(c, reactor);
-            if (iv == null) return;
+            if (iv == null) {
+                return;
+            }
 
             ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
             iv.invokeFunction("act");
@@ -117,7 +121,9 @@ public class ReactorScriptManager extends AbstractScriptManager {
     private void touching(MapleClient c, MapleReactor reactor, boolean touching) {
         try {
             Invocable iv = initializeInvocable(c, reactor);
-            if (iv == null) return;
+            if (iv == null) {
+                return;
+            }
 
             ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
             if (touching) {

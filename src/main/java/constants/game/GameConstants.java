@@ -26,7 +26,7 @@ public class GameConstants {
             MapleDisease.SEAL, MapleDisease.DARKNESS, MapleDisease.WEAKEN, MapleDisease.CURSE};
     public static final int MAX_FIELD_MOB_DAMAGE = getMaxObstacleMobDamageFromWz() * 2;
     // "goto" command for players
-    public static final HashMap<String, Integer> GOTO_TOWNS = new HashMap<String, Integer>() {{
+    public static final HashMap<String, Integer> GOTO_TOWNS = new HashMap<>() {{
         put("southperry", 60000);
         put("amherst", 1000000);
         put("henesys", 100000000);
@@ -65,7 +65,7 @@ public class GameConstants {
         put("mushking", 106020000);
     }};
     // "goto" command for only-GMs
-    public static final HashMap<String, Integer> GOTO_AREAS = new HashMap<String, Integer>() {{
+    public static final HashMap<String, Integer> GOTO_AREAS = new HashMap<>() {{
         put("gmmap", 180000000);
         put("excavation", 990000000);
         put("mushmom", 100000005);
@@ -86,7 +86,7 @@ public class GameConstants {
         put("bosspq", 970030000);
         put("fm", 910000000);
     }};
-    public static final List<String> GAME_SONGS = new ArrayList<String>(170) {{
+    public static final List<String> GAME_SONGS = new ArrayList<>(170) {{
         add("Jukebox/Congratulation");
         add("Bgm00/SleepyWood");
         add("Bgm00/FloralLife");
@@ -297,10 +297,9 @@ public class GameConstants {
         String name = jobNames.get(jobid);
 
         if (name == null) {
-            MapleJob job = MapleJob.getById(jobid);
-
-            if (job != null) {
-                name = job.name().toLowerCase();
+            Optional<MapleJob> job = MapleJob.getById(jobid);
+            if (job.isPresent()) {
+                name = job.get().name().toLowerCase();
                 name = name.replaceAll("[*0-9]", "");
                 name = name.substring(0, 1).toUpperCase() + name.substring(1);
             } else {
@@ -500,8 +499,8 @@ public class GameConstants {
     private static boolean isInBranchJobTree(int skillJobId, int jobId, int branchType) {
         int branch = (int) (Math.pow(10, branchType));
 
-        int skillBranch = (int) (skillJobId / branch) * branch;
-        int jobBranch = (int) (jobId / branch) * branch;
+        int skillBranch = (skillJobId / branch) * branch;
+        int jobBranch = (jobId / branch) * branch;
 
         return skillBranch == jobBranch;
     }
@@ -509,8 +508,8 @@ public class GameConstants {
     private static boolean hasDivergedBranchJobTree(int skillJobId, int jobId, int branchType) {
         int branch = (int) (Math.pow(10, branchType));
 
-        int skillBranch = (int) (skillJobId / branch);
-        int jobBranch = (int) (jobId / branch);
+        int skillBranch = skillJobId / branch;
+        int jobBranch = jobId / branch;
 
         return skillBranch != jobBranch && skillBranch % 10 != 0;
     }
@@ -520,8 +519,12 @@ public class GameConstants {
 
         if (!isInBranchJobTree(skillJob, jobId, 0)) {
             for (int i = 1; i <= 3; i++) {
-                if (hasDivergedBranchJobTree(skillJob, jobId, i)) return false;
-                if (isInBranchJobTree(skillJob, jobId, i)) return (skillJob <= jobId);
+                if (hasDivergedBranchJobTree(skillJob, jobId, i)) {
+                    return false;
+                }
+                if (isInBranchJobTree(skillJob, jobId, i)) {
+                    return (skillJob <= jobId);
+                }
             }
         } else {
             return (skillJob <= jobId);

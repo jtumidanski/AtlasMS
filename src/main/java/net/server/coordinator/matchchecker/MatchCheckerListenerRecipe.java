@@ -23,5 +23,5 @@ package net.server.coordinator.matchchecker;
  * @author Ronan
  */
 public interface MatchCheckerListenerRecipe {
-    public AbstractMatchCheckerListener getListener();
+    AbstractMatchCheckerListener getListener();
 }

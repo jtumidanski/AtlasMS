@@ -78,7 +78,7 @@ public class WZFile implements MapleDataProvider {
         int entries = WZTool.readValue(lea);
         for (int i = 0; i < entries; i++) {
             byte marker = lea.readByte();
-            String name = null;
+            String name;
             int size, checksum;
             switch (marker) {
                 case 0x02:
@@ -109,7 +109,7 @@ public class WZFile implements MapleDataProvider {
     }
 
     public WZIMGFile getImgFile(String path) throws IOException {
-        String segments[] = path.split("/");
+        String[] segments = path.split("/");
         WZDirectoryEntry dir = root;
         for (int x = 0; x < segments.length - 1; x++) {
             dir = (WZDirectoryEntry) dir.getEntry(segments[x]);
@@ -132,8 +132,7 @@ public class WZFile implements MapleDataProvider {
             if (imgFile == null) {
                 return null;
             }
-            MapleData ret = imgFile.getRoot();
-            return ret;
+            return imgFile.getRoot();
         } catch (IOException e) {
             e.printStackTrace();
         }

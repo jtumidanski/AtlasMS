@@ -39,6 +39,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public final class AdminCommandHandler extends AbstractMaplePacketHandler {
 
@@ -62,11 +63,16 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
                 c.announce(MaplePacketCreator.enableActions());
                 break;
             case 0x01: { // /d (inv)
-                byte type = slea.readByte();
-                MapleInventory in = c.getPlayer().getInventory(MapleInventoryType.getByType(type));
+                byte typeIndex = slea.readByte();
+                Optional<MapleInventoryType> type = MapleInventoryType.getByType(typeIndex);
+                if (type.isEmpty()) {
+                    return;
+                }
+
+                MapleInventory in = c.getPlayer().getInventory(type.get());
                 for (short i = 1; i <= in.getSlotLimit(); i++) { //TODO What is the point of this loop?
                     if (in.getItem(i) != null) {
-                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.getByType(type), i, in.getItem(i).getQuantity(), false);
+                        MapleInventoryManipulator.removeFromSlot(c, type.get(), i, in.getItem(i).getQuantity(), false);
                     }
                     return;
                 }
@@ -127,13 +133,7 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
             case 0x15: // Kill
                 int mobToKill = slea.readInt();
                 int amount = slea.readInt();
-                List<MapleMapObject> monsterx = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
-                for (int x = 0; x < amount; x++) {
-                    MapleMonster monster = (MapleMonster) monsterx.get(x);
-                    if (monster.getId() == mobToKill) {
-                        c.getPlayer().getMap().killMonster(monster, c.getPlayer(), true);
-                    }
-                }
+                killMonster(c, mobToKill, amount);
                 break;
             case 0x16: // Questreset
                 MapleQuest.getInstance(slea.readShort()).reset(c.getPlayer());
@@ -148,7 +148,7 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
             case 0x18: // Maple & Mobhp
                 int mobHp = slea.readInt();
                 c.getPlayer().dropMessage("Monsters HP");
-                List<MapleMapObject> monsters = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
+                List<MapleMapObject> monsters = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
                 for (MapleMapObject mobs : monsters) {
                     MapleMonster monster = (MapleMonster) mobs;
                     if (monster.getId() == mobHp) {
@@ -177,8 +177,18 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
                 }
                 break;
             default:
-                System.out.println("New GM packet encountered (MODE : " + mode + ": " + slea.toString());
+                System.out.println("New GM packet encountered (MODE : " + mode + ": " + slea);
                 break;
+        }
+    }
+
+    private static void killMonster(MapleClient c, int mobToKill, int amount) {
+        List<MapleMapObject> monsterx = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
+        for (int x = 0; x < amount; x++) {
+            MapleMonster monster = (MapleMonster) monsterx.get(x);
+            if (monster.getId() == mobToKill) {
+                c.getPlayer().getMap().killMonster(monster, c.getPlayer(), true);
+            }
         }
     }
 }

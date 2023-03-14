@@ -28,6 +28,7 @@ import net.server.handlers.KeepAliveHandler;
 import net.server.handlers.LoginRequiringNoOpHandler;
 import net.server.handlers.login.*;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,12 +38,10 @@ public final class PacketProcessor {
     private MaplePacketHandler[] handlers;
 
     private PacketProcessor() {
-        int maxRecvOp = 0;
-        for (RecvOpcode op : RecvOpcode.values()) {
-            if (op.getValue() > maxRecvOp) {
-                maxRecvOp = op.getValue();
-            }
-        }
+        int maxRecvOp = Arrays.stream(RecvOpcode.values())
+                .mapToInt(RecvOpcode::getValue)
+                .max()
+                .orElse(0);
         handlers = new MaplePacketHandler[maxRecvOp + 1];
     }
 

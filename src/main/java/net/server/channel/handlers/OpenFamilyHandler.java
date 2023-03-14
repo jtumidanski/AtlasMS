@@ -32,7 +32,9 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class OpenFamilyHandler extends AbstractMaplePacketHandler {
     @Override
     public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        if (!YamlConfig.config.server.USE_FAMILY_SYSTEM) return;
+        if (!YamlConfig.config.server.USE_FAMILY_SYSTEM) {
+            return;
+        }
         MapleCharacter chr = c.getPlayer();
         c.announce(MaplePacketCreator.getFamilyInfo(chr.getFamilyEntry()));
     }

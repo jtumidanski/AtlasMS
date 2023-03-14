@@ -16,7 +16,7 @@ public enum MapleFamilyEntitlement {
     private final int usageLimit, repCost;
     private final String name, description;
 
-    private MapleFamilyEntitlement(int usageLimit, int repCost, String name, String description) {
+    MapleFamilyEntitlement(int usageLimit, int repCost, String name, String description) {
         this.usageLimit = usageLimit;
         this.repCost = repCost;
         this.name = name;

@@ -34,7 +34,7 @@ public class MaplePortalFactory {
     }
 
     public MaplePortal makePortal(int type, MapleData portal) {
-        MapleGenericPortal ret = null;
+        MapleGenericPortal ret;
         if (type == MaplePortal.MAP_PORTAL) {
             ret = new MapleMapPortal();
         } else {

@@ -32,7 +32,7 @@ public class DueyPackage {
     private int mesos = 0;
     private String message = null;
     private Calendar timestamp;
-    private int packageId = 0;
+    private int packageId;
 
     public DueyPackage(int pId, Item item) {
         this.item = item;

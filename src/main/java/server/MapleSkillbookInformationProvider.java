@@ -146,7 +146,7 @@ public class MapleSkillbookInformationProvider {
     }
 
     private static void fetchSkillbooksFromReactors() {
-        Connection con = null;
+        Connection con;
         try {
             con = DatabaseConnection.getConnection();
 

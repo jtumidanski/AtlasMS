@@ -43,7 +43,7 @@ public class ThreadManager {
         RejectedExecutionHandler reh = new RejectedExecutionHandlerImpl();
         ThreadFactory tf = Executors.defaultThreadFactory();
 
-        tpe = new ThreadPoolExecutor(20, 1000, 77, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(50), tf, reh);
+        tpe = new ThreadPoolExecutor(20, 1000, 77, TimeUnit.SECONDS, new ArrayBlockingQueue<>(50), tf, reh);
     }
 
     public void stop() {

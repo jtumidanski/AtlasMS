@@ -197,12 +197,16 @@ public class MaplePet extends Item {
         //will NOT increase pet's closeness if tried to feed pet with 100% fullness
         if (fullness < 100 || incFullness == 0) {   //incFullness == 0: command given
             int newFullness = fullness + incFullness;
-            if (newFullness > 100) newFullness = 100;
+            if (newFullness > 100) {
+                newFullness = 100;
+            }
             fullness = newFullness;
 
             if (incCloseness > 0 && closeness < 30000) {
                 int newCloseness = closeness + incCloseness;
-                if (newCloseness > 30000) newCloseness = 30000;
+                if (newCloseness > 30000) {
+                    newCloseness = 30000;
+                }
 
                 closeness = newCloseness;
                 while (newCloseness >= ExpTable.getClosenessNeededForLevel(level)) {
@@ -215,7 +219,9 @@ public class MaplePet extends Item {
             enjoyed = true;
         } else {
             int newCloseness = closeness - 1;
-            if (newCloseness < 0) newCloseness = 0;
+            if (newCloseness < 0) {
+                newCloseness = 0;
+            }
 
             closeness = newCloseness;
             if (level > 1 && newCloseness < ExpTable.getClosenessNeededForLevel(level - 1)) {
@@ -229,8 +235,9 @@ public class MaplePet extends Item {
         saveToDb();
 
         Item petz = owner.getInventory(MapleInventoryType.CASH).getItem(getPosition());
-        if (petz != null)
+        if (petz != null) {
             owner.forceUpdateItem(petz);
+        }
     }
 
     public int getFullness() {
@@ -286,8 +293,9 @@ public class MaplePet extends Item {
         saveToDb();
 
         Item petz = owner.getInventory(MapleInventoryType.CASH).getItem(getPosition());
-        if (petz != null)
+        if (petz != null) {
             owner.forceUpdateItem(petz);
+        }
     }
 
     public void removePetFlag(MapleCharacter owner, PetFlag flag) {
@@ -295,8 +303,9 @@ public class MaplePet extends Item {
         saveToDb();
 
         Item petz = owner.getInventory(MapleInventoryType.CASH).getItem(getPosition());
-        if (petz != null)
+        if (petz != null) {
             owner.forceUpdateItem(petz);
+        }
     }
 
     public Pair<Integer, Boolean> canConsume(int itemId) {
@@ -307,7 +316,7 @@ public class MaplePet extends Item {
         for (LifeMovementFragment move : movement) {
             if (move instanceof LifeMovement) {
                 if (move instanceof AbsoluteLifeMovement) {
-                    this.setPos(((LifeMovement) move).getPosition());
+                    this.setPos(move.getPosition());
                 }
                 this.setStance(((LifeMovement) move).getNewstate());
             }
@@ -319,7 +328,7 @@ public class MaplePet extends Item {
 
         private int i;
 
-        private PetFlag(int i) {
+        PetFlag(int i) {
             this.i = i;
         }
 

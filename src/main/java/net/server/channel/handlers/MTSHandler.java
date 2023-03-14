@@ -50,7 +50,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
 
     private static byte[] getMTS(int tab, int type, int page) {
         List<MTSItemInfo> items = new ArrayList<>();
-        Connection con = null;
+        Connection con;
         PreparedStatement ps;
         ResultSet rs;
         int pages = 0;
@@ -73,7 +73,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 if (rs.getInt("type") != 1) {
                     Item i = new Item(rs.getInt("itemid"), (short) 0, (short) rs.getInt("quantity"));
                     i.setOwner(rs.getString("owner"));
-                    items.add(new MTSItemInfo((Item) i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 } else {
                     Equip equip = new Equip(rs.getInt("itemid"), (byte) rs.getInt("position"), -1);
                     equip.setOwner(rs.getString("owner"));
@@ -102,7 +102,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                     equip.setFlag((short) rs.getInt("flag"));
                     equip.setExpiration(rs.getLong("expiration"));
                     equip.setGiftFrom(rs.getString("giftFrom"));
-                    items.add(new MTSItemInfo((Item) equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 }
             }
             rs.close();
@@ -184,7 +184,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 MapleInventoryType invType = ItemConstants.getInventoryType(itemid);
                 Item i = c.getPlayer().getInventory(invType).getItem(slot).copy();
                 if (i != null && c.getPlayer().getMeso() >= 5000) {
-                    Connection con = null;
+                    Connection con;
                     try {
                         con = DatabaseConnection.getConnection();
 
@@ -239,10 +239,10 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                             date += day + "";
                         }
                         if (!i.getInventoryType().equals(MapleInventoryType.EQUIP)) {
-                            Item item = (Item) i;
+                            Item item = i;
                             ps = con.prepareStatement("INSERT INTO mts_items (tab, type, itemid, quantity, expiration, giftFrom, seller, price, owner, sellername, sell_ends) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                             ps.setInt(1, 1);
-                            ps.setInt(2, (int) invType.getType());
+                            ps.setInt(2, invType.getType());
                             ps.setInt(3, item.getItemId());
                             ps.setInt(4, quantity);
                             ps.setLong(5, item.getExpiration());
@@ -256,7 +256,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                             Equip equip = (Equip) i;
                             ps = con.prepareStatement("INSERT INTO mts_items (tab, type, itemid, quantity, expiration, giftFrom, seller, price, upgradeslots, level, str, dex, `int`, luk, hp, mp, watk, matk, wdef, mdef, acc, avoid, hands, speed, jump, locked, owner, sellername, sell_ends, vicious, flag, itemexp, itemlevel, ringid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                             ps.setInt(1, 1);
-                            ps.setInt(2, (int) invType.getType());
+                            ps.setInt(2, invType.getType());
                             ps.setInt(3, equip.getItemId());
                             ps.setInt(4, quantity);
                             ps.setLong(5, equip.getExpiration());
@@ -348,7 +348,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
             } else if (op == 7) { //cancel sale
                 int id = slea.readInt(); //id of the item
-                Connection con = null;
+                Connection con;
                 try {
                     con = DatabaseConnection.getConnection();
                     PreparedStatement ps = con.prepareStatement("UPDATE mts_items SET transfer = 1 WHERE id = ? AND seller = ?");
@@ -370,7 +370,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
             } else if (op == 8) { //transfer item from transfer inv.
                 int id = slea.readInt(); //id of the item
-                Connection con = null;
+                Connection con;
                 PreparedStatement ps;
                 ResultSet rs;
                 try {
@@ -472,7 +472,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
             } else if (op == 10) { //delete from cart
                 int id = slea.readInt(); //id of the item
-                Connection con = null;
+                Connection con;
                 try {
                     con = DatabaseConnection.getConnection();
                     try (PreparedStatement ps = con.prepareStatement("DELETE FROM mts_cart WHERE itemid = ? AND cid = ?")) {
@@ -493,7 +493,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
             } else if (op == 14) { //buy auction item now
             } else if (op == 16) { //buy
                 int id = slea.readInt(); //id of the item
-                Connection con = null;
+                Connection con;
                 PreparedStatement ps;
                 ResultSet rs;
                 try {
@@ -557,7 +557,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 }
             } else if (op == 17) { //buy from cart
                 int id = slea.readInt(); //id of the item
-                Connection con = null;
+                Connection con;
                 PreparedStatement ps;
                 ResultSet rs;
                 try {
@@ -616,7 +616,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                     c.announce(MaplePacketCreator.MTSFailBuy());
                 }
             } else {
-                System.out.println("Unhandled OP(MTS): " + op + " Packet: " + slea.toString());
+                System.out.println("Unhandled OP(MTS): " + op + " Packet: " + slea);
             }
         } else {
             c.announce(MaplePacketCreator.showMTSCash(c.getPlayer()));
@@ -625,7 +625,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
 
     public List<MTSItemInfo> getNotYetSold(int cid) {
         List<MTSItemInfo> items = new ArrayList<>();
-        Connection con = null;
+        Connection con;
         PreparedStatement ps;
         ResultSet rs;
         try {
@@ -637,7 +637,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 if (rs.getInt("type") != 1) {
                     Item i = new Item(rs.getInt("itemid"), (byte) 0, (short) rs.getInt("quantity"));
                     i.setOwner(rs.getString("owner"));
-                    items.add(new MTSItemInfo((Item) i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 } else {
                     Equip equip = new Equip(rs.getInt("itemid"), (byte) rs.getInt("position"), -1);
                     equip.setOwner(rs.getString("owner"));
@@ -666,7 +666,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                     equip.setRingId(rs.getInt("ringid"));
                     equip.setExpiration(rs.getLong("expiration"));
                     equip.setGiftFrom(rs.getString("giftFrom"));
-                    items.add(new MTSItemInfo((Item) equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 }
             }
             rs.close();
@@ -680,7 +680,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
 
     public byte[] getCart(int cid) {
         List<MTSItemInfo> items = new ArrayList<>();
-        Connection con = null;
+        Connection con;
         PreparedStatement ps;
         ResultSet rs;
         int pages = 0;
@@ -697,7 +697,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                         if (rse.getInt("type") != 1) {
                             Item i = new Item(rse.getInt("itemid"), (short) 0, (short) rse.getInt("quantity"));
                             i.setOwner(rse.getString("owner"));
-                            items.add(new MTSItemInfo((Item) i, rse.getInt("price"), rse.getInt("id"), rse.getInt("seller"), rse.getString("sellername"), rse.getString("sell_ends")));
+                            items.add(new MTSItemInfo(i, rse.getInt("price"), rse.getInt("id"), rse.getInt("seller"), rse.getString("sellername"), rse.getString("sell_ends")));
                         } else {
                             Equip equip = new Equip(rse.getInt("itemid"), (byte) rse.getInt("position"), -1);
                             equip.setOwner(rse.getString("owner"));
@@ -726,7 +726,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                             equip.setFlag((short) rs.getInt("flag"));
                             equip.setExpiration(rs.getLong("expiration"));
                             equip.setGiftFrom(rs.getString("giftFrom"));
-                            items.add(new MTSItemInfo((Item) equip, rse.getInt("price"), rse.getInt("id"), rse.getInt("seller"), rse.getString("sellername"), rse.getString("sell_ends")));
+                            items.add(new MTSItemInfo(equip, rse.getInt("price"), rse.getInt("id"), rse.getInt("seller"), rse.getString("sellername"), rse.getString("sell_ends")));
                         }
                     }
                 }
@@ -753,7 +753,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
 
     public List<MTSItemInfo> getTransfer(int cid) {
         List<MTSItemInfo> items = new ArrayList<>();
-        Connection con = null;
+        Connection con;
         PreparedStatement ps;
         ResultSet rs;
         try {
@@ -765,7 +765,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 if (rs.getInt("type") != 1) {
                     Item i = new Item(rs.getInt("itemid"), (short) 0, (short) rs.getInt("quantity"));
                     i.setOwner(rs.getString("owner"));
-                    items.add(new MTSItemInfo((Item) i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 } else {
                     Equip equip = new Equip(rs.getInt("itemid"), (byte) rs.getInt("position"), -1);
                     equip.setOwner(rs.getString("owner"));
@@ -794,7 +794,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                     equip.setFlag((short) rs.getInt("flag"));
                     equip.setExpiration(rs.getLong("expiration"));
                     equip.setGiftFrom(rs.getString("giftFrom"));
-                    items.add(new MTSItemInfo((Item) equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 }
             }
             rs.close();
@@ -827,7 +827,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
         } else {
             listaitems = " AND sellername LIKE CONCAT('%','" + search + "', '%')";
         }
-        Connection con = null;
+        Connection con;
         PreparedStatement ps;
         ResultSet rs;
         int pages = 0;
@@ -850,7 +850,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 if (rs.getInt("type") != 1) {
                     Item i = new Item(rs.getInt("itemid"), (short) 0, (short) rs.getInt("quantity"));
                     i.setOwner(rs.getString("owner"));
-                    items.add(new MTSItemInfo((Item) i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(i, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 } else {
                     Equip equip = new Equip(rs.getInt("itemid"), (byte) rs.getInt("position"), -1);
                     equip.setOwner(rs.getString("owner"));
@@ -879,7 +879,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                     equip.setFlag((short) rs.getInt("flag"));
                     equip.setExpiration(rs.getLong("expiration"));
                     equip.setGiftFrom(rs.getString("giftFrom"));
-                    items.add(new MTSItemInfo((Item) equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
+                    items.add(new MTSItemInfo(equip, rs.getInt("price"), rs.getInt("id"), rs.getInt("seller"), rs.getString("sellername"), rs.getString("sell_ends")));
                 }
             }
             rs.close();

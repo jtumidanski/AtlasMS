@@ -108,7 +108,9 @@ public class RankingLoginTask implements Runnable {
             try {
                 con.rollback();
                 con.setAutoCommit(true);
-                if (!con.isClosed()) con.close();
+                if (!con.isClosed()) {
+                    con.close();
+                }
             } catch (SQLException ex2) {
                 ex2.printStackTrace();
             }

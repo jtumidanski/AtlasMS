@@ -40,7 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DebugCommand extends Command {
-    private final static String debugTypes[] = {"monster", "packet", "portal", "spawnpoint", "pos", "map", "mobsp", "event", "areas", "reactors", "servercoupons", "playercoupons", "timer", "marriage", "buff", ""};
+    private final static String[] debugTypes = {"monster", "packet", "portal", "spawnpoint", "pos", "map", "mobsp", "event", "areas", "reactors", "servercoupons", "playercoupons", "timer", "marriage", "buff", ""};
 
     {
         setDescription("");
@@ -67,7 +67,7 @@ public class DebugCommand extends Command {
                 break;
 
             case "monster":
-                List<MapleMapObject> monsters = player.getMap().getMapObjectsInRange(player.getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
+                List<MapleMapObject> monsters = player.getMap().getMapObjectsInRange(player.getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
                 for (MapleMapObject monstermo : monsters) {
                     MapleMonster monster = (MapleMonster) monstermo;
                     MapleCharacter controller = monster.getController();
@@ -81,16 +81,20 @@ public class DebugCommand extends Command {
 
             case "portal":
                 MaplePortal portal = player.getMap().findClosestPortal(player.getPosition());
-                if (portal != null)
+                if (portal != null) {
                     player.dropMessage(6, "Closest portal: " + portal.getId() + " '" + portal.getName() + "' Type: " + portal.getType() + " --> toMap: " + portal.getTargetMapId() + " scriptname: '" + portal.getScriptName() + "' state: " + (portal.getPortalState() ? 1 : 0) + ".");
-                else player.dropMessage(6, "There is no portal on this map.");
+                } else {
+                    player.dropMessage(6, "There is no portal on this map.");
+                }
                 break;
 
             case "spawnpoint":
                 SpawnPoint sp = player.getMap().findClosestSpawnpoint(player.getPosition());
-                if (sp != null)
+                if (sp != null) {
                     player.dropMessage(6, "Closest mob spawn point: " + " Position: x " + sp.getPosition().getX() + " y " + sp.getPosition().getY() + " Spawns mobid: '" + sp.getMonsterId() + "' --> canSpawn: " + !sp.getDenySpawn() + " canSpawnRightNow: " + sp.shouldSpawn() + ".");
-                else player.dropMessage(6, "There is no mob spawn point on this map.");
+                } else {
+                    player.dropMessage(6, "There is no mob spawn point on this map.");
+                }
                 break;
 
             case "pos":
@@ -106,8 +110,11 @@ public class DebugCommand extends Command {
                 break;
 
             case "event":
-                if (player.getEventInstance() == null) player.dropMessage(6, "Player currently not in an event.");
-                else player.dropMessage(6, "Current event name: " + player.getEventInstance().getName() + ".");
+                if (player.getEventInstance() == null) {
+                    player.dropMessage(6, "Player currently not in an event.");
+                } else {
+                    player.dropMessage(6, "Current event name: " + player.getEventInstance().getName() + ".");
+                }
                 break;
 
             case "areas":

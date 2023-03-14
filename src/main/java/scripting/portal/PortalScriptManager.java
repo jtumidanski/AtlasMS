@@ -38,6 +38,7 @@ public class PortalScriptManager extends AbstractScriptManager {
     private static PortalScriptManager instance = new PortalScriptManager();
     private Map<String, Invocable> scripts = new HashMap<>();
     private ScriptEngineFactory sef;
+
     private PortalScriptManager() {
         ScriptEngineManager sem = new ScriptEngineManager();
         sef = sem.getEngineByName("javascript").getFactory();
@@ -67,13 +68,10 @@ public class PortalScriptManager extends AbstractScriptManager {
         try {
             Invocable iv = getPortalScript(portal.getScriptName());
             if (iv != null) {
-                boolean couldWarp = (boolean) iv.invokeFunction("enter", new PortalPlayerInteraction(c, portal));
-                return couldWarp;
+                return (boolean) iv.invokeFunction("enter", new PortalPlayerInteraction(c, portal));
             }
-        } catch (UndeclaredThrowableException ute) {
+        } catch (Exception ute) {
             FilePrinter.printError(FilePrinter.PORTAL + portal.getScriptName() + ".txt", ute);
-        } catch (final Exception e) {
-            FilePrinter.printError(FilePrinter.PORTAL + portal.getScriptName() + ".txt", e);
         }
         return false;
     }

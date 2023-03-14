@@ -57,7 +57,9 @@ public class MapleReactorStats {
 
     public void addState(byte state, List<StateData> data, int timeOut) {
         stateInfo.put(state, data);
-        if (timeOut > -1) timeoutInfo.put(state, timeOut);
+        if (timeOut > -1) {
+            timeoutInfo.put(state, timeOut);
+        }
     }
 
     public void addState(byte state, int type, Pair<Integer, Integer> reactItem, byte nextState, int timeOut, byte canTouch) {
@@ -80,7 +82,9 @@ public class MapleReactorStats {
     }
 
     public byte getNextState(byte state, byte index) {
-        if (stateInfo.get(state) == null || stateInfo.get(state).size() < (index + 1)) return -1;
+        if (stateInfo.get(state) == null || stateInfo.get(state).size() < (index + 1)) {
+            return -1;
+        }
         StateData nextState = stateInfo.get(state).get(index);
         if (nextState != null) {
             return nextState.getNextState();

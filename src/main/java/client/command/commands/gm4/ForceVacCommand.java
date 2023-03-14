@@ -44,13 +44,15 @@ public class ForceVacCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        List<MapleMapObject> items = player.getMap().getMapObjectsInRange(player.getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.ITEM));
+        List<MapleMapObject> items = player.getMap().getMapObjectsInRange(player.getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.ITEM));
         for (MapleMapObject item : items) {
             MapleMapItem mapItem = (MapleMapItem) item;
 
             mapItem.lockItem();
             try {
-                if (mapItem.isPickedUp()) continue;
+                if (mapItem.isPickedUp()) {
+                    continue;
+                }
 
                 if (mapItem.getMeso() > 0) {
                     player.gainMeso(mapItem.getMeso(), true);

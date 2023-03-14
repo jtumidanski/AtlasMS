@@ -85,7 +85,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         boolean isAttack = inRangeInclusive(rawActivity, 24, 41);
         boolean isSkill = inRangeInclusive(rawActivity, 42, 59);
 
-        MobSkill toUse = null;
+        MobSkill toUse;
         int useSkillId = 0, useSkillLevel = 0;
 
         MobSkill nextUse = null;
@@ -151,7 +151,9 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         Point serverStartPos = new Point(monster.getPosition());
 
         Boolean aggro = monster.aggroMoveLifeUpdate(player);
-        if (aggro == null) return;
+        if (aggro == null) {
+            return;
+        }
 
         if (nextUse != null) {
             c.announce(MaplePacketCreator.moveMonsterResponse(objectid, moveid, mobMp, aggro, nextSkillId, nextSkillLevel));

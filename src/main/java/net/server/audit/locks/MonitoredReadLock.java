@@ -24,12 +24,12 @@ package net.server.audit.locks;
  */
 public interface MonitoredReadLock {
 
-    public void lock();
+    void lock();
 
-    public void unlock();
+    void unlock();
 
-    public boolean tryLock();
+    boolean tryLock();
 
-    public MonitoredReadLock dispose();
+    MonitoredReadLock dispose();
 
 }

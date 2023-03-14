@@ -53,6 +53,7 @@ public class MapleSessionCoordinator {
     private final ConcurrentHashMap<String, String> cachedHostHwids = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> cachedHostTimeout = new ConcurrentHashMap<>();
     private final List<ReentrantLock> poolLock = new ArrayList<>(100);
+
     private MapleSessionCoordinator() {
         for (int i = 0; i < 100; i++) {
             poolLock.add(MonitoredReentrantLockFactory.createLock(MonitoredLockType.SERVER_LOGIN_COORD));
@@ -95,7 +96,7 @@ public class MapleSessionCoordinator {
                 baseTime = 1680;    // 70 days
         }
 
-        return 3600000 * (baseTime + subdegreeTime);
+        return 3600000L * (baseTime + subdegreeTime);
     }
 
     private static void updateAccessAccount(Connection con, String remoteHwid, int accountId, int loginRelevance) throws SQLException {
@@ -260,7 +261,9 @@ public class MapleSessionCoordinator {
     }
 
     public boolean canStartLoginSession(IoSession session) {
-        if (!YamlConfig.config.server.DETERRED_MULTICLIENT) return true;
+        if (!YamlConfig.config.server.DETERRED_MULTICLIENT) {
+            return true;
+        }
 
         String remoteHost = getSessionRemoteHost(session);
         Lock lock = getCoodinatorLock(remoteHost);
@@ -574,7 +577,7 @@ public class MapleSessionCoordinator {
     public void printSessionTrace() {
         if (!onlineClients.isEmpty()) {
             List<Entry<Integer, MapleClient>> elist = new ArrayList<>(onlineClients.entrySet());
-            Collections.sort(elist, new Comparator<Entry<Integer, MapleClient>>() {
+            elist.sort(new Comparator<>() {
                 @Override
                 public int compare(Entry<Integer, MapleClient> e1, Entry<Integer, MapleClient> e2) {
                     return e1.getKey().compareTo(e2.getKey());
@@ -600,7 +603,7 @@ public class MapleSessionCoordinator {
         if (!loginRemoteHosts.isEmpty()) {
             List<Entry<String, Set<IoSession>>> elist = new ArrayList<>(loginRemoteHosts.entrySet());
 
-            Collections.sort(elist, new Comparator<Entry<String, Set<IoSession>>>() {
+            elist.sort(new Comparator<>() {
                 @Override
                 public int compare(Entry<String, Set<IoSession>> e1, Entry<String, Set<IoSession>> e2) {
                     return e1.getKey().compareTo(e2.getKey());
@@ -619,7 +622,7 @@ public class MapleSessionCoordinator {
 
         if (!onlineClients.isEmpty()) {
             List<Entry<Integer, MapleClient>> elist = new ArrayList<>(onlineClients.entrySet());
-            Collections.sort(elist, new Comparator<Entry<Integer, MapleClient>>() {
+            elist.sort(new Comparator<>() {
                 @Override
                 public int compare(Entry<Integer, MapleClient> e1, Entry<Integer, MapleClient> e2) {
                     return e1.getKey().compareTo(e2.getKey());
@@ -645,7 +648,7 @@ public class MapleSessionCoordinator {
         if (!loginRemoteHosts.isEmpty()) {
             List<Entry<String, Set<IoSession>>> elist = new ArrayList<>(loginRemoteHosts.entrySet());
 
-            Collections.sort(elist, new Comparator<Entry<String, Set<IoSession>>>() {
+            elist.sort(new Comparator<>() {
                 @Override
                 public int compare(Entry<String, Set<IoSession>> e1, Entry<String, Set<IoSession>> e2) {
                     return e1.getKey().compareTo(e2.getKey());

@@ -64,7 +64,7 @@ public class MaplePacketDecoder extends CumulativeProtocolDecoder {
             return false;
         }
         if (in.remaining() >= decoderState.packetlength) {
-            byte decryptedPacket[] = new byte[decoderState.packetlength];
+            byte[] decryptedPacket = new byte[decoderState.packetlength];
             in.get(decryptedPacket, 0, decoderState.packetlength);
             decoderState.packetlength = -1;
             rcvdCrypto.crypt(decryptedPacket);

@@ -27,11 +27,11 @@ public enum Element {
     private int value;
     private boolean special = false;
 
-    private Element(int v) {
+    Element(int v) {
         this.value = v;
     }
 
-    private Element(int v, boolean special) {
+    Element(int v, boolean special) {
         this.value = v;
         this.special = special;
     }

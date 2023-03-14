@@ -36,6 +36,7 @@ import net.server.coordinator.session.MapleSessionCoordinator;
 import net.server.coordinator.world.MapleEventRecallCoordinator;
 import net.server.guild.MapleAlliance;
 import net.server.guild.MapleGuild;
+import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import net.server.world.PartyOperation;
 import net.server.world.World;
@@ -114,7 +115,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
             timedBuffs.add(new Pair<>(curtime - pb.usedTime, pb));
         }
 
-        Collections.sort(timedBuffs, new Comparator<Pair<Long, PlayerBuffValueHolder>>() {
+        timedBuffs.sort(new Comparator<>() {
             @Override
             public int compare(Pair<Long, PlayerBuffValueHolder> p1, Pair<Long, PlayerBuffValueHolder> p2) {
                 return p1.getLeft().compareTo(p2.getLeft());
@@ -298,12 +299,15 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 player.visitMap(player.getMap());
 
                 BuddyList bl = player.getBuddylist();
-                int buddyIds[] = bl.getBuddyIds();
+                int[] buddyIds = bl.getBuddyIds();
                 wserv.loggedOn(player.getName(), player.getId(), c.getChannel(), buddyIds);
+
+                //TODO clean this up
                 for (CharacterIdChannelPair onlineBuddy : wserv.multiBuddyFind(player.getId(), buddyIds)) {
-                    BuddylistEntry ble = bl.get(onlineBuddy.getCharacterId());
-                    ble.setChannel(onlineBuddy.getChannel());
-                    bl.put(ble);
+                    bl.get(onlineBuddy.getCharacterId()).ifPresent(buddy -> {
+                        buddy.setChannel(onlineBuddy.getChannel());
+                        bl.put(buddy);
+                    });
                 }
                 c.announce(MaplePacketCreator.updateBuddylist(bl.getBuddies()));
 
@@ -363,18 +367,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 }
 
                 player.showNote();
-                if (player.getParty() != null) {
-                    MaplePartyCharacter pchar = player.getMPC();
-
-                    //Use this in case of enabling party HPbar HUD when logging in, however "you created a party" will appear on chat.
-                    //c.announce(MaplePacketCreator.partyCreated(pchar));
-
-                    pchar.setChannel(c.getChannel());
-                    pchar.setMapId(player.getMapId());
-                    pchar.setOnline(true);
-                    wserv.updateParty(player.getParty().getId(), PartyOperation.LOG_ONOFF, pchar);
-                    player.updatePartyMemberHP();
-                }
+                player.getParty().ifPresent(p -> onLoginUpdatePartyStatus(c, p));
 
                 MapleInventory eqpInv = player.getInventory(MapleInventoryType.EQUIPPED);
                 eqpInv.lockInventory();
@@ -396,7 +389,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 c.announce(MaplePacketCreator.updateGender(player));
                 player.checkMessenger();
                 c.announce(MaplePacketCreator.enableReport());
-                player.changeSkillLevel(SkillFactory.getSkill(10000000 * player.getJobType() + 12), (byte) (player.getLinkedLevel() / 10), 20, -1);
+                player.changeSkillLevel(10000000 * player.getJobType() + 12, (byte) (player.getLinkedLevel() / 10), 20, -1);
                 player.checkBerserk(player.isHidden());
 
                 if (newcomer) {
@@ -424,7 +417,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
 
                     if (diseases != null) {
                         for (Entry<MapleDisease, Pair<Long, MobSkill>> e : diseases.entrySet()) {
-                            final List<Pair<MapleDisease, Integer>> debuff = Collections.singletonList(new Pair<>(e.getKey(), Integer.valueOf(e.getValue().getRight().getX())));
+                            final List<Pair<MapleDisease, Integer>> debuff = Collections.singletonList(new Pair<>(e.getKey(), e.getValue().getRight().getX()));
                             c.announce(MaplePacketCreator.giveDebuff(debuff, e.getValue().getRight()));
                         }
                     }
@@ -446,10 +439,14 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 player.commitExcludedItems();
                 showDueyNotification(c, player);
 
-                if (player.getMap().getHPDec() > 0) player.resetHpDecreaseTask();
+                if (player.getMap().getHPDec() > 0) {
+                    player.resetHpDecreaseTask();
+                }
 
                 player.resetPlayerRates();
-                if (YamlConfig.config.server.USE_ADD_RATES_BY_LEVEL == true) player.setPlayerRates();
+                if (YamlConfig.config.server.USE_ADD_RATES_BY_LEVEL == true) {
+                    player.setPlayerRates();
+                }
                 player.setWorldRates();
                 player.updateCouponRates();
 
@@ -476,7 +473,9 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                     c.announce(MaplePacketCreator.setNPCScriptable(ScriptableNPCConstants.SCRIPTABLE_NPCS));
                 }
 
-                if (newcomer) player.setLoginTime(System.currentTimeMillis());
+                if (newcomer) {
+                    player.setLoginTime(System.currentTimeMillis());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -485,5 +484,18 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
         } else {
             c.announce(MaplePacketCreator.getAfterLoginError(10));
         }
+    }
+
+    private static void onLoginUpdatePartyStatus(MapleClient client, MapleParty party) {
+        MaplePartyCharacter pchar = client.getPlayer().getMPC();
+
+        //Use this in case of enabling party HPbar HUD when logging in, however "you created a party" will appear on chat.
+        //c.announce(MaplePacketCreator.partyCreated(pchar));
+
+        pchar.setChannel(client.getChannel());
+        pchar.setMapId(client.getPlayer().getMapId());
+        pchar.setOnline(true);
+        client.getWorldServer().updateParty(party.getId(), PartyOperation.LOG_ONOFF, pchar);
+        client.getPlayer().updatePartyMemberHP();
     }
 }

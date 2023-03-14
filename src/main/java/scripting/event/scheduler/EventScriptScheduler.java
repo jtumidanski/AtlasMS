@@ -46,12 +46,7 @@ public class EventScriptScheduler {
 
     private ScheduledFuture<?> schedulerTask = null;
     private MonitoredReentrantLock schedulerLock;
-    private Runnable monitorTask = new Runnable() {
-        @Override
-        public void run() {
-            runBaseSchedule();
-        }
-    };
+    private Runnable monitorTask = this::runBaseSchedule;
 
     public EventScriptScheduler() {
         schedulerLock = MonitoredReentrantLockFactory.createLock(MonitoredLockType.EM_SCHDL, true);
@@ -168,12 +163,7 @@ public class EventScriptScheduler {
     }
 
     private void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {

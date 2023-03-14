@@ -265,12 +265,7 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
     }
 
     private static int getNextScriptId(byte branch) {
-        List<Integer> availablesBranch = availablePlayerNpcScriptIds.get(branch);
-
-        if (availablesBranch == null) {
-            availablesBranch = new ArrayList<>(20);
-            availablePlayerNpcScriptIds.put(branch, availablesBranch);
-        }
+        List<Integer> availablesBranch = availablePlayerNpcScriptIds.computeIfAbsent(branch, k -> new ArrayList<>(20));
 
         if (availablesBranch.isEmpty()) {
             fetchAvailableScriptIdsFromDb(branch, availablesBranch);
@@ -309,7 +304,9 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
             }
         }
 
-        if (YamlConfig.config.server.USE_DEBUG) System.out.println("GOT SID " + scriptId + " POS " + pos);
+        if (YamlConfig.config.server.USE_DEBUG) {
+            System.out.println("GOT SID " + scriptId + " POS " + pos);
+        }
 
         int worldId = chr.getWorld();
         int jobId = (chr.getJob().getId() / 100) * 100;
@@ -397,7 +394,9 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT id, map FROM playernpcs WHERE name LIKE ?" + (map != null ? " AND map = ?" : ""));
             ps.setString(1, chr.getName());
-            if (map != null) ps.setInt(2, map.getId());
+            if (map != null) {
+                ps.setInt(2, map.getId());
+            }
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -422,9 +421,7 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
             e.printStackTrace();
         }
 
-        for (Integer i : updateMapids) {
-            mapids.add(i);
-        }
+        mapids.addAll(updateMapids);
 
         return mapids;
     }
@@ -442,7 +439,9 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
     }
 
     public static boolean spawnPlayerNPC(int mapid, Point pos, MapleCharacter chr) {
-        if (chr == null) return false;
+        if (chr == null) {
+            return false;
+        }
 
         MaplePlayerNPC pn = processPlayerNPCInternal(chr.getClient().getChannelServer().getMapFactory().getMap(mapid), pos, chr, true).getLeft();
         if (pn != null) {
@@ -462,7 +461,7 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
 
     private static MaplePlayerNPC getPlayerNPCFromWorldMap(String name, int world, int map) {
         World wserv = Server.getInstance().getWorld(world);
-        for (MapleMapObject pnpcObj : wserv.getChannel(1).getMapFactory().getMap(map).getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.PLAYER_NPC))) {
+        for (MapleMapObject pnpcObj : wserv.getChannel(1).getMapFactory().getMap(map).getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.PLAYER_NPC))) {
             MaplePlayerNPC pn = (MaplePlayerNPC) pnpcObj;
 
             if (name.contentEquals(pn.getName()) && pn.getScriptId() < 9977777) {
@@ -474,7 +473,9 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
     }
 
     public static void removePlayerNPC(MapleCharacter chr) {
-        if (chr == null) return;
+        if (chr == null) {
+            return;
+        }
 
         List<Integer> updateMapids = processPlayerNPCInternal(null, null, chr, false).getRight();
         int worldid = updateMapids.remove(0);
@@ -496,7 +497,9 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
 
     public static void multicastSpawnPlayerNPC(int mapid, int world) {
         World wserv = Server.getInstance().getWorld(world);
-        if (wserv == null) return;
+        if (wserv == null) {
+            return;
+        }
 
         MapleClient c = new MapleClient(null, null, null);  // mock client
         c.setWorld(world);
@@ -518,12 +521,14 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
             int wsize = Server.getInstance().getWorldsSize();
             while (rs.next()) {
                 int world = rs.getInt("world"), map = rs.getInt("map");
-                if (world >= wsize) continue;
+                if (world >= wsize) {
+                    continue;
+                }
 
                 for (Channel channel : Server.getInstance().getChannelsFromWorld(world)) {
                     MapleMap m = channel.getMapFactory().getMap(map);
 
-                    for (MapleMapObject pnpcObj : m.getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.PLAYER_NPC))) {
+                    for (MapleMapObject pnpcObj : m.getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.PLAYER_NPC))) {
                         MaplePlayerNPC pn = (MaplePlayerNPC) pnpcObj;
                         m.removeMapObject(pnpcObj);
                         m.broadcastMessage(MaplePacketCreator.removeNPCController(pn.getObjectId()));

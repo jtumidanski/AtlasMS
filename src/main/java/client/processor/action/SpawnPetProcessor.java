@@ -21,7 +21,6 @@ package client.processor.action;
 
 import client.MapleCharacter;
 import client.MapleClient;
-import client.SkillFactory;
 import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
 import client.inventory.manipulator.MapleInventoryManipulator;
@@ -44,7 +43,9 @@ public class SpawnPetProcessor {
             try {
                 MapleCharacter chr = c.getPlayer();
                 MaplePet pet = chr.getInventory(MapleInventoryType.CASH).getItem(slot).getPet();
-                if (pet == null) return;
+                if (pet == null) {
+                    return;
+                }
 
                 int petid = pet.getItemId();
                 if (petid == 5000028 || petid == 5000047) //Handles Dragon AND Robos
@@ -70,7 +71,7 @@ public class SpawnPetProcessor {
                 if (chr.getPetIndex(pet) != -1) {
                     chr.unequipPet(pet, true);
                 } else {
-                    if (chr.getSkillLevel(SkillFactory.getSkill(8)) == 0 && chr.getPet(0) != null) {
+                    if (chr.getSkillLevel(8) == 0 && chr.getPet(0) != null) {
                         chr.unequipPet(chr.getPet(0), false);
                     }
                     if (lead) {

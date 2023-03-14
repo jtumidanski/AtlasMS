@@ -77,10 +77,11 @@ public final class WhisperHandler extends AbstractMaplePacketHandler {
                         LogHelper.logChat(c, "Whisper To " + recipient, text);
                     }
                     player = world.getPlayerStorage().getCharacterByName(recipient);
-                    if (player.isHidden() && player.gmLevel() >= c.getPlayer().gmLevel())
+                    if (player.isHidden() && player.gmLevel() >= c.getPlayer().gmLevel()) {
                         c.announce(MaplePacketCreator.getWhisperReply(recipient, (byte) 0));
-                    else
+                    } else {
                         c.announce(MaplePacketCreator.getWhisperReply(recipient, (byte) 1));
+                    }
                 } else {
                     c.announce(MaplePacketCreator.getWhisperReply(recipient, (byte) 0));
                 }

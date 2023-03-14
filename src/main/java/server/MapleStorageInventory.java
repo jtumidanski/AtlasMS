@@ -40,7 +40,9 @@ class PairedQuicksort {
     public PairedQuicksort(ArrayList<Item> A, int primarySort, int secondarySort) {
         intersect = new ArrayList<>();
 
-        if (A.size() > 0) MapleQuicksort(0, A.size() - 1, A, primarySort);
+        if (A.size() > 0) {
+            MapleQuicksort(0, A.size() - 1, A, primarySort);
+        }
 
         intersect.add(0);
         for (int ind = 1; ind < A.size(); ind++) {
@@ -51,8 +53,9 @@ class PairedQuicksort {
         intersect.add(A.size());
 
         for (int ind = 0; ind < intersect.size() - 1; ind++) {
-            if (intersect.get(ind + 1) > intersect.get(ind))
+            if (intersect.get(ind + 1) > intersect.get(ind)) {
                 MapleQuicksort(intersect.get(ind), intersect.get(ind + 1) - 1, A, secondarySort);
+            }
         }
     }
 
@@ -140,7 +143,7 @@ class PairedQuicksort {
             if (i <= j) {
                 w = (Equip) A.get(i);
                 A.set(i, A.get(j));
-                A.set(j, (Item) w);
+                A.set(j, w);
 
                 i++;
                 j--;
@@ -167,14 +170,18 @@ class PairedQuicksort {
         }
 
 
-        if (Esq < j) MapleQuicksort(Esq, j, A, sort);
-        if (i < Dir) MapleQuicksort(i, Dir, A, sort);
+        if (Esq < j) {
+            MapleQuicksort(Esq, j, A, sort);
+        }
+        if (i < Dir) {
+            MapleQuicksort(i, Dir, A, sort);
+        }
     }
 }
 
 public class MapleStorageInventory {
     private MapleClient c;
-    private Map<Short, Item> inventory = new LinkedHashMap<>();
+    private Map<Short, Item> inventory;
     private byte slotLimit;
 
     public MapleStorageInventory(MapleClient c, List<Item> toSort) {
@@ -215,8 +222,8 @@ public class MapleStorageInventory {
     }
 
     private void move(short sSlot, short dSlot, short slotMax) {
-        Item source = (Item) inventory.get(sSlot);
-        Item target = (Item) inventory.get(dSlot);
+        Item source = inventory.get(sSlot);
+        Item target = inventory.get(dSlot);
         if (source == null) {
             return;
         }
@@ -301,14 +308,22 @@ public class MapleStorageInventory {
 
         for (short dst = 1; dst <= this.getSlotLimit(); dst++) {
             dstItem = this.getItem(dst);
-            if (dstItem == null) continue;
+            if (dstItem == null) {
+                continue;
+            }
 
             for (short src = (short) (dst + 1); src <= this.getSlotLimit(); src++) {
                 srcItem = this.getItem(src);
-                if (srcItem == null) continue;
+                if (srcItem == null) {
+                    continue;
+                }
 
-                if (dstItem.getItemId() != srcItem.getItemId()) continue;
-                if (dstItem.getQuantity() == ii.getSlotMax(c, this.getItem(dst).getItemId())) break;
+                if (dstItem.getItemId() != srcItem.getItemId()) {
+                    continue;
+                }
+                if (dstItem.getQuantity() == ii.getSlotMax(c, this.getItem(dst).getItemId())) {
+                    break;
+                }
 
                 moveItem(src, dst);
             }
@@ -344,7 +359,7 @@ public class MapleStorageInventory {
         for (short i = 1; i <= this.getSlotLimit(); i++) {
             Item item = this.getItem(i);
             if (item != null) {
-                itemarray.add((Item) item.copy());
+                itemarray.add(item.copy());
             }
         }
 

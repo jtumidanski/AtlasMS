@@ -46,8 +46,9 @@ public class ReloadMapCommand extends Command {
         for (MapleCharacter chr : characters) {
             chr.saveLocationOnWarp();
             chr.changeMap(newMap);
-            if (chr.getId() != callerid)
+            if (chr.getId() != callerid) {
                 chr.dropMessage("You have been relocated due to map reloading. Sorry for the inconvenience.");
+            }
         }
         newMap.respawn();
     }

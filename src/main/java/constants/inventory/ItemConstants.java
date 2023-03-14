@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * @author Jay Estrella
@@ -46,13 +47,10 @@ public final class ItemConstants {
     public final static short MERGE_UNTRADEABLE = 0x200;
     public final static boolean EXPIRING_ITEMS = true;
     public final static Set<Integer> permanentItemids = new HashSet<>();
-    protected static Map<Integer, MapleInventoryType> inventoryTypeCache = new HashMap<>();
+    private final static Map<Integer, MapleInventoryType> inventoryTypeCache = new HashMap<>();
 
     static {
-        int[] pi = {5000060, 5000100, 5000101, 5000102};    // i ain't going to open one gigantic itemid cache just for 4 perma itemids, no way!
-        for (int i : pi) {
-            permanentItemids.add(i);
-        }
+        IntStream.of(5000060, 5000100, 5000101, 5000102).forEach(permanentItemids::add);
     }
 
     public static int getFlagByInt(int type) {
@@ -147,8 +145,12 @@ public final class ItemConstants {
     }
 
     public static boolean isFlagModifier(int scrollId, short flag) {
-        if (scrollId == 2041058 && ((flag & ItemConstants.COLD) == ItemConstants.COLD)) return true;
-        if (scrollId == 2040727 && ((flag & ItemConstants.SPIKES) == ItemConstants.SPIKES)) return true;
+        if (scrollId == 2041058 && ((flag & ItemConstants.COLD) == ItemConstants.COLD)) {
+            return true;
+        }
+        if (scrollId == 2040727 && ((flag & ItemConstants.SPIKES) == ItemConstants.SPIKES)) {
+            return true;
+        }
         return false;
     }
 
@@ -190,7 +192,7 @@ public final class ItemConstants {
 
         final byte type = (byte) (itemId / 1000000);
         if (type >= 1 && type <= 5) {
-            ret = MapleInventoryType.getByType(type);
+            ret = MapleInventoryType.getByType(type).orElse(MapleInventoryType.UNDEFINED);
         }
 
         inventoryTypeCache.put(itemId, ret);

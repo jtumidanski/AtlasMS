@@ -54,7 +54,7 @@ public final class TransferNameHandler extends AbstractMaplePacketHandler {
         if (chr.getLevel() < 10) {
             c.announce(MaplePacketCreator.sendNameTransferRules(4));
             return;
-        } else if (c.getTempBanCalendar() != null && c.getTempBanCalendar().getTimeInMillis() + (30 * 24 * 60 * 60 * 1000) < Calendar.getInstance().getTimeInMillis()) {
+        } else if (c.getTempBanCalendar() != null && c.getTempBanCalendar().getTimeInMillis() + (30L * 24 * 60 * 60 * 1000) < Calendar.getInstance().getTimeInMillis()) {
             c.announce(MaplePacketCreator.sendNameTransferRules(2));
             return;
         }
@@ -72,7 +72,6 @@ public final class TransferNameHandler extends AbstractMaplePacketHandler {
                     c.announce(MaplePacketCreator.sendNameTransferRules(3));
                     return;
                 }
-                ;
             }
         } catch (SQLException e) {
             e.printStackTrace();

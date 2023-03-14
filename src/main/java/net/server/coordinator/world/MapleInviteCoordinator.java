@@ -53,7 +53,9 @@ public class MapleInviteCoordinator {
         if (referenceFrom.equals(reference)) {
             inviteInfo = type.removeRequest(targetCid);
             from = inviteInfo.getLeft();
-            if (from != null && !from.isLoggedinWorld()) from = null;
+            if (from != null && !from.isLoggedinWorld()) {
+                from = null;
+            }
 
             result = answer ? InviteResult.ACCEPTED : InviteResult.DENIED;
         }
@@ -93,7 +95,7 @@ public class MapleInviteCoordinator {
     public enum InviteResult {
         ACCEPTED,
         DENIED,
-        NOT_FOUND;
+        NOT_FOUND
     }
 
     public enum InviteType {
@@ -111,7 +113,7 @@ public class MapleInviteCoordinator {
         final ConcurrentHashMap<Integer, Integer> inviteTimeouts;
         final ConcurrentHashMap<Integer, Object[]> inviteParams;
 
-        private InviteType() {
+        InviteType() {
             invites = new ConcurrentHashMap<>();
             inviteTimeouts = new ConcurrentHashMap<>();
             inviteFrom = new ConcurrentHashMap<>();

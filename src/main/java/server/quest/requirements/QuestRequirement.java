@@ -27,6 +27,7 @@ import server.quest.MapleQuestRequirementType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Tyler (Twdtwd)
@@ -55,13 +56,18 @@ public class QuestRequirement extends MapleQuestRequirement {
     @Override
     public boolean check(MapleCharacter chr, Integer npcid) {
         for (Integer questID : quests.keySet()) {
-            int stateReq = quests.get(questID);
+            Optional<MapleQuestStatus.Status> status = MapleQuestStatus.Status.getById(quests.get(questID));
+            if (status.isEmpty()) {
+                continue;
+            }
+
             MapleQuestStatus qs = chr.getQuest(MapleQuest.getInstance(questID));
 
-            if (qs == null && MapleQuestStatus.Status.getById(stateReq).equals(MapleQuestStatus.Status.NOT_STARTED))
+            if (qs == null && status.get().equals(MapleQuestStatus.Status.NOT_STARTED)) {
                 continue;
+            }
 
-            if (qs == null || !qs.getStatus().equals(MapleQuestStatus.Status.getById(stateReq))) {
+            if (qs == null || !qs.getStatus().equals(status.get())) {
                 return false;
             }
 

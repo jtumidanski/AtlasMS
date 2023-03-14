@@ -48,7 +48,7 @@ public class MobSkillFactory {
     private final static MonitoredReentrantReadWriteLock dataLock = new MonitoredReentrantReadWriteLock(MonitoredLockType.MOBSKILL_FACTORY);
     private final static MonitoredReadLock rL = MonitoredReadLockFactory.createLock(dataLock);
     private final static MonitoredWriteLock wL = MonitoredWriteLockFactory.createLock(dataLock);
-    private static Map<String, MobSkill> mobSkills = new HashMap<String, MobSkill>();
+    private static Map<String, MobSkill> mobSkills = new HashMap<>();
     private static MapleData skillRoot = dataSource.getData("MobSkill.img");
 
     public static MobSkill getMobSkill(final int skillId, final int level) {
@@ -70,19 +70,19 @@ public class MobSkillFactory {
                 MapleData skillData = skillRoot.getChildByPath(skillId + "/level/" + level);
                 if (skillData != null) {
                     int mpCon = MapleDataTool.getInt(skillData.getChildByPath("mpCon"), 0);
-                    List<Integer> toSummon = new ArrayList<Integer>();
+                    List<Integer> toSummon = new ArrayList<>();
                     for (int i = 0; i > -1; i++) {
                         if (skillData.getChildByPath(String.valueOf(i)) == null) {
                             break;
                         }
-                        toSummon.add(Integer.valueOf(MapleDataTool.getInt(skillData.getChildByPath(String.valueOf(i)), 0)));
+                        toSummon.add(MapleDataTool.getInt(skillData.getChildByPath(String.valueOf(i)), 0));
                     }
                     int effect = MapleDataTool.getInt("summonEffect", skillData, 0);
                     int hp = MapleDataTool.getInt("hp", skillData, 100);
                     int x = MapleDataTool.getInt("x", skillData, 1);
                     int y = MapleDataTool.getInt("y", skillData, 1);
-                    long duration = MapleDataTool.getInt("time", skillData, 0) * 1000;
-                    long cooltime = MapleDataTool.getInt("interval", skillData, 0) * 1000;
+                    long duration = MapleDataTool.getInt("time", skillData, 0) * 1000L;
+                    long cooltime = MapleDataTool.getInt("interval", skillData, 0) * 1000L;
                     int iprop = MapleDataTool.getInt("prop", skillData, 100);
                     float prop = iprop / 100;
                     int limit = MapleDataTool.getInt("limit", skillData, 0);

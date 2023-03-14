@@ -27,6 +27,7 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
 
     private Set<? extends java.util.Map.Entry<K, V>> entries = null;
     private ArrayList<Entry<K, V>> list;
+
     public ArrayMap() {
         list = new ArrayList<>();
     }

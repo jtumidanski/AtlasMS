@@ -21,6 +21,9 @@
 */
 package client;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum MapleJob {
     BEGINNER(0),
 
@@ -65,7 +68,7 @@ public enum MapleJob {
     final static int maxId = 22;    // maxId = (EVAN / 100);
     final int jobid;
 
-    private MapleJob(int id) {
+    MapleJob(int id) {
         jobid = id;
     }
 
@@ -73,13 +76,10 @@ public enum MapleJob {
         return maxId;
     }
 
-    public static MapleJob getById(int id) {
-        for (MapleJob l : MapleJob.values()) {
-            if (l.getId() == id) {
-                return l;
-            }
-        }
-        return null;
+    public static Optional<MapleJob> getById(int id) {
+        return Arrays.stream(MapleJob.values())
+                .filter(j -> j.getId() == id)
+                .findFirst();
     }
 
     public static MapleJob getBy5ByteEncoding(int encoded) {

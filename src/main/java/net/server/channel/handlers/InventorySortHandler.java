@@ -33,6 +33,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author BubblesDev
@@ -67,8 +68,9 @@ class PairedQuicksort {
         intersect.add(A.size());
 
         for (int ind = 0; ind < intersect.size() - 1; ind++) {
-            if (intersect.get(ind + 1) > intersect.get(ind))
+            if (intersect.get(ind + 1) > intersect.get(ind)) {
                 MapleQuicksort(intersect.get(ind), intersect.get(ind + 1) - 1, A, secondarySort);
+            }
         }
     }
 
@@ -185,7 +187,7 @@ class PairedQuicksort {
             if (i <= j) {
                 w = (Equip) A.get(i);
                 A.set(i, A.get(j));
-                A.set(j, (Item) w);
+                A.set(j, w);
 
                 i++;
                 j--;
@@ -212,14 +214,18 @@ class PairedQuicksort {
         }
 
 
-        if (Esq < j) MapleQuicksort(Esq, j, A, sort);
-        if (i < Dir) MapleQuicksort(i, Dir, A, sort);
+        if (Esq < j) {
+            MapleQuicksort(Esq, j, A, sort);
+        }
+        if (i < Dir) {
+            MapleQuicksort(i, Dir, A, sort);
+        }
     }
 
     private int[] BinarySearchElement(ArrayList<Item> A, int rangeId) {
         int st = 0, en = A.size() - 1;
 
-        int mid = -1, idx = -1;
+        int mid, idx = -1;
         while (en >= st) {
             idx = (st + en) / 2;
             mid = getItemSubtype(A.get(idx));
@@ -280,13 +286,19 @@ public final class InventorySortHandler extends AbstractMaplePacketHandler {
         ArrayList<Item> itemarray = new ArrayList<>();
         List<ModifyInventory> mods = new ArrayList<>();
 
-        MapleInventory inventory = chr.getInventory(MapleInventoryType.getByType(invType));
+        Optional<MapleInventoryType> type = MapleInventoryType.getByType(invType);
+        if (type.isEmpty()) {
+            c.disconnect(false, false);
+            return;
+        }
+
+        MapleInventory inventory = chr.getInventory(type.get());
         inventory.lockInventory();
         try {
             for (short i = 1; i <= inventory.getSlotLimit(); i++) {
                 Item item = inventory.getItem(i);
                 if (item != null) {
-                    itemarray.add((Item) item.copy());
+                    itemarray.add(item.copy());
                 }
             }
 
@@ -295,7 +307,7 @@ public final class InventorySortHandler extends AbstractMaplePacketHandler {
                 mods.add(new ModifyInventory(3, item));
             }
 
-            int invTypeCriteria = (MapleInventoryType.getByType(invType) == MapleInventoryType.EQUIP) ? 3 : 1;
+            int invTypeCriteria = (type.get() == MapleInventoryType.EQUIP) ? 3 : 1;
             int sortCriteria = (YamlConfig.config.server.USE_ITEM_SORT_BY_NAME == true) ? 2 : 0;
             PairedQuicksort pq = new PairedQuicksort(itemarray, sortCriteria, invTypeCriteria);
 

@@ -55,7 +55,7 @@ public final class BBSOperationHandler extends AbstractMaplePacketHandler {
         if (c.getPlayer().getGuildId() <= 0) {
             return;
         }
-        Connection con = null;
+        Connection con;
         try {
             con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT threadid FROM bbs_threads WHERE guildid = ? AND localthreadid = ?");
@@ -154,7 +154,7 @@ public final class BBSOperationHandler extends AbstractMaplePacketHandler {
         if (mc.getGuildId() <= 0) {
             return;
         }
-        Connection con = null;
+        Connection con;
         try {
             con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT threadid, postercid FROM bbs_threads WHERE guildid = ? AND localthreadid = ?");
@@ -194,7 +194,7 @@ public final class BBSOperationHandler extends AbstractMaplePacketHandler {
             return;
         }
         int threadid;
-        Connection con = null;
+        Connection con;
         try {
             con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT postercid, threadid FROM bbs_replies WHERE replyid = ?");

@@ -39,7 +39,7 @@ public abstract class MapleQuestAction {
     }
 
     public static List<Integer> getJobBy5ByteEncoding(int encoded) {
-        List<Integer> ret = new ArrayList<Integer>();
+        List<Integer> ret = new ArrayList<>();
         if ((encoded & 0x1) != 0) {
             ret.add(0);
         }
@@ -102,7 +102,7 @@ public abstract class MapleQuestAction {
     }
 
     public static List<Integer> getJobBySimpleEncoding(int encoded) {
-        List<Integer> ret = new ArrayList<Integer>();
+        List<Integer> ret = new ArrayList<>();
         if ((encoded & 0x1) != 0) {
             ret.add(200);
         }

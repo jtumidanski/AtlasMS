@@ -43,7 +43,7 @@ public final class MultiChatHandler extends AbstractMaplePacketHandler {
 
         int type = slea.readByte(); // 0 for buddys, 1 for partys
         int numRecipients = slea.readByte();
-        int recipients[] = new int[numRecipients];
+        int[] recipients = new int[numRecipients];
         for (int i = 0; i < numRecipients; i++) {
             recipients[i] = slea.readInt();
         }
@@ -60,8 +60,8 @@ public final class MultiChatHandler extends AbstractMaplePacketHandler {
             if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
                 LogHelper.logChat(c, "Buddy", chattext);
             }
-        } else if (type == 1 && player.getParty() != null) {
-            world.partyChat(player.getParty(), chattext, player.getName());
+        } else if (type == 1 && player.getParty().isPresent()) {
+            world.partyChat(player.getParty().get(), chattext, player.getName());
             if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
                 LogHelper.logChat(c, "Party", chattext);
             }

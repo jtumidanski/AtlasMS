@@ -50,11 +50,11 @@ public class MapleLogger {
         if (isRecvBlocked(op)) {
             return;
         }
-        String packet = op.toString() + "\r\n" + HexTool.toString((byte[]) message);
+        String packet = op + "\r\n" + HexTool.toString((byte[]) message);
         FilePrinter.printError(FilePrinter.PACKET_LOGS + c.getAccountName() + "-" + chr.getName() + ".txt", packet);
     }
 
-    private static final boolean isRecvBlocked(RecvOpcode op) {
+    private static boolean isRecvBlocked(RecvOpcode op) {
         switch (op) {
             case MOVE_PLAYER:
             case GENERAL_CHAT:
@@ -69,7 +69,7 @@ public class MapleLogger {
         }
     }
 
-    private static final RecvOpcode getOpcodeFromValue(int value) {
+    private static RecvOpcode getOpcodeFromValue(int value) {
         for (RecvOpcode op : RecvOpcode.values()) {
             if (op.getValue() == value) {
                 return op;

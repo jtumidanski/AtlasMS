@@ -54,7 +54,7 @@ public final class MagicDamageHandler extends AbstractDealDamageHandler {
         }
 
         if (GameConstants.isDojo(chr.getMap().getId()) && attack.numAttacked > 0) {
-            chr.setDojoEnergy(chr.getDojoEnergy() + +YamlConfig.config.server.DOJO_ENERGY_ATK);
+            chr.setDojoEnergy(chr.getDojoEnergy() + YamlConfig.config.server.DOJO_ENERGY_ATK);
             c.announce(MaplePacketCreator.getEnergy("energy", chr.getDojoEnergy()));
         }
 
@@ -62,19 +62,19 @@ public final class MagicDamageHandler extends AbstractDealDamageHandler {
         byte[] packet = MaplePacketCreator.magicAttack(chr, attack.skill, attack.skilllevel, attack.stance, attack.numAttackedAndDamage, attack.allDamage, charge, attack.speed, attack.direction, attack.display);
 
         chr.getMap().broadcastMessage(chr, packet, false, true);
-        MapleStatEffect effect = attack.getAttackEffect(chr, null);
-        Skill skill = SkillFactory.getSkill(attack.skill);
+        MapleStatEffect effect = attack.getAttackEffect(chr, null).orElseThrow();
+        Skill skill = SkillFactory.getSkill(attack.skill).orElseThrow();
         MapleStatEffect effect_ = skill.getEffect(chr.getSkillLevel(skill));
         if (effect_.getCooldown() > 0) {
             if (chr.skillIsCooling(attack.skill)) {
                 return;
             } else {
                 c.announce(MaplePacketCreator.skillCooldown(attack.skill, effect_.getCooldown()));
-                chr.addCooldown(attack.skill, currentServerTime(), effect_.getCooldown() * 1000);
+                chr.addCooldown(attack.skill, currentServerTime(), effect_.getCooldown() * 1000L);
             }
         }
         applyAttack(attack, chr, effect.getAttackCount());
-        Skill eaterSkill = SkillFactory.getSkill((chr.getJob().getId() - (chr.getJob().getId() % 10)) * 10000);// MP Eater, works with right job
+        Skill eaterSkill = SkillFactory.getSkill((chr.getJob().getId() - (chr.getJob().getId() % 10)) * 10000).orElseThrow();// MP Eater, works with right job
         int eaterLevel = chr.getSkillLevel(eaterSkill);
         if (eaterLevel > 0) {
             for (Integer singleDamage : attack.allDamage.keySet()) {

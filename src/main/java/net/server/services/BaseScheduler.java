@@ -43,12 +43,7 @@ public abstract class BaseScheduler {
 
     private ScheduledFuture<?> schedulerTask = null;
     private MonitoredReentrantLock schedulerLock;
-    private Runnable monitorTask = new Runnable() {
-        @Override
-        public void run() {
-            runBaseSchedule();
-        }
-    };
+    private Runnable monitorTask = this::runBaseSchedule;
 
     protected BaseScheduler(MonitoredLockType lockType) {
         schedulerLock = MonitoredReentrantLockFactory.createLock(lockType, true);
@@ -58,9 +53,7 @@ public abstract class BaseScheduler {
     protected BaseScheduler(MonitoredLockType lockType, List<MonitoredReentrantLock> extLocks) {
         schedulerLock = MonitoredReentrantLockFactory.createLock(lockType, true);
 
-        for (MonitoredReentrantLock lock : extLocks) {
-            externalLocks.add(lock);
-        }
+        externalLocks.addAll(extLocks);
     }
 
     protected void addListener(SchedulerListener listener) {
@@ -196,12 +189,7 @@ public abstract class BaseScheduler {
     }
 
     private void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {

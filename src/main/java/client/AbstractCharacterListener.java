@@ -23,11 +23,11 @@ package client;
  * @author Ronan
  */
 public interface AbstractCharacterListener {
-    public void onHpChanged(int oldHp);
+    void onHpChanged(int oldHp);
 
-    public void onHpmpPoolUpdate();
+    void onHpmpPoolUpdate();
 
-    public void onStatUpdate();
+    void onStatUpdate();
 
-    public void onAnnounceStatPoolUpdate();
+    void onAnnounceStatPoolUpdate();
 }

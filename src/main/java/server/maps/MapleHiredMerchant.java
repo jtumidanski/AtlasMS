@@ -57,8 +57,8 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
     private int ownerId, itemId, mesos = 0;
     private int channel, world;
     private long start;
-    private String ownerName = "";
-    private String description = "";
+    private String ownerName;
+    private String description;
     private MapleCharacter[] visitors = new MapleCharacter[3];
     private List<Pair<String, Byte>> messages = new LinkedList<>();
     private List<SoldItem> sold = new LinkedList<>();
@@ -546,7 +546,9 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
 
     public boolean addItem(MaplePlayerShopItem item) {
         synchronized (items) {
-            if (items.size() >= 16) return false;
+            if (items.size() >= 16) {
+                return false;
+            }
 
             items.add(item);
             return true;
@@ -623,10 +625,12 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
         List<MaplePlayerShopItem> list = new LinkedList<>();
         List<MaplePlayerShopItem> all = new ArrayList<>();
 
-        if (!open.get()) return list;
+        if (!open.get()) {
+            return list;
+        }
 
         synchronized (items) {
-            for (MaplePlayerShopItem mpsi : items) all.add(mpsi);
+            all.addAll(items);
         }
 
         for (MaplePlayerShopItem mpsi : all) {
@@ -646,9 +650,9 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
             short newBundle = pItems.getBundles();
 
             if (shutdown) { //is "shutdown" really necessary?
-                newItem.setQuantity((short) (pItems.getItem().getQuantity()));
+                newItem.setQuantity(pItems.getItem().getQuantity());
             } else {
-                newItem.setQuantity((short) (pItems.getItem().getQuantity()));
+                newItem.setQuantity(pItems.getItem().getQuantity());
             }
             if (newBundle > 0) {
                 itemsWithType.add(new Pair<>(newItem, newItem.getInventoryType()));
@@ -684,9 +688,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
     public List<Pair<String, Byte>> getMessages() {
         synchronized (messages) {
             List<Pair<String, Byte>> msgList = new LinkedList<>();
-            for (Pair<String, Byte> m : messages) {
-                msgList.add(m);
-            }
+            msgList.addAll(messages);
 
             return msgList;
         }

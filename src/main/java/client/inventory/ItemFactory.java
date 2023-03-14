@@ -45,7 +45,7 @@ public enum ItemFactory {
     MARRIAGE_GIFTS(8, false),
     DUEY(9, false);
     private static final int lockCount = 400;
-    private static final Lock locks[] = new Lock[lockCount];  // thanks Masterrulax for pointing out a bottleneck issue here
+    private static final Lock[] locks = new Lock[lockCount];  // thanks Masterrulax for pointing out a bottleneck issue here
 
     static {
         for (int i = 0; i < lockCount; i++) {
@@ -56,7 +56,7 @@ public enum ItemFactory {
     private final int value;
     private final boolean account;
 
-    private ItemFactory(int value, boolean account) {
+    ItemFactory(int value, boolean account) {
         this.value = value;
         this.account = account;
     }
@@ -83,7 +83,7 @@ public enum ItemFactory {
         equip.setWatk((short) rs.getInt("watk"));
         equip.setWdef((short) rs.getInt("wdef"));
         equip.setUpgradeSlots((byte) rs.getInt("upgradeslots"));
-        equip.setLevel((byte) rs.getByte("level"));
+        equip.setLevel(rs.getByte("level"));
         equip.setItemExp(rs.getInt("itemexp"));
         equip.setItemLevel(rs.getByte("itemlevel"));
         equip.setExpiration(rs.getLong("expiration"));
@@ -114,7 +114,7 @@ public enum ItemFactory {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer cid = rs.getInt("characterid");
-                        items.add(new Pair<Item, Integer>(loadEquipFromResultSet(rs), cid));
+                        items.add(new Pair<>(loadEquipFromResultSet(rs), cid));
                     }
                 }
             }
@@ -128,8 +128,11 @@ public enum ItemFactory {
     }
 
     public List<Pair<Item, MapleInventoryType>> loadItems(int id, boolean login) throws SQLException {
-        if (value != 6) return loadItemsCommon(id, login);
-        else return loadItemsMerchant(id, login);
+        if (value != 6) {
+            return loadItemsCommon(id, login);
+        } else {
+            return loadItemsMerchant(id, login);
+        }
     }
 
     public void saveItems(List<Pair<Item, MapleInventoryType>> items, int id, Connection con) throws SQLException {
@@ -139,8 +142,11 @@ public enum ItemFactory {
     public void saveItems(List<Pair<Item, MapleInventoryType>> items, List<Short> bundlesList, int id, Connection con) throws SQLException {
         // thanks Arufonsu, MedicOP, BHB for pointing a "synchronized" bottleneck here
 
-        if (value != 6) saveItemsCommon(items, id, con);
-        else saveItemsMerchant(items, bundlesList, id, con);
+        if (value != 6) {
+            saveItemsCommon(items, id, con);
+        } else {
+            saveItemsMerchant(items, bundlesList, id, con);
+        }
     }
 
     private List<Pair<Item, MapleInventoryType>> loadItemsCommon(int id, boolean login) throws SQLException {
@@ -164,10 +170,10 @@ public enum ItemFactory {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                MapleInventoryType mit = MapleInventoryType.getByType(rs.getByte("inventorytype"));
+                MapleInventoryType mit = MapleInventoryType.getByType(rs.getByte("inventorytype")).orElseThrow();
 
                 if (mit.equals(MapleInventoryType.EQUIP) || mit.equals(MapleInventoryType.EQUIPPED)) {
-                    items.add(new Pair<Item, MapleInventoryType>(loadEquipFromResultSet(rs), mit));
+                    items.add(new Pair<>(loadEquipFromResultSet(rs), mit));
                 } else {
                     int petid = rs.getInt("petid");
                     if (rs.wasNull()) {
@@ -324,10 +330,10 @@ public enum ItemFactory {
                     bundles = rs2.getShort("bundles");
                 }
 
-                MapleInventoryType mit = MapleInventoryType.getByType(rs.getByte("inventorytype"));
+                MapleInventoryType mit = MapleInventoryType.getByType(rs.getByte("inventorytype")).orElseThrow();
 
                 if (mit.equals(MapleInventoryType.EQUIP) || mit.equals(MapleInventoryType.EQUIPPED)) {
-                    items.add(new Pair<Item, MapleInventoryType>(loadEquipFromResultSet(rs), mit));
+                    items.add(new Pair<>(loadEquipFromResultSet(rs), mit));
                 } else {
                     if (bundles > 0) {
                         int petid = rs.getInt("petid");

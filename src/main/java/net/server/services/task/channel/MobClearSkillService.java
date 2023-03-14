@@ -29,7 +29,7 @@ import net.server.services.BaseService;
  */
 public class MobClearSkillService extends BaseService {
 
-    private MobClearSkillScheduler mobClearSkillSchedulers[] = new MobClearSkillScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
+    private MobClearSkillScheduler[] mobClearSkillSchedulers = new MobClearSkillScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
 
     public MobClearSkillService() {
         for (int i = 0; i < YamlConfig.config.server.CHANNEL_LOCKS; i++) {

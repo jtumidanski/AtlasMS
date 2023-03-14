@@ -35,11 +35,11 @@ import java.util.Map;
  */
 public class PetDataFactory {
     private static MapleDataProvider dataRoot = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/Item.wz"));
-    private static Map<String, PetCommand> petCommands = new HashMap<String, PetCommand>();
-    private static Map<Integer, Integer> petHunger = new HashMap<Integer, Integer>();
+    private static Map<String, PetCommand> petCommands = new HashMap<>();
+    private static Map<Integer, Integer> petHunger = new HashMap<>();
 
     public static PetCommand getPetCommand(int petId, int skillId) {
-        PetCommand ret = petCommands.get(Integer.valueOf(petId) + "" + skillId);
+        PetCommand ret = petCommands.get(petId + "" + skillId);
         if (ret != null) {
             return ret;
         }
@@ -61,14 +61,14 @@ public class PetDataFactory {
     }
 
     public static int getHunger(int petId) {
-        Integer ret = petHunger.get(Integer.valueOf(petId));
+        Integer ret = petHunger.get(petId);
         if (ret != null) {
             return ret;
         }
         synchronized (petHunger) {
-            ret = petHunger.get(Integer.valueOf(petId));
+            ret = petHunger.get(petId);
             if (ret == null) {
-                ret = Integer.valueOf(MapleDataTool.getInt(dataRoot.getData("Pet/" + petId + ".img").getChildByPath("info/hungry"), 1));
+                ret = MapleDataTool.getInt(dataRoot.getData("Pet/" + petId + ".img").getChildByPath("info/hungry"), 1);
             }
             return ret;
         }

@@ -66,7 +66,7 @@ public class MapleGachapon {
         private int uncommon;
         private int rare;
 
-        private Gachapon(int npcid, int c, int u, int r, GachaponItems g) {
+        Gachapon(int npcid, int c, int u, int r, GachaponItems g) {
             this.npcId = npcid;
             this.gachapon = g;
             this.common = c;

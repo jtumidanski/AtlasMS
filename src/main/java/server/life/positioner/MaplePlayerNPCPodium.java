@@ -66,8 +66,7 @@ public class MaplePlayerNPCPodium {
         int podiumPlatform = rank / step;
         int relativePos = (rank % step) + 1;
 
-        Point pos = new Point(getPlatformPosX(podiumPlatform) + ((100 * relativePos) / (step + 1)), getPlatformPosY(podiumPlatform));
-        return pos;
+        return new Point(getPlatformPosX(podiumPlatform) + ((100 * relativePos) / (step + 1)), getPlatformPosY(podiumPlatform));
     }
 
     private static Point rearrangePlayerNpcs(MapleMap map, int newStep, List<MaplePlayerNPC> pnpcs) {
@@ -82,14 +81,16 @@ public class MaplePlayerNPCPodium {
 
     private static Point reorganizePlayerNpcs(MapleMap map, int newStep, List<MapleMapObject> mmoList) {
         if (!mmoList.isEmpty()) {
-            if (YamlConfig.config.server.USE_DEBUG) System.out.println("Reorganizing pnpc map, step " + newStep);
+            if (YamlConfig.config.server.USE_DEBUG) {
+                System.out.println("Reorganizing pnpc map, step " + newStep);
+            }
 
             List<MaplePlayerNPC> playerNpcs = new ArrayList<>(mmoList.size());
             for (MapleMapObject mmo : mmoList) {
                 playerNpcs.add((MaplePlayerNPC) mmo);
             }
 
-            Collections.sort(playerNpcs, new Comparator<MaplePlayerNPC>() {
+            playerNpcs.sort(new Comparator<>() {
                 @Override
                 public int compare(MaplePlayerNPC p1, MaplePlayerNPC p2) {
                     return p1.getScriptId() - p2.getScriptId(); // scriptid as playernpc history
@@ -132,9 +133,11 @@ public class MaplePlayerNPCPodium {
         int podiumStep = podiumData % (1 << 5), podiumCount = (podiumData / (1 << 5));
 
         if (podiumCount >= 3 * podiumStep) {
-            if (podiumStep >= YamlConfig.config.server.PLAYERNPC_AREA_STEPS) return null;
+            if (podiumStep >= YamlConfig.config.server.PLAYERNPC_AREA_STEPS) {
+                return null;
+            }
 
-            List<MapleMapObject> mmoList = map.getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.PLAYER_NPC));
+            List<MapleMapObject> mmoList = map.getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.PLAYER_NPC));
             map.getWorldServer().setPlayerNpcMapPodiumData(map.getId(), encodePodiumData(podiumStep + 1, podiumCount + 1));
             return reorganizePlayerNpcs(map, podiumStep + 1, mmoList);
         } else {
@@ -145,7 +148,9 @@ public class MaplePlayerNPCPodium {
 
     public static Point getNextPlayerNpcPosition(MapleMap map) {
         Point pos = getNextPlayerNpcPosition(map, map.getWorldServer().getPlayerNpcMapPodiumData(map.getId()));
-        if (pos == null) return null;
+        if (pos == null) {
+            return null;
+        }
 
         return map.getGroundBelow(pos);
     }

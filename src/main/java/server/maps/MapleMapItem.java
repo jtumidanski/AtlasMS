@@ -89,7 +89,9 @@ public class MapleMapItem extends AbstractMapleMapObject {
     }
 
     public final int getItemId() {
-        if (meso > 0) return meso;
+        if (meso > 0) {
+            return meso;
+        }
         return item.getItemId();
     }
 
@@ -130,7 +132,9 @@ public class MapleMapItem extends AbstractMapleMapObject {
     }
 
     public final boolean canBePickedBy(MapleCharacter chr) {
-        if (character_ownerid <= 0 || isFFADrop()) return true;
+        if (character_ownerid <= 0 || isFFADrop()) {
+            return true;
+        }
 
         if (party_ownerid == -1) {
             if (chr.getId() == character_ownerid) {

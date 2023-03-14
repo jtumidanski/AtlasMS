@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class MonsterCarnivalParty {
 
-    private List<MapleCharacter> members = new LinkedList<>();
+    private List<MapleCharacter> members;
     private MapleCharacter leader;
     private byte team;
     private short availableCP = 0, totalCP = 0;
@@ -77,10 +77,11 @@ public class MonsterCarnivalParty {
     }
 
     public void warpOut() {
-        if (winner == true)
+        if (winner == true) {
             warpOut(980000003 + (leader.getMonsterCarnival().getRoom() * 100));
-        else
+        } else {
             warpOut(980000004 + (leader.getMonsterCarnival().getRoom() * 100));
+        }
     }
 
     public boolean allInMap(MapleMap map) {
@@ -88,6 +89,7 @@ public class MonsterCarnivalParty {
         for (MapleCharacter chr : members) {
             if (chr.getMap() != map) {
                 status = false;
+                break;
             }
         }
         return status;

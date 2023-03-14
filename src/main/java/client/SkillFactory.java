@@ -29,16 +29,17 @@ import server.life.Element;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class SkillFactory {
     private static Map<Integer, Skill> skills = new HashMap<>();
     private static MapleDataProvider datasource = MapleDataProviderFactory.getDataProvider(MapleDataProviderFactory.fileInWZPath("Skill.wz"));
 
-    public static Skill getSkill(int id) {
-        if (!skills.isEmpty()) {
-            return skills.get(Integer.valueOf(id));
+    public static Optional<Skill> getSkill(int id) {
+        if (skills.isEmpty()) {
+            return Optional.empty();
         }
-        return null;
+        return Optional.ofNullable(skills.get(id));
     }
 
     public static void loadAllSkills() {
@@ -333,15 +334,17 @@ public class SkillFactory {
     public static String getSkillName(int skillid) {
         MapleData data = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/" + "String.wz")).getData("Skill.img");
         StringBuilder skill = new StringBuilder();
-        skill.append(String.valueOf(skillid));
+        skill.append(skillid);
         if (skill.length() == 4) {
             skill.delete(0, 4);
-            skill.append("000").append(String.valueOf(skillid));
+            skill.append("000").append(skillid);
         }
+
         if (data.getChildByPath(skill.toString()) != null) {
             for (MapleData skilldata : data.getChildByPath(skill.toString()).getChildren()) {
-                if (skilldata.getName().equals("name"))
+                if (skilldata.getName().equals("name")) {
                     return MapleDataTool.getString(skilldata, null);
+                }
             }
         }
 

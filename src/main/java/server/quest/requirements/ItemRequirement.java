@@ -33,6 +33,7 @@ import server.quest.MapleQuestRequirementType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Tyler (Twdtwd)
@@ -97,10 +98,6 @@ public class ItemRequirement extends MapleQuestRequirement {
 
     public int getItemAmountNeeded(int itemid, boolean complete) {
         Integer amount = items.get(itemid);
-        if (amount != null) {
-            return amount;
-        } else {
-            return complete ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-        }
+        return Objects.requireNonNullElse(amount, complete ? Integer.MAX_VALUE : Integer.MIN_VALUE);
     }
 }

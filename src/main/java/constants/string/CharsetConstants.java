@@ -13,6 +13,8 @@ package constants.string;
  * CharsetConstants
  */
 
+import java.util.Arrays;
+
 public class CharsetConstants {
 
     public static MapleLanguageType MAPLE_TYPE = MapleLanguageType.LANGUAGE_US;
@@ -23,18 +25,16 @@ public class CharsetConstants {
         final byte type;
         final String ascii;
 
-        private MapleLanguageType(int type, String ascii) {
+        MapleLanguageType(int type, String ascii) {
             this.type = (byte) type;
             this.ascii = ascii;
         }
 
         public static MapleLanguageType getByType(byte type) {
-            for (MapleLanguageType l : MapleLanguageType.values()) {
-                if (l.getType() == type) {
-                    return l;
-                }
-            }
-            return LANGUAGE_PT_BR;
+            return Arrays.stream(MapleLanguageType.values())
+                    .filter(l -> l.getType() == type)
+                    .findFirst()
+                    .orElse(LANGUAGE_PT_BR);
         }
 
         public String getAscii() {

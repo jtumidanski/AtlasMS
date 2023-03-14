@@ -51,14 +51,18 @@ public class ShutdownCommand extends Command {
         }
 
         if (time > 1) {
-            int seconds = (int) (time / 1000) % 60;
-            int minutes = (int) ((time / (1000 * 60)) % 60);
-            int hours = (int) ((time / (1000 * 60 * 60)) % 24);
-            int days = (int) ((time / (1000 * 60 * 60 * 24)));
+            int seconds = (time / 1000) % 60;
+            int minutes = (time / (1000 * 60)) % 60;
+            int hours = (time / (1000 * 60 * 60)) % 24;
+            int days = (time / (1000 * 60 * 60 * 24));
 
             String strTime = "";
-            if (days > 0) strTime += days + " days, ";
-            if (hours > 0) strTime += hours + " hours, ";
+            if (days > 0) {
+                strTime += days + " days, ";
+            }
+            if (hours > 0) {
+                strTime += hours + " hours, ";
+            }
             strTime += minutes + " minutes, ";
             strTime += seconds + " seconds";
 

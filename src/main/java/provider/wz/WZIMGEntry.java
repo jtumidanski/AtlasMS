@@ -32,7 +32,7 @@ import java.util.List;
 public class WZIMGEntry implements MapleData {
     private String name;
     private MapleDataType type;
-    private List<MapleData> children = new ArrayList<MapleData>(10);
+    private List<MapleData> children = new ArrayList<>(10);
     private Object data;
     private MapleDataEntity parent;
 
@@ -65,7 +65,7 @@ public class WZIMGEntry implements MapleData {
 
     @Override
     public MapleData getChildByPath(String path) {
-        String segments[] = path.split("/");
+        String[] segments = path.split("/");
         if (segments[0].equals("..")) {
             return ((MapleData) getParent()).getChildByPath(path.substring(path.indexOf("/") + 1));
         }

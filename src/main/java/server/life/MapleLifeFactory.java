@@ -77,7 +77,7 @@ public class MapleLifeFactory {
     }
 
     private static Pair<MapleMonsterStats, List<MobAttackInfoHolder>> getMonsterStats(int mid) {
-        MapleData monsterData = data.getData(StringUtil.getLeftPaddedStr(Integer.toString(mid) + ".img", '0', 11));
+        MapleData monsterData = data.getData(StringUtil.getLeftPaddedStr(mid + ".img", '0', 11));
         if (monsterData == null) {
             return null;
         }
@@ -226,16 +226,15 @@ public class MapleLifeFactory {
 
     public static MapleMonster getMonster(int mid) {
         try {
-            MapleMonsterStats stats = monsterStats.get(Integer.valueOf(mid));
+            MapleMonsterStats stats = monsterStats.get(mid);
             if (stats == null) {
                 Pair<MapleMonsterStats, List<MobAttackInfoHolder>> mobStats = getMonsterStats(mid);
                 stats = mobStats.getLeft();
                 setMonsterAttackInfo(mid, mobStats.getRight());
 
-                monsterStats.put(Integer.valueOf(mid), stats);
+                monsterStats.put(mid, stats);
             }
-            MapleMonster ret = new MapleMonster(mid, stats);
-            return ret;
+            return new MapleMonster(mid, stats);
         } catch (NullPointerException npe) {
             System.out.println("[SEVERE] MOB " + mid + " failed to load. Issue: " + npe.getMessage() + "\n\n");
             npe.printStackTrace();
@@ -246,9 +245,9 @@ public class MapleLifeFactory {
 
     public static int getMonsterLevel(int mid) {
         try {
-            MapleMonsterStats stats = monsterStats.get(Integer.valueOf(mid));
+            MapleMonsterStats stats = monsterStats.get(mid);
             if (stats == null) {
-                MapleData monsterData = data.getData(StringUtil.getLeftPaddedStr(Integer.toString(mid) + ".img", '0', 11));
+                MapleData monsterData = data.getData(StringUtil.getLeftPaddedStr(mid + ".img", '0', 11));
                 if (monsterData == null) {
                     return -1;
                 }
@@ -267,7 +266,7 @@ public class MapleLifeFactory {
 
     private static void decodeElementalString(MapleMonsterStats stats, String elemAttr) {
         for (int i = 0; i < elemAttr.length(); i += 2) {
-            stats.setEffectiveness(Element.getFromChar(elemAttr.charAt(i)), ElementalEffectiveness.getByNumber(Integer.valueOf(String.valueOf(elemAttr.charAt(i + 1)))));
+            stats.setEffectiveness(Element.getFromChar(elemAttr.charAt(i)), ElementalEffectiveness.getByNumber(Integer.parseInt(String.valueOf(elemAttr.charAt(i + 1)))));
         }
     }
 

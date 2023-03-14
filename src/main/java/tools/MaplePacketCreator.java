@@ -109,7 +109,7 @@ public class MaplePacketCreator {
     }
 
     private static void addRemainingSkillInfo(final MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
-        int remainingSp[] = chr.getRemainingSps();
+        int[] remainingSp = chr.getRemainingSps();
         int effectiveLength = 0;
         for (int i = 0; i < remainingSp.length; i++) {
             if (remainingSp[i] > 0) {
@@ -424,7 +424,7 @@ public class MaplePacketCreator {
         } else {
             int itemLevel = equip.getItemLevel();
 
-            long expNibble = (ExpTable.getExpNeededForLevel(ii.getEquipLevelReq(item.getItemId())) * equip.getItemExp());
+            long expNibble = ((long) ExpTable.getExpNeededForLevel(ii.getEquipLevelReq(item.getItemId())) * equip.getItemExp());
             expNibble /= ExpTable.getEquipExpNeededForLevel(itemLevel);
 
             mplew.write(0);
@@ -440,7 +440,11 @@ public class MaplePacketCreator {
 
     private static void addInventoryInfo(final MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
         for (byte i = 1; i <= 5; i++) {
-            mplew.write(chr.getInventory(MapleInventoryType.getByType(i)).getSlotLimit());
+            byte limit = MapleInventoryType.getByType(i)
+                    .map(chr::getInventory)
+                    .map(MapleInventory::getSlotLimit)
+                    .orElse((byte) 0);
+            mplew.write(limit);
         }
         mplew.writeLong(getTime(-2));
         MapleInventory iv = chr.getInventory(MapleInventoryType.EQUIPPED);
@@ -449,9 +453,9 @@ public class MaplePacketCreator {
         List<Item> equippedCash = new ArrayList<>(equippedC.size());
         for (Item item : equippedC) {
             if (item.getPosition() <= -100) {
-                equippedCash.add((Item) item);
+                equippedCash.add(item);
             } else {
-                equipped.add((Item) item);
+                equipped.add(item);
             }
         }
         for (Item item : equipped) {    // equipped doesn't actually need sorting, thanks Pllsz
@@ -680,7 +684,7 @@ public class MaplePacketCreator {
         mplew.write(c.getGender());
 
         boolean canFly = Server.getInstance().canFly(c.getAccID());
-        mplew.writeBool((YamlConfig.config.server.USE_ENFORCE_ADMIN_ACCOUNT || canFly) ? c.getGMLevel() > 1 : false);    // thanks Steve(kaito1410) for pointing the GM account boolean here
+        mplew.writeBool((YamlConfig.config.server.USE_ENFORCE_ADMIN_ACCOUNT || canFly) && c.getGMLevel() > 1);    // thanks Steve(kaito1410) for pointing the GM account boolean here
         mplew.write(((YamlConfig.config.server.USE_ENFORCE_ADMIN_ACCOUNT || canFly) && c.getGMLevel() > 1) ? 0x80 : 0);  // Admin Byte. 0x80,0x40,0x20.. Rubbish.
         mplew.write(0); // Country Code.
 
@@ -985,19 +989,15 @@ public class MaplePacketCreator {
         for (Pair<MapleStat, Integer> statupdate : stats) {
             updateMask |= statupdate.getLeft().getValue();
         }
-        List<Pair<MapleStat, Integer>> mystats = stats;
-        if (mystats.size() > 1) {
-            Collections.sort(mystats, new Comparator<Pair<MapleStat, Integer>>() {
-                @Override
-                public int compare(Pair<MapleStat, Integer> o1, Pair<MapleStat, Integer> o2) {
-                    int val1 = o1.getLeft().getValue();
-                    int val2 = o2.getLeft().getValue();
-                    return (val1 < val2 ? -1 : (val1 == val2 ? 0 : 1));
-                }
+        if (stats.size() > 1) {
+            stats.sort((o1, o2) -> {
+                int val1 = o1.getLeft().getValue();
+                int val2 = o2.getLeft().getValue();
+                return (Integer.compare(val1, val2));
             });
         }
         mplew.writeInt(updateMask);
-        for (Pair<MapleStat, Integer> statupdate : mystats) {
+        for (Pair<MapleStat, Integer> statupdate : stats) {
             if (statupdate.getLeft().getValue() >= 1) {
                 if (statupdate.getLeft().getValue() == 0x1) {
                     mplew.write(statupdate.getRight().byteValue());
@@ -1016,7 +1016,7 @@ public class MaplePacketCreator {
                 } else if (statupdate.getLeft().getValue() == 0x20000) {
                     mplew.writeShort(statupdate.getRight().shortValue());
                 } else {
-                    mplew.writeInt(statupdate.getRight().intValue());
+                    mplew.writeInt(statupdate.getRight());
                 }
             }
         }
@@ -1473,9 +1473,15 @@ public class MaplePacketCreator {
         }
 
         // reflect packet structure found thanks to Arnah (Vertisy)
-        if (pCounter != -1) mplew.writeInt(pCounter);// wPCounter_
-        if (mCounter != -1) mplew.writeInt(mCounter);// wMCounter_
-        if (pCounter != -1 || mCounter != -1) mplew.writeInt(100);// nCounterProb_
+        if (pCounter != -1) {
+            mplew.writeInt(pCounter);// wPCounter_
+        }
+        if (mCounter != -1) {
+            mplew.writeInt(mCounter);// wMCounter_
+        }
+        if (pCounter != -1 || mCounter != -1) {
+            mplew.writeInt(100);// nCounterProb_
+        }
     }
 
     /**
@@ -1887,7 +1893,7 @@ public class MaplePacketCreator {
         }
         if (chr.getBuffedValue(MapleBuffStat.COMBO) != null) {
             buffmask |= MapleBuffStat.COMBO.getValue();
-            buffvalue = Integer.valueOf(chr.getBuffedValue(MapleBuffStat.COMBO).intValue());
+            buffvalue = chr.getBuffedValue(MapleBuffStat.COMBO).intValue();
         }
         if (chr.getBuffedValue(MapleBuffStat.SHADOWPARTNER) != null) {
             buffmask |= MapleBuffStat.SHADOWPARTNER.getValue();
@@ -1896,7 +1902,7 @@ public class MaplePacketCreator {
             buffmask |= MapleBuffStat.SOULARROW.getValue();
         }
         if (chr.getBuffedValue(MapleBuffStat.MORPH) != null) {
-            buffvalue = Integer.valueOf(chr.getBuffedValue(MapleBuffStat.MORPH).intValue());
+            buffvalue = chr.getBuffedValue(MapleBuffStat.MORPH).intValue();
         }
         mplew.writeInt((int) ((buffmask >> 32) & 0xffffffffL));
         if (buffvalue != null) {
@@ -2083,7 +2089,7 @@ public class MaplePacketCreator {
     }
 
     public static byte[] onNewYearCardRes(MapleCharacter user, int cardId, int mode, int msg) {
-        NewYearCardRecord newyear = user.getNewYearRecord(cardId);
+        NewYearCardRecord newyear = user.getNewYearRecord(cardId).orElseThrow();
         return onNewYearCardRes(user, newyear, mode, msg);
     }
 
@@ -2420,13 +2426,13 @@ public class MaplePacketCreator {
         for (Integer oned : damage.keySet()) {
             List<Integer> onedList = damage.get(oned);
             if (onedList != null) {
-                lew.writeInt(oned.intValue());
+                lew.writeInt(oned);
                 lew.write(0x0);
                 if (skill == 4211006) {
                     lew.write(onedList.size());
                 }
                 for (Integer eachd : onedList) {
-                    lew.writeInt(eachd.intValue());
+                    lew.writeInt(eachd);
                 }
             }
         }
@@ -2585,7 +2591,7 @@ public class MaplePacketCreator {
     }
 
     public static byte[] updateAriantPQRanking(final MapleCharacter chr, final int score) {
-        return updateAriantPQRanking(new LinkedHashMap<MapleCharacter, Integer>() {{
+        return updateAriantPQRanking(new LinkedHashMap<>() {{
             put(chr, score);
         }});
     }
@@ -3142,7 +3148,7 @@ public class MaplePacketCreator {
     }
 
     private static void writeLongEncodeTemporaryMask(final MaplePacketLittleEndianWriter mplew, Collection<MonsterStatus> stati) {
-        int masks[] = new int[4];
+        int[] masks = new int[4];
 
         for (MonsterStatus statup : stati) {
             int pos = statup.isFirst() ? 0 : 2;
@@ -3368,7 +3374,7 @@ public class MaplePacketCreator {
         addCharLook(mplew, shop.getOwner(), false);
         mplew.writeMapleAsciiString(shop.getOwner().getName());
 
-        MapleCharacter visitors[] = shop.getVisitors();
+        MapleCharacter[] visitors = shop.getVisitors();
         for (int i = 0; i < 3; i++) {
             if (visitors[i] != null) {
                 mplew.write(i + 1);
@@ -3472,7 +3478,7 @@ public class MaplePacketCreator {
         return mplew.getPacket();
     }
 
-    public static byte[] getNPCTalkStyle(int npc, String talk, int styles[]) {
+    public static byte[] getNPCTalkStyle(int npc, String talk, int[] styles) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(4); // ?
@@ -3640,7 +3646,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.KEYMAP.getValue());
         mplew.write(0);
         for (int x = 0; x < 90; x++) {
-            MapleKeyBinding binding = keybindings.get(Integer.valueOf(x));
+            MapleKeyBinding binding = keybindings.get(x);
             if (binding != null) {
                 mplew.write(binding.getType());
                 mplew.writeInt(binding.getAction());
@@ -3686,7 +3692,7 @@ public class MaplePacketCreator {
     }
 
     public static byte[] getInventoryFull() {
-        return modifyInventory(true, Collections.<ModifyInventory>emptyList());
+        return modifyInventory(true, Collections.emptyList());
     }
 
     public static byte[] getShowInventoryFull() {
@@ -3925,7 +3931,7 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.PARTY_OPERATION.getValue());
         mplew.write(4);
-        mplew.writeInt(from.getParty().getId());
+        mplew.writeInt(from.getPartyId());
         mplew.writeMapleAsciiString(from.getName());
         mplew.write(0);
         return mplew.getPacket();
@@ -3935,7 +3941,7 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.PARTY_OPERATION.getValue());
         mplew.write(4);
-        mplew.writeInt(from.getParty().getId());
+        mplew.writeInt(from.getPartyId());
         mplew.writeMapleAsciiString("PS: " + from.getName());
         mplew.write(0);
         return mplew.getPacket();
@@ -5067,7 +5073,7 @@ public class MaplePacketCreator {
         return mplew.getPacket();
     }
 
-    public static final byte[] loadExceptionList(final int cid, final int petId, final byte petIdx, final List<Integer> data) {
+    public static byte[] loadExceptionList(final int cid, final int petId, final byte petIdx, final List<Integer> data) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.PET_EXCEPTION_LIST.getValue());
         mplew.writeInt(cid);
@@ -5752,7 +5758,7 @@ public class MaplePacketCreator {
         mplew.writeInt(hm.getItemId());
         mplew.writeMapleAsciiString("Hired Merchant");
 
-        MapleCharacter visitors[] = hm.getVisitors();
+        MapleCharacter[] visitors = hm.getVisitors();
         for (int i = 0; i < 3; i++) {
             if (visitors[i] != null) {
                 mplew.write(i + 1);
@@ -5962,11 +5968,7 @@ public class MaplePacketCreator {
         }
         mplew.write(0xFF);
         Integer cWeapon = equip.get((byte) -111);
-        if (cWeapon != null) {
-            mplew.writeInt(cWeapon);
-        } else {
-            mplew.writeInt(0);
-        }
+        mplew.writeInt(Objects.requireNonNullElse(cWeapon, 0));
         for (int i = 0; i < 3; i++) {
             mplew.writeInt(0);
         }
@@ -6200,7 +6202,9 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.CANCEL_NAME_CHANGE_RESULT.getValue());
         mplew.writeBool(success);
-        if (!success) mplew.write(0);
+        if (!success) {
+            mplew.write(0);
+        }
         //mplew.writeMapleAsciiString("Custom message."); //only if ^ != 0
         return mplew.getPacket();
     }
@@ -6209,7 +6213,9 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.CANCEL_TRANSFER_WORLD_RESULT.getValue());
         mplew.writeBool(success);
-        if (!success) mplew.write(0);
+        if (!success) {
+            mplew.write(0);
+        }
         //mplew.writeMapleAsciiString("Custom message."); //only if ^ != 0
         return mplew.getPacket();
     }
@@ -6496,7 +6502,9 @@ public class MaplePacketCreator {
     }
 
     public static byte[] getFamilyInfo(MapleFamilyEntry f) {
-        if (f == null) return getEmptyFamilyInfo();
+        if (f == null) {
+            return getEmptyFamilyInfo();
+        }
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.FAMILY_INFO_RESULT.getValue());
         mplew.writeInt(f.getReputation()); // cur rep left
@@ -6536,7 +6544,7 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.FAMILY_CHART_RESULT.getValue());
         mplew.writeInt(entry.getChrId()); //ID of viewed player's pedigree, can't be leader?
-        List<MapleFamilyEntry> superJuniors = new ArrayList<MapleFamilyEntry>(4);
+        List<MapleFamilyEntry> superJuniors = new ArrayList<>(4);
         boolean hasOtherJunior = false;
         int entryCount = 2; //2 guaranteed, leader and self
         entryCount += Math.min(2, entry.getTotalSeniors());
@@ -6548,34 +6556,50 @@ public class MaplePacketCreator {
             }
         }
         for (MapleFamilyEntry junior : entry.getJuniors()) {
-            if (junior == null) continue;
+            if (junior == null) {
+                continue;
+            }
             entryCount++;
             for (MapleFamilyEntry superJunior : junior.getJuniors()) {
-                if (superJunior == null) continue;
+                if (superJunior == null) {
+                    continue;
+                }
                 entryCount++;
                 superJuniors.add(superJunior);
             }
         }
         //write entries
         boolean missingEntries = entryCount == 2; //pedigree requires at least 3 entries to show leader, might only have 2 if leader's juniors leave
-        if (missingEntries) entryCount++;
+        if (missingEntries) {
+            entryCount++;
+        }
         mplew.writeInt(entryCount); //player count
         addPedigreeEntry(mplew, entry.getFamily().getLeader());
         if (entry.getSenior() != null) {
-            if (entry.getSenior().getSenior() != null) addPedigreeEntry(mplew, entry.getSenior().getSenior());
+            if (entry.getSenior().getSenior() != null) {
+                addPedigreeEntry(mplew, entry.getSenior().getSenior());
+            }
             addPedigreeEntry(mplew, entry.getSenior());
         }
         addPedigreeEntry(mplew, entry);
         if (hasOtherJunior) { //must be sent after own entry
             MapleFamilyEntry otherJunior = entry.getSenior().getOtherJunior(entry);
-            if (otherJunior != null) addPedigreeEntry(mplew, otherJunior);
+            if (otherJunior != null) {
+                addPedigreeEntry(mplew, otherJunior);
+            }
         }
-        if (missingEntries) addPedigreeEntry(mplew, entry);
+        if (missingEntries) {
+            addPedigreeEntry(mplew, entry);
+        }
         for (MapleFamilyEntry junior : entry.getJuniors()) {
-            if (junior == null) continue;
+            if (junior == null) {
+                continue;
+            }
             addPedigreeEntry(mplew, junior);
             for (MapleFamilyEntry superJunior : junior.getJuniors()) {
-                if (superJunior != null) addPedigreeEntry(mplew, superJunior);
+                if (superJunior != null) {
+                    addPedigreeEntry(mplew, superJunior);
+                }
             }
         }
         mplew.writeInt(2 + superJuniors.size()); //member info count
@@ -7617,11 +7641,7 @@ public class MaplePacketCreator {
     }
 
     private static String getRightPaddedStr(String in, char padchar, int length) {
-        StringBuilder builder = new StringBuilder(in);
-        for (int x = in.length(); x < length; x++) {
-            builder.append(padchar);
-        }
-        return builder.toString();
+        return in + String.valueOf(padchar).repeat(Math.max(0, length - in.length()));
     }
 
     public static byte[] MobDamageMobFriendly(MapleMonster mob, int damage, int remainingHp) {

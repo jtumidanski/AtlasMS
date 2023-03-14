@@ -29,7 +29,7 @@ import net.server.services.BaseService;
  */
 public class MobMistService extends BaseService {
 
-    private MobMistScheduler mobMistSchedulers[] = new MobMistScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
+    private MobMistScheduler[] mobMistSchedulers = new MobMistScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
 
     public MobMistService() {
         for (int i = 0; i < YamlConfig.config.server.CHANNEL_LOCKS; i++) {

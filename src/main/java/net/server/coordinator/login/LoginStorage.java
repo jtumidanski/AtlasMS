@@ -36,11 +36,7 @@ public class LoginStorage {
     private ConcurrentHashMap<Integer, List<Long>> loginHistory = new ConcurrentHashMap<>();
 
     public boolean registerLogin(int accountId) {
-        List<Long> accHist = loginHistory.get(accountId);
-        if (accHist == null) {
-            accHist = new LinkedList<Long>();
-            loginHistory.put(accountId, accHist);
-        }
+        List<Long> accHist = loginHistory.computeIfAbsent(accountId, k -> new LinkedList<>());
 
         synchronized (accHist) {
             if (accHist.size() > YamlConfig.config.server.MAX_ACCOUNT_LOGIN_ATTEMPT) {

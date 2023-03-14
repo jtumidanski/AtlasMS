@@ -100,12 +100,9 @@ public class PartySearchStorage {
             pscList.add(new PartySearchCharacter(chr));
         }
 
-        Collections.sort(pscList, new Comparator<PartySearchCharacter>() {
-            @Override
-            public int compare(PartySearchCharacter c1, PartySearchCharacter c2) {
-                int levelP1 = c1.getLevel(), levelP2 = c2.getLevel();
-                return levelP1 > levelP2 ? 1 : (levelP1 == levelP2 ? 0 : -1);
-            }
+        pscList.sort((c1, c2) -> {
+            int levelP1 = c1.getLevel(), levelP2 = c2.getLevel();
+            return Integer.compare(levelP1, levelP2);
         });
 
         psWLock.lock();

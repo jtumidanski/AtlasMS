@@ -51,7 +51,9 @@ public class SetEqStatCommand extends Command {
         for (byte i = 1; i <= equip.getSlotLimit(); i++) {
             try {
                 Equip eq = (Equip) equip.getItem(i);
-                if (eq == null) continue;
+                if (eq == null) {
+                    continue;
+                }
 
                 eq.setWdef(newStat);
                 eq.setAcc(newStat);

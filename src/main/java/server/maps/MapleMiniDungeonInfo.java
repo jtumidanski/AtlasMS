@@ -46,7 +46,7 @@ public enum MapleMiniDungeonInfo {
     private int dungeonId;
     private int dungeons;
 
-    private MapleMiniDungeonInfo(int baseId, int dungeonId, int dungeons) {
+    MapleMiniDungeonInfo(int baseId, int dungeonId, int dungeons) {
         this.baseId = baseId;
         this.dungeonId = dungeonId;
         this.dungeons = dungeons;

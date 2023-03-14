@@ -40,23 +40,33 @@ public class FamilySeparateHandler extends AbstractMaplePacketHandler {
 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        if (!YamlConfig.config.server.USE_FAMILY_SYSTEM) return;
+        if (!YamlConfig.config.server.USE_FAMILY_SYSTEM) {
+            return;
+        }
         MapleFamily oldFamily = c.getPlayer().getFamily();
-        if (oldFamily == null) return;
-        MapleFamilyEntry forkOn = null;
+        if (oldFamily == null) {
+            return;
+        }
+        MapleFamilyEntry forkOn;
         boolean isSenior;
         if (slea.available() > 0) { //packet 0x95 doesn't send id, since there is only one senior
             forkOn = c.getPlayer().getFamily().getEntryByID(slea.readInt());
-            if (!c.getPlayer().getFamilyEntry().isJunior(forkOn)) return; //packet editing?
+            if (!c.getPlayer().getFamilyEntry().isJunior(forkOn)) {
+                return; //packet editing?
+            }
             isSenior = true;
         } else {
             forkOn = c.getPlayer().getFamilyEntry();
             isSenior = false;
         }
-        if (forkOn == null) return;
+        if (forkOn == null) {
+            return;
+        }
 
         MapleFamilyEntry senior = forkOn.getSenior();
-        if (senior == null) return;
+        if (senior == null) {
+            return;
+        }
         int levelDiff = Math.abs(c.getPlayer().getLevel() - senior.getLevel());
         int cost = 2500 * levelDiff;
         cost += levelDiff * levelDiff;
@@ -67,7 +77,9 @@ public class FamilySeparateHandler extends AbstractMaplePacketHandler {
         c.getPlayer().gainMeso(-cost);
         int repCost = separateRepCost(forkOn);
         senior.gainReputation(-repCost, false);
-        if (senior.getSenior() != null) senior.getSenior().gainReputation(-(repCost / 2), false);
+        if (senior.getSenior() != null) {
+            senior.getSenior().gainReputation(-(repCost / 2), false);
+        }
         forkOn.announceToSenior(MaplePacketCreator.serverNotice(5, forkOn.getName() + " has left the family."), true);
         forkOn.fork();
         c.announce(MaplePacketCreator.getFamilyInfo(forkOn)); //pedigree info will be requested from the client if the window is open

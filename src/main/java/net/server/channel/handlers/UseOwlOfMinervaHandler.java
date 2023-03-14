@@ -47,7 +47,7 @@ public final class UseOwlOfMinervaHandler extends AbstractMaplePacketHandler {
                 owlLeaderboards.add(i);
             }
         } else {
-            Comparator<Pair<Integer, Integer>> comparator = new Comparator<Pair<Integer, Integer>>() {  // descending order
+            Comparator<Pair<Integer, Integer>> comparator = new Comparator<>() {  // descending order
                 @Override
                 public int compare(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
                     return p2.getRight().compareTo(p1.getRight());
@@ -55,9 +55,7 @@ public final class UseOwlOfMinervaHandler extends AbstractMaplePacketHandler {
             };
 
             PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(Math.max(1, owlSearched.size()), comparator);
-            for (Pair<Integer, Integer> p : owlSearched) {
-                queue.add(p);
-            }
+            queue.addAll(owlSearched);
 
             owlLeaderboards = new LinkedList<>();
             for (int i = 0; i < Math.min(owlSearched.size(), 10); i++) {

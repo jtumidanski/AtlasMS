@@ -40,8 +40,9 @@ public final class NoteActionHandler extends AbstractMaplePacketHandler {
             String charname = slea.readMapleAsciiString();
             String message = slea.readMapleAsciiString();
             try {
-                if (c.getPlayer().getCashShop().isOpened())
+                if (c.getPlayer().getCashShop().isOpened()) {
                     c.announce(MaplePacketCreator.showCashInventory(c));
+                }
 
                 c.getPlayer().sendNote(charname, message, (byte) 1);
                 c.getPlayer().getCashShop().decreaseNotes();
@@ -62,8 +63,9 @@ public final class NoteActionHandler extends AbstractMaplePacketHandler {
                     ps = con.prepareStatement("SELECT `fame` FROM notes WHERE id=? AND deleted=0");
                     ps.setInt(1, id);
                     ResultSet rs = ps.executeQuery();
-                    if (rs.next())
+                    if (rs.next()) {
                         fame += rs.getInt("fame");
+                    }
                     rs.close();
 
                     ps = con.prepareStatement("UPDATE notes SET `deleted` = 1 WHERE id = ?");

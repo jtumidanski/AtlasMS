@@ -28,6 +28,8 @@ import net.AbstractMaplePacketHandler;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 /**
  * @author Matze
  */
@@ -40,7 +42,12 @@ public final class ItemMoveHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        MapleInventoryType type = MapleInventoryType.getByType(slea.readByte());
+        Optional<MapleInventoryType> type = MapleInventoryType.getByType(slea.readByte());
+        if (type.isEmpty()) {
+            c.announce(MaplePacketCreator.enableActions());
+            return;
+        }
+
         short src = slea.readShort();     //is there any reason to use byte instead of short in src and action?
         short action = slea.readShort();
         short quantity = slea.readShort();
@@ -50,12 +57,14 @@ public final class ItemMoveHandler extends AbstractMaplePacketHandler {
         } else if (action < 0) {
             MapleInventoryManipulator.equip(c, src, action);
         } else if (action == 0) {
-            MapleInventoryManipulator.drop(c, type, src, quantity);
+            MapleInventoryManipulator.drop(c, type.get(), src, quantity);
         } else {
-            MapleInventoryManipulator.move(c, type, src, action);
+            MapleInventoryManipulator.move(c, type.get(), src, action);
         }
 
-        if (c.getPlayer().getMap().getHPDec() > 0) c.getPlayer().resetHpDecreaseTask();
+        if (c.getPlayer().getMap().getHPDec() > 0) {
+            c.getPlayer().resetHpDecreaseTask();
+        }
         c.getPlayer().getAutobanManager().spam(6);
     }
 }

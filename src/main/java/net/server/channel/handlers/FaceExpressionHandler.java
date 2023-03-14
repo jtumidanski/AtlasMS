@@ -35,7 +35,7 @@ public final class FaceExpressionHandler extends AbstractMaplePacketHandler {
 
         if (emote > 7) {
             int itemid = 5159992 + emote;   // thanks RajanGrewal (Darter) for reporting unchecked emote itemid
-            if (!ItemConstants.isFaceExpression(itemid) || chr.getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid) == null) {
+            if (!ItemConstants.isFaceExpression(itemid) || chr.getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid).isEmpty()) {
                 return;
             }
         } else if (emote < 1) {

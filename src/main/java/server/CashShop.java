@@ -54,6 +54,7 @@ public class CashShop {
     private List<Integer> wishList = new ArrayList<>();
     private int notes = 0;
     private Lock lock = MonitoredReentrantLockFactory.createLock(MonitoredLockType.CASHSHOP);
+
     public CashShop(int accountId, int characterId, int jobType) throws SQLException {
         this.accountId = accountId;
         this.characterId = characterId;
@@ -103,9 +104,15 @@ public class CashShop {
             ps.close();
             con.close();
         } finally {
-            if (ps != null && !ps.isClosed()) ps.close();
-            if (rs != null && !rs.isClosed()) rs.close();
-            if (con != null && !con.isClosed()) con.close();
+            if (ps != null && !ps.isClosed()) {
+                ps.close();
+            }
+            if (rs != null && !rs.isClosed()) {
+                rs.close();
+            }
+            if (con != null && !con.isClosed()) {
+                con.close();
+            }
         }
     }
 
@@ -143,8 +150,9 @@ public class CashShop {
 
     public void gainCash(int type, CashItem buyItem, int world) {
         gainCash(type, -buyItem.getPrice());
-        if (!YamlConfig.config.server.USE_ENFORCE_ITEM_SUGGESTION)
+        if (!YamlConfig.config.server.USE_ENFORCE_ITEM_SUGGESTION) {
             Server.getInstance().getWorld(world).addCashItemBought(buyItem.getSN());
+        }
     }
 
     public boolean isOpened() {
@@ -234,8 +242,12 @@ public class CashShop {
             sqle.printStackTrace();
         } finally {
             try {
-                if (ps != null && !ps.isClosed()) ps.close();
-                if (con != null && !con.isClosed()) con.close();
+                if (ps != null && !ps.isClosed()) {
+                    ps.close();
+                }
+                if (con != null && !con.isClosed()) {
+                    con.close();
+                }
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -244,7 +256,7 @@ public class CashShop {
 
     public List<Pair<Item, String>> loadGifts() {
         List<Pair<Item, String>> gifts = new ArrayList<>();
-        Connection con = null;
+        Connection con;
 
         try {
             con = DatabaseConnection.getConnection();
@@ -261,9 +273,10 @@ public class CashShop {
                 if (item.getInventoryType().equals(MapleInventoryType.EQUIP)) {
                     equip = (Equip) item;
                     equip.setRingId(rs.getInt("ringid"));
-                    gifts.add(new Pair<Item, String>(equip, rs.getString("message")));
-                } else
+                    gifts.add(new Pair<>(equip, rs.getString("message")));
+                } else {
                     gifts.add(new Pair<>(item, rs.getString("message")));
+                }
 
                 if (CashItemFactory.isPackage(cItem.getItemId())) { //Packages never contains a ring
                     for (Item packageItem : CashItemFactory.getPackage(cItem.getItemId())) {
@@ -518,9 +531,15 @@ public class CashShop {
                 ex.printStackTrace();
             } finally {
                 try {
-                    if (rs != null && !rs.isClosed()) rs.close();
-                    if (ps != null && !ps.isClosed()) ps.close();
-                    if (con != null && !con.isClosed()) con.close();
+                    if (rs != null && !rs.isClosed()) {
+                        rs.close();
+                    }
+                    if (ps != null && !ps.isClosed()) {
+                        ps.close();
+                    }
+                    if (con != null && !con.isClosed()) {
+                        con.close();
+                    }
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -528,7 +547,9 @@ public class CashShop {
         }
 
         public static CashItem getRandomCashItem() {
-            if (randomitemsns.isEmpty()) return null;
+            if (randomitemsns.isEmpty()) {
+                return null;
+            }
 
             int rnd = (int) (Math.random() * randomitemsns.size());
             return items.get(randomitemsns.get(rnd));
@@ -572,9 +593,15 @@ public class CashShop {
                 ex.printStackTrace();
             } finally {
                 try {
-                    if (rs != null && !rs.isClosed()) rs.close();
-                    if (ps != null && !ps.isClosed()) ps.close();
-                    if (con != null && !con.isClosed()) con.close();
+                    if (rs != null && !rs.isClosed()) {
+                        rs.close();
+                    }
+                    if (ps != null && !ps.isClosed()) {
+                        ps.close();
+                    }
+                    if (con != null && !con.isClosed()) {
+                        con.close();
+                    }
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }

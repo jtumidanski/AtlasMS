@@ -42,7 +42,7 @@ public final class DenyPartyRequestHandler extends AbstractMaplePacketHandler {
             MapleCharacter chr = c.getPlayer();
 
             if (MapleInviteCoordinator.answerInvite(InviteType.PARTY, chr.getId(), cfrom.getPartyId(), false).result == InviteResult.DENIED) {
-                chr.updatePartySearchAvailability(chr.getParty() == null);
+                chr.updatePartySearchAvailability(chr.getParty().isEmpty());
                 cfrom.getClient().announce(MaplePacketCreator.partyStatusMessage(23, chr.getName()));
             }
         }

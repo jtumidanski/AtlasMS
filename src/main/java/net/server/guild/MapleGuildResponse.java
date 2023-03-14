@@ -33,7 +33,7 @@ public enum MapleGuildResponse {
 
     private int value;
 
-    private MapleGuildResponse(int val) {
+    MapleGuildResponse(int val) {
         value = val;
     }
 

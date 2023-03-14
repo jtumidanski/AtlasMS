@@ -64,7 +64,7 @@ public class IntervalBuilder {
             newLimitX2 = newTo;
         }
 
-        intervalLimits.add(st, new Line2D.Float((float) newLimitX1, 0, (float) newLimitX2, 0));
+        intervalLimits.add(st, new Line2D.Float(newLimitX1, 0, newLimitX2, 0));
     }
 
     private int bsearchInterval(int point) {
@@ -98,7 +98,9 @@ public class IntervalBuilder {
             }
 
             int en = bsearchInterval(to);
-            if (en < st) en = st - 1;
+            if (en < st) {
+                en = st - 1;
+            }
 
             refitOverlappedIntervals(st, en + 1, from, to);
         } finally {

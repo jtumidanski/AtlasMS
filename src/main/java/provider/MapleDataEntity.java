@@ -25,7 +25,7 @@ package provider;
  * @author Matze
  */
 public interface MapleDataEntity {
-    public String getName();
+    String getName();
 
-    public MapleDataEntity getParent();
+    MapleDataEntity getParent();
 }

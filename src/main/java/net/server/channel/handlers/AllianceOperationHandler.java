@@ -220,7 +220,7 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
                 break;
             }
             case 0x08:
-                String ranks[] = new String[5];
+                String[] ranks = new String[5];
                 for (int i = 0; i < 5; i++) {
                     ranks[i] = slea.readMapleAsciiString();
                 }
@@ -266,7 +266,9 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
 
     private void changePlayerAllianceRank(MapleAlliance alliance, MapleCharacter chr, boolean raise) {
         int newRank = chr.getAllianceRank() + (raise ? -1 : 1);
-        if (newRank < 3 || newRank > 5) return;
+        if (newRank < 3 || newRank > 5) {
+            return;
+        }
 
         chr.getMGC().setAllianceRank(newRank);
         chr.saveGuildStatus();

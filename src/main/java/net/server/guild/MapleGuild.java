@@ -47,16 +47,17 @@ public class MapleGuild {
 
     private final List<MapleGuildCharacter> members;
     private final Lock membersLock = MonitoredReentrantLockFactory.createLock(MonitoredLockType.GUILD, true);
-    private String rankTitles[] = new String[5]; // 1 = master, 2 = jr, 5 = lowest member
+    private String[] rankTitles = new String[5]; // 1 = master, 2 = jr, 5 = lowest member
     private String name, notice;
     private int id, gp, logo, logoColor, leader, capacity, logoBG, logoBGColor, signature, allianceId;
     private int world;
     private Map<Integer, List<Integer>> notifications = new LinkedHashMap<>();
     private boolean bDirty = true;
+
     public MapleGuild(int guildid, int world) {
         this.world = world;
         members = new ArrayList<>();
-        Connection con = null;
+        Connection con;
         try {
             con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT * FROM guilds WHERE guildid = " + guildid);
@@ -195,7 +196,7 @@ public class MapleGuild {
 
         MapleMatchCheckerCoordinator mmce = guildLeader.getWorldServer().getMatchCheckerCoordinator();
         for (MapleCharacter chr : guildLeader.getMap().getAllPlayers()) {
-            if (chr.getParty() == null && chr.getGuild() == null && mmce.getMatchConfirmationLeaderid(chr.getId()) == -1) {
+            if (chr.getParty().isEmpty() && chr.getGuild() == null && mmce.getMatchConfirmationLeaderid(chr.getId()) == -1) {
                 guildMembers.add(chr);
             }
         }
@@ -238,7 +239,7 @@ public class MapleGuild {
             if (notifications.keySet().size() != chs.size()) {
                 notifications.clear();
                 for (Integer ch : chs) {
-                    notifications.put(ch, new LinkedList<Integer>());
+                    notifications.put(ch, new LinkedList<>());
                 }
             } else {
                 for (List<Integer> l : notifications.values()) {
@@ -258,7 +259,9 @@ public class MapleGuild {
                 synchronized (notifications) {
                     chl = notifications.get(mgc.getChannel());
                 }
-                if (chl != null) chl.add(mgc.getId());
+                if (chl != null) {
+                    chl.add(mgc.getId());
+                }
                 //Unable to connect to Channel... error was here
             }
         } finally {
@@ -398,7 +401,9 @@ public class MapleGuild {
 
         for (MapleGuildCharacter mgc : getMembers()) {
             MapleCharacter chr = ps.getCharacterById(mgc.getId());
-            if (chr == null || !chr.isLoggedinWorld()) continue;
+            if (chr == null || !chr.isLoggedinWorld()) {
+                continue;
+            }
 
             byte[] packet = MaplePacketCreator.guildNameChanged(chr.getId(), this.getName());
             chr.getMap().broadcastMessage(chr, packet);
@@ -410,7 +415,9 @@ public class MapleGuild {
 
         for (MapleGuildCharacter mgc : getMembers()) {
             MapleCharacter chr = ps.getCharacterById(mgc.getId());
-            if (chr == null || !chr.isLoggedinWorld()) continue;
+            if (chr == null || !chr.isLoggedinWorld()) {
+                continue;
+            }
 
             byte[] packet = MaplePacketCreator.guildMarkChanged(chr.getId(), this);
             chr.getMap().broadcastMessage(chr, packet);
@@ -422,7 +429,9 @@ public class MapleGuild {
 
         for (MapleGuildCharacter mgc : getMembers()) {
             MapleCharacter chr = ps.getCharacterById(mgc.getId());
-            if (chr == null || !chr.isLoggedinWorld()) continue;
+            if (chr == null || !chr.isLoggedinWorld()) {
+                continue;
+            }
 
             byte[] packet = MaplePacketCreator.showGuildInfo(chr);
             chr.announce(packet);

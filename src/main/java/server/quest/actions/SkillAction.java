@@ -30,10 +30,7 @@ import provider.MapleDataTool;
 import server.quest.MapleQuest;
 import server.quest.MapleQuestActionType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Tyler (Twdtwd)
@@ -54,8 +51,9 @@ public class SkillAction extends MapleQuestAction {
             byte skillLevel = 0;
             int skillid = MapleDataTool.getInt(sEntry.getChildByPath("id"));
             MapleData skillLevelData = sEntry.getChildByPath("skillLevel");
-            if (skillLevelData != null)
+            if (skillLevelData != null) {
                 skillLevel = (byte) MapleDataTool.getInt(skillLevelData);
+            }
             int masterLevel = MapleDataTool.getInt(sEntry.getChildByPath("masterLevel"));
             List<Integer> jobs = new ArrayList<>();
 
@@ -73,18 +71,21 @@ public class SkillAction extends MapleQuestAction {
     @Override
     public void run(MapleCharacter chr, Integer extSelection) {
         for (SkillData skill : skillData.values()) {
-            Skill skillObject = SkillFactory.getSkill(skill.getId());
-            if (skillObject == null) continue;
+            Optional<Skill> skillObject = SkillFactory.getSkill(skill.getId());
+            if (skillObject.isEmpty()) {
+                continue;
+            }
 
             boolean shouldLearn = false;
 
-            if (skill.jobsContains(chr.getJob()) || skillObject.isBeginnerSkill())
+            if (skill.jobsContains(chr.getJob()) || skillObject.get().isBeginnerSkill()) {
                 shouldLearn = true;
+            }
 
-            byte skillLevel = (byte) Math.max(skill.getLevel(), chr.getSkillLevel(skillObject));
-            int masterLevel = Math.max(skill.getMasterLevel(), chr.getMasterLevel(skillObject));
+            byte skillLevel = (byte) Math.max(skill.getLevel(), chr.getSkillLevel(skillObject.get()));
+            int masterLevel = Math.max(skill.getMasterLevel(), chr.getMasterLevel(skillObject.get()));
             if (shouldLearn) {
-                chr.changeSkillLevel(skillObject, skillLevel, masterLevel, -1);
+                chr.changeSkillLevel(skillObject.get(), skillLevel, masterLevel, -1);
             }
 
         }
@@ -92,7 +93,7 @@ public class SkillAction extends MapleQuestAction {
 
     private class SkillData {
         protected int id, level, masterLevel;
-        List<Integer> jobs = new ArrayList<>();
+        List<Integer> jobs;
 
         public SkillData(int id, int level, int masterLevel, List<Integer> jobs) {
             this.id = id;

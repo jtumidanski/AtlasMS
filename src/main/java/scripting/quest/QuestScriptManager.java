@@ -99,11 +99,8 @@ public class QuestScriptManager extends AbstractScriptManager {
             try {
                 c.setClickedNPC();
                 iv.invokeFunction("start", mode, type, selection);
-            } catch (final UndeclaredThrowableException ute) {
+            } catch (final Throwable ute) {
                 FilePrinter.printError(FilePrinter.QUEST + getQM(c).getQuest() + ".txt", ute);
-                dispose(c);
-            } catch (final Throwable t) {
-                FilePrinter.printError(FilePrinter.QUEST + getQM(c).getQuest() + ".txt", t);
                 dispose(c);
             }
         }
@@ -156,11 +153,8 @@ public class QuestScriptManager extends AbstractScriptManager {
             try {
                 c.setClickedNPC();
                 iv.invokeFunction("end", mode, type, selection);
-            } catch (final UndeclaredThrowableException ute) {
+            } catch (final Throwable ute) {
                 FilePrinter.printError(FilePrinter.QUEST + getQM(c).getQuest() + ".txt", ute);
-                dispose(c);
-            } catch (final Throwable t) {
-                FilePrinter.printError(FilePrinter.QUEST + getQM(c).getQuest() + ".txt", t);
                 dispose(c);
             }
         }

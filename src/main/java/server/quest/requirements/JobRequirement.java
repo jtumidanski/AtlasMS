@@ -30,6 +30,7 @@ import server.quest.MapleQuestRequirementType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Tyler (Twdtwd)
@@ -55,11 +56,14 @@ public class JobRequirement extends MapleQuestRequirement {
 
     @Override
     public boolean check(MapleCharacter chr, Integer npcid) {
-        for (Integer job : jobs) {
-            if (chr.getJob().equals(MapleJob.getById(job)) || chr.isGM()) {
-                return true;
-            }
+        if (chr.isGM()) {
+            return true;
         }
-        return false;
+
+        return jobs.stream()
+                .map(MapleJob::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .anyMatch(j -> j.equals(chr.getJob()));
     }
 }

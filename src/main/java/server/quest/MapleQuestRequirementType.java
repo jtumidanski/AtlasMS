@@ -28,64 +28,40 @@ public enum MapleQuestRequirementType {
     UNDEFINED(-1), JOB(0), ITEM(1), QUEST(2), MIN_LEVEL(3), MAX_LEVEL(4), END_DATE(5), MOB(6), NPC(7), FIELD_ENTER(8), INTERVAL(9), SCRIPT(10), PET(11), MIN_PET_TAMENESS(12), MONSTER_BOOK(13), NORMAL_AUTO_START(14), INFO_NUMBER(15), INFO_EX(16), COMPLETED_QUEST(17), START(18), END(19), DAY_BY_DAY(20), MESO(21), BUFF(22), EXCEPT_BUFF(23);
     final byte type;
 
-    private MapleQuestRequirementType(int type) {
+    MapleQuestRequirementType(int type) {
         this.type = (byte) type;
     }
 
     public static MapleQuestRequirementType getByWZName(String name) {
-        if (name.equals("job")) {
-            return JOB;
-        } else if (name.equals("quest")) {
-            return QUEST;
-        } else if (name.equals("item")) {
-            return ITEM;
-        } else if (name.equals("lvmin")) {
-            return MIN_LEVEL;
-        } else if (name.equals("lvmax")) {
-            return MAX_LEVEL;
-        } else if (name.equals("end")) {
-            return END_DATE;
-        } else if (name.equals("mob")) {
-            return MOB;
-        } else if (name.equals("npc")) {
-            return NPC;
-        } else if (name.equals("fieldEnter")) {
-            return FIELD_ENTER;
-        } else if (name.equals("interval")) {
-            return INTERVAL;
-        } else if (name.equals("startscript")) {
-            return SCRIPT;
-        } else if (name.equals("endscript")) {
-            return SCRIPT;
-        } else if (name.equals("pet")) {
-            return PET;
-        } else if (name.equals("pettamenessmin")) {
-            return MIN_PET_TAMENESS;
-        } else if (name.equals("mbmin")) {
-            return MONSTER_BOOK;
-        } else if (name.equals("normalAutoStart")) {
-            return NORMAL_AUTO_START;
-        } else if (name.equals("infoNumber")) {
-            return INFO_NUMBER;
-        } else if (name.equals("infoex")) {
-            return INFO_EX;
-        } else if (name.equals("questComplete")) {
-            return COMPLETED_QUEST;
-        } else if (name.equals("start")) {
-            return START;
+        return switch (name) {
+            case "job" -> JOB;
+            case "quest" -> QUEST;
+            case "item" -> ITEM;
+            case "lvmin" -> MIN_LEVEL;
+            case "lvmax" -> MAX_LEVEL;
+            case "end" -> END_DATE;
+            case "mob" -> MOB;
+            case "npc" -> NPC;
+            case "fieldEnter" -> FIELD_ENTER;
+            case "interval" -> INTERVAL;
+            case "startscript" -> SCRIPT;
+            case "endscript" -> SCRIPT;
+            case "pet" -> PET;
+            case "pettamenessmin" -> MIN_PET_TAMENESS;
+            case "mbmin" -> MONSTER_BOOK;
+            case "normalAutoStart" -> NORMAL_AUTO_START;
+            case "infoNumber" -> INFO_NUMBER;
+            case "infoex" -> INFO_EX;
+            case "questComplete" -> COMPLETED_QUEST;
+            case "start" -> START;
 	/*} else if(name.equals("end")) {   already coded
             return END;*/
-        } else if (name.equals("daybyday")) {
-            return DAY_BY_DAY;
-        } else if (name.equals("money")) {
-            return MESO;
-        } else if (name.equals("buff")) {
-            return BUFF;
-        } else if (name.equals("exceptbuff")) {
-            return EXCEPT_BUFF;
-        } else {
-            return UNDEFINED;
-        }
+            case "daybyday" -> DAY_BY_DAY;
+            case "money" -> MESO;
+            case "buff" -> BUFF;
+            case "exceptbuff" -> EXCEPT_BUFF;
+            default -> UNDEFINED;
+        };
     }
 
     public byte getType() {

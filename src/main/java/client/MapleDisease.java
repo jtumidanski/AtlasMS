@@ -23,6 +23,9 @@ package client;
 
 import constants.game.GameConstants;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum MapleDisease {
     NULL(0x0),
     SLOW(0x1, 126),
@@ -41,15 +44,15 @@ public enum MapleDisease {
     private boolean first;
     private int mobskill;
 
-    private MapleDisease(long i) {
+    MapleDisease(long i) {
         this(i, false, 0);
     }
 
-    private MapleDisease(long i, int skill) {
+    MapleDisease(long i, int skill) {
         this(i, false, skill);
     }
 
-    private MapleDisease(long i, boolean first, int skill) {
+    MapleDisease(long i, boolean first, int skill) {
         this.i = i;
         this.first = first;
         this.mobskill = skill;
@@ -63,18 +66,16 @@ public enum MapleDisease {
         }
     }
 
-    public static final MapleDisease getRandom() {
+    public static MapleDisease getRandom() {
         MapleDisease[] diseases = GameConstants.CPQ_DISEASES;
         return diseases[(int) (Math.random() * diseases.length)];
     }
 
-    public static final MapleDisease getBySkill(final int skill) {
-        for (MapleDisease d : MapleDisease.values()) {
-            if (d.getDisease() == skill && d.getDisease() != 0) {
-                return d;
-            }
-        }
-        return null;
+    public static Optional<MapleDisease> getBySkill(final int skill) {
+        return Arrays.stream(MapleDisease.values())
+                .filter(d -> d.getDisease() != 0)
+                .filter(d -> d.getDisease() == skill)
+                .findFirst();
     }
 
     public long getValue() {

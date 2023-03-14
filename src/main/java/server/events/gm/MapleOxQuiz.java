@@ -39,9 +39,9 @@ import java.util.List;
  */
 public final class MapleOxQuiz {
     private static MapleDataProvider stringData = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/Etc.wz"));
-    private int round = 1;
-    private int question = 1;
-    private MapleMap map = null;
+    private int round;
+    private int question;
+    private MapleMap map;
     private int expGain = 200;
 
     public MapleOxQuiz(MapleMap map) {

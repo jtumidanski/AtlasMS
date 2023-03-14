@@ -93,7 +93,9 @@ public class Item implements Comparable<Item> {
 
     public void setPosition(short position) {
         this.position = position;
-        if (this.pet != null) this.pet.setPosition(position);
+        if (this.pet != null) {
+            this.pet.setPosition(position);
+        }
     }
 
     public short getQuantity() {

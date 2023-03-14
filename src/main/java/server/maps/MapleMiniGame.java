@@ -215,13 +215,19 @@ public class MapleMiniGame extends AbstractMapleMapObject {
     }
 
     public void minigameMatchOwnerWins(boolean forfeit) {
-        if (!minigameMatchFinish()) return;
+        if (!minigameMatchFinish()) {
+            return;
+        }
 
         owner.setMiniGamePoints(visitor, 1, this.isOmok());
 
-        if (visitorforfeits < 4 || !forfeit) ownerscore += 50;
+        if (visitorforfeits < 4 || !forfeit) {
+            ownerscore += 50;
+        }
         visitorscore += (15 * (forfeit ? -1 : 1));
-        if (forfeit) visitorforfeits++;
+        if (forfeit) {
+            visitorforfeits++;
+        }
 
         this.broadcast(MaplePacketCreator.getMiniGameOwnerWin(this, forfeit));
 
@@ -229,13 +235,19 @@ public class MapleMiniGame extends AbstractMapleMapObject {
     }
 
     public void minigameMatchVisitorWins(boolean forfeit) {
-        if (!minigameMatchFinish()) return;
+        if (!minigameMatchFinish()) {
+            return;
+        }
 
         owner.setMiniGamePoints(visitor, 2, this.isOmok());
 
-        if (ownerforfeits < 4 || !forfeit) visitorscore += 50;
+        if (ownerforfeits < 4 || !forfeit) {
+            visitorscore += 50;
+        }
         ownerscore += (15 * (forfeit ? -1 : 1));
-        if (forfeit) ownerforfeits++;
+        if (forfeit) {
+            ownerforfeits++;
+        }
 
         this.broadcast(MaplePacketCreator.getMiniGameVisitorWin(this, forfeit));
 
@@ -243,7 +255,9 @@ public class MapleMiniGame extends AbstractMapleMapObject {
     }
 
     public void minigameMatchDraw() {
-        if (!minigameMatchFinish()) return;
+        if (!minigameMatchFinish()) {
+            return;
+        }
 
         owner.setMiniGamePoints(visitor, 3, this.isOmok());
 
@@ -503,11 +517,11 @@ public class MapleMiniGame extends AbstractMapleMapObject {
         return MapleMapObjectType.MINI_GAME;
     }
 
-    public static enum MiniGameType {
+    public enum MiniGameType {
         UNDEFINED(0), OMOK(1), MATCH_CARD(2);
-        private int value = 0;
+        private int value;
 
-        private MiniGameType(int value) {
+        MiniGameType(int value) {
             this.value = value;
         }
 
@@ -516,7 +530,7 @@ public class MapleMiniGame extends AbstractMapleMapObject {
         }
     }
 
-    public static enum MiniGameResult {
-        WIN, LOSS, TIE;
+    public enum MiniGameResult {
+        WIN, LOSS, TIE
     }
 }

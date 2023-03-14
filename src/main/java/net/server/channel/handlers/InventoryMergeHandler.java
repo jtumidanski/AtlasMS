@@ -34,6 +34,8 @@ import server.MapleItemInformationProvider;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public final class InventoryMergeHandler extends AbstractMaplePacketHandler {
 
     @Override
@@ -53,8 +55,12 @@ public final class InventoryMergeHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        MapleInventoryType inventoryType = MapleInventoryType.getByType(invType);
-        MapleInventory inventory = c.getPlayer().getInventory(inventoryType);
+        Optional<MapleInventoryType> inventoryType = MapleInventoryType.getByType(invType);
+        if (inventoryType.isEmpty()) {
+            return;
+        }
+
+        MapleInventory inventory = c.getPlayer().getInventory(inventoryType.get());
         inventory.lockInventory();
         try {
             //------------------- RonanLana's SLOT MERGER -----------------
@@ -64,22 +70,30 @@ public final class InventoryMergeHandler extends AbstractMaplePacketHandler {
 
             for (short dst = 1; dst <= inventory.getSlotLimit(); dst++) {
                 dstItem = inventory.getItem(dst);
-                if (dstItem == null) continue;
+                if (dstItem == null) {
+                    continue;
+                }
 
                 for (short src = (short) (dst + 1); src <= inventory.getSlotLimit(); src++) {
                     srcItem = inventory.getItem(src);
-                    if (srcItem == null) continue;
+                    if (srcItem == null) {
+                        continue;
+                    }
 
-                    if (dstItem.getItemId() != srcItem.getItemId()) continue;
-                    if (dstItem.getQuantity() == ii.getSlotMax(c, inventory.getItem(dst).getItemId())) break;
+                    if (dstItem.getItemId() != srcItem.getItemId()) {
+                        continue;
+                    }
+                    if (dstItem.getQuantity() == ii.getSlotMax(c, inventory.getItem(dst).getItemId())) {
+                        break;
+                    }
 
-                    MapleInventoryManipulator.move(c, inventoryType, src, dst);
+                    MapleInventoryManipulator.move(c, inventoryType.get(), src, dst);
                 }
             }
 
             //------------------------------------------------------------
 
-            inventory = c.getPlayer().getInventory(inventoryType);
+            inventory = c.getPlayer().getInventory(inventoryType.get());
             boolean sorted = false;
 
             while (!sorted) {
@@ -94,7 +108,7 @@ public final class InventoryMergeHandler extends AbstractMaplePacketHandler {
                         }
                     }
                     if (itemSlot > 0) {
-                        MapleInventoryManipulator.move(c, inventoryType, itemSlot, freeSlot);
+                        MapleInventoryManipulator.move(c, inventoryType.get(), itemSlot, freeSlot);
                     } else {
                         sorted = true;
                     }
@@ -106,7 +120,7 @@ public final class InventoryMergeHandler extends AbstractMaplePacketHandler {
             inventory.unlockInventory();
         }
 
-        c.announce(MaplePacketCreator.finishedSort(inventoryType.getType()));
+        c.announce(MaplePacketCreator.finishedSort(inventoryType.get().getType()));
         c.announce(MaplePacketCreator.enableActions());
     }
 }

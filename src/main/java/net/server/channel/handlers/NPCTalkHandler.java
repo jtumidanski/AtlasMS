@@ -50,8 +50,9 @@ public final class NPCTalkHandler extends AbstractMaplePacketHandler {
         MapleMapObject obj = c.getPlayer().getMap().getMapObject(oid);
         if (obj instanceof MapleNPC) {
             MapleNPC npc = (MapleNPC) obj;
-            if (YamlConfig.config.server.USE_DEBUG == true)
+            if (YamlConfig.config.server.USE_DEBUG == true) {
                 c.getPlayer().dropMessage(5, "Talking to NPC " + npc.getId());
+            }
 
             if (npc.getId() == 9010009) {   //is duey
                 DueyProcessor.dueySendTalk(c, false);

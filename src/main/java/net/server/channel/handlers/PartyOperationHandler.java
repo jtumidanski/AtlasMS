@@ -32,96 +32,122 @@ import net.server.coordinator.world.MapleInviteCoordinator.MapleInviteResult;
 import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import net.server.world.PartyOperation;
-import net.server.world.World;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
-import java.util.List;
+import java.util.Optional;
 
 public final class PartyOperationHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient client) {
         int operation = slea.readByte();
-        MapleCharacter player = c.getPlayer();
-        World world = c.getWorldServer();
-        MapleParty party = player.getParty();
         switch (operation) {
-            case 1: { // create
-                MapleParty.createParty(player, false);
-                break;
+            case 1 -> createParty(client);
+            case 2 -> leaveOrDisbandParty(client);
+            case 3 -> {
+                int partyId = slea.readInt();
+                joinParty(client, partyId);
             }
-            case 2: { // leave/disband
-                if (party != null) {
-                    List<MapleCharacter> partymembers = player.getPartyMembersOnline();
-
-                    MapleParty.leaveParty(party, c);
-                    player.updatePartySearchAvailability(true);
-                    player.partyOperationUpdate(party, partymembers);
-                }
-                break;
-            }
-            case 3: { // join
-                int partyid = slea.readInt();
-
-                MapleInviteResult inviteRes = MapleInviteCoordinator.answerInvite(InviteType.PARTY, player.getId(), partyid, true);
-                InviteResult res = inviteRes.result;
-                if (res == InviteResult.ACCEPTED) {
-                    MapleParty.joinParty(player, partyid, false);
-                } else {
-                    c.announce(MaplePacketCreator.serverNotice(5, "You couldn't join the party due to an expired invitation request."));
-                }
-                break;
-            }
-            case 4: { // invite
+            case 4 -> {
                 String name = slea.readMapleAsciiString();
-                MapleCharacter invited = world.getPlayerStorage().getCharacterByName(name);
-                if (invited != null) {
-                    if (invited.getLevel() < 10 && (!YamlConfig.config.server.USE_PARTY_FOR_STARTERS || player.getLevel() >= 10)) { //min requirement is level 10
-                        c.announce(MaplePacketCreator.serverNotice(5, "The player you have invited does not meet the requirements."));
-                        return;
-                    }
-                    if (YamlConfig.config.server.USE_PARTY_FOR_STARTERS && invited.getLevel() >= 10 && player.getLevel() < 10) {    //trying to invite high level
-                        c.announce(MaplePacketCreator.serverNotice(5, "The player you have invited does not meet the requirements."));
-                        return;
-                    }
-
-                    if (invited.getParty() == null) {
-                        if (party == null) {
-                            if (!MapleParty.createParty(player, false)) {
-                                return;
-                            }
-
-                            party = player.getParty();
-                        }
-                        if (party.getMembers().size() < 6) {
-                            if (MapleInviteCoordinator.createInvite(InviteType.PARTY, player, party.getId(), invited.getId())) {
-                                invited.getClient().announce(MaplePacketCreator.partyInvite(player));
-                            } else {
-                                c.announce(MaplePacketCreator.partyStatusMessage(22, invited.getName()));
-                            }
-                        } else {
-                            c.announce(MaplePacketCreator.partyStatusMessage(17));
-                        }
-                    } else {
-                        c.announce(MaplePacketCreator.partyStatusMessage(16));
-                    }
-                } else {
-                    c.announce(MaplePacketCreator.partyStatusMessage(19));
-                }
-                break;
+                inviteToParty(client, name);
             }
-            case 5: { // expel
-                int cid = slea.readInt();
-                MapleParty.expelFromParty(party, c, cid);
-                break;
+            case 5 -> {
+                int characterId = slea.readInt();
+                expelFromParty(client, characterId);
             }
-            case 6: { // change leader
+            case 6 -> {
                 int newLeader = slea.readInt();
-                MaplePartyCharacter newLeadr = party.getMemberById(newLeader);
-                world.updateParty(party.getId(), PartyOperation.CHANGE_LEADER, newLeadr);
-                break;
+                changePartyLeader(client, newLeader);
             }
         }
+    }
+
+    private static void changePartyLeader(MapleClient client, int newLeader) {
+        client.getPlayer().getParty().ifPresent(p -> changePartyLeader(client, p, newLeader));
+    }
+
+    private static void changePartyLeader(MapleClient client, MapleParty party, int characterId) {
+        MaplePartyCharacter newLeader = party.getMemberById(characterId);
+        client.getWorldServer().updateParty(party.getId(), PartyOperation.CHANGE_LEADER, newLeader);
+    }
+
+    private static void expelFromParty(MapleClient client, int characterId) {
+        client.getPlayer().getParty().ifPresent(p -> MapleParty.expelFromParty(p, client, characterId));
+    }
+
+    private static void inviteToParty(MapleClient client, String name) {
+        MapleCharacter character = client.getPlayer();
+        MapleCharacter invited = client.getWorldServer().getPlayerStorage().getCharacterByName(name);
+        if (invited == null) {
+            client.announce(MaplePacketCreator.partyStatusMessage(19));
+            return;
+        }
+
+        if (invited.getLevel() < 10 && (!YamlConfig.config.server.USE_PARTY_FOR_STARTERS || character.getLevel() >= 10)) { //min requirement is level 10
+            client.announce(MaplePacketCreator.serverNotice(5, "The player you have invited does not meet the requirements."));
+            return;
+        }
+        if (YamlConfig.config.server.USE_PARTY_FOR_STARTERS && invited.getLevel() >= 10 && character.getLevel() < 10) {    //trying to invite high level
+            client.announce(MaplePacketCreator.serverNotice(5, "The player you have invited does not meet the requirements."));
+            return;
+        }
+
+        if (invited.getParty().isPresent()) {
+            client.announce(MaplePacketCreator.partyStatusMessage(16));
+            return;
+        }
+
+        Optional<MapleParty> party = character.getParty();
+        if (party.isEmpty()) {
+            if (!MapleParty.createParty(character, false)) {
+                return;
+            }
+
+            party = character.getParty();
+        }
+
+        if (party.isEmpty()) {
+            client.announce(MaplePacketCreator.partyStatusMessage(1));
+            return;
+        }
+
+        if (party.get().getMembers().size() >= 6) {
+            client.announce(MaplePacketCreator.partyStatusMessage(17));
+            return;
+        }
+
+        if (MapleInviteCoordinator.createInvite(InviteType.PARTY, character, party.get().getId(), invited.getId())) {
+            invited.getClient().announce(MaplePacketCreator.partyInvite(character));
+        } else {
+            client.announce(MaplePacketCreator.partyStatusMessage(22, invited.getName()));
+        }
+    }
+
+    private static void joinParty(MapleClient client, int partyId) {
+        MapleCharacter character = client.getPlayer();
+        MapleInviteResult inviteRes = MapleInviteCoordinator.answerInvite(InviteType.PARTY, character.getId(), partyId, true);
+        InviteResult res = inviteRes.result;
+        if (res == InviteResult.ACCEPTED) {
+            MapleParty.joinParty(character, partyId, false);
+        } else {
+            client.announce(MaplePacketCreator.serverNotice(5, "You couldn't join the party due to an expired invitation request."));
+        }
+    }
+
+    private static void leaveOrDisbandParty(MapleClient client) {
+        client.getPlayer().getParty().ifPresent(p -> leaveOrDisbandParty(client, p));
+    }
+
+    private static void leaveOrDisbandParty(MapleClient client, MapleParty party) {
+        MapleCharacter character = client.getPlayer();
+        MapleParty.leaveParty(party, client);
+        character.updatePartySearchAvailability(true);
+        character.partyOperationUpdate(party, character.getPartyMembersOnline());
+    }
+
+    private static void createParty(MapleClient client) {
+        MapleParty.createParty(client.getPlayer(), false);
     }
 }

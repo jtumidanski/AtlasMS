@@ -31,22 +31,24 @@ import java.util.*;
  */
 public class MapleQuestStatus {
     //private boolean updated;   //maybe this can be of use for someone?
-    private final Map<Integer, String> progress = new LinkedHashMap<Integer, String>();
-    private final List<Integer> medalProgress = new LinkedList<Integer>();
+    private final Map<Integer, String> progress = new LinkedHashMap<>();
+    private final List<Integer> medalProgress = new LinkedList<>();
     private short questID;
     private Status status;
     private int npc;
     private long completionTime, expirationTime;
     private int forfeited = 0, completed = 0;
     private String customData;
+
     public MapleQuestStatus(MapleQuest quest, Status status) {
         this.questID = quest.getId();
         this.setStatus(status);
         this.completionTime = System.currentTimeMillis();
         this.expirationTime = 0;
         //this.updated = true;
-        if (status == Status.STARTED)
+        if (status == Status.STARTED) {
             registerMobs();
+        }
     }
 
     public MapleQuestStatus(MapleQuest quest, Status status, int npc) {
@@ -100,14 +102,14 @@ public class MapleQuestStatus {
     }
 
     private void registerMobs() {
-        for (int i : MapleQuest.getInstance(questID).getRelevantMobs()) {
-            progress.put(i, "000");
-        }
+        MapleQuest.getInstance(questID).getRelevantMobs().forEach(i -> progress.put(i, "000"));
         //this.setUpdated();
     }
 
     public boolean addMedalMap(int mapid) {
-        if (medalProgress.contains(mapid)) return false;
+        if (medalProgress.contains(mapid)) {
+            return false;
+        }
         medalProgress.add(mapid);
         //this.setUpdated();
         return true;
@@ -149,11 +151,7 @@ public class MapleQuestStatus {
 
     public String getProgress(int id) {
         String ret = progress.get(id);
-        if (ret == null) {
-            return "";
-        } else {
-            return ret;
-        }
+        return Objects.requireNonNullElse(ret, "");
     }
 
     public void resetProgress(int id) {
@@ -161,9 +159,7 @@ public class MapleQuestStatus {
     }
 
     public void resetAllProgress() {
-        for (Map.Entry<Integer, String> entry : progress.entrySet()) {
-            setProgress(entry.getKey(), "000");
-        }
+        progress.keySet().forEach(k -> setProgress(k, "000"));
     }
 
     public Map<Integer, String> getProgress() {
@@ -240,11 +236,9 @@ public class MapleQuestStatus {
     }
 
     public String getProgressData() {
-        StringBuilder str = new StringBuilder();
-        for (String ps : progress.values()) {
-            str.append(ps);
-        }
-        return str.toString();
+        StringBuilder result = new StringBuilder();
+        progress.values().forEach(result::append);
+        return result.toString();
     }
 
     public enum Status {
@@ -254,17 +248,14 @@ public class MapleQuestStatus {
         COMPLETED(2);
         final int status;
 
-        private Status(int id) {
+        Status(int id) {
             status = id;
         }
 
-        public static Status getById(int id) {
-            for (Status l : Status.values()) {
-                if (l.getId() == id) {
-                    return l;
-                }
-            }
-            return null;
+        public static Optional<Status> getById(int id) {
+            return Arrays.stream(Status.values())
+                    .filter(s -> s.getId() == id)
+                    .findFirst();
         }
 
         public int getId() {

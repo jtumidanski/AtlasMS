@@ -66,8 +66,6 @@ public class LockCollector {
             lock.unlock();
         }
 
-        for (Runnable r : toDispose) {
-            r.run();
-        }
+        toDispose.forEach(Runnable::run);
     }
 }

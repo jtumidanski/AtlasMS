@@ -158,10 +158,14 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
 
     public void dropItems(boolean delayed, int posX, int posY, boolean meso, int mesoChance, final int minMeso, final int maxMeso, int minItems) {
         MapleCharacter chr = c.getPlayer();
-        if (chr == null) return;
+        if (chr == null) {
+            return;
+        }
 
         List<ReactorDropEntry> items = assembleReactorDropEntries(chr, generateDropList(getDropChances(), chr.getDropRate(), meso, mesoChance, minItems));
-        if (items.size() % 2 == 0) posX -= 12;
+        if (items.size() % 2 == 0) {
+            posX -= 12;
+        }
         final Point dropPos = new Point(posX, posY);
 
         if (!delayed) {
@@ -169,7 +173,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
 
             byte p = 1;
             for (ReactorDropEntry d : items) {
-                dropPos.x = (int) (posX + ((p % 2 == 0) ? (25 * ((p + 1) / 2)) : -(25 * (p / 2))));
+                dropPos.x = posX + ((p % 2 == 0) ? (25 * ((p + 1) / 2)) : -(25 * (p / 2)));
                 p++;
 
                 if (d.itemId == 0) {

@@ -84,7 +84,7 @@ public class MapleMonsterAggroCoordinator {
                 if (pae.currentDamageInstances < 1) {   // expired aggro for this player
                     return true;
                 }
-                pae.accumulatedDamage = pae.averageDamage * pae.currentDamageInstances;
+                pae.accumulatedDamage = (long) pae.averageDamage * pae.currentDamageInstances;
             }
 
             return false;
@@ -118,7 +118,9 @@ public class MapleMonsterAggroCoordinator {
     public void stopAggroCoordinator() {
         idleLock.lock();
         try {
-            if (aggroMonitor == null) return;
+            if (aggroMonitor == null) {
+                return;
+            }
 
             aggroMonitor.cancel(false);
             aggroMonitor = null;
@@ -132,7 +134,9 @@ public class MapleMonsterAggroCoordinator {
     public void startAggroCoordinator() {
         idleLock.lock();
         try {
-            if (aggroMonitor != null) return;
+            if (aggroMonitor != null) {
+                return;
+            }
 
             aggroMonitor = TimerManager.getInstance().register(new Runnable() {
                 @Override
@@ -152,7 +156,9 @@ public class MapleMonsterAggroCoordinator {
     }
 
     public void addAggroDamage(MapleMonster mob, int cid, int damage) { // assumption: should not trigger after dispose()
-        if (!mob.isAlive()) return;
+        if (!mob.isAlive()) {
+            return;
+        }
 
         List<PlayerAggroEntry> sortedAggro = mobSortedAggros.get(mob);
         Map<Integer, PlayerAggroEntry> mobAggro = mobAggroEntries.get(mob);
@@ -225,8 +231,11 @@ public class MapleMonsterAggroCoordinator {
                         for (PlayerAggroEntry pae : mobAggro.values()) {
                             if (expiredAfterUpdateEntryDamage(pae, deltaTime)) {
                                 toRemove.add(pae.cid);
-                                if (pae.entryRank > -1) toRemoveIdx.add(pae.entryRank);
-                                else toRemoveByFetch.add(pae.cid);
+                                if (pae.entryRank > -1) {
+                                    toRemoveIdx.add(pae.entryRank);
+                                } else {
+                                    toRemoveByFetch.add(pae.cid);
+                                }
                             }
                         }
 
@@ -243,7 +252,7 @@ public class MapleMonsterAggroCoordinator {
                         }
 
                         if (!toRemoveIdx.isEmpty()) {
-                            Collections.sort(toRemoveIdx, new Comparator<Integer>() {   // last to first indexes
+                            toRemoveIdx.sort(new Comparator<>() {   // last to first indexes
                                 @Override
                                 public int compare(Integer p1, Integer p2) {
                                     return p1 < p2 ? 1 : p1.equals(p2) ? 0 : -1;
@@ -362,12 +371,7 @@ public class MapleMonsterAggroCoordinator {
     }
 
     private void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {

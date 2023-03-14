@@ -50,8 +50,9 @@ public class PetSkillAction extends MapleQuestAction {
     @Override
     public boolean check(MapleCharacter chr, Integer extSelection) {
         MapleQuestStatus status = chr.getQuest(MapleQuest.getInstance(questID));
-        if (!(status.getStatus() == MapleQuestStatus.Status.NOT_STARTED && status.getForfeited() > 0))
+        if (!(status.getStatus() == MapleQuestStatus.Status.NOT_STARTED && status.getForfeited() > 0)) {
             return false;
+        }
 
         return chr.getPet(0) != null;
     }

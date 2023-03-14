@@ -69,7 +69,6 @@ public final class TransferWorldHandler extends AbstractMaplePacketHandler {
                     c.announce(MaplePacketCreator.sendWorldTransferRules(7, c));
                     return;
                 }
-                ;
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -24,6 +24,7 @@ package client.inventory.manipulator;
 import client.MapleBuffStat;
 import client.MapleCharacter;
 import client.MapleClient;
+import client.MapleRing;
 import client.inventory.*;
 import client.newyear.NewYearCardRecord;
 import config.YamlConfig;
@@ -84,7 +85,7 @@ public class MapleInventoryManipulator {
                     Iterator<Item> i = existing.iterator();
                     while (quantity > 0) {
                         if (i.hasNext()) {
-                            Item eItem = (Item) i.next();
+                            Item eItem = i.next();
                             short oldQ = eItem.getQuantity();
                             if (oldQ < slotMax && ((eItem.getOwner().equals(owner) || owner == null) && eItem.getFlag() == flag)) {
                                 short newQ = (short) Math.min(oldQ + quantity, slotMax);
@@ -116,7 +117,9 @@ public class MapleInventoryManipulator {
                             nItem.setOwner(owner);
                         }
                         c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                        if (sandboxItem) chr.setHasSandboxItem();
+                        if (sandboxItem) {
+                            chr.setHasSandboxItem();
+                        }
                     } else {
                         c.announce(MaplePacketCreator.enableActions());
                         return false;
@@ -133,7 +136,9 @@ public class MapleInventoryManipulator {
                     return false;
                 }
                 c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                if (MapleInventoryManipulator.isSandboxItem(nItem)) chr.setHasSandboxItem();
+                if (MapleInventoryManipulator.isSandboxItem(nItem)) {
+                    chr.setHasSandboxItem();
+                }
             }
         } else if (quantity == 1) {
             Item nEquip = ii.getEquipById(itemId);
@@ -149,7 +154,9 @@ public class MapleInventoryManipulator {
                 return false;
             }
             c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nEquip))));
-            if (MapleInventoryManipulator.isSandboxItem(nEquip)) chr.setHasSandboxItem();
+            if (MapleInventoryManipulator.isSandboxItem(nEquip)) {
+                chr.setHasSandboxItem();
+            }
         } else {
             throw new RuntimeException("Trying to create equip with non-one quantity");
         }
@@ -195,7 +202,7 @@ public class MapleInventoryManipulator {
                     Iterator<Item> i = existing.iterator();
                     while (quantity > 0) {
                         if (i.hasNext()) {
-                            Item eItem = (Item) i.next();
+                            Item eItem = i.next();
                             short oldQ = eItem.getQuantity();
                             if (oldQ < slotMax && item.getFlag() == eItem.getFlag() && item.getOwner().equals(eItem.getOwner())) {
                                 short newQ = (short) Math.min(oldQ + quantity, slotMax);
@@ -226,7 +233,9 @@ public class MapleInventoryManipulator {
                     nItem.setPosition(newSlot);
                     item.setPosition(newSlot);
                     c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                    if (MapleInventoryManipulator.isSandboxItem(nItem)) chr.setHasSandboxItem();
+                    if (MapleInventoryManipulator.isSandboxItem(nItem)) {
+                        chr.setHasSandboxItem();
+                    }
                 }
             } else {
                 Item nItem = new Item(itemid, (short) 0, quantity, petId);
@@ -242,7 +251,9 @@ public class MapleInventoryManipulator {
                 nItem.setPosition(newSlot);
                 item.setPosition(newSlot);
                 c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                if (MapleInventoryManipulator.isSandboxItem(nItem)) chr.setHasSandboxItem();
+                if (MapleInventoryManipulator.isSandboxItem(nItem)) {
+                    chr.setHasSandboxItem();
+                }
                 c.announce(MaplePacketCreator.enableActions());
             }
         } else if (quantity == 1) {
@@ -254,7 +265,9 @@ public class MapleInventoryManipulator {
             }
             item.setPosition(newSlot);
             c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, item))));
-            if (MapleInventoryManipulator.isSandboxItem(item)) chr.setHasSandboxItem();
+            if (MapleInventoryManipulator.isSandboxItem(item)) {
+                chr.setHasSandboxItem();
+            }
         } else {
             FilePrinter.printError(FilePrinter.ITEM, "Tried to pickup Equip id " + itemid + " containing more than 1 quantity --> " + quantity);
             c.announce(MaplePacketCreator.getInventoryFull());
@@ -268,7 +281,7 @@ public class MapleInventoryManipulator {
     }
 
     private static boolean haveItemWithId(MapleInventory inv, int itemid) {
-        return inv.findById(itemid) != null;
+        return inv.findById(itemid).isPresent();
     }
 
     public static boolean checkSpace(MapleClient c, int itemid, int quantity, String owner) {
@@ -596,7 +609,7 @@ public class MapleInventoryManipulator {
         eqpdInv.lockInventory();
         try {
             if (source.getRingId() > -1) {
-                chr.getRingById(source.getRingId()).equip();
+                chr.getRingById(source.getRingId()).ifPresent(MapleRing::equip);
             }
             chr.equippedItem(source);
             eqpdInv.addItemFromDB(source);
@@ -638,7 +651,7 @@ public class MapleInventoryManipulator {
         eqpdInv.lockInventory();
         try {
             if (source.getRingId() > -1) {
-                chr.getRingById(source.getRingId()).unequip();
+                chr.getRingById(source.getRingId()).ifPresent(MapleRing::unequip);
             }
             chr.unequippedItem(source);
             eqpdInv.removeSlot(src);

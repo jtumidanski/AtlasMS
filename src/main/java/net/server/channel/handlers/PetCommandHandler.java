@@ -47,7 +47,7 @@ public final class PetCommandHandler extends AbstractMaplePacketHandler {
         slea.readInt();
         slea.readByte();
         byte command = slea.readByte();
-        PetCommand petCommand = PetDataFactory.getPetCommand(pet.getItemId(), (int) command);
+        PetCommand petCommand = PetDataFactory.getPetCommand(pet.getItemId(), command);
         if (petCommand == null) {
             return;
         }

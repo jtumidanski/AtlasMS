@@ -32,12 +32,7 @@ public class StringUtil {
      * @return The padded string.
      */
     public static String getLeftPaddedStr(String in, char padchar, int length) {
-        StringBuilder builder = new StringBuilder(length);
-        for (int x = in.length(); x < length; x++) {
-            builder.append(padchar);
-        }
-        builder.append(in);
-        return builder.toString();
+        return String.valueOf(padchar).repeat(Math.max(0, length - in.length())) + in;
     }
 
     /**
@@ -50,11 +45,7 @@ public class StringUtil {
      * @return The padded string.
      */
     public static String getRightPaddedStr(String in, char padchar, int length) {
-        StringBuilder builder = new StringBuilder(in);
-        for (int x = in.length(); x < length; x++) {
-            builder.append(padchar);
-        }
-        return builder.toString();
+        return in + String.valueOf(padchar).repeat(Math.max(0, length - in.length()));
     }
 
     /**
@@ -65,7 +56,7 @@ public class StringUtil {
      * @param start Starting from which string.
      * @return The joined strings.
      */
-    public static String joinStringFrom(String arr[], int start) {
+    public static String joinStringFrom(String[] arr, int start) {
         return joinStringFrom(arr, start, " ");
     }
 
@@ -77,7 +68,7 @@ public class StringUtil {
      * @param start Starting from which string.
      * @return The joined strings.
      */
-    public static String joinStringFrom(String arr[], int start, String sep) {
+    public static String joinStringFrom(String[] arr, int start, String sep) {
         StringBuilder builder = new StringBuilder();
         for (int i = start; i < arr.length; i++) {
             builder.append(arr[i]);

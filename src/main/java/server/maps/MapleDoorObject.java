@@ -31,6 +31,7 @@ import net.server.world.MapleParty;
 import tools.MaplePacketCreator;
 
 import java.awt.*;
+import java.util.Optional;
 
 /**
  * @author Ronan
@@ -86,18 +87,18 @@ public class MapleDoorObject extends AbstractMapleMapObject {
     }
 
     public void warp(final MapleCharacter chr) {
-        MapleParty party = chr.getParty();
-        if (chr.getId() == ownerId || (party != null && party.getMemberById(ownerId) != null)) {
+        Optional<MapleParty> party = chr.getParty();
+        if (chr.getId() != ownerId && (party.isEmpty() || party.map(p -> p.getMemberById(ownerId)).isEmpty())) {
+            chr.getClient().announce(MaplePacketCreator.blockedMessage(6));
+            chr.getClient().announce(MaplePacketCreator.enableActions());
+        } else {
             chr.announce(MaplePacketCreator.playPortalSound());
 
-            if (!inTown() && party == null) {
+            if (!inTown() && party.isEmpty()) {
                 chr.changeMap(to, getLinkedPortalId());
             } else {
                 chr.changeMap(to, getLinkedPortalPosition());
             }
-        } else {
-            chr.getClient().announce(MaplePacketCreator.blockedMessage(6));
-            chr.getClient().announce(MaplePacketCreator.enableActions());
         }
     }
 
@@ -109,7 +110,7 @@ public class MapleDoorObject extends AbstractMapleMapObject {
     public void sendSpawnData(MapleClient client, boolean launched) {
         MapleCharacter chr = client.getPlayer();
         if (this.getFrom().getId() == chr.getMapId()) {
-            if (chr.getParty() != null && (this.getOwnerId() == chr.getId() || chr.getParty().getMemberById(this.getOwnerId()) != null)) {
+            if (chr.getParty().isPresent() && (this.getOwnerId() == chr.getId() || chr.getParty().map(p -> p.getMemberById(getOwnerId())).isPresent())) {
                 chr.announce(MaplePacketCreator.partyPortal(this.getFrom().getId(), this.getTo().getId(), this.toPosition()));
             }
 
@@ -124,8 +125,8 @@ public class MapleDoorObject extends AbstractMapleMapObject {
     public void sendDestroyData(MapleClient client) {
         MapleCharacter chr = client.getPlayer();
         if (from.getId() == chr.getMapId()) {
-            MapleParty party = chr.getParty();
-            if (party != null && (ownerId == chr.getId() || party.getMemberById(ownerId) != null)) {
+            Optional<MapleParty> party = chr.getParty();
+            if (party.isPresent() && (ownerId == chr.getId() || party.map(p -> p.getMemberById(ownerId)).isPresent())) {
                 client.announce(MaplePacketCreator.partyPortal(999999999, 999999999, new Point(-1, -1)));
             }
             client.announce(MaplePacketCreator.removeDoor(ownerId, inTown()));

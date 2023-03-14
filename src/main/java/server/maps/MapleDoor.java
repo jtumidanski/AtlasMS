@@ -135,11 +135,10 @@ public class MapleDoor {
 
         if (this.getTownPortal().getId() == 0x80) {
             for (MapleCharacter chr : townChars) {
-                MapleDoor door = chr.getMainTownDoor();
-                if (door != null) {
+                chr.getMainTownDoor().ifPresent(d -> {
                     townDoor.sendSpawnData(chr.getClient());
                     chr.addVisibleMapObject(townDoor);
-                }
+                });
             }
         }
     }

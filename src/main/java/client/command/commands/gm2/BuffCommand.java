@@ -25,7 +25,6 @@ package client.command.commands.gm2;
 
 import client.MapleCharacter;
 import client.MapleClient;
-import client.Skill;
 import client.SkillFactory;
 import client.command.Command;
 
@@ -41,9 +40,7 @@ public class BuffCommand extends Command {
             player.yellowMessage("Syntax: !buff <buffid>");
             return;
         }
-        int skillid = Integer.parseInt(params[0]);
-
-        Skill skill = SkillFactory.getSkill(skillid);
-        if (skill != null) skill.getEffect(skill.getMaxLevel()).applyTo(player);
+        SkillFactory.getSkill(Integer.parseInt(params[0]))
+                .ifPresent(s -> s.getEffect(s.getMaxLevel()).applyTo(player));
     }
 }

@@ -125,10 +125,14 @@ public class PetAutopotProcessor {
                     hasMpGain = stat.getMp() > 0 || stat.getMpRate() > 0.0;
 
                     incHp = stat.getHp();
-                    if (incHp <= 0 && hasHpGain) incHp = Math.ceil(maxHp * stat.getHpRate());
+                    if (incHp <= 0 && hasHpGain) {
+                        incHp = Math.ceil(maxHp * stat.getHpRate());
+                    }
 
                     incMp = stat.getMp();
-                    if (incMp <= 0 && hasMpGain) incMp = Math.ceil(maxMp * stat.getMpRate());
+                    if (incMp <= 0 && hasMpGain) {
+                        incMp = Math.ceil(maxMp * stat.getMpRate());
+                    }
 
                     if (YamlConfig.config.server.USE_COMPULSORY_AUTOPOT) {
                         if (hasHpGain) {

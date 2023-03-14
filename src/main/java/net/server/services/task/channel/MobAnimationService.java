@@ -42,7 +42,7 @@ public class MobAnimationService extends BaseService {
         public void run() {
         }    // do nothing
     };
-    private MobAnimationScheduler mobAnimationSchedulers[] = new MobAnimationScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
+    private MobAnimationScheduler[] mobAnimationSchedulers = new MobAnimationScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
 
     public MobAnimationService() {
         for (int i = 0; i < YamlConfig.config.server.CHANNEL_LOCKS; i++) {
@@ -109,12 +109,7 @@ public class MobAnimationService extends BaseService {
         }
 
         private void disposeLocks() {
-            LockCollector.getInstance().registerDisposeAction(new Runnable() {
-                @Override
-                public void run() {
-                    emptyLocks();
-                }
-            });
+            LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
         }
 
         private void emptyLocks() {

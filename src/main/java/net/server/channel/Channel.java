@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package net.server.channel;
 
 import client.MapleCharacter;
+import client.MapleClient;
 import config.YamlConfig;
 import constants.game.GameConstants;
 import net.MapleServerHandler;
@@ -61,6 +62,7 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 public final class Channel {
 
@@ -78,7 +80,7 @@ public final class Channel {
     private Map<MapleExpeditionType, MapleExpedition> expeditions = new HashMap<>();
     private Map<Integer, MapleMiniDungeon> dungeons = new HashMap<>();
     private List<MapleExpeditionType> expedType = new ArrayList<>();
-    private Set<MapleMap> ownedMaps = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<MapleMap, Boolean>()));
+    private Set<MapleMap> ownedMaps = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
     private MapleEvent event;
     private boolean finishedShutdown = false;
     private Set<Integer> usedMC = new HashSet<>();
@@ -106,7 +108,7 @@ public final class Channel {
     private MonitoredReadLock merchRlock = MonitoredReadLockFactory.createLock(merchantLock);
     private MonitoredWriteLock merchWlock = MonitoredWriteLockFactory.createLock(merchantLock);
 
-    private MonitoredReentrantLock faceLock[] = new MonitoredReentrantLock[YamlConfig.config.server.CHANNEL_LOCKS];
+    private MonitoredReentrantLock[] faceLock = new MonitoredReentrantLock[YamlConfig.config.server.CHANNEL_LOCKS];
 
     private MonitoredReentrantLock lock = MonitoredReentrantLockFactory.createLock(MonitoredLockType.CHANNEL, true);
 
@@ -125,12 +127,10 @@ public final class Channel {
             acceptor = new NioSocketAcceptor();
             acceptor.setHandler(new MapleServerHandler(world, channel));
             acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 30);
-            acceptor.getFilterChain().addLast("codec", (IoFilter) new ProtocolCodecFilter(new MapleCodecFactory()));
+            acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MapleCodecFactory()));
             acceptor.bind(new InetSocketAddress(port));
             ((SocketSessionConfig) acceptor.getSessionConfig()).setTcpNoDelay(true);
-            for (MapleExpeditionType exped : MapleExpeditionType.values()) {
-                expedType.add(exped);
-            }
+            expedType.addAll(Arrays.asList(MapleExpeditionType.values()));
 
             if (Server.getInstance().isOnline()) {  // postpone event loading to improve boot time... thanks Riizade, daronhudson for noticing slow startup times
                 eventSM = new EventScriptManager(this, getEvents());
@@ -158,7 +158,7 @@ public final class Channel {
     }
 
     private static String[] getEvents() {
-        List<String> events = new ArrayList<String>();
+        List<String> events = new ArrayList<>();
         for (File file : new File("scripts/event").listFiles()) {
             events.add(file.getName().substring(0, file.getName().length() - 3));
         }
@@ -181,29 +181,30 @@ public final class Channel {
         if (leftTime / (60 * 1000) > 0) {
             mode++;     //counts minutes
 
-            if (leftTime / (60 * 60 * 1000) > 0)
+            if (leftTime / (60 * 60 * 1000) > 0) {
                 mode++;     //counts hours
+            }
         }
 
         switch (mode) {
             case 2:
                 int hours = (int) ((leftTime / (1000 * 60 * 60)));
-                str.append(hours + " hours, ");
+                str.append(hours).append(" hours, ");
 
             case 1:
                 int minutes = (int) ((leftTime / (1000 * 60)) % 60);
-                str.append(minutes + " minutes, ");
+                str.append(minutes).append(" minutes, ");
 
             default:
                 int seconds = (int) (leftTime / 1000) % 60;
-                str.append(seconds + " seconds");
+                str.append(seconds).append(" seconds");
         }
 
         return str.toString();
     }
 
     public static long getRelativeWeddingTicketExpireTime(int resSlot) {
-        return (resSlot * YamlConfig.config.server.WEDDING_RESERVATION_INTERVAL * 60 * 1000);
+        return ((long) resSlot * YamlConfig.config.server.WEDDING_RESERVATION_INTERVAL * 60 * 1000);
     }
 
     private static int getMonsterCarnivalRoom(boolean cpq1, int field) {
@@ -275,12 +276,7 @@ public final class Channel {
     }
 
     private void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {
@@ -303,9 +299,7 @@ public final class Channel {
                 merchWlock.unlock();
             }
 
-            for (MapleHiredMerchant merch : merchs) {
-                merch.forceClose();
-            }
+            merchs.forEach(MapleHiredMerchant::forceClose);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -355,9 +349,7 @@ public final class Channel {
     }
 
     public void broadcastPacket(final byte[] data) {
-        for (MapleCharacter chr : players.getAllCharacters()) {
-            chr.announce(data);
-        }
+        players.getAllCharacters().forEach(c -> c.announce(data));
     }
 
     public final int getId() {
@@ -381,24 +373,18 @@ public final class Channel {
     }
 
     public void broadcastGMPacket(final byte[] data) {
-        for (MapleCharacter chr : players.getAllCharacters()) {
-            if (chr.isGM()) {
-                chr.announce(data);
-            }
-        }
+        players.getAllCharacters().stream()
+                .filter(MapleCharacter::isGM)
+                .forEach(c -> c.announce(data));
     }
 
     public List<MapleCharacter> getPartyMembers(MapleParty party) {
-        List<MapleCharacter> partym = new ArrayList<>(8);
-        for (MaplePartyCharacter partychar : party.getMembers()) {
-            if (partychar.getChannel() == getId()) {
-                MapleCharacter chr = getPlayerStorage().getCharacterByName(partychar.getName());
-                if (chr != null) {
-                    partym.add(chr);
-                }
-            }
-        }
-        return partym;
+        return party.getMembers().stream()
+                .filter(c -> c.getChannel() == getId())
+                .map(MaplePartyCharacter::getName)
+                .map(name -> getPlayerStorage().getCharacterByName(name))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public void insertPlayerAway(int chrId) {   // either they in CS or MTS
@@ -415,12 +401,12 @@ public final class Channel {
 
     private void disconnectAwayPlayers() {
         World wserv = getWorldServer();
-        for (Integer cid : playersAway) {
-            MapleCharacter chr = wserv.getPlayerStorage().getCharacterById(cid);
-            if (chr != null && chr.isLoggedin()) {
-                chr.getClient().forceDisconnect();
-            }
-        }
+        playersAway.stream()
+                .map(id -> wserv.getPlayerStorage().getCharacterById(id))
+                .filter(Objects::nonNull)
+                .filter(MapleCharacter::isLoggedin)
+                .map(MapleCharacter::getClient)
+                .forEach(MapleClient::forceDisconnect);
     }
 
     public Map<Integer, MapleHiredMerchant> getHiredMerchants() {
@@ -464,7 +450,7 @@ public final class Channel {
         int[] retArr = new int[ret.size()];
         int pos = 0;
         for (Integer i : ret) {
-            retArr[pos++] = i.intValue();
+            retArr[pos++] = i;
         }
         return retArr;
     }
@@ -523,7 +509,9 @@ public final class Channel {
     }
 
     public int lookupPartyDojo(MapleParty party) {
-        if (party == null) return -1;
+        if (party == null) {
+            return -1;
+        }
 
         Integer i = dojoParty.get(party.hashCode());
         return (i != null) ? i : -1;
@@ -556,7 +544,9 @@ public final class Channel {
                 int dojoSlot = getDojoSlot(slotMapid);
 
                 if (party != null) {
-                    if (dojoParty.containsKey(party.hashCode())) return -2;
+                    if (dojoParty.containsKey(party.hashCode())) {
+                        return -2;
+                    }
                     dojoParty.put(party.hashCode(), dojoSlot);
                 }
 
@@ -585,7 +575,9 @@ public final class Channel {
         }
 
         if (party != null) {
-            if (dojoParty.remove(party.hashCode()) != null) return;
+            if (dojoParty.remove(party.hashCode()) != null) {
+                return;
+            }
         }
 
         if (dojoParty.containsValue(slot)) {    // strange case, no party there!
@@ -626,7 +618,9 @@ public final class Channel {
                 break;
             }
             MapleMap dojoMap = getMapFactory().getMap(dojoBaseMap + (100 * (stage + i)) + delta);
-            if (!dojoMap.getAllPlayers().isEmpty()) return;
+            if (!dojoMap.getAllPlayers().isEmpty()) {
+                return;
+            }
         }
 
         freeDojoSlot(slot, null);
@@ -635,7 +629,9 @@ public final class Channel {
     private void startDojoSchedule(final int dojoMapId) {
         final int slot = getDojoSlot(dojoMapId);
         final int stage = (dojoMapId / 100) % 100;
-        if (stage <= dojoStage[slot]) return;
+        if (stage <= dojoStage[slot]) {
+            return;
+        }
 
         long clockTime = (stage > 36 ? 15 : (stage / 6) + 5) * 60000;
 
@@ -661,7 +657,7 @@ public final class Channel {
                             if (GameConstants.isDojo(chr.getMap().getId())) {
                                 chr.changeMap(dojoExit);
                             }
-                            party = chr.getParty();
+                            party = chr.getParty().orElse(null);
                         }
                     }
 
@@ -678,7 +674,9 @@ public final class Channel {
     public void dismissDojoSchedule(int dojoMapId, MapleParty party) {
         int slot = getDojoSlot(dojoMapId);
         int stage = (dojoMapId / 100) % 100;
-        if (stage <= dojoStage[slot]) return;
+        if (stage <= dojoStage[slot]) {
+            return;
+        }
 
         lock.lock();
         try {
@@ -712,7 +710,9 @@ public final class Channel {
     public boolean addMiniDungeon(int dungeonid) {
         lock.lock();
         try {
-            if (dungeons.containsKey(dungeonid)) return false;
+            if (dungeons.containsKey(dungeonid)) {
+                return false;
+            }
 
             MapleMiniDungeonInfo mmdi = MapleMiniDungeonInfo.getDungeon(dungeonid);
             MapleMiniDungeon mmd = new MapleMiniDungeon(mmdi.getBase(), this.getMapFactory().getMap(mmdi.getDungeonId()).getTimeLimit());   // thanks Conrad for noticing hardcoded time limit for minidungeons
@@ -748,10 +748,14 @@ public final class Channel {
         lock.lock();
         try {
             List<Integer> weddingReservationQueue = (cathedral ? cathedralReservationQueue : chapelReservationQueue);
-            if (weddingReservationQueue.isEmpty()) return null;
+            if (weddingReservationQueue.isEmpty()) {
+                return null;
+            }
 
             ret = weddingReservationQueue.remove(0);
-            if (ret == null) return null;
+            if (ret == null) {
+                return null;
+            }
         } finally {
             lock.unlock();
         }
@@ -779,12 +783,16 @@ public final class Channel {
     }
 
     public int getWeddingReservationStatus(Integer weddingId, boolean cathedral) {
-        if (weddingId == null) return -1;
+        if (weddingId == null) {
+            return -1;
+        }
 
         lock.lock();
         try {
             if (cathedral) {
-                if (weddingId.equals(ongoingCathedral)) return 0;
+                if (weddingId.equals(ongoingCathedral)) {
+                    return 0;
+                }
 
                 for (int i = 0; i < cathedralReservationQueue.size(); i++) {
                     if (weddingId.equals(cathedralReservationQueue.get(i))) {
@@ -792,7 +800,9 @@ public final class Channel {
                     }
                 }
             } else {
-                if (weddingId.equals(ongoingChapel)) return 0;
+                if (weddingId.equals(ongoingChapel)) {
+                    return 0;
+                }
 
                 for (int i = 0; i < chapelReservationQueue.size(); i++) {
                     if (weddingId.equals(chapelReservationQueue.get(i))) {
@@ -808,7 +818,9 @@ public final class Channel {
     }
 
     public int pushWeddingReservation(Integer weddingId, boolean cathedral, boolean premium, Integer groomId, Integer brideId) {
-        if (weddingId == null || isWeddingReserved(weddingId)) return -1;
+        if (weddingId == null || isWeddingReserved(weddingId)) {
+            return -1;
+        }
 
         World wserv = getWorldServer();
         wserv.putMarriageQueued(weddingId, cathedral, premium, groomId, brideId);
@@ -900,7 +912,7 @@ public final class Channel {
                 public void run() {
                     closeOngoingWedding(cathedral);
                 }
-            }, YamlConfig.config.server.WEDDING_RESERVATION_TIMEOUT * 60 * 1000);
+            }, (long) YamlConfig.config.server.WEDDING_RESERVATION_TIMEOUT * 60 * 1000);
 
             if (cathedral) {
                 cathedralReservationTask = weddingTask;
@@ -912,12 +924,16 @@ public final class Channel {
 
     public synchronized boolean acceptOngoingWedding(final boolean cathedral) {     // couple succeeded to show up and started the ceremony
         if (cathedral) {
-            if (cathedralReservationTask == null) return false;
+            if (cathedralReservationTask == null) {
+                return false;
+            }
 
             cathedralReservationTask.cancel(false);
             cathedralReservationTask = null;
         } else {
-            if (chapelReservationTask == null) return false;
+            if (chapelReservationTask == null) {
+                return false;
+            }
 
             chapelReservationTask.cancel(false);
             chapelReservationTask = null;
@@ -931,7 +947,9 @@ public final class Channel {
     }
 
     public String getWeddingReservationTimeLeft(Integer weddingId) {
-        if (weddingId == null) return null;
+        if (weddingId == null) {
+            return null;
+        }
 
         lock.lock();
         try {
@@ -953,7 +971,7 @@ public final class Channel {
                 return venue + " - RIGHT NOW";
             }
 
-            return venue + " - " + getTimeLeft(ongoingStartTime + (resStatus * YamlConfig.config.server.WEDDING_RESERVATION_INTERVAL * 60 * 1000)) + " from now";
+            return venue + " - " + getTimeLeft(ongoingStartTime + ((long) resStatus * YamlConfig.config.server.WEDDING_RESERVATION_INTERVAL * 60 * 1000)) + " from now";
         } finally {
             lock.unlock();
         }
@@ -969,9 +987,7 @@ public final class Channel {
     }
 
     public void dropMessage(int type, String message) {
-        for (MapleCharacter player : getPlayerStorage().getAllCharacters()) {
-            player.dropMessage(type, message);
-        }
+        getPlayerStorage().getAllCharacters().forEach(c -> c.dropMessage(type, message));
     }
 
     public void registerOwnedMap(MapleMap map) {
@@ -989,10 +1005,7 @@ public final class Channel {
             synchronized (ownedMaps) {
                 ownedMapsList = new ArrayList<>(ownedMaps);
             }
-
-            for (MapleMap map : ownedMapsList) {
-                map.checkMapOwnerActivity();
-            }
+            ownedMapsList.forEach(MapleMap::checkMapOwnerActivity);
         }
     }
 

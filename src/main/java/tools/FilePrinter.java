@@ -195,7 +195,7 @@ public class FilePrinter {
     }
 
     private static String getString(final Throwable e) {
-        String retValue = null;
+        String retValue;
         StringWriter sw = null;
         PrintWriter pw = null;
         try {

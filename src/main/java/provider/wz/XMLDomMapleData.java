@@ -51,11 +51,7 @@ public class XMLDomMapleData implements MapleData {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(fis);
             this.node = document.getFirstChild();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new RuntimeException(e);
         }
         this.imageDataDir = imageDataDir;
@@ -67,7 +63,7 @@ public class XMLDomMapleData implements MapleData {
 
     @Override
     public synchronized MapleData getChildByPath(String path) {  // the whole XML reading system seems susceptible to give nulls on strenuous read scenarios
-        String segments[] = path.split("/");
+        String[] segments = path.split("/");
         if (segments[0].equals("..")) {
             return ((MapleData) getParent()).getChildByPath(path.substring(path.indexOf("/") + 1));
         }
@@ -139,8 +135,7 @@ public class XMLDomMapleData implements MapleData {
             }
             case STRING:
             case UOL: {
-                String value = attributes.getNamedItem("value").getNodeValue();
-                return value;
+                return attributes.getNamedItem("value").getNodeValue();
             }
             case VECTOR: {
                 String x = attributes.getNamedItem("x").getNodeValue();

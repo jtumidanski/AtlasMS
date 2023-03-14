@@ -56,7 +56,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
     public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter mc = c.getPlayer();
         byte type = slea.readByte();
-        int allianceId = -1;
+        int allianceId;
         switch (type) {
             case 0x00:
                 //c.announce(MaplePacketCreator.showGuildInfo(mc));
@@ -144,7 +144,9 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 c.announce(MaplePacketCreator.showGuildInfo(mc));
 
                 allianceId = mc.getGuild().getAllianceId();
-                if (allianceId > 0) Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                if (allianceId > 0) {
+                    Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                }
 
                 mc.saveGuildStatus(); // update database
                 mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildNameChanged(mc.getId(), mc.getGuild().getName())); // thanks Vcoc for pointing out an issue with updating guild tooltip to players in the map
@@ -164,7 +166,9 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 Server.getInstance().leaveGuild(mc.getMGC());
 
                 c.announce(MaplePacketCreator.showGuildInfo(null));
-                if (allianceId > 0) Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                if (allianceId > 0) {
+                    Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                }
 
                 mc.getMGC().setGuildId(0);
                 mc.getMGC().setGuildRank(5);
@@ -182,14 +186,16 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 }
 
                 Server.getInstance().expelMember(mc.getMGC(), name, cid);
-                if (allianceId > 0) Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                if (allianceId > 0) {
+                    Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                }
                 break;
             case 0x0d:
                 if (mc.getGuildId() <= 0 || mc.getGuildRank() != 1) {
                     System.out.println("[Hack] " + mc.getName() + " tried to change guild rank titles when s/he does not have permission.");
                     return;
                 }
-                String ranks[] = new String[5];
+                String[] ranks = new String[5];
                 for (int i = 0; i < 5; i++) {
                     ranks[i] = slea.readMapleAsciiString();
                 }
@@ -234,8 +240,9 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 break;
             case 0x10:
                 if (mc.getGuildId() <= 0 || mc.getGuildRank() > 2) {
-                    if (mc.getGuildId() <= 0)
+                    if (mc.getGuildId() <= 0) {
                         System.out.println("[Hack] " + mc.getName() + " tried to change guild notice while not in a guild.");
+                    }
                     return;
                 }
                 String notice = slea.readMapleAsciiString();
@@ -248,7 +255,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 slea.readInt();
                 World wserv = c.getWorldServer();
 
-                if (mc.getParty() != null) {
+                if (mc.getParty().isPresent()) {
                     wserv.getMatchCheckerCoordinator().dismissMatchConfirmation(mc.getId());
                     return;
                 }
@@ -271,7 +278,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
 
                 break;
             default:
-                System.out.println("Unhandled GUILD_OPERATION packet: \n" + slea.toString());
+                System.out.println("Unhandled GUILD_OPERATION packet: \n" + slea);
         }
     }
 }

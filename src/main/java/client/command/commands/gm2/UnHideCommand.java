@@ -23,7 +23,6 @@
 */
 package client.command.commands.gm2;
 
-import client.MapleCharacter;
 import client.MapleClient;
 import client.SkillFactory;
 import client.command.Command;
@@ -35,8 +34,8 @@ public class UnHideCommand extends Command {
 
     @Override
     public void execute(MapleClient c, String[] params) {
-        MapleCharacter player = c.getPlayer();
-        SkillFactory.getSkill(9101004).getEffect(SkillFactory.getSkill(9101004).getMaxLevel()).applyTo(player);
+        SkillFactory.getSkill(9101004)
+                .ifPresent(s -> s.getEffect(s.getMaxLevel()).applyTo(c.getPlayer()));
 
     }
 }

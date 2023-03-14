@@ -54,7 +54,7 @@ public class BanCommand extends Command {
             String readableTargetName = MapleCharacter.makeMapleReadable(target.getName());
             String ip = target.getClient().getSession().getRemoteAddress().toString().split(":")[0];
             //Ban ip
-            PreparedStatement ps = null;
+            PreparedStatement ps;
             try {
                 Connection con = DatabaseConnection.getConnection();
                 if (ip.matches("/[0-9]{1,3}\\..*")) {

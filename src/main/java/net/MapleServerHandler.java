@@ -127,12 +127,12 @@ public class MapleServerHandler extends IoHandlerAdapter {
             FilePrinter.print(FilePrinter.SESSION, "IoSession with " + session.getRemoteAddress() + " opened on " + sdf.format(Calendar.getInstance().getTime()), false);
         }
 
-        byte ivRecv[] = {70, 114, 122, 82};
-        byte ivSend[] = {82, 48, 120, 115};
+        byte[] ivRecv = {70, 114, 122, 82};
+        byte[] ivSend = {82, 48, 120, 115};
         ivRecv[3] = (byte) (Math.random() * 255);
         ivSend[3] = (byte) (Math.random() * 255);
         MapleAESOFB sendCypher = new MapleAESOFB(ivSend, (short) (0xFFFF - ServerConstants.VERSION));
-        MapleAESOFB recvCypher = new MapleAESOFB(ivRecv, (short) ServerConstants.VERSION);
+        MapleAESOFB recvCypher = new MapleAESOFB(ivRecv, ServerConstants.VERSION);
         MapleClient client = new MapleClient(sendCypher, recvCypher, session);
         client.setWorld(world);
         client.setChannel(channel);
@@ -178,15 +178,16 @@ public class MapleServerHandler extends IoHandlerAdapter {
         short packetId = slea.readShort();
         MapleClient client = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
 
-        if (YamlConfig.config.server.USE_DEBUG_SHOW_RCVD_PACKET && !ignoredDebugRecvPackets.contains(packetId))
+        if (YamlConfig.config.server.USE_DEBUG_SHOW_RCVD_PACKET && !ignoredDebugRecvPackets.contains(packetId)) {
             System.out.println("Received packet id " + packetId);
+        }
         final MaplePacketHandler packetHandler = processor.getHandler(packetId);
         if (packetHandler != null && packetHandler.validateState(client)) {
             try {
                 MapleLogger.logRecv(client, packetId, message);
                 packetHandler.handlePacket(slea, client);
             } catch (final Throwable t) {
-                FilePrinter.printError(FilePrinter.PACKET_HANDLER + packetHandler.getClass().getName() + ".txt", t, "Error for " + (client.getPlayer() == null ? "" : "player ; " + client.getPlayer() + " on map ; " + client.getPlayer().getMapId() + " - ") + "account ; " + client.getAccountName() + "\r\n" + slea.toString());
+                FilePrinter.printError(FilePrinter.PACKET_HANDLER + packetHandler.getClass().getName() + ".txt", t, "Error for " + (client.getPlayer() == null ? "" : "player ; " + client.getPlayer() + " on map ; " + client.getPlayer().getMapId() + " - ") + "account ; " + client.getAccountName() + "\r\n" + slea);
                 //client.announce(MaplePacketCreator.enableActions());//bugs sometimes
             }
             client.updateLastPacket();
@@ -235,20 +236,16 @@ public class MapleServerHandler extends IoHandlerAdapter {
         Set<MapleClient> pingClients = new HashSet<>();
         idleLock.lock();
         try {
-            for (Entry<MapleClient, Long> mc : idleSessions.entrySet()) {
-                if (timeNow - mc.getValue() >= 15000) {
-                    pingClients.add(mc.getKey());
-                }
-            }
+            idleSessions.entrySet().stream()
+                    .filter(e -> timeNow - e.getValue() >= 15000)
+                    .map(Entry::getKey)
+                    .forEach(pingClients::add);
             idleSessions.clear();
 
             if (!tempIdleSessions.isEmpty()) {
                 tempLock.lock();
                 try {
-                    for (Entry<MapleClient, Long> mc : tempIdleSessions.entrySet()) {
-                        idleSessions.put(mc.getKey(), mc.getValue());
-                    }
-
+                    idleSessions.putAll(tempIdleSessions);
                     tempIdleSessions.clear();
                 } finally {
                     tempLock.unlock();
@@ -258,18 +255,11 @@ public class MapleServerHandler extends IoHandlerAdapter {
             idleLock.unlock();
         }
 
-        for (MapleClient c : pingClients) {
-            c.testPing(timeThen);
-        }
+        pingClients.forEach(c -> c.testPing(timeThen));
     }
 
     private void idleManagerTask() {
-        this.idleManager = TimerManager.getInstance().register(new Runnable() {
-            @Override
-            public void run() {
-                manageIdleSessions();
-            }
-        }, 10000);
+        this.idleManager = TimerManager.getInstance().register(this::manageIdleSessions, 10000);
     }
 
     private void cancelIdleManagerTask() {
@@ -278,12 +268,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
     }
 
     private void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {

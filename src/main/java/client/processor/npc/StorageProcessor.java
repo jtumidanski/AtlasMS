@@ -37,6 +37,8 @@ import tools.FilePrinter;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 /**
  * @author Matze
  * @author Ronan - inventory concurrency protection on storing items
@@ -58,7 +60,13 @@ public class StorageProcessor {
         if (c.tryacquireClient()) {
             try {
                 if (mode == 4) { // take out
-                    byte type = slea.readByte();
+                    byte typeIndex = slea.readByte();
+                    Optional<MapleInventoryType> type = MapleInventoryType.getByType(typeIndex);
+                    if (type.isEmpty()) {
+                        c.disconnect(true, false);
+                        return;
+                    }
+
                     byte slot = slea.readByte();
                     if (slot < 0 || slot > storage.getSlots()) { // removal starts at zero
                         AutobanFactory.PACKET_EDIT.alert(c.getPlayer(), c.getPlayer().getName() + " tried to packet edit with storage.");
@@ -66,7 +74,7 @@ public class StorageProcessor {
                         c.disconnect(true, false);
                         return;
                     }
-                    slot = storage.getSlot(MapleInventoryType.getByType(type), slot);
+                    slot = storage.getSlot(type.get(), slot);
                     Item item = storage.getItem(slot);
                     if (item != null) {
                         if (ii.isPickupRestricted(item.getItemId()) && chr.haveItemWithId(item.getItemId(), true)) {
@@ -166,7 +174,9 @@ public class StorageProcessor {
                         storage.sendStored(c, ItemConstants.getInventoryType(itemId));
                     }
                 } else if (mode == 6) { // arrange items
-                    if (YamlConfig.config.server.USE_STORAGE_ITEM_SORT) storage.arrangeItems(c);
+                    if (YamlConfig.config.server.USE_STORAGE_ITEM_SORT) {
+                        storage.arrangeItems(c);
+                    }
                     c.announce(MaplePacketCreator.enableActions());
                 } else if (mode == 7) { // meso
                     int meso = slea.readInt();

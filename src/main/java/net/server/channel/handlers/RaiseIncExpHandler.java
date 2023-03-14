@@ -14,6 +14,7 @@ import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Xari
@@ -23,7 +24,7 @@ public class RaiseIncExpHandler extends AbstractMaplePacketHandler {
 
     @Override
     public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        byte inventorytype = slea.readByte();//nItemIT
+        byte typeIndex = slea.readByte();//nItemIT
         short slot = slea.readShort();//nSlotPosition
         int itemid = slea.readInt();//nItemID
 
@@ -46,7 +47,13 @@ public class RaiseIncExpHandler extends AbstractMaplePacketHandler {
                 }
 
                 int consId;
-                MapleInventory inv = chr.getInventory(MapleInventoryType.getByType(inventorytype));
+                Optional<MapleInventoryType> type = MapleInventoryType.getByType(typeIndex);
+                if (type.isEmpty()) {
+                    c.announce(MaplePacketCreator.enableActions());
+                    return;
+                }
+
+                MapleInventory inv = chr.getInventory(type.get());
                 inv.lockInventory();
                 try {
                     consId = inv.getItem(slot).getItemId();
@@ -54,7 +61,7 @@ public class RaiseIncExpHandler extends AbstractMaplePacketHandler {
                         return;
                     }
 
-                    MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.getByType(inventorytype), (short) slot, (short) 1, false, true);
+                    MapleInventoryManipulator.removeFromSlot(c, type.get(), slot, (short) 1, false, true);
                 } finally {
                     inv.unlockInventory();
                 }

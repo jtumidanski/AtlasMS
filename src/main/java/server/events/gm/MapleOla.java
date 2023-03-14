@@ -34,15 +34,16 @@ public class MapleOla {
     private MapleCharacter chr;
     private long time = 0;
     private long timeStarted = 0;
-    private ScheduledFuture<?> schedule = null;
+    private ScheduledFuture<?> schedule;
 
     public MapleOla(final MapleCharacter chr) {
         this.chr = chr;
         this.schedule = TimerManager.getInstance().schedule(new Runnable() {
             @Override
             public void run() {
-                if (chr.getMapId() >= 109030001 && chr.getMapId() <= 109030303)
+                if (chr.getMapId() >= 109030001 && chr.getMapId() <= 109030303) {
                     chr.changeMap(chr.getMap().getReturnMap());
+                }
                 resetTimes();
             }
         }, 360000);

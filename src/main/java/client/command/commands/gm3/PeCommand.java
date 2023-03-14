@@ -48,7 +48,7 @@ public class PeCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        String packet = "";
+        String packet;
         try {
             InputStreamReader is = new FileReader("pe.txt");
             Properties packetProps = new Properties();
@@ -71,7 +71,7 @@ public class PeCommand extends Command {
                 player.yellowMessage("Receiving: " + packet);
                 packetHandler.handlePacket(slea, c);
             } catch (final Throwable t) {
-                FilePrinter.printError(FilePrinter.PACKET_HANDLER + packetHandler.getClass().getName() + ".txt", t, "Error for " + (c.getPlayer() == null ? "" : "player ; " + c.getPlayer() + " on map ; " + c.getPlayer().getMapId() + " - ") + "account ; " + c.getAccountName() + "\r\n" + slea.toString());
+                FilePrinter.printError(FilePrinter.PACKET_HANDLER + packetHandler.getClass().getName() + ".txt", t, "Error for " + (c.getPlayer() == null ? "" : "player ; " + c.getPlayer() + " on map ; " + c.getPlayer().getMapId() + " - ") + "account ; " + c.getAccountName() + "\r\n" + slea);
             }
         }
     }

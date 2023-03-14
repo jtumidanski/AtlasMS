@@ -27,9 +27,9 @@ import java.util.List;
  * @author Matze
  */
 public interface MapleDataDirectoryEntry extends MapleDataEntry {
-    public List<MapleDataDirectoryEntry> getSubdirectories();
+    List<MapleDataDirectoryEntry> getSubdirectories();
 
-    public List<MapleDataFileEntry> getFiles();
+    List<MapleDataFileEntry> getFiles();
 
-    public MapleDataEntry getEntry(String name);
+    MapleDataEntry getEntry(String name);
 }

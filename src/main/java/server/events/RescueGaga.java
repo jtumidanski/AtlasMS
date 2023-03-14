@@ -6,7 +6,6 @@
 package server.events;
 
 import client.MapleCharacter;
-import client.SkillFactory;
 
 /**
  * @author kevintjuh93
@@ -46,11 +45,11 @@ public class RescueGaga extends MapleEvents {
 
         long expiration = (System.currentTimeMillis() + 3600 * 24 * 20 * 1000);//20 days
         if (completed < 20) {
-            chr.changeSkillLevel(SkillFactory.getSkill(skillid), (byte) 1, 1, expiration);
-            chr.changeSkillLevel(SkillFactory.getSkill(skillid + 1), (byte) 1, 1, expiration);
-            chr.changeSkillLevel(SkillFactory.getSkill(skillid + 2), (byte) 1, 1, expiration);
+            chr.changeSkillLevel(skillid, (byte) 1, 1, expiration);
+            chr.changeSkillLevel(skillid + 1, (byte) 1, 1, expiration);
+            chr.changeSkillLevel(skillid + 2, (byte) 1, 1, expiration);
         } else {
-            chr.changeSkillLevel(SkillFactory.getSkill(skillid), (byte) 2, 2, chr.getSkillExpiration(skillid));
+            chr.changeSkillLevel(skillid, (byte) 2, 2, chr.getSkillExpiration(skillid));
         }
     }
 

@@ -48,7 +48,9 @@ public final class DeleteCharHandler extends AbstractMaplePacketHandler {
                  PreparedStatement ps2 = con.prepareStatement("SELECT COUNT(*) as rowcount FROM worldtransfers WHERE `characterid` = ? AND completionTime IS NULL")) {
                 ps.setInt(1, cid);
                 ResultSet rs = ps.executeQuery();
-                if (!rs.next()) throw new SQLException("Character record does not exist.");
+                if (!rs.next()) {
+                    throw new SQLException("Character record does not exist.");
+                }
                 int world = rs.getInt("world");
                 int guildId = rs.getInt("guildid");
                 int guildRank = rs.getInt("guildrank");

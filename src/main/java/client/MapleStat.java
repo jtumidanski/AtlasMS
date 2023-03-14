@@ -21,6 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package client;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum MapleStat {
 
     SKIN(0x1),
@@ -45,17 +48,14 @@ public enum MapleStat {
     GACHAEXP(0x200000);
     private final int i;
 
-    private MapleStat(int i) {
+    MapleStat(int i) {
         this.i = i;
     }
 
-    public static MapleStat getByValue(int value) {
-        for (MapleStat stat : MapleStat.values()) {
-            if (stat.getValue() == value) {
-                return stat;
-            }
-        }
-        return null;
+    public static Optional<MapleStat> getByValue(int value) {
+        return Arrays.stream(MapleStat.values())
+                .filter(s -> s.getValue() == value)
+                .findFirst();
     }
 
     public static MapleStat getBy5ByteEncoding(int encoded) {
@@ -73,46 +73,28 @@ public enum MapleStat {
     }
 
     public static MapleStat getByString(String type) {
-        if (type.equals("SKIN")) {
-            return SKIN;
-        } else if (type.equals("FACE")) {
-            return FACE;
-        } else if (type.equals("HAIR")) {
-            return HAIR;
-        } else if (type.equals("LEVEL")) {
-            return LEVEL;
-        } else if (type.equals("JOB")) {
-            return JOB;
-        } else if (type.equals("STR")) {
-            return STR;
-        } else if (type.equals("DEX")) {
-            return DEX;
-        } else if (type.equals("INT")) {
-            return INT;
-        } else if (type.equals("LUK")) {
-            return LUK;
-        } else if (type.equals("HP")) {
-            return HP;
-        } else if (type.equals("MAXHP")) {
-            return MAXHP;
-        } else if (type.equals("MP")) {
-            return MP;
-        } else if (type.equals("MAXMP")) {
-            return MAXMP;
-        } else if (type.equals("AVAILABLEAP")) {
-            return AVAILABLEAP;
-        } else if (type.equals("AVAILABLESP")) {
-            return AVAILABLESP;
-        } else if (type.equals("EXP")) {
-            return EXP;
-        } else if (type.equals("FAME")) {
-            return FAME;
-        } else if (type.equals("MESO")) {
-            return MESO;
-        } else if (type.equals("PET")) {
-            return PET;
-        }
-        return null;
+        return switch (type) {
+            case "SKIN" -> SKIN;
+            case "FACE" -> FACE;
+            case "HAIR" -> HAIR;
+            case "LEVEL" -> LEVEL;
+            case "JOB" -> JOB;
+            case "STR" -> STR;
+            case "DEX" -> DEX;
+            case "INT" -> INT;
+            case "LUK" -> LUK;
+            case "HP" -> HP;
+            case "MAXHP" -> MAXHP;
+            case "MP" -> MP;
+            case "MAXMP" -> MAXMP;
+            case "AVAILABLEAP" -> AVAILABLEAP;
+            case "AVAILABLESP" -> AVAILABLESP;
+            case "EXP" -> EXP;
+            case "FAME" -> FAME;
+            case "MESO" -> MESO;
+            case "PET" -> PET;
+            default -> null;
+        };
     }
 
     public int getValue() {

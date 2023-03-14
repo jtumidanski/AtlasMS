@@ -39,8 +39,9 @@ public class StartEventCommand extends Command {
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
         int players = 50;
-        if (params.length > 1)
+        if (params.length > 1) {
             players = Integer.parseInt(params[0]);
+        }
         c.getChannelServer().setEvent(new MapleEvent(player.getMapId(), players));
         Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.earnTitleMessage(
                 "[Event] An event has started on "

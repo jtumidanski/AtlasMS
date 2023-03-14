@@ -33,6 +33,7 @@ import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class DebuffCommand extends Command {
     {
@@ -107,7 +108,7 @@ public class DebuffCommand extends Command {
             return;
         }
 
-        for (MapleMapObject mmo : player.getMap().getMapObjectsInRange(player.getPosition(), 777777.7, Arrays.asList(MapleMapObjectType.PLAYER))) {
+        for (MapleMapObject mmo : player.getMap().getMapObjectsInRange(player.getPosition(), 777777.7, List.of(MapleMapObjectType.PLAYER))) {
             MapleCharacter chr = (MapleCharacter) mmo;
 
             if (chr.getId() != player.getId()) {

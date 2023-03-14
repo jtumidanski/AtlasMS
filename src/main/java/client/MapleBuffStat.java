@@ -123,12 +123,12 @@ public enum MapleBuffStat {
     private final long i;
     private final boolean isFirst;
 
-    private MapleBuffStat(long i, boolean isFirst) {
+    MapleBuffStat(long i, boolean isFirst) {
         this.i = i;
         this.isFirst = isFirst;
     }
 
-    private MapleBuffStat(long i) {
+    MapleBuffStat(long i) {
         this.i = i;
         this.isFirst = false;
     }

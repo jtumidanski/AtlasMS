@@ -63,7 +63,7 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
     }
 
     private static long clampStat(int v, int min, int max) {
-        return (v < min) ? min : ((v > max) ? max : v);
+        return (v < min) ? min : (Math.min(v, max));
     }
 
     private static long calcStatPoolNode(Integer v, int displacement) {
@@ -228,7 +228,9 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
             thp = localmaxhp;
         }
 
-        if (this.hp != thp) this.transienthp = Float.NEGATIVE_INFINITY;
+        if (this.hp != thp) {
+            this.transienthp = Float.NEGATIVE_INFINITY;
+        }
         this.hp = thp;
 
         dispatchHpChanged(oldHp);
@@ -251,7 +253,9 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
             tmp = localmaxmp;
         }
 
-        if (this.mp != tmp) this.transientmp = Float.NEGATIVE_INFINITY;
+        if (this.mp != tmp) {
+            this.transientmp = Float.NEGATIVE_INFINITY;
+        }
         this.mp = tmp;
     }
 
@@ -265,7 +269,9 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
     }
 
     protected void setMaxHp(int hp_) {
-        if (this.maxhp < hp_) this.transienthp = Float.NEGATIVE_INFINITY;
+        if (this.maxhp < hp_) {
+            this.transienthp = Float.NEGATIVE_INFINITY;
+        }
         this.maxhp = hp_;
         this.clientmaxhp = Math.min(30000, hp_);
     }
@@ -280,7 +286,9 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
     }
 
     protected void setMaxMp(int mp_) {
-        if (this.maxmp < mp_) this.transientmp = Float.NEGATIVE_INFINITY;
+        if (this.maxmp < mp_) {
+            this.transientmp = Float.NEGATIVE_INFINITY;
+        }
         this.maxmp = mp_;
         this.clientmaxmp = Math.min(30000, mp_);
     }
@@ -333,7 +341,7 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
                 short newHp = (short) (hpMpPool >> 48);
                 short newMp = (short) (hpMpPool >> 32);
                 short newMaxHp = (short) (hpMpPool >> 16);
-                short newMaxMp = (short) (hpMpPool.shortValue());
+                short newMaxMp = hpMpPool.shortValue();
 
                 if (newMaxHp != Short.MIN_VALUE) {
                     if (newMaxHp < 50) {
@@ -372,7 +380,7 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
                 short newStr = (short) (strDexIntLuk >> 48);
                 short newDex = (short) (strDexIntLuk >> 32);
                 short newInt = (short) (strDexIntLuk >> 16);
-                short newLuk = (short) (strDexIntLuk.shortValue());
+                short newLuk = strDexIntLuk.shortValue();
 
                 if (newStr >= 4) {
                     setStr(newStr);
@@ -404,7 +412,7 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
 
             if (newSp != null) {
                 short sp = (short) (newSp >> 16);
-                short skillbook = (short) (newSp.shortValue());
+                short skillbook = newSp.shortValue();
 
                 setRemainingSp(sp, skillbook);
                 statUpdates.put(MapleStat.AVAILABLESP, remainingSp[skillbook]);
@@ -651,11 +659,18 @@ public abstract class AbstractMapleCharacterObject extends AbstractAnimatedMaple
             }
 
             int newStr = str, newDex = dex, newInt = int_, newLuk = luk;
-            if (deltaStr != null)
+            if (deltaStr != null) {
                 newStr += deltaStr;   // thanks Rohenn for noticing an NPE case after "null" started being used
-            if (deltaDex != null) newDex += deltaDex;
-            if (deltaInt != null) newInt += deltaInt;
-            if (deltaLuk != null) newLuk += deltaLuk;
+            }
+            if (deltaDex != null) {
+                newDex += deltaDex;
+            }
+            if (deltaInt != null) {
+                newInt += deltaInt;
+            }
+            if (deltaLuk != null) {
+                newLuk += deltaLuk;
+            }
 
             if (newStr < 4 || newStr > YamlConfig.config.server.MAX_AP) {
                 return false;

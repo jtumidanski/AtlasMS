@@ -46,7 +46,9 @@ public class AssignAPProcessor {
 
     public static void APAutoAssignAction(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
-        if (chr.getRemainingAp() < 1) return;
+        if (chr.getRemainingAp() < 1) {
+            return;
+        }
 
         Collection<Item> equippedC = chr.getInventory(MapleInventoryType.EQUIPPED).list();
 
@@ -76,13 +78,19 @@ public class AssignAPProcessor {
 
                 for (Item item : equippedC) {   //selecting the biggest AP value of each stat from each equipped item.
                     nEquip = (Equip) item;
-                    if (nEquip.getStr() > 0) eqpStrList.add(nEquip.getStr());
+                    if (nEquip.getStr() > 0) {
+                        eqpStrList.add(nEquip.getStr());
+                    }
                     str += nEquip.getStr();
 
-                    if (nEquip.getDex() > 0) eqpDexList.add(nEquip.getDex());
+                    if (nEquip.getDex() > 0) {
+                        eqpDexList.add(nEquip.getDex());
+                    }
                     dex += nEquip.getDex();
 
-                    if (nEquip.getLuk() > 0) eqpLukList.add(nEquip.getLuk());
+                    if (nEquip.getLuk() > 0) {
+                        eqpLukList.add(nEquip.getLuk());
+                    }
                     luk += nEquip.getLuk();
 
                     //if(nEquip.getInt() > 0) eqpIntList.add(nEquip.getInt()); //not needed...
@@ -94,9 +102,9 @@ public class AssignAPProcessor {
                 statUpdate[2] = chr.getLuk();
                 statUpdate[3] = chr.getInt();
 
-                Collections.sort(eqpStrList, Collections.reverseOrder());
-                Collections.sort(eqpDexList, Collections.reverseOrder());
-                Collections.sort(eqpLukList, Collections.reverseOrder());
+                eqpStrList.sort(Collections.reverseOrder());
+                eqpDexList.sort(Collections.reverseOrder());
+                eqpLukList.sort(Collections.reverseOrder());
 
                 //Autoassigner looks up the 1st/2nd placed equips for their stats to calculate the optimal upgrade.
                 int eqpStr = getNthHighestStat(eqpStrList, (short) 0) + getNthHighestStat(eqpStrList, (short) 1);
@@ -109,18 +117,25 @@ public class AssignAPProcessor {
 
                 MapleJob stance = c.getPlayer().getJobStyle(opt);
                 int prStat = 0, scStat = 0, trStat = 0, temp, tempAp = remainingAp, CAP;
-                if (tempAp < 1) return;
+                if (tempAp < 1) {
+                    return;
+                }
 
                 MapleStat primary, secondary, tertiary = MapleStat.LUK;
                 switch (stance) {
                     case MAGICIAN:
                         CAP = 165;
                         scStat = (chr.getLevel() + 3) - (chr.getLuk() + luk - eqpLuk);
-                        if (scStat < 0) scStat = 0;
+                        if (scStat < 0) {
+                            scStat = 0;
+                        }
                         scStat = Math.min(scStat, tempAp);
 
-                        if (tempAp > scStat) tempAp -= scStat;
-                        else tempAp = 0;
+                        if (tempAp > scStat) {
+                            tempAp -= scStat;
+                        } else {
+                            tempAp = 0;
+                        }
 
                         prStat = tempAp;
                         int_ = prStat;
@@ -143,11 +158,16 @@ public class AssignAPProcessor {
                     case BOWMAN:
                         CAP = 125;
                         scStat = (chr.getLevel() + 5) - (chr.getStr() + str - eqpStr);
-                        if (scStat < 0) scStat = 0;
+                        if (scStat < 0) {
+                            scStat = 0;
+                        }
                         scStat = Math.min(scStat, tempAp);
 
-                        if (tempAp > scStat) tempAp -= scStat;
-                        else tempAp = 0;
+                        if (tempAp > scStat) {
+                            tempAp -= scStat;
+                        } else {
+                            tempAp = 0;
+                        }
 
                         prStat = tempAp;
                         dex = prStat;
@@ -170,11 +190,16 @@ public class AssignAPProcessor {
                     case CROSSBOWMAN:
                         CAP = 120;
                         scStat = chr.getLevel() - (chr.getStr() + str - eqpStr);
-                        if (scStat < 0) scStat = 0;
+                        if (scStat < 0) {
+                            scStat = 0;
+                        }
                         scStat = Math.min(scStat, tempAp);
 
-                        if (tempAp > scStat) tempAp -= scStat;
-                        else tempAp = 0;
+                        if (tempAp > scStat) {
+                            tempAp -= scStat;
+                        } else {
+                            tempAp = 0;
+                        }
 
                         prStat = tempAp;
                         dex = prStat;
@@ -199,7 +224,9 @@ public class AssignAPProcessor {
                         scStat = 0;
                         if (chr.getDex() < 80) {
                             scStat = (2 * chr.getLevel()) - (chr.getDex() + dex - eqpDex);
-                            if (scStat < 0) scStat = 0;
+                            if (scStat < 0) {
+                                scStat = 0;
+                            }
 
                             scStat = Math.min(80 - chr.getDex(), scStat);
                             scStat = Math.min(tempAp, scStat);
@@ -207,7 +234,9 @@ public class AssignAPProcessor {
                         }
 
                         temp = (chr.getLevel() + 40) - Math.max(80, scStat + chr.getDex() + dex - eqpDex);
-                        if (temp < 0) temp = 0;
+                        if (temp < 0) {
+                            temp = 0;
+                        }
                         temp = Math.min(tempAp, temp);
                         scStat += temp;
                         tempAp -= temp;
@@ -216,7 +245,9 @@ public class AssignAPProcessor {
                         if (chr.getStr() >= Math.max(13, (int) (0.4 * chr.getLevel()))) {
                             if (chr.getStr() < 50) {
                                 trStat = (chr.getLevel() - 10) - (chr.getStr() + str - eqpStr);
-                                if (trStat < 0) trStat = 0;
+                                if (trStat < 0) {
+                                    trStat = 0;
+                                }
 
                                 trStat = Math.min(50 - chr.getStr(), trStat);
                                 trStat = Math.min(tempAp, trStat);
@@ -224,7 +255,9 @@ public class AssignAPProcessor {
                             }
 
                             temp = (20 + (chr.getLevel() / 2)) - Math.max(50, trStat + chr.getStr() + str - eqpStr);
-                            if (temp < 0) temp = 0;
+                            if (temp < 0) {
+                                temp = 0;
+                            }
                             temp = Math.min(tempAp, temp);
                             trStat += temp;
                             tempAp -= temp;
@@ -273,7 +306,9 @@ public class AssignAPProcessor {
                             scStat = 0;
                             if (chr.getDex() < 80) {
                                 scStat = (2 * chr.getLevel()) - (chr.getDex() + dex - eqpDex);
-                                if (scStat < 0) scStat = 0;
+                                if (scStat < 0) {
+                                    scStat = 0;
+                                }
 
                                 scStat = Math.min(80 - chr.getDex(), scStat);
                                 scStat = Math.min(tempAp, scStat);
@@ -281,7 +316,9 @@ public class AssignAPProcessor {
                             }
 
                             temp = (chr.getLevel() + 40) - Math.max(80, scStat + chr.getDex() + dex - eqpDex);
-                            if (temp < 0) temp = 0;
+                            if (temp < 0) {
+                                temp = 0;
+                            }
                             temp = Math.min(tempAp, temp);
                             scStat += temp;
                             tempAp -= temp;
@@ -289,7 +326,9 @@ public class AssignAPProcessor {
                             scStat = 0;
                             if (chr.getDex() < 96) {
                                 scStat = (int) (2.4 * chr.getLevel()) - (chr.getDex() + dex - eqpDex);
-                                if (scStat < 0) scStat = 0;
+                                if (scStat < 0) {
+                                    scStat = 0;
+                                }
 
                                 scStat = Math.min(96 - chr.getDex(), scStat);
                                 scStat = Math.min(tempAp, scStat);
@@ -297,7 +336,9 @@ public class AssignAPProcessor {
                             }
 
                             temp = 96 + (int) (1.2 * (chr.getLevel() - 40)) - Math.max(96, scStat + chr.getDex() + dex - eqpDex);
-                            if (temp < 0) temp = 0;
+                            if (temp < 0) {
+                                temp = 0;
+                            }
                             temp = Math.min(tempAp, temp);
                             scStat += temp;
                             tempAp -= temp;
@@ -370,8 +411,10 @@ public class AssignAPProcessor {
         return (statList.size() <= rank ? 0 : statList.get(rank));
     }
 
-    private static int gainStatByType(MapleStat type, int[] statGain, int gain, int statUpdate[]) {
-        if (gain <= 0) return 0;
+    private static int gainStatByType(MapleStat type, int[] statGain, int gain, int[] statUpdate) {
+        if (gain <= 0) {
+            return 0;
+        }
 
         int newVal = 0;
         if (type.equals(MapleStat.STR)) {
@@ -419,7 +462,9 @@ public class AssignAPProcessor {
     }
 
     private static MapleStat getQuaternaryStat(MapleJob stance) {
-        if (stance != MapleJob.MAGICIAN) return MapleStat.INT;
+        if (stance != MapleJob.MAGICIAN) {
+            return MapleStat.INT;
+        }
         return MapleStat.STR;
     }
 
@@ -629,11 +674,13 @@ public class AssignAPProcessor {
 
         if (job.isA(MapleJob.WARRIOR) || job.isA(MapleJob.DAWNWARRIOR1)) {
             if (!usedAPReset) {
-                Skill increaseHP = SkillFactory.getSkill(job.isA(MapleJob.DAWNWARRIOR1) ? DawnWarrior.MAX_HP_INCREASE : Warrior.IMPROVED_MAXHP);
+                int skillId = job.isA(MapleJob.DAWNWARRIOR1) ? DawnWarrior.MAX_HP_INCREASE : Warrior.IMPROVED_MAXHP;
+                Skill increaseHP = SkillFactory.getSkill(skillId).orElseThrow();
                 int sLvl = player.getSkillLevel(increaseHP);
 
-                if (sLvl > 0)
+                if (sLvl > 0) {
                     MaxHP += increaseHP.getEffect(sLvl).getY();
+                }
             }
 
             if (YamlConfig.config.server.USE_RANDOMIZE_HPMP_GAIN) {
@@ -687,11 +734,13 @@ public class AssignAPProcessor {
             }
         } else if (job.isA(MapleJob.PIRATE) || job.isA(MapleJob.THUNDERBREAKER1)) {
             if (!usedAPReset) {
-                Skill increaseHP = SkillFactory.getSkill(job.isA(MapleJob.PIRATE) ? Brawler.IMPROVE_MAX_HP : ThunderBreaker.IMPROVE_MAX_HP);
+                int skillId = job.isA(MapleJob.PIRATE) ? Brawler.IMPROVE_MAX_HP : ThunderBreaker.IMPROVE_MAX_HP;
+                Skill increaseHP = SkillFactory.getSkill(skillId).orElseThrow();
                 int sLvl = player.getSkillLevel(increaseHP);
 
-                if (sLvl > 0)
+                if (sLvl > 0) {
                     MaxHP += increaseHP.getEffect(sLvl).getY();
+                }
             }
 
             if (YamlConfig.config.server.USE_RANDOMIZE_HPMP_GAIN) {
@@ -732,11 +781,12 @@ public class AssignAPProcessor {
             }
         } else if (job.isA(MapleJob.MAGICIAN) || job.isA(MapleJob.BLAZEWIZARD1)) {
             if (!usedAPReset) {
-                Skill increaseMP = SkillFactory.getSkill(job.isA(MapleJob.BLAZEWIZARD1) ? BlazeWizard.INCREASING_MAX_MP : Magician.IMPROVED_MAX_MP_INCREASE);
+                Skill increaseMP = SkillFactory.getSkill(job.isA(MapleJob.BLAZEWIZARD1) ? BlazeWizard.INCREASING_MAX_MP : Magician.IMPROVED_MAX_MP_INCREASE).orElseThrow();
                 int sLvl = player.getSkillLevel(increaseMP);
 
-                if (sLvl > 0)
+                if (sLvl > 0) {
                     MaxMP += increaseMP.getEffect(sLvl).getY();
+                }
             }
 
             if (YamlConfig.config.server.USE_RANDOMIZE_HPMP_GAIN) {

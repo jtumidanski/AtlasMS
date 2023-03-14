@@ -28,6 +28,8 @@ import client.MapleClient;
 import client.MapleJob;
 import client.command.Command;
 
+import java.util.Optional;
+
 public class JobCommand extends Command {
     {
         setDescription("");
@@ -42,8 +44,13 @@ public class JobCommand extends Command {
                 player.message("Jobid " + jobid + " is not available.");
                 return;
             }
+            Optional<MapleJob> job = MapleJob.getById(jobid);
+            if (job.isEmpty()) {
+                player.message(String.format("Job [%d] not found.", jobid));
+                return;
+            }
 
-            player.changeJob(MapleJob.getById(jobid));
+            player.changeJob(job.get());
             player.equipChanged();
         } else if (params.length == 2) {
             MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
@@ -54,8 +61,13 @@ public class JobCommand extends Command {
                     player.message("Jobid " + jobid + " is not available.");
                     return;
                 }
+                Optional<MapleJob> job = MapleJob.getById(jobid);
+                if (job.isEmpty()) {
+                    player.message(String.format("Job [%d] not found.", jobid));
+                    return;
+                }
 
-                victim.changeJob(MapleJob.getById(jobid));
+                victim.changeJob(job.get());
                 player.equipChanged();
             } else {
                 player.message("Player '" + params[0] + "' could not be found.");

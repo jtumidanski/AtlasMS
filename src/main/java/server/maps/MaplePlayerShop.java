@@ -181,15 +181,19 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
                         visitor.setSlot(-1);    //absolutely cant remove player slot for late players without dc'ing them... heh
 
                         for (int j = i; j < 2; j++) {
-                            if (visitors[j] != null)
+                            if (visitors[j] != null) {
                                 owner.announce(MaplePacketCreator.getPlayerShopRemoveVisitor(j + 1));
+                            }
                             visitors[j] = visitors[j + 1];
-                            if (visitors[j] != null) visitors[j].setSlot(j);
+                            if (visitors[j] != null) {
+                                visitors[j].setSlot(j);
+                            }
                         }
                         visitors[2] = null;
                         for (int j = i; j < 2; j++) {
-                            if (visitors[j] != null)
+                            if (visitors[j] != null) {
                                 owner.announce(MaplePacketCreator.getPlayerShopNewVisitor(visitors[j], j + 1));
+                            }
                         }
 
                         this.broadcastRestoreToVisitors();
@@ -216,7 +220,9 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
 
     public boolean addItem(MaplePlayerShopItem item) {
         synchronized (items) {
-            if (items.size() >= 16) return false;
+            if (items.size() >= 16) {
+                return false;
+            }
 
             items.add(item);
             return true;
@@ -415,7 +421,9 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
 
         synchronized (chatLog) {
             chatLog.add(new Pair<>(c.getPlayer(), chat));
-            if (chatLog.size() > 25) chatLog.remove(0);
+            if (chatLog.size() > 25) {
+                chatLog.remove(0);
+            }
             chatSlot.put(c.getPlayer().getId(), s);
         }
 
@@ -554,7 +562,7 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
         List<MaplePlayerShopItem> all = new ArrayList<>();
 
         synchronized (items) {
-            for (MaplePlayerShopItem mpsi : items) all.add(mpsi);
+            all.addAll(items);
         }
 
         for (MaplePlayerShopItem mpsi : all) {

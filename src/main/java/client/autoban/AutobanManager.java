@@ -23,9 +23,9 @@ public class AutobanManager {
     private int misses = 0;
     private int lastmisses = 0;
     private int samemisscount = 0;
-    private long spam[] = new long[20];
-    private int timestamp[] = new int[20];
-    private byte timestampcounter[] = new byte[20];
+    private long[] spam = new long[20];
+    private int[] timestamp = new int[20];
+    private byte[] timestampcounter = new byte[20];
 
 
     public AutobanManager(MapleCharacter chr) {
@@ -43,13 +43,15 @@ public class AutobanManager {
                     points.put(fac, points.get(fac) / 2); //So the points are not completely gone.
                 }
             }
-            if (fac.getExpire() != -1)
+            if (fac.getExpire() != -1) {
                 lastTime.put(fac, Server.getInstance().getCurrentTime());
+            }
 
             if (points.containsKey(fac)) {
                 points.put(fac, points.get(fac) + 1);
-            } else
+            } else {
                 points.put(fac, 1);
+            }
 
             if (points.get(fac) >= fac.getMaximum()) {
                 chr.autoban(reason);
@@ -69,12 +71,13 @@ public class AutobanManager {
         if (lastmisses == misses && misses > 6) {
             samemisscount++;
         }
-        if (samemisscount > 4)
+        if (samemisscount > 4) {
             chr.sendPolice("You will be disconnected for miss godmode.");
-            //chr.autoban("Autobanned for : " + misses + " Miss godmode", 1);
-        else if (samemisscount > 0)
-
+        }
+        //chr.autoban("Autobanned for : " + misses + " Miss godmode", 1);
+        else if (samemisscount > 0) {
             this.lastmisses = misses;
+        }
         this.misses = 0;
     }
 

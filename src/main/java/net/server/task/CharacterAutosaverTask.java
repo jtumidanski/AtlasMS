@@ -35,7 +35,9 @@ public class CharacterAutosaverTask extends BaseTask implements Runnable {  // t
 
     @Override
     public void run() {
-        if (!YamlConfig.config.server.USE_AUTOSAVE) return;
+        if (!YamlConfig.config.server.USE_AUTOSAVE) {
+            return;
+        }
 
         PlayerStorage ps = wserv.getPlayerStorage();
         for (MapleCharacter chr : ps.getAllCharacters()) {

@@ -119,8 +119,11 @@ public class MapleFamilyEntry {
     }
 
     public void setCharacter(MapleCharacter newCharacter) {
-        if (newCharacter == null) cacheOffline(newCharacter);
-        else newCharacter.setFamilyEntry(this);
+        if (newCharacter == null) {
+            cacheOffline(newCharacter);
+        } else {
+            newCharacter.setFamilyEntry(this);
+        }
         this.character = newCharacter;
     }
 
@@ -133,7 +136,9 @@ public class MapleFamilyEntry {
     }
 
     public synchronized void join(MapleFamilyEntry senior) {
-        if (senior == null || getSenior() != null) return;
+        if (senior == null || getSenior() != null) {
+            return;
+        }
         MapleFamily oldFamily = getFamily();
         MapleFamily newFamily = senior.getFamily();
         setSenior(senior, false);
@@ -150,7 +155,9 @@ public class MapleFamilyEntry {
             for (MapleFamilyEntry junior : juniors) { // better to duplicate this than the SQL code
                 if (junior != null) {
                     success = junior.updateNewFamilyDB(con); // recursively updates juniors in db
-                    if (!success) break;
+                    if (!success) {
+                        break;
+                    }
                 }
             }
             if (!success) {
@@ -193,7 +200,9 @@ public class MapleFamilyEntry {
             for (MapleFamilyEntry junior : juniors) { // better to duplicate this than the SQL code
                 if (junior != null) {
                     success = junior.updateNewFamilyDB(con); // recursively updates juniors in db
-                    if (!success) break;
+                    if (!success) {
+                        break;
+                    }
                 }
             }
             if (!success) {
@@ -209,30 +218,42 @@ public class MapleFamilyEntry {
     }
 
     private synchronized boolean updateNewFamilyDB(Connection con) {
-        if (!updateFamilyEntryDB(con, getChrId(), getFamily().getID())) return false;
-        if (!updateCharacterFamilyDB(con, getChrId(), getFamily().getID(), true)) return false;
+        if (!updateFamilyEntryDB(con, getChrId(), getFamily().getID())) {
+            return false;
+        }
+        if (!updateCharacterFamilyDB(con, getChrId(), getFamily().getID(), true)) {
+            return false;
+        }
 
         for (MapleFamilyEntry junior : juniors) {
             if (junior != null) {
-                if (!junior.updateNewFamilyDB(con)) return false;
+                if (!junior.updateNewFamilyDB(con)) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
     private synchronized void addSeniorCount(int seniorCount, MapleFamily newFamily) { // traverses tree and subtracts seniors and updates family
-        if (newFamily != null) this.family = newFamily;
+        if (newFamily != null) {
+            this.family = newFamily;
+        }
         setTotalSeniors(getTotalSeniors() + seniorCount);
         this.generation += seniorCount;
         for (MapleFamilyEntry junior : juniors) {
-            if (junior != null) junior.addSeniorCount(seniorCount, newFamily);
+            if (junior != null) {
+                junior.addSeniorCount(seniorCount, newFamily);
+            }
         }
     }
 
     private synchronized void addJuniorCount(int juniorCount) { // climbs tree and adds junior count
         setTotalJuniors(getTotalJuniors() + juniorCount);
         MapleFamilyEntry senior = getSenior();
-        if (senior != null) senior.addJuniorCount(juniorCount);
+        if (senior != null) {
+            senior.addJuniorCount(juniorCount);
+        }
     }
 
     public MapleFamily getFamily() {
@@ -245,20 +266,29 @@ public class MapleFamilyEntry {
 
     public String getName() {
         MapleCharacter chr = character;
-        if (chr != null) return chr.getName();
-        else return charName;
+        if (chr != null) {
+            return chr.getName();
+        } else {
+            return charName;
+        }
     }
 
     public int getLevel() {
         MapleCharacter chr = character;
-        if (chr != null) return chr.getLevel();
-        else return level;
+        if (chr != null) {
+            return chr.getLevel();
+        } else {
+            return level;
+        }
     }
 
     public MapleJob getJob() {
         MapleCharacter chr = character;
-        if (chr != null) return chr.getJob();
-        else return job;
+        if (chr != null) {
+            return chr.getJob();
+        } else {
+            return job;
+        }
     }
 
     public int getReputation() {
@@ -266,7 +296,9 @@ public class MapleFamilyEntry {
     }
 
     public void setReputation(int reputation) {
-        if (reputation != this.reputation) this.repChanged = true;
+        if (reputation != this.reputation) {
+            this.repChanged = true;
+        }
         this.reputation = reputation;
     }
 
@@ -275,7 +307,9 @@ public class MapleFamilyEntry {
     }
 
     public void setTodaysRep(int today) {
-        if (today != todaysRep) this.repChanged = true;
+        if (today != todaysRep) {
+            this.repChanged = true;
+        }
         this.todaysRep = today;
     }
 
@@ -284,7 +318,9 @@ public class MapleFamilyEntry {
     }
 
     public void setRepsToSenior(int reputation) {
-        if (reputation != this.repsToSenior) this.repChanged = true;
+        if (reputation != this.repsToSenior) {
+            this.repChanged = true;
+        }
         this.repsToSenior = reputation;
     }
 
@@ -293,20 +329,26 @@ public class MapleFamilyEntry {
     }
 
     private void gainReputation(int gain, boolean countTowardsTotal, MapleFamilyEntry from) {
-        if (gain != 0) repChanged = true;
+        if (gain != 0) {
+            repChanged = true;
+        }
         this.reputation += gain;
         this.todaysRep += gain;
         if (gain > 0 && countTowardsTotal) {
             this.totalReputation += gain;
         }
         MapleCharacter chr = getChr();
-        if (chr != null) chr.announce(MaplePacketCreator.sendGainRep(gain, from != null ? from.getName() : ""));
+        if (chr != null) {
+            chr.announce(MaplePacketCreator.sendGainRep(gain, from != null ? from.getName() : ""));
+        }
     }
 
     public void giveReputationToSenior(int gain, boolean includeSuperSenior) {
         int actualGain = gain;
         MapleFamilyEntry senior = getSenior();
-        if (senior != null && senior.getLevel() < getLevel() && gain > 0) actualGain /= 2; //don't halve negative values
+        if (senior != null && senior.getLevel() < getLevel() && gain > 0) {
+            actualGain /= 2; //don't halve negative values
+        }
         if (senior != null) {
             senior.gainReputation(actualGain, true, this);
             if (actualGain > 0) {
@@ -327,7 +369,9 @@ public class MapleFamilyEntry {
     }
 
     public void setTotalReputation(int totalReputation) {
-        if (totalReputation != this.totalReputation) this.repChanged = true;
+        if (totalReputation != this.totalReputation) {
+            this.repChanged = true;
+        }
         this.totalReputation = totalReputation;
     }
 
@@ -336,7 +380,9 @@ public class MapleFamilyEntry {
     }
 
     public synchronized boolean setSenior(MapleFamilyEntry senior, boolean save) {
-        if (this.senior == senior) return false;
+        if (this.senior == senior) {
+            return false;
+        }
         MapleFamilyEntry oldSenior = this.senior;
         this.senior = senior;
         if (senior != null) {
@@ -344,7 +390,9 @@ public class MapleFamilyEntry {
                 if (save) {
                     updateDBChangeFamily(getChrId(), senior.getFamily().getID(), senior.getChrId());
                 }
-                if (this.repsToSenior != 0) this.repChanged = true;
+                if (this.repsToSenior != 0) {
+                    this.repChanged = true;
+                }
                 this.repsToSenior = 0;
                 this.addSeniorCount(1, null);
                 this.setTotalSeniors(senior.getTotalSeniors() + 1);
@@ -359,19 +407,26 @@ public class MapleFamilyEntry {
     }
 
     public List<MapleFamilyEntry> getJuniors() {
-        return Collections.unmodifiableList(Arrays.asList(juniors));
+        return List.of(juniors);
     }
 
     public MapleFamilyEntry getOtherJunior(MapleFamilyEntry junior) {
-        if (juniors[0] == junior) return juniors[1];
-        else if (juniors[1] == junior) return juniors[0];
+        if (juniors[0] == junior) {
+            return juniors[1];
+        } else if (juniors[1] == junior) {
+            return juniors[0];
+        }
         return null;
     }
 
     public int getJuniorCount() { //close enough to be relatively consistent to multiple threads (and the result is not vital)
         int juniorCount = 0;
-        if (juniors[0] != null) juniorCount++;
-        if (juniors[1] != null) juniorCount++;
+        if (juniors[0] != null) {
+            juniorCount++;
+        }
+        if (juniors[1] != null) {
+            juniorCount++;
+        }
         return juniorCount;
     }
 
@@ -388,8 +443,11 @@ public class MapleFamilyEntry {
     }
 
     public synchronized boolean isJunior(MapleFamilyEntry entry) { //require locking since result accuracy is vital
-        if (juniors[0] == entry) return true;
-        else if (juniors[1] == entry) return true;
+        if (juniors[0] == entry) {
+            return true;
+        } else if (juniors[1] == entry) {
+            return true;
+        }
         return false;
     }
 
@@ -423,11 +481,15 @@ public class MapleFamilyEntry {
         MapleFamilyEntry senior = getSenior();
         if (senior != null) {
             MapleCharacter seniorChr = senior.getChr();
-            if (seniorChr != null) seniorChr.announce(packet);
+            if (seniorChr != null) {
+                seniorChr.announce(packet);
+            }
             senior = senior.getSenior();
             if (includeSuperSenior && senior != null) {
                 seniorChr = senior.getChr();
-                if (seniorChr != null) seniorChr.announce(packet);
+                if (seniorChr != null) {
+                    seniorChr.announce(packet);
+                }
             }
         }
     }
@@ -436,11 +498,15 @@ public class MapleFamilyEntry {
         MapleFamilyEntry senior = getSenior();
         if (senior != null) {
             MapleCharacter seniorChr = senior.getChr();
-            if (seniorChr != null) seniorChr.announce(MaplePacketCreator.getFamilyInfo(senior));
+            if (seniorChr != null) {
+                seniorChr.announce(MaplePacketCreator.getFamilyInfo(senior));
+            }
             senior = senior.getSenior();
             if (includeSuperSenior && senior != null) {
                 seniorChr = senior.getChr();
-                if (seniorChr != null) seniorChr.announce(MaplePacketCreator.getFamilyInfo(senior));
+                if (seniorChr != null) {
+                    seniorChr.announce(MaplePacketCreator.getFamilyInfo(senior));
+                }
             }
         }
     }
@@ -462,7 +528,9 @@ public class MapleFamilyEntry {
             if (entry != null) {
                 Pair<Integer, Integer> counts = entry.traverseAndUpdateCounts(seniors + 1);
                 juniorCount += counts.getRight(); //total juniors
-                if (counts.getLeft() > highestGeneration) highestGeneration = counts.getLeft();
+                if (counts.getLeft() > highestGeneration) {
+                    highestGeneration = counts.getLeft();
+                }
             }
         }
         setTotalJuniors(juniorCount);
@@ -471,7 +539,9 @@ public class MapleFamilyEntry {
 
     public boolean useEntitlement(MapleFamilyEntitlement entitlement) {
         int id = entitlement.ordinal();
-        if (entitlements[id] >= 1) return false;
+        if (entitlements[id] >= 1) {
+            return false;
+        }
         try (Connection con = DatabaseConnection.getConnection(); PreparedStatement ps = con.prepareStatement("INSERT INTO family_entitlement (entitlementid, charid, timestamp) VALUES (?, ?, ?)")) {
             ps.setInt(1, id);
             ps.setInt(2, getChrId());
@@ -518,7 +588,9 @@ public class MapleFamilyEntry {
     }
 
     public boolean saveReputation() {
-        if (!repChanged) return true;
+        if (!repChanged) {
+            return true;
+        }
         try (Connection con = DatabaseConnection.getConnection()) {
             return saveReputation(con);
         } catch (SQLException e) {
@@ -529,7 +601,9 @@ public class MapleFamilyEntry {
     }
 
     public boolean saveReputation(Connection con) {
-        if (!repChanged) return true;
+        if (!repChanged) {
+            return true;
+        }
         try (PreparedStatement ps = con.prepareStatement("UPDATE family_character SET reputation = ?, todaysrep = ?, totalreputation = ?, reptosenior = ? WHERE cid = ?")) {
             ps.setInt(1, getReputation());
             ps.setInt(2, getTodaysRep());

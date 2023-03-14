@@ -24,8 +24,10 @@ package net.server.world;
 import client.MapleCharacter;
 import client.MapleJob;
 
+import java.util.Optional;
+
 public class MaplePartyCharacter {
-    private String name;
+    private final String name;
     private int id;
     private int level;
     private int channel, world;
@@ -52,8 +54,8 @@ public class MaplePartyCharacter {
         this.name = "";
     }
 
-    public MapleCharacter getPlayer() {
-        return character;
+    public Optional<MapleCharacter> getPlayer() {
+        return Optional.ofNullable(character);
     }
 
     public MapleJob getJob() {
@@ -73,7 +75,7 @@ public class MaplePartyCharacter {
     }
 
     public boolean isLeader() {
-        return getPlayer().isPartyLeader();
+        return getPlayer().map(MapleCharacter::isPartyLeader).orElse(false);
     }
 
     public boolean isOnline() {
@@ -132,13 +134,10 @@ public class MaplePartyCharacter {
         }
         final MaplePartyCharacter other = (MaplePartyCharacter) obj;
         if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
+            return other.name == null;
+        } else {
+            return name.equals(other.name);
         }
-        return true;
     }
 
     public int getWorld() {

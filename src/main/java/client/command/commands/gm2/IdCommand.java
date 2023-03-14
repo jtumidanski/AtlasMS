@@ -50,12 +50,12 @@ public class IdCommand extends Command {
                     if (resultList.size() > 0) {
                         int count = 0;
                         for (Map.Entry<String, String> entry : resultList.entrySet()) {
-                            sb.append(String.format("Id for %s is: #b%s#k", entry.getKey(), entry.getValue()) + "\r\n");
+                            sb.append(String.format("Id for %s is: #b%s#k", entry.getKey(), entry.getValue())).append("\r\n");
                             if (++count > 100) {
                                 break;
                             }
                         }
-                        sb.append(String.format("Results found: #r%d#k | Returned: #b%d#k/100 | Refine search query to improve time.", resultList.size(), count) + "\r\n");
+                        sb.append(String.format("Results found: #r%d#k | Returned: #b%d#k/100 | Refine search query to improve time.", resultList.size(), count)).append("\r\n");
 
                         player.getAbstractPlayerInteraction().npcTalk(9010000, sb.toString());
                     } else {
@@ -76,7 +76,7 @@ public class IdCommand extends Command {
         if (!handbookDirectory.containsKey(type)) {
             throw new IdTypeNotSupportedException();
         }
-        itemMap.put(type, new HashMap<String, String>());
+        itemMap.put(type, new HashMap<>());
         BufferedReader reader = new BufferedReader(new FileReader(handbookDirectory.get(type)));
         String line;
         while ((line = reader.readLine()) != null) {
@@ -88,7 +88,9 @@ public class IdCommand extends Command {
     }
 
     private String joinStringArr(String[] arr, String separator) {
-        if (null == arr || 0 == arr.length) return "";
+        if (null == arr || 0 == arr.length) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder(256);
         sb.append(arr[0]);
         for (int i = 1; i < arr.length; i++) sb.append(separator).append(arr[i]);
@@ -98,7 +100,7 @@ public class IdCommand extends Command {
     private Map<String, String> fetchResults(Map<String, String> queryMap, String queryItem) {
         Map<String, String> results = new HashMap<>();
         for (String item : queryMap.keySet()) {
-            if (item.indexOf(queryItem) != -1) {
+            if (item.contains(queryItem)) {
                 results.put(item, queryMap.get(item));
             }
         }

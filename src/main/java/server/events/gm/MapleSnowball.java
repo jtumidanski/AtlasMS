@@ -33,7 +33,7 @@ import java.util.List;
  * @author kevintjuh93
  */
 public class MapleSnowball {
-    List<MapleCharacter> characters = new LinkedList<MapleCharacter>();
+    List<MapleCharacter> characters = new LinkedList<>();
     private MapleMap map;
     private int position = 0;
     private int hits = 3;
@@ -47,13 +47,16 @@ public class MapleSnowball {
         this.team = team;
 
         for (MapleCharacter chr : map.getCharacters()) {
-            if (chr.getTeam() == team)
+            if (chr.getTeam() == team) {
                 characters.add(chr);
+            }
         }
     }
 
     public void startEvent() {
-        if (hittable == true) return;
+        if (hittable == true) {
+            return;
+        }
 
         for (MapleCharacter chr : characters) {
             if (chr != null) {
@@ -67,14 +70,16 @@ public class MapleSnowball {
             public void run() {
                 if (map.getSnowball(team).getPosition() > map.getSnowball(team == 0 ? 1 : 0).getPosition()) {
                     for (MapleCharacter chr : characters) {
-                        if (chr != null)
+                        if (chr != null) {
                             chr.announce(MaplePacketCreator.rollSnowBall(false, 3, map.getSnowball(0), map.getSnowball(0)));
+                        }
                     }
                     winner = true;
                 } else if (map.getSnowball(team == 0 ? 1 : 0).getPosition() > map.getSnowball(team).getPosition()) {
                     for (MapleCharacter chr : characters) {
-                        if (chr != null)
+                        if (chr != null) {
                             chr.announce(MaplePacketCreator.rollSnowBall(false, 4, map.getSnowball(0), map.getSnowball(0)));
+                        }
                     }
                     winner = true;
                 } //Else
@@ -105,10 +110,10 @@ public class MapleSnowball {
     }
 
     public void hit(int what, int damage) {
-        if (what < 2)
-            if (damage > 0)
+        if (what < 2) {
+            if (damage > 0) {
                 this.hits--;
-            else {
+            } else {
                 if (this.snowmanhp - damage < 0) {
                     this.snowmanhp = 0;
 
@@ -120,19 +125,22 @@ public class MapleSnowball {
                             message(5);
                         }
                     }, 10000);
-                } else
+                } else {
                     this.snowmanhp -= damage;
+                }
                 map.broadcastMessage(MaplePacketCreator.rollSnowBall(false, 1, map.getSnowball(0), map.getSnowball(1)));
             }
+        }
 
         if (this.hits == 0) {
             this.position += 1;
-            if (this.position == 45)
+            if (this.position == 45) {
                 map.getSnowball(team == 0 ? 1 : 0).message(1);
-            else if (this.position == 290)
+            } else if (this.position == 290) {
                 map.getSnowball(team == 0 ? 1 : 0).message(2);
-            else if (this.position == 560)
+            } else if (this.position == 560) {
                 map.getSnowball(team == 0 ? 1 : 0).message(3);
+            }
 
             this.hits = 3;
             map.broadcastMessage(MaplePacketCreator.rollSnowBall(false, 0, map.getSnowball(0), map.getSnowball(1)));
@@ -143,8 +151,9 @@ public class MapleSnowball {
 
     public void message(int message) {
         for (MapleCharacter chr : characters) {
-            if (chr != null)
+            if (chr != null) {
                 chr.announce(MaplePacketCreator.snowballMessage(team, message));
+            }
         }
     }
 
@@ -153,10 +162,11 @@ public class MapleSnowball {
 
             @Override
             public void run() {
-                if (winner == true)
+                if (winner == true) {
                     map.warpOutByTeam(team, 109050000);
-                else
+                } else {
                     map.warpOutByTeam(team, 109050001);
+                }
 
                 map.setSnowball(team, null);
             }

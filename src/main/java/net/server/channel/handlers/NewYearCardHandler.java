@@ -62,7 +62,9 @@ public final class NewYearCardHandler extends AbstractMaplePacketHandler {
     }
 
     private static int getValidNewYearCardStatus(int itemid, MapleCharacter player, short slot) {
-        if (!ItemConstants.isNewYearCardUse(itemid)) return 0x14;
+        if (!ItemConstants.isNewYearCardUse(itemid)) {
+            return 0x14;
+        }
 
         Item it = player.getInventory(ItemConstants.getInventoryType(itemid)).getItem(slot);
         return (it != null && it.getItemId() == itemid) ? 0 : 0x12;
@@ -125,8 +127,9 @@ public final class NewYearCardHandler extends AbstractMaplePacketHandler {
                         NewYearCardRecord.updateNewYearCard(newyear);
 
                         player.getAbstractPlayerInteraction().gainItem(4301000, (short) 1);
-                        if (!newyear.getMessage().isEmpty())
+                        if (!newyear.getMessage().isEmpty()) {
                             player.dropMessage(6, "[New Year] " + newyear.getSenderName() + ": " + newyear.getMessage());
+                        }
 
                         player.addNewYearRecord(newyear);
                         player.announce(MaplePacketCreator.onNewYearCardRes(player, newyear, 6, 0));    // successfully rcvd

@@ -44,6 +44,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * @author Jvlaple
@@ -179,7 +180,9 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
 
     private synchronized static void breakMarriage(MapleCharacter chr) {
         int partnerid = chr.getPartnerId();
-        if (partnerid <= 0) return;
+        if (partnerid <= 0) {
+            return;
+        }
 
         chr.getClient().getWorldServer().deleteRelationship(chr.getId(), partnerid);
         MapleRing.removeRing(chr.getMarriageRing());
@@ -210,16 +213,10 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
 
     private static void resetRingId(MapleCharacter player) {
         int ringitemid = player.getMarriageRing().getItemId();
-
-        Item it = player.getInventory(MapleInventoryType.EQUIP).findById(ringitemid);
-        if (it == null) {
-            it = player.getInventory(MapleInventoryType.EQUIPPED).findById(ringitemid);
-        }
-
-        if (it != null) {
-            Equip eqp = (Equip) it;
-            eqp.setRingId(-1);
-        }
+        player.getInventory(MapleInventoryType.EQUIP).findById(ringitemid)
+                .or(() -> player.getInventory(MapleInventoryType.EQUIPPED).findById(ringitemid))
+                .map(i -> (Equip) i)
+                .ifPresent(e -> e.setRingId(-1));
     }
 
     private synchronized static void breakEngagement(MapleCharacter chr) {
@@ -257,23 +254,27 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
     }
 
     public static void breakMarriageRing(MapleCharacter chr, final int wItemId) {
-        final MapleInventoryType type = MapleInventoryType.getByType((byte) (wItemId / 1000000));
-        final Item wItem = chr.getInventory(type).findById(wItemId);
-        final boolean weddingToken = (wItem != null && type == MapleInventoryType.ETC && wItemId / 10000 == 403);
-        final boolean weddingRing = (wItem != null && wItemId / 10 == 111280);
+        final Optional<MapleInventoryType> type = MapleInventoryType.getByType((byte) (wItemId / 1000000));
+        if (type.isEmpty()) {
+            return;
+        }
+
+        final Optional<Item> wItem = chr.getInventory(type.get()).findById(wItemId);
+        final boolean weddingToken = (wItem.isPresent() && type.get() == MapleInventoryType.ETC && wItemId / 10000 == 403);
+        final boolean weddingRing = (wItem.isPresent() && wItemId / 10 == 111280);
 
         if (weddingRing) {
             if (chr.getPartnerId() > 0) {
                 breakMarriage(chr);
             }
 
-            chr.getMap().disappearingItemDrop(chr, chr, wItem, chr.getPosition());
+            chr.getMap().disappearingItemDrop(chr, chr, wItem.get(), chr.getPosition());
         } else if (weddingToken) {
             if (chr.getPartnerId() > 0) {
                 breakEngagement(chr);
             }
 
-            chr.getMap().disappearingItemDrop(chr, chr, wItem, chr.getPosition());
+            chr.getMap().disappearingItemDrop(chr, chr, wItem.get(), chr.getPosition());
         }
     }
 
@@ -505,7 +506,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                 break;
 
             default:
-                System.out.println("Unhandled RING_ACTION Mode: " + slea.toString());
+                System.out.println("Unhandled RING_ACTION Mode: " + slea);
                 break;
         }
 

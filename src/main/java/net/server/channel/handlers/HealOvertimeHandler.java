@@ -35,7 +35,9 @@ public final class HealOvertimeHandler extends AbstractMaplePacketHandler {
     @Override
     public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
-        if (!chr.isLoggedinWorld()) return;
+        if (!chr.isLoggedinWorld()) {
+            return;
+        }
 
         AutobanManager abm = chr.getAutobanManager();
         int timestamp = Server.getInstance().getCurrentTimestamp();
@@ -44,8 +46,9 @@ public final class HealOvertimeHandler extends AbstractMaplePacketHandler {
         short healHP = slea.readShort();
         if (healHP != 0) {
             abm.setTimestamp(8, timestamp, 28);  // thanks Vcoc & Thora for pointing out d/c happening here
-            if ((abm.getLastSpam(0) + 1500) > timestamp)
+            if ((abm.getLastSpam(0) + 1500) > timestamp) {
                 AutobanFactory.FAST_HP_HEALING.addPoint(abm, "Fast hp healing");
+            }
 
             MapleMap map = chr.getMap();
             int abHeal = (int) (77 * map.getRecovery() * 1.5); // thanks Ari for noticing players not getting healed in sauna in certain cases

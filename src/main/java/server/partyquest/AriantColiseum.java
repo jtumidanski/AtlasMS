@@ -78,26 +78,11 @@ public class AriantColiseum {
             mc.announce(MaplePacketCreator.updateAriantPQRanking(score));
         }
 
-        setAriantScoreBoard(TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                showArenaResults();
-            }
-        }, pqTimerBoard));
+        setAriantScoreBoard(TimerManager.getInstance().schedule(this::showArenaResults, pqTimerBoard));
 
-        setArenaFinish(TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                enterKingsRoom();
-            }
-        }, pqTimer));
+        setArenaFinish(TimerManager.getInstance().schedule(this::enterKingsRoom, pqTimer));
 
-        setArenaUpdate(TimerManager.getInstance().register(new Runnable() {
-            @Override
-            public void run() {
-                broadcastAriantScoreUpdate();
-            }
-        }, 500, 500));
+        setArenaUpdate(TimerManager.getInstance().register(this::broadcastAriantScoreUpdate, 500, 500));
     }
 
     private static boolean isUnfairMatch(Integer winnerScore, Integer secondScore, Integer lostShardsScore, List<Integer> runnerupsScore) {
@@ -234,7 +219,7 @@ public class AriantColiseum {
     }
 
     public void distributeAriantPoints() {
-        Integer firstTop = -1, secondTop = -1;
+        int firstTop = -1, secondTop = -1;
         MapleCharacter winner = null;
         List<Integer> runnerups = new ArrayList<>();
 

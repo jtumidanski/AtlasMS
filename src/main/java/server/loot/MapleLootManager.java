@@ -74,7 +74,9 @@ public class MapleLootManager {
 
     public static List<MonsterDropEntry> retrieveRelevantDrops(int monsterId, List<MapleCharacter> players) {
         List<MonsterDropEntry> loots = MapleMonsterInformationProvider.getInstance().retrieveEffectiveDrop(monsterId);
-        if (loots.isEmpty()) return loots;
+        if (loots.isEmpty()) {
+            return loots;
+        }
 
         List<MapleLootInventory> playersInv = new LinkedList<>();
         for (MapleCharacter chr : players) {

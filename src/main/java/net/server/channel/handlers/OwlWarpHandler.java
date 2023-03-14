@@ -47,8 +47,11 @@ public final class OwlWarpHandler extends AbstractMaplePacketHandler {
         if (hm == null || hm.getMapId() != mapid || !hm.hasItem(c.getPlayer().getOwlSearch())) {
             ps = c.getWorldServer().getPlayerShop(ownerid);
             if (ps == null || ps.getMapId() != mapid || !ps.hasItem(c.getPlayer().getOwlSearch())) {
-                if (hm == null && ps == null) c.announce(MaplePacketCreator.getOwlMessage(1));
-                else c.announce(MaplePacketCreator.getOwlMessage(3));
+                if (hm == null && ps == null) {
+                    c.announce(MaplePacketCreator.getOwlMessage(1));
+                } else {
+                    c.announce(MaplePacketCreator.getOwlMessage(3));
+                }
                 return;
             }
 
@@ -59,9 +62,11 @@ public final class OwlWarpHandler extends AbstractMaplePacketHandler {
 
                         if (ps.isOpen()) {   //change map has a delay, must double check
                             if (!ps.visitShop(c.getPlayer())) {
-                                if (!ps.isBanned(c.getPlayer().getName()))
+                                if (!ps.isBanned(c.getPlayer().getName())) {
                                     c.announce(MaplePacketCreator.getOwlMessage(2));
-                                else c.announce(MaplePacketCreator.getOwlMessage(17));
+                                } else {
+                                    c.announce(MaplePacketCreator.getOwlMessage(17));
+                                }
                             }
                         } else {
                             //c.announce(MaplePacketCreator.serverNotice(1, "That merchant has either been closed or is under maintenance."));

@@ -33,9 +33,9 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 public class ListWZFile {
-    private static Collection<String> modernImgs = new HashSet<String>();
+    private static Collection<String> modernImgs = new HashSet<>();
     private LittleEndianAccessor lea;
-    private List<String> entries = new ArrayList<String>();
+    private List<String> entries = new ArrayList<>();
 
     public ListWZFile(File listwz) throws FileNotFoundException {
         lea = new GenericLittleEndianAccessor(new InputStreamByteStream(new BufferedInputStream(new FileInputStream(listwz))));
@@ -66,7 +66,7 @@ public class ListWZFile {
             ListWZFile listwz;
             try {
                 listwz = new ListWZFile(MapleDataProviderFactory.fileInWZPath("List.wz"));
-                modernImgs = new HashSet<String>(listwz.getEntries());
+                modernImgs = new HashSet<>(listwz.getEntries());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }

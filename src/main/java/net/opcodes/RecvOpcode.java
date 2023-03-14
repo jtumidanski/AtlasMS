@@ -204,9 +204,9 @@ public enum RecvOpcode {
     USE_MAPLELIFE(0x100),
     USE_HAMMER(0x104);
 
-    private int code = -2;
+    private int code;
 
-    private RecvOpcode(int code) {
+    RecvOpcode(int code) {
         this.code = code;
     }
 

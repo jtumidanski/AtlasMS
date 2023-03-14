@@ -289,7 +289,7 @@ public class Wedding extends MaplePacketCreator {
         MARRIED(0x3);
         private int ms;
 
-        private MarriageStatus(int ms) {
+        MarriageStatus(int ms) {
             this.ms = ms;
         }
 
@@ -308,7 +308,7 @@ public class Wedding extends MaplePacketCreator {
         GetReservation(0x6);
         private int req;
 
-        private MarriageRequest(int req) {
+        MarriageRequest(int req) {
             this.req = req;
         }
 
@@ -326,7 +326,7 @@ public class Wedding extends MaplePacketCreator {
         VEGAS_NORMAL(0x15);
         private int wt;
 
-        private WeddingType(int wt) {
+        WeddingType(int wt) {
             this.wt = wt;
         }
 
@@ -343,7 +343,7 @@ public class Wedding extends MaplePacketCreator {
         EXITMAP(680000500);
         private int wm;
 
-        private WeddingMap(int wm) {
+        WeddingMap(int wm) {
             this.wm = wm;
         }
 
@@ -386,7 +386,7 @@ public class Wedding extends MaplePacketCreator {
         WT_CATHEDRAL_PREMIUM(5251003);
         private int wi;
 
-        private WeddingItem(int wi) {
+        WeddingItem(int wi) {
             this.wi = wi;
         }
 

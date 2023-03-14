@@ -23,13 +23,13 @@ import client.MapleCharacter;
 import constants.string.LanguageConstants;
 import net.server.coordinator.matchchecker.AbstractMatchCheckerListener;
 import net.server.coordinator.matchchecker.MatchCheckerListenerRecipe;
+import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import scripting.npc.NPCConversationManager;
 import scripting.npc.NPCScriptManager;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ronan
@@ -40,16 +40,11 @@ public class MatchCheckerCPQChallenge implements MatchCheckerListenerRecipe {
         return (new MatchCheckerCPQChallenge()).getListener();
     }
 
-    private static MapleCharacter getChallenger(int leaderid, Set<MapleCharacter> matchPlayers) {
-        MapleCharacter leader = null;
-        for (MapleCharacter chr : matchPlayers) {
-            if (chr.getId() == leaderid && chr.getClient() != null) {
-                leader = chr;
-                break;
-            }
-        }
-
-        return leader;
+    private static Optional<MapleCharacter> getChallenger(int leaderid, Set<MapleCharacter> matchPlayers) {
+        return matchPlayers.stream()
+                .filter(c -> c.getId() == leaderid)
+                .filter(c -> c.getClient() != null)
+                .findFirst();
     }
 
     @Override
@@ -61,61 +56,45 @@ public class MatchCheckerCPQChallenge implements MatchCheckerListenerRecipe {
                 NPCConversationManager cm = leader.getClient().getCM();
                 int npcid = cm.getNpc();
 
-                MapleCharacter ldr = null;
-                for (MapleCharacter chr : nonLeaderMatchPlayers) {
-                    ldr = chr;
-                    break;
-                }
-
-                MapleCharacter chr = leader;
-
-                List<MaplePartyCharacter> chrMembers = new LinkedList<>();
-                for (MaplePartyCharacter mpc : chr.getParty().getMembers()) {
-                    if (mpc.isOnline()) {
-                        chrMembers.add(mpc);
-                    }
-                }
+                Optional<MapleCharacter> ldr = nonLeaderMatchPlayers.stream().findFirst();
+                List<MaplePartyCharacter> chrMembers = leader.getParty()
+                        .map(MapleParty::getMembers)
+                        .orElse(Collections.emptyList()).stream()
+                        .filter(MaplePartyCharacter::isOnline)
+                        .collect(Collectors.toList());
 
                 if (message.contentEquals("cpq1")) {
-                    NPCScriptManager.getInstance().start("cpqchallenge", ldr.getClient(), npcid, chrMembers);
+                    ldr.ifPresent(c -> NPCScriptManager.getInstance().start("cpqchallenge", c.getClient(), npcid, chrMembers));
                 } else {
-                    NPCScriptManager.getInstance().start("cpqchallenge2", ldr.getClient(), npcid, chrMembers);
+                    ldr.ifPresent(c -> NPCScriptManager.getInstance().start("cpqchallenge2", c.getClient(), npcid, chrMembers));
                 }
 
-                cm.sendOk(LanguageConstants.getMessage(chr, LanguageConstants.CPQChallengeRoomSent));
+                cm.sendOk(LanguageConstants.getMessage(leader, LanguageConstants.CPQChallengeRoomSent));
             }
 
             @Override
-            public void onMatchAccepted(int leaderid, Set<MapleCharacter> matchPlayers, String message) {
-                MapleCharacter chr = getChallenger(leaderid, matchPlayers);
-
-                MapleCharacter ldr = null;
-                for (MapleCharacter ch : matchPlayers) {
-                    if (ch != chr) {
-                        ldr = ch;
-                        break;
-                    }
-                }
-
+            public void onMatchAccepted(int leaderId, Set<MapleCharacter> matchPlayers, String message) {
+                Optional<MapleCharacter> challenger = getChallenger(leaderId, matchPlayers);
+                Optional<MapleCharacter> ldr = matchPlayers.stream().findFirst();
                 if (message.contentEquals("cpq1")) {
-                    ldr.getClient().getCM().startCPQ(chr, ldr.getMapId() + 1);
+                    challenger.ifPresent(c -> ldr.ifPresent(l -> l.getClient().getCM().startCPQ(c, l.getMapId() + 1)));
                 } else {
-                    ldr.getClient().getCM().startCPQ2(chr, ldr.getMapId() + 1);
+                    challenger.ifPresent(c -> ldr.ifPresent(l -> l.getClient().getCM().startCPQ2(c, l.getMapId() + 1)));
                 }
 
-                ldr.getParty().setEnemy(chr.getParty());
-                chr.getParty().setEnemy(ldr.getParty());
-                chr.setChallenged(false);
+                ldr.flatMap(MapleCharacter::getParty).ifPresent(p -> challenger.flatMap(MapleCharacter::getParty).ifPresent(p::setEnemy));
+                challenger.flatMap(MapleCharacter::getParty).ifPresent(p -> ldr.flatMap(MapleCharacter::getParty).ifPresent(p::setEnemy));
+                challenger.ifPresent(c -> c.setChallenged(false));
             }
 
             @Override
-            public void onMatchDeclined(int leaderid, Set<MapleCharacter> matchPlayers, String message) {
-                MapleCharacter chr = getChallenger(leaderid, matchPlayers);
-                chr.dropMessage(5, LanguageConstants.getMessage(chr, LanguageConstants.CPQChallengeRoomDenied));
+            public void onMatchDeclined(int leaderId, Set<MapleCharacter> matchPlayers, String message) {
+                Optional<MapleCharacter> challenger = getChallenger(leaderId, matchPlayers);
+                challenger.ifPresent(c -> c.dropMessage(5, LanguageConstants.getMessage(c, LanguageConstants.CPQChallengeRoomDenied)));
             }
 
             @Override
-            public void onMatchDismissed(int leaderid, Set<MapleCharacter> matchPlayers, String message) {
+            public void onMatchDismissed(int leaderId, Set<MapleCharacter> matchPlayers, String message) {
             }
         };
     }

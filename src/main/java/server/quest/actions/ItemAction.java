@@ -61,21 +61,24 @@ public class ItemAction extends MapleQuestAction {
 
             Integer prop = null;
             MapleData propData = iEntry.getChildByPath("prop");
-            if (propData != null)
+            if (propData != null) {
                 prop = MapleDataTool.getInt(propData);
+            }
 
             int gender = 2;
-            if (iEntry.getChildByPath("gender") != null)
+            if (iEntry.getChildByPath("gender") != null) {
                 gender = MapleDataTool.getInt(iEntry.getChildByPath("gender"));
+            }
 
             int job = -1;
-            if (iEntry.getChildByPath("job") != null)
+            if (iEntry.getChildByPath("job") != null) {
                 job = MapleDataTool.getInt(iEntry.getChildByPath("job"));
+            }
 
             items.add(new ItemData(Integer.parseInt(iEntry.getName()), id, count, prop, job, gender, period));
         }
 
-        Collections.sort(items, new Comparator<ItemData>() {
+        items.sort(new Comparator<>() {
             @Override
             public int compare(ItemData o1, ItemData o2) {
                 return o1.map - o2.map;
@@ -106,8 +109,9 @@ public class ItemAction extends MapleQuestAction {
 
             if (iEntry.getProp() != null) {
                 if (iEntry.getProp() == -1) {
-                    if (extSelection != extNum++)
+                    if (extSelection != extNum++) {
                         continue;
+                    }
                 } else {
                     accProps += iEntry.getProp();
 
@@ -150,7 +154,7 @@ public class ItemAction extends MapleQuestAction {
         for (ItemData iEntry : giveItem) {
             int itemid = iEntry.getId(), count = iEntry.getCount(), period = iEntry.getPeriod();    // thanks Vcoc for noticing quest milestone item not getting removed from inventory after a while
 
-            MapleInventoryManipulator.addById(chr.getClient(), itemid, (short) count, "", -1, period > 0 ? (System.currentTimeMillis() + period * 60 * 1000) : -1);
+            MapleInventoryManipulator.addById(chr.getClient(), itemid, (short) count, "", -1, period > 0 ? (System.currentTimeMillis() + (long) period * 60 * 1000) : -1);
             chr.announce(MaplePacketCreator.getShowItemGain(itemid, (short) count, true));
         }
     }
@@ -190,8 +194,9 @@ public class ItemAction extends MapleQuestAction {
 
                     int freeSlotCount = chr.getInventory(type).freeSlotCountById(item.getId(), quantity);
                     if (freeSlotCount == -1) {
-                        if (type.equals(MapleInventoryType.EQUIP) && chr.getInventory(MapleInventoryType.EQUIPPED).countById(item.getId()) > quantity)
+                        if (type.equals(MapleInventoryType.EQUIP) && chr.getInventory(MapleInventoryType.EQUIPPED).countById(item.getId()) > quantity) {
                             continue;
+                        }
 
                         announceInventoryLimit(Collections.singletonList(item.getId()), chr);
                         return false;

@@ -86,8 +86,9 @@ public final class AcceptFamilyHandler extends AbstractMaplePacketHandler {
         MapleCharacter inviter = c.getWorldServer().getPlayerStorage().getCharacterById(inviterId);
         if (inviter != null) {
             MapleInviteResult inviteResult = MapleInviteCoordinator.answerInvite(InviteType.FAMILY, c.getPlayer().getId(), c.getPlayer(), accept);
-            if (inviteResult.result == InviteResult.NOT_FOUND)
+            if (inviteResult.result == InviteResult.NOT_FOUND) {
                 return; //was never invited. (or expired on server only somehow?)
+            }
             if (accept) {
                 if (inviter.getFamily() != null) {
                     if (chr.getFamily() == null) {
@@ -104,7 +105,9 @@ public final class AcceptFamilyHandler extends AbstractMaplePacketHandler {
                     } else { //absorb target family
                         MapleFamilyEntry targetEntry = chr.getFamilyEntry();
                         MapleFamily targetFamily = targetEntry.getFamily();
-                        if (targetFamily.getLeader() != targetEntry) return;
+                        if (targetFamily.getLeader() != targetEntry) {
+                            return;
+                        }
                         if (inviter.getFamily().getTotalGenerations() + targetFamily.getTotalGenerations() <= YamlConfig.config.server.FAMILY_MAX_GENERATIONS) {
                             targetEntry.join(inviter.getFamilyEntry());
                         } else {

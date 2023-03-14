@@ -33,7 +33,7 @@ public final class UseChairHandler extends AbstractMaplePacketHandler {
         int itemId = slea.readInt();
 
         // thanks Darter (YungMoozi) for reporting unchecked chair item
-        if (!ItemConstants.isChair(itemId) || c.getPlayer().getInventory(MapleInventoryType.SETUP).findById(itemId) == null) {
+        if (!ItemConstants.isChair(itemId) || c.getPlayer().getInventory(MapleInventoryType.SETUP).findById(itemId).isEmpty()) {
             return;
         }
 

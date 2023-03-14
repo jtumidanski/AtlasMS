@@ -48,8 +48,9 @@ public final class ItemRewardHandler extends AbstractMaplePacketHandler {
         int itemId = slea.readInt(); // will load from xml I don't care.
 
         Item it = c.getPlayer().getInventory(MapleInventoryType.USE).getItem(slot);   // null check here thanks to Thora
-        if (it == null || it.getItemId() != itemId || c.getPlayer().getInventory(MapleInventoryType.USE).countById(itemId) < 1)
+        if (it == null || it.getItemId() != itemId || c.getPlayer().getInventory(MapleInventoryType.USE).countById(itemId) < 1) {
             return;
+        }
 
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         Pair<Integer, List<RewardItem>> rewards = ii.getItemReward(itemId);
@@ -62,7 +63,7 @@ public final class ItemRewardHandler extends AbstractMaplePacketHandler {
                 if (ItemConstants.getInventoryType(reward.itemid) == MapleInventoryType.EQUIP) {
                     final Item item = ii.getEquipById(reward.itemid);
                     if (reward.period != -1) {
-                        item.setExpiration(currentServerTime() + (reward.period * 60 * 60 * 10));
+                        item.setExpiration(currentServerTime() + ((long) reward.period * 60 * 60 * 10));
                     }
                     MapleInventoryManipulator.addFromDrop(c, item, false);
                 } else {

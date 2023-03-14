@@ -49,7 +49,7 @@ public final class CancelBuffHandler extends AbstractMaplePacketHandler implemen
                 break;
 
             default:
-                c.getPlayer().cancelEffect(SkillFactory.getSkill(sourceid).getEffect(1), false, -1);
+                c.getPlayer().cancelEffect(SkillFactory.getSkill(sourceid).orElseThrow().getEffect(1), false, -1);
                 break;
         }
     }

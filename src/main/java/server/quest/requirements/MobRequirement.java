@@ -72,8 +72,9 @@ public class MobRequirement extends MapleQuestRequirement {
                 return false;
             }
 
-            if (progress < countReq)
+            if (progress < countReq) {
                 return false;
+            }
         }
         return true;
     }

@@ -54,7 +54,7 @@ public enum FieldLimit {
 
     private long i;
 
-    private FieldLimit(long i) {
+    FieldLimit(long i) {
         this.i = i;
     }
 

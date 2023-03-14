@@ -55,7 +55,7 @@ public class PartySearchCharacter {
         }
 
         queued = false;
-        if (chr.isLoggedinWorld() && chr.getParty() == null) {
+        if (chr.isLoggedinWorld() && chr.getParty().isEmpty()) {
             return chr;
         } else {
             return null;

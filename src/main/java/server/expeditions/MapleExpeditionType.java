@@ -50,7 +50,7 @@ public enum MapleExpeditionType {
     private int maxLevel;
     private int registrationTime;
 
-    private MapleExpeditionType(int minSize, int maxSize, int minLevel, int maxLevel, int minutes) {
+    MapleExpeditionType(int minSize, int maxSize, int minLevel, int maxLevel, int minutes) {
         this.minSize = minSize;
         this.maxSize = maxSize;
         this.minLevel = minLevel;

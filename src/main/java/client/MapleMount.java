@@ -122,7 +122,9 @@ public class MapleMount {
     }
 
     public void empty() {
-        if (owner != null) owner.getClient().getWorldServer().unregisterMountHunger(owner);
+        if (owner != null) {
+            owner.getClient().getWorldServer().unregisterMountHunger(owner);
+        }
         this.owner = null;
     }
 }

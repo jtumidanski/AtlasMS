@@ -56,9 +56,7 @@ public class WZTool {
         SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
         try {
             cipher = Cipher.getInstance("AES");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             e.printStackTrace();
         }
         try {
@@ -70,18 +68,14 @@ public class WZTool {
         for (int i = 0; i < (0xFFFF / 16); i++) {
             try {
                 iv = cipher.doFinal(iv);
-            } catch (IllegalBlockSizeException e) {
-                e.printStackTrace();
-            } catch (BadPaddingException e) {
+            } catch (IllegalBlockSizeException | BadPaddingException e) {
                 e.printStackTrace();
             }
             System.arraycopy(iv, 0, encKey, (i * 16), 16);
         }
         try {
             iv = cipher.doFinal(iv);
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
         }
         System.arraycopy(iv, 0, encKey, 65520, 15);
@@ -104,12 +98,12 @@ public class WZTool {
             if (b == 0x7F) {
                 strLength = llea.readInt();
             } else {
-                strLength = (int) b;
+                strLength = b;
             }
             if (strLength < 0) {
                 return "";
             }
-            byte str[] = new byte[strLength * 2];
+            byte[] str = new byte[strLength * 2];
             for (int i = 0; i < strLength * 2; i++) {
                 str[i] = llea.readByte();
             }
@@ -123,7 +117,7 @@ public class WZTool {
             if (strLength < 0) {
                 return "";
             }
-            byte str[] = new byte[strLength];
+            byte[] str = new byte[strLength];
             for (int i = 0; i < strLength; i++) {
                 str[i] = llea.readByte();
             }
@@ -160,7 +154,7 @@ public class WZTool {
     }
 
     public static String readDecodedStringAtOffsetAndReset(SeekableLittleEndianAccessor slea, int offset) {
-        long pos = 0;
+        long pos;
         pos = slea.getPosition();
         slea.seek(offset);
         String ret = readDecodedString(slea);
@@ -173,7 +167,7 @@ public class WZTool {
         if (b == -128) {
             return lea.readInt();
         } else {
-            return ((int) b);
+            return b;
         }
     }
 

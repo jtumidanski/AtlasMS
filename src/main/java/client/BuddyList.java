@@ -35,13 +35,14 @@ public class BuddyList {
     private Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<>();
     private int capacity;
     private Deque<CharacterNameAndId> pendingRequests = new LinkedList<>();
+
     public BuddyList(int capacity) {
         this.capacity = capacity;
     }
 
     public boolean contains(int characterId) {
         synchronized (buddies) {
-            return buddies.containsKey(Integer.valueOf(characterId));
+            return buddies.containsKey(characterId);
         }
     }
 
@@ -66,32 +67,27 @@ public class BuddyList {
         this.capacity = capacity;
     }
 
-    public BuddylistEntry get(int characterId) {
+    public Optional<BuddylistEntry> get(int characterId) {
         synchronized (buddies) {
-            return buddies.get(Integer.valueOf(characterId));
+            return Optional.ofNullable(buddies.get(characterId));
         }
     }
 
-    public BuddylistEntry get(String characterName) {
-        String lowerCaseName = characterName.toLowerCase();
-        for (BuddylistEntry ble : getBuddies()) {
-            if (ble.getName().toLowerCase().equals(lowerCaseName)) {
-                return ble;
-            }
-        }
-
-        return null;
+    public Optional<BuddylistEntry> get(String characterName) {
+        return getBuddies().stream()
+                .filter(b -> b.getName().equalsIgnoreCase(characterName))
+                .findFirst();
     }
 
     public void put(BuddylistEntry entry) {
         synchronized (buddies) {
-            buddies.put(Integer.valueOf(entry.getCharacterId()), entry);
+            buddies.put(entry.getCharacterId(), entry);
         }
     }
 
     public void remove(int characterId) {
         synchronized (buddies) {
-            buddies.remove(Integer.valueOf(characterId));
+            buddies.remove(characterId);
         }
     }
 
@@ -109,23 +105,18 @@ public class BuddyList {
 
     public int[] getBuddyIds() {
         synchronized (buddies) {
-            int buddyIds[] = new int[buddies.size()];
-            int i = 0;
-            for (BuddylistEntry ble : buddies.values()) {
-                buddyIds[i++] = ble.getCharacterId();
-            }
-            return buddyIds;
+            return buddies.values().stream()
+                    .mapToInt(BuddylistEntry::getCharacterId)
+                    .toArray();
         }
     }
 
     public void broadcast(byte[] packet, PlayerStorage pstorage) {
-        for (int bid : getBuddyIds()) {
-            MapleCharacter chr = pstorage.getCharacterById(bid);
-
-            if (chr != null && chr.isLoggedinWorld()) {
-                chr.announce(packet);
-            }
-        }
+        Arrays.stream(getBuddyIds()).parallel()
+                .mapToObj(pstorage::getCharacterById)
+                .filter(Objects::nonNull)
+                .filter(MapleCharacter::isLoggedinWorld)
+                .forEach(c -> c.announce(packet));
     }
 
     public void loadFromDb(int characterId) {

@@ -57,6 +57,7 @@ public class MapleTrade {
     private MapleCharacter chr;
     private byte number;
     private boolean fullTrade = false;
+
     public MapleTrade(byte number, MapleCharacter chr) {
         this.chr = chr;
         this.number = number;
@@ -150,7 +151,9 @@ public class MapleTrade {
 
     private static void cancelTradeInternal(MapleCharacter chr, byte selfResult, byte partnerResult) {
         MapleTrade trade = chr.getTrade();
-        if (trade == null) return;
+        if (trade == null) {
+            return;
+        }
 
         trade.cancel(selfResult);
         if (trade.getPartner() != null) {
@@ -182,7 +185,9 @@ public class MapleTrade {
 
     public static void cancelTrade(MapleCharacter chr, TradeResult result) {
         MapleTrade trade = chr.getTrade();
-        if (trade == null) return;
+        if (trade == null) {
+            return;
+        }
 
         trade.cancelHandshake(result.getValue());
     }
@@ -510,7 +515,7 @@ public class MapleTrade {
 
         private final int res;
 
-        private TradeResult(int res) {
+        TradeResult(int res) {
             this.res = res;
         }
 

@@ -44,10 +44,7 @@ import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.sql.*;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author RonanLana - synchronization of Duey modules
@@ -122,7 +119,7 @@ public class DueyProcessor {
     }
 
     private static void deletePackageFromInventoryDB(Connection con, int packageId) throws SQLException {
-        ItemFactory.DUEY.saveItems(new LinkedList<Pair<Item, MapleInventoryType>>(), packageId, con);
+        ItemFactory.DUEY.saveItems(new LinkedList<>(), packageId, con);
     }
 
     private static void removePackageFromDB(int packageId) {
@@ -176,7 +173,9 @@ public class DueyProcessor {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         DueyPackage dueypack = getPackageFromDB(rs);
-                        if (dueypack == null) continue;
+                        if (dueypack == null) {
+                            continue;
+                        }
 
                         packages.add(dueypack);
                     }
@@ -244,16 +243,20 @@ public class DueyProcessor {
     }
 
     private static boolean insertPackageItem(int packageId, Item item) {
+        Optional<MapleInventoryType> type = MapleInventoryType.getByType(item.getItemType());
+        if (type.isEmpty()) {
+            return false;
+        }
+
+        Pair<Item, MapleInventoryType> dueyItem = new Pair<>(item, type.get());
+
         try {
-            Pair<Item, MapleInventoryType> dueyItem = new Pair<>(item, MapleInventoryType.getByType(item.getItemType()));
             Connection con = DatabaseConnection.getConnection();
             ItemFactory.DUEY.saveItems(Collections.singletonList(dueyItem), packageId, con);
             con.close();
-
             return true;
         } catch (SQLException sqle) {
             sqle.printStackTrace();
-
             return false;
         }
     }
@@ -262,8 +265,12 @@ public class DueyProcessor {
         if (invTypeId > 0) {
             MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
 
-            MapleInventoryType invType = MapleInventoryType.getByType(invTypeId);
-            MapleInventory inv = c.getPlayer().getInventory(invType);
+            Optional<MapleInventoryType> invType = MapleInventoryType.getByType(invTypeId);
+            if (invType.isEmpty()) {
+                return -1;
+            }
+
+            MapleInventory inv = c.getPlayer().getInventory(invType.get());
 
             Item item;
             inv.lockInventory();
@@ -275,9 +282,9 @@ public class DueyProcessor {
                     }
 
                     if (ItemConstants.isRechargeable(item.getItemId())) {
-                        MapleInventoryManipulator.removeFromSlot(c, invType, itemPos, item.getQuantity(), true);
+                        MapleInventoryManipulator.removeFromSlot(c, invType.get(), itemPos, item.getQuantity(), true);
                     } else {
-                        MapleInventoryManipulator.removeFromSlot(c, invType, itemPos, amount, true, false);
+                        MapleInventoryManipulator.removeFromSlot(c, invType.get(), itemPos, amount, true, false);
                     }
 
                     item = item.copy();
@@ -434,7 +441,7 @@ public class DueyProcessor {
 
                         if (!MapleInventoryManipulator.checkSpace(c, dpItem.getItemId(), dpItem.getQuantity(), dpItem.getOwner())) {
                             int itemid = dpItem.getItemId();
-                            if (MapleItemInformationProvider.getInstance().isPickupRestricted(itemid) && c.getPlayer().getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid) != null) {
+                            if (MapleItemInformationProvider.getInstance().isPickupRestricted(itemid) && c.getPlayer().getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid).isPresent()) {
                                 c.announce(MaplePacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_RECEIVER_WITH_UNIQUE.getCode()));
                             } else {
                                 c.announce(MaplePacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_NO_FREE_SLOTS.getCode()));
@@ -545,7 +552,7 @@ public class DueyProcessor {
         TOCLIENT_RECV_PACKAGE_MSG(0x1B);
         final byte code;
 
-        private Actions(int code) {
+        Actions(int code) {
             this.code = (byte) code;
         }
 

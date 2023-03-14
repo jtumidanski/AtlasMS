@@ -49,8 +49,8 @@ public class NewYearCardRecord {
     private boolean receiverReceivedCard;
 
     private String stringContent;
-    private long dateSent = 0;
-    private long dateReceived = 0;
+    private long dateSent;
+    private long dateReceived;
 
     private ScheduledFuture<?> sendTask = null;
 
@@ -118,7 +118,9 @@ public class NewYearCardRecord {
 
     public static NewYearCardRecord loadNewYearCard(int cardid) {
         NewYearCardRecord nyc = Server.getInstance().getNewYearCard(cardid);
-        if (nyc != null) return nyc;
+        if (nyc != null) {
+            return nyc;
+        }
 
         try (Connection con = DatabaseConnection.getConnection()) {
             try (PreparedStatement ps = con.prepareStatement("SELECT * FROM newyear WHERE id = ?")) {
@@ -330,7 +332,9 @@ public class NewYearCardRecord {
     }
 
     public void startNewYearCardTask() {
-        if (sendTask != null) return;
+        if (sendTask != null) {
+            return;
+        }
 
         sendTask = TimerManager.getInstance().register(new Runnable() {
             @Override

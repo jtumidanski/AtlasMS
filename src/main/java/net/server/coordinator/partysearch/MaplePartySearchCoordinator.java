@@ -72,7 +72,7 @@ public class MaplePartySearchCoordinator {
         MapleData data = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/" + "Etc.wz")).getData("MapNeighbors.img");
         if (data != null) {
             for (MapleData mapdata : data.getChildren()) {
-                int mapid = Integer.valueOf(mapdata.getName());
+                int mapid = Integer.parseInt(mapdata.getName());
 
                 Set<Integer> neighborMaps = new HashSet<>();
                 mapLinks.put(mapid, neighborMaps);
@@ -108,7 +108,7 @@ public class MaplePartySearchCoordinator {
     private static Map<Integer, MapleJob> instantiateJobTable() {
         Map<Integer, MapleJob> table = new HashMap<>();
 
-        List<Pair<Integer, Integer>> jobSearchTypes = new LinkedList<Pair<Integer, Integer>>() {{
+        List<Pair<Integer, Integer>> jobSearchTypes = new LinkedList<>() {{
             add(new Pair<>(MapleJob.MAPLELEAF_BRIGADIER.getId(), 0));
             add(new Pair<>(0, 0));
             add(new Pair<>(MapleJob.ARAN1.getId(), 0));
@@ -127,11 +127,11 @@ public class MaplePartySearchCoordinator {
 
         int i = 0;
         for (Pair<Integer, Integer> p : jobSearchTypes) {
-            table.put(i, MapleJob.getById(p.getLeft()));
+            table.put(i, MapleJob.getById(p.getLeft()).orElseThrow());
             i++;
 
             for (int j = 1; j <= p.getRight(); j++) {
-                table.put(i, MapleJob.getById(p.getLeft() + 10 * j));
+                table.put(i, MapleJob.getById(p.getLeft() + 10 * j).orElseThrow());
                 i++;
             }
         }
@@ -143,9 +143,9 @@ public class MaplePartySearchCoordinator {
         if (job.getJobNiche() == 0) {
             return MapleJob.BEGINNER;
         } else if (job.getId() < 600) { // explorers
-            return MapleJob.getById((job.getId() / 10) * 10);
+            return MapleJob.getById((job.getId() / 10) * 10).orElseThrow();
         } else if (job.getId() >= 1000) {
-            return MapleJob.getById((job.getId() / 100) * 100);
+            return MapleJob.getById((job.getId() / 100) * 100).orElseThrow();
         } else {
             return MapleJob.MAPLELEAF_BRIGADIER;
         }
@@ -192,7 +192,9 @@ public class MaplePartySearchCoordinator {
     }
 
     public void registerPartyLeader(MapleCharacter leader, int minLevel, int maxLevel, int jobs) {
-        if (searchLeaders.containsKey(leader.getId())) return;
+        if (searchLeaders.containsKey(leader.getId())) {
+            return;
+        }
 
         searchSettings.put(leader.getId(), new LeaderSearchMetadata(minLevel, maxLevel, jobs));
         searchLeaders.put(leader.getId(), leader);
@@ -200,7 +202,9 @@ public class MaplePartySearchCoordinator {
     }
 
     private void registerPartyLeader(MapleCharacter leader, LeaderSearchMetadata settings) {
-        if (searchLeaders.containsKey(leader.getId())) return;
+        if (searchLeaders.containsKey(leader.getId())) {
+            return;
+        }
 
         searchSettings.put(leader.getId(), settings);
         searchLeaders.put(leader.getId(), leader);
@@ -345,12 +349,13 @@ public class MaplePartySearchCoordinator {
         }
 
         for (MapleCharacter leader : searchedLeaders) {
-            MapleParty party = leader.getParty();
-            if (party != null && party.getMembers().size() < 6) {
+            Optional<MapleParty> party = leader.getParty();
+            if (party.isPresent() && party.map(MapleParty::getMembers).map(Collection::size).orElse(6) < 6) {
                 addQueueLeader(leader);
             } else {
-                if (leader.isLoggedinWorld())
+                if (leader.isLoggedinWorld()) {
                     leader.dropMessage(5, "Your Party Search token session has finished as your party reached full capacity.");
+                }
                 searchLeaders.remove(leader.getId());
                 searchSettings.remove(leader.getId());
             }
@@ -364,8 +369,9 @@ public class MaplePartySearchCoordinator {
             if (leader.isLoggedinWorld()) {
                 if (settings != null) {
                     recycledLeaders.add(new Pair<>(leader, settings));
-                    if (YamlConfig.config.server.USE_DEBUG && leader.isGM())
+                    if (YamlConfig.config.server.USE_DEBUG && leader.isGM()) {
                         leader.dropMessage(5, "Your Party Search token session is now on waiting queue for up to 7 minutes, to get it working right away please stop your Party Search and retry again later.");
+                    }
                 } else {
                     leader.dropMessage(5, "Your Party Search token session expired, please stop your Party Search and retry again later.");
                 }

@@ -35,7 +35,7 @@ import java.util.concurrent.locks.Lock;
  */
 public class MapleMiniDungeon {
     List<MapleCharacter> players = new ArrayList<>();
-    ScheduledFuture<?> timeoutTask = null;
+    ScheduledFuture<?> timeoutTask;
     Lock lock = MonitoredReentrantLockFactory.createLock(MonitoredLockType.MINIDUNGEON, true);
 
     int baseMap;
@@ -45,23 +45,22 @@ public class MapleMiniDungeon {
         baseMap = base;
         expireTime = timeLimit * 1000;
 
-        timeoutTask = TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                close();
-            }
-        }, expireTime);
+        timeoutTask = TimerManager.getInstance().schedule(this::close, expireTime);
 
         expireTime += System.currentTimeMillis();
     }
 
     public boolean registerPlayer(MapleCharacter chr) {
         int time = (int) ((expireTime - System.currentTimeMillis()) / 1000);
-        if (time > 0) chr.getClient().announce(MaplePacketCreator.getClock(time));
+        if (time > 0) {
+            chr.getClient().announce(MaplePacketCreator.getClock(time));
+        }
 
         lock.lock();
         try {
-            if (timeoutTask == null) return false;
+            if (timeoutTask == null) {
+                return false;
+            }
 
             players.add(chr);
         } finally {

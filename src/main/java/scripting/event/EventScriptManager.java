@@ -43,6 +43,7 @@ public class EventScriptManager extends AbstractScriptManager {
     private static EventEntry fallback;
     private Map<String, EventEntry> events = new ConcurrentHashMap<>();
     private boolean active = false;
+
     public EventScriptManager(Channel channel, String[] scripts) {
         super();
         for (String script : scripts) {
@@ -132,6 +133,7 @@ public class EventScriptManager extends AbstractScriptManager {
 
         public Invocable iv;
         public EventManager em;
+
         public EventEntry(Invocable iv, EventManager em) {
             this.iv = iv;
             this.em = em;

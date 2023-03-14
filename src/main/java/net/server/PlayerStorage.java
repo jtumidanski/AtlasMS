@@ -53,7 +53,9 @@ public class PlayerStorage {
         wlock.lock();
         try {
             MapleCharacter mc = storage.remove(chr);
-            if (mc != null) nameStorage.remove(mc.getName().toLowerCase());
+            if (mc != null) {
+                nameStorage.remove(mc.getName().toLowerCase());
+            }
 
             return mc;
         } finally {
@@ -97,12 +99,10 @@ public class PlayerStorage {
             rlock.unlock();
         }
 
-        for (MapleCharacter mc : chrList) {
-            MapleClient client = mc.getClient();
-            if (client != null) {
-                client.forceDisconnect();
-            }
-        }
+        chrList.stream()
+                .map(MapleCharacter::getClient)
+                .filter(Objects::nonNull)
+                .forEach(MapleClient::forceDisconnect);
 
         wlock.lock();
         try {

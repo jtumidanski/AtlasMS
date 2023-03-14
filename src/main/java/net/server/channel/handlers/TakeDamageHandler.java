@@ -119,7 +119,7 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
                                         }
 
                                         for (byte b = 0; b < qty; b++) {
-                                            pos.x = (int) (playerpos + ((d % 2 == 0) ? (25 * (d + 1) / 2) : -(25 * (d / 2))));
+                                            pos.x = playerpos + ((d % 2 == 0) ? (25 * (d + 1) / 2) : -(25 * (d / 2)));
                                             map.spawnItemDrop(chr, chr, new Item(loseItem.getId(), (short) 0, (short) 1), map.calcDropPos(pos, chr.getPosition()), true, true);
                                             d++;
                                         }
@@ -161,7 +161,7 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
                     int jobid = chr.getJob().getId();
                     if (jobid == 212 || jobid == 222 || jobid == 232) {
                         int id = jobid * 10000 + 1002;
-                        Skill manaReflectSkill = SkillFactory.getSkill(id);
+                        Skill manaReflectSkill = SkillFactory.getSkill(id).orElseThrow();
                         if (chr.isBuffFrom(MapleBuffStat.MANA_REFLECTION, manaReflectSkill) && chr.getSkillLevel(manaReflectSkill) > 0 && manaReflectSkill.getEffect(chr.getSkillLevel(manaReflectSkill)).makeChanceResult()) {
                             int bouncedamage = (damage * manaReflectSkill.getEffect(chr.getSkillLevel(manaReflectSkill)).getX() / 100);
                             if (bouncedamage > attacker.getMaxHp() / 5) {
@@ -206,7 +206,7 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
                     }
                     MapleStatEffect bPressure = chr.getBuffEffect(MapleBuffStat.BODY_PRESSURE); // thanks Atoot for noticing an issue on Body Pressure neutralise
                     if (bPressure != null) {
-                        Skill skill = SkillFactory.getSkill(Aran.BODY_PRESSURE);
+                        Skill skill = SkillFactory.getSkill(Aran.BODY_PRESSURE).orElseThrow();
                         if (!attacker.alreadyBuffedStats().contains(MonsterStatus.NEUTRALISE)) {
                             if (!attacker.isBoss() && bPressure.makeChanceResult()) {
                                 attacker.applyStatus(chr, new MonsterStatusEffect(Collections.singletonMap(MonsterStatus.NEUTRALISE, 1), skill, null, false), false, (bPressure.getDuration() / 10) * 2, false);
@@ -225,14 +225,14 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
                 Skill achilles1 = null;
                 int jobid = chr.getJob().getId();
                 if (jobid < 200 && jobid % 10 == 2) {
-                    achilles1 = SkillFactory.getSkill(jobid * 10000 + (jobid == 112 ? 4 : 5));
+                    achilles1 = SkillFactory.getSkill(jobid * 10000 + (jobid == 112 ? 4 : 5)).orElseThrow();
                     achilles = chr.getSkillLevel(achilles1);
                 }
                 if (achilles != 0 && achilles1 != null) {
                     damage *= (achilles1.getEffect(achilles).getX() / 1000.0);
                 }
 
-                Skill highDef = SkillFactory.getSkill(Aran.HIGH_DEFENSE);
+                Skill highDef = SkillFactory.getSkill(Aran.HIGH_DEFENSE).orElseThrow();
                 int hdLevel = chr.getSkillLevel(highDef);
                 if (highDef != null && hdLevel > 0) {
                     damage *= Math.ceil(highDef.getEffect(hdLevel).getX() / 1000.0);

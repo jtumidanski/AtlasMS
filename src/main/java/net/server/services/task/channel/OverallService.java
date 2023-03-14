@@ -29,7 +29,7 @@ import net.server.services.BaseService;
  */
 public class OverallService extends BaseService {   // thanks Alex for suggesting a refactor over the several channel schedulers unnecessarily populating the Channel class
 
-    private OverallScheduler channelSchedulers[] = new OverallScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
+    private OverallScheduler[] channelSchedulers = new OverallScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
 
     public OverallService() {
         for (int i = 0; i < YamlConfig.config.server.CHANNEL_LOCKS; i++) {

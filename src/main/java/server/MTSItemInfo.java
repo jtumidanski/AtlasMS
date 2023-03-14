@@ -33,7 +33,7 @@ public class MTSItemInfo {
     private Item item;
     private String seller;
     private int id;
-    private int year, month, day = 1;
+    private int year, month, day;
 
     public MTSItemInfo(Item item, int price, int id, int cid, String seller, String date) {
         this.item = item;

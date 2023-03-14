@@ -21,11 +21,8 @@
  */
 package net.server.channel.handlers;
 
-import client.MapleCharacter;
 import client.MapleClient;
 import net.AbstractMaplePacketHandler;
-import net.server.world.MapleParty;
-import net.server.world.World;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -36,36 +33,33 @@ import tools.data.input.SeekableLittleEndianAccessor;
  */
 public class PartySearchStartHandler extends AbstractMaplePacketHandler {
     @Override
-    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient client) {
         int min = slea.readInt();
         int max = slea.readInt();
 
-        MapleCharacter chr = c.getPlayer();
         if (min > max) {
-            chr.dropMessage(1, "The min. value is higher than the max!");
-            c.announce(MaplePacketCreator.enableActions());
+            client.getPlayer().dropMessage(1, "The min. value is higher than the max!");
+            client.announce(MaplePacketCreator.enableActions());
             return;
         }
 
         if (max - min > 30) {
-            chr.dropMessage(1, "You can only search for party members within a range of 30 levels.");
-            c.announce(MaplePacketCreator.enableActions());
+            client.getPlayer().dropMessage(1, "You can only search for party members within a range of 30 levels.");
+            client.announce(MaplePacketCreator.enableActions());
             return;
         }
 
-        if (chr.getLevel() < min || chr.getLevel() > max) {
-            chr.dropMessage(1, "The range of level for search has to include your own level.");
-            c.announce(MaplePacketCreator.enableActions());
+        if (client.getPlayer().getLevel() < min || client.getPlayer().getLevel() > max) {
+            client.getPlayer().dropMessage(1, "The range of level for search has to include your own level.");
+            client.announce(MaplePacketCreator.enableActions());
             return;
         }
 
         slea.readInt(); // members
         int jobs = slea.readInt();
 
-        MapleParty party = c.getPlayer().getParty();
-        if (party == null || !c.getPlayer().isPartyLeader()) return;
-
-        World world = c.getWorldServer();
-        world.getPartySearchCoordinator().registerPartyLeader(chr, min, max, jobs);
+        client.getPlayer().getParty()
+                .filter(p -> client.getPlayer().isPartyLeader())
+                .ifPresent(p -> client.getWorldServer().getPartySearchCoordinator().registerPartyLeader(client.getPlayer(), min, max, jobs));
     }
 }

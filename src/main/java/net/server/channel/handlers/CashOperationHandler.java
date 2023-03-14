@@ -46,6 +46,7 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class CashOperationHandler extends AbstractMaplePacketHandler {
 
@@ -148,7 +149,9 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                         ex.printStackTrace();
                     }
                     MapleCharacter receiver = c.getChannelServer().getPlayerStorage().getCharacterByName(recipient.get("name"));
-                    if (receiver != null) receiver.showNote();
+                    if (receiver != null) {
+                        receiver.showNote();
+                    }
                 } else if (action == 0x05) { // Modify wish list
                     cs.clearWishList();
                     for (byte i = 0; i < 10; i++) {
@@ -299,7 +302,12 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                         return;
                     }
 
-                    MapleInventory mi = chr.getInventory(MapleInventoryType.getByType(invType));
+                    Optional<MapleInventoryType> type = MapleInventoryType.getByType(invType);
+                    if (type.isEmpty()) {
+                        c.enableCSActions();
+                        return;
+                    }
+                    MapleInventory mi = chr.getInventory(type.get());
                     Item item = mi.findByCashId(cashId);
                     if (item == null) {
                         c.enableCSActions();
@@ -437,7 +445,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                             c.announce(MaplePacketCreator.showCashShopMessage((byte) 0));
                             c.enableCSActions();
                             return;
-                        } else if (c.getTempBanCalendar() != null && c.getTempBanCalendar().getTimeInMillis() + (30 * 24 * 60 * 60 * 1000) > Calendar.getInstance().getTimeInMillis()) {
+                        } else if (c.getTempBanCalendar() != null && c.getTempBanCalendar().getTimeInMillis() + (30L * 24 * 60 * 60 * 1000) > Calendar.getInstance().getTimeInMillis()) {
                             c.announce(MaplePacketCreator.showCashShopMessage((byte) 0));
                             c.enableCSActions();
                             return;

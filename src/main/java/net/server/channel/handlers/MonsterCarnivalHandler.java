@@ -38,6 +38,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -99,34 +100,35 @@ public final class MonsterCarnivalHandler extends AbstractMaplePacketHandler {
                             c.announce(MaplePacketCreator.enableActions());
                             return;
                         }
-                        final MapleDisease dis = skill.getDisease();
-                        MapleParty enemies = c.getPlayer().getParty().getEnemy();
+                        Optional<MapleDisease> dis = skill.getDisease();
+                        MapleParty enemies = c.getPlayer().getParty().orElseThrow().getEnemy();
                         if (skill.targetsAll) {
                             int hitChance = 0;
-                            if (dis.getDisease() == 121 || dis.getDisease() == 122 || dis.getDisease() == 125 || dis.getDisease() == 126) {
+                            //TODO this is a NPE possibility need to review what the original logic was trying to do.
+                            if (dis.get().getDisease() == 121 || dis.get().getDisease() == 122 || dis.get().getDisease() == 125 || dis.get().getDisease() == 126) {
                                 hitChance = (int) (Math.random() * 100);
                             }
                             if (hitChance <= 80) {
-                                for (MaplePartyCharacter mpc : enemies.getPartyMembers()) {
-                                    MapleCharacter mc = mpc.getPlayer();
-                                    if (mc != null) {
-                                        if (dis == null) {
-                                            mc.dispel();
-                                        } else {
-                                            mc.giveDebuff(dis, skill.getSkill());
-                                        }
-                                    }
-                                }
+                                enemies.getPartyMembers().stream()
+                                        .map(MaplePartyCharacter::getPlayer)
+                                        .flatMap(Optional::stream)
+                                        .forEach(mc -> {
+                                            if (dis.isEmpty()) {
+                                                mc.dispel();
+                                            } else {
+                                                mc.giveDebuff(dis.get(), skill.getSkill());
+                                            }
+                                        });
                             }
                         } else {
                             int amount = enemies.getMembers().size() - 1;
                             int randd = (int) Math.floor(Math.random() * amount);
                             MapleCharacter chrApp = c.getPlayer().getMap().getCharacterById(enemies.getMemberByPos(randd).getId());
                             if (chrApp != null && chrApp.getMap().isCPQMap()) {
-                                if (dis == null) {
+                                if (dis.isEmpty()) {
                                     chrApp.dispel();
                                 } else {
-                                    chrApp.giveDebuff(dis, skill.getSkill());
+                                    chrApp.giveDebuff(dis.get(), skill.getSkill());
                                 }
                             }
                         }

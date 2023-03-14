@@ -35,8 +35,7 @@ import java.util.Collection;
 public final class BeholderHandler extends AbstractMaplePacketHandler {//Summon Skills noobs
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        //System.out.println(slea.toString());
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         Collection<MapleSummon> summons = c.getPlayer().getSummonsValues();
         int oid = slea.readInt();
         MapleSummon summon = null;

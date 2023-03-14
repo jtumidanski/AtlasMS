@@ -50,7 +50,9 @@ public class PetTamenessAction extends MapleQuestAction {
         MapleClient c = chr.getClient();
 
         MaplePet pet = chr.getPet(0);   // assuming here only the pet leader will gain tameness
-        if (pet == null) return;
+        if (pet == null) {
+            return;
+        }
 
         c.lockClient();
         try {

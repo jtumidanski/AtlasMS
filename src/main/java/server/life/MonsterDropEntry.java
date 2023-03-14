@@ -27,6 +27,7 @@ package server.life;
 public class MonsterDropEntry {
     public short questid;
     public int itemId, chance, Minimum, Maximum;
+
     public MonsterDropEntry(int itemId, int chance, int Minimum, int Maximum, short questid) {
         this.itemId = itemId;
         this.chance = chance;

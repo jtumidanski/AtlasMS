@@ -33,18 +33,15 @@ public class MapMonitor {
     public MapMonitor(final MapleMap map, String portal) {
         this.map = map;
         this.portal = map.getPortal(portal);
-        this.monitorSchedule = TimerManager.getInstance().register(new Runnable() {
-            @Override
-            public void run() {
-                if (map.getCharacters().size() < 1) {
-                    cancelAction();
-                }
+        this.monitorSchedule = TimerManager.getInstance().register(() -> {
+            if (map.getCharacters().size() < 1) {
+                cancelAction();
             }
         }, 5000);
     }
 
     private void cancelAction() {
-        if (monitorSchedule != null) {  // thanks Thora for pointing a NPE occurring here
+        if (monitorSchedule != null) {
             monitorSchedule.cancel(false);
             monitorSchedule = null;
         }

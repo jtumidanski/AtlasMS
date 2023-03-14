@@ -22,7 +22,6 @@
 package scripting.event;
 
 import client.MapleCharacter;
-import client.Skill;
 import client.SkillFactory;
 import config.YamlConfig;
 import constants.inventory.ItemConstants;
@@ -153,17 +152,9 @@ public class EventInstanceManager {
     }
 
     public void applyEventPlayersSkillBuff(int skillId, int skillLv) {
-        List<MapleCharacter> players = getPlayerList();
-        Skill skill = SkillFactory.getSkill(skillId);
-
-        if (skill != null) {
-            MapleStatEffect mse = skill.getEffect(Math.min(skillLv, skill.getMaxLevel()));
-            if (mse != null) {
-                for (MapleCharacter player : players) {
-                    mse.applyTo(player);
-                }
-            }
-        }
+        SkillFactory.getSkill(skillId)
+                .map(s -> s.getEffect(Math.min(skillLv, s.getMaxLevel())))
+                .ifPresent(se -> getPlayerList().forEach(se::applyTo));
     }
 
     public void giveEventPlayersExp(int gain) {
@@ -171,7 +162,9 @@ public class EventInstanceManager {
     }
 
     public void giveEventPlayersExp(int gain, int mapId) {
-        if (gain == 0) return;
+        if (gain == 0) {
+            return;
+        }
 
         List<MapleCharacter> players = getPlayerList();
 
@@ -181,7 +174,9 @@ public class EventInstanceManager {
             }
         } else {
             for (MapleCharacter mc : players) {
-                if (mc.getMapId() == mapId) mc.gainExp(gain * mc.getExpRate(), true, true);
+                if (mc.getMapId() == mapId) {
+                    mc.gainExp(gain * mc.getExpRate(), true, true);
+                }
             }
         }
     }
@@ -191,7 +186,9 @@ public class EventInstanceManager {
     }
 
     public void giveEventPlayersMeso(int gain, int mapId) {
-        if (gain == 0) return;
+        if (gain == 0) {
+            return;
+        }
 
         List<MapleCharacter> players = getPlayerList();
 
@@ -201,7 +198,9 @@ public class EventInstanceManager {
             }
         } else {
             for (MapleCharacter mc : players) {
-                if (mc.getMapId() == mapId) mc.gainMeso(gain * mc.getMesoRate());
+                if (mc.getMapId() == mapId) {
+                    mc.gainMeso(gain * mc.getMesoRate());
+                }
             }
         }
 
@@ -345,7 +344,7 @@ public class EventInstanceManager {
 
     public void registerParty(MapleCharacter chr) {
         if (chr.isPartyLeader()) {
-            registerParty(chr.getParty(), chr.getMap());
+            chr.getParty().ifPresent(p -> registerParty(p, chr.getMap()));
         }
     }
 
@@ -609,7 +608,9 @@ public class EventInstanceManager {
     }
 
     public synchronized void dispose(boolean shutdown) {    // should not trigger any event script method after disposed
-        if (disposed) return;
+        if (disposed) {
+            return;
+        }
 
         try {
             invokeScriptFunction("dispose", EventInstanceManager.this);
@@ -644,7 +645,9 @@ public class EventInstanceManager {
 
         sL.lock();
         try {
-            if (!eventCleared) em.disposeInstance(name);
+            if (!eventCleared) {
+                em.disposeInstance(name);
+            }
         } finally {
             sL.unlock();
         }
@@ -667,12 +670,7 @@ public class EventInstanceManager {
     }
 
     private void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {
@@ -826,7 +824,7 @@ public class EventInstanceManager {
     }
 
     public boolean isLeader(MapleCharacter chr) {
-        return (chr.getParty().getLeaderId() == chr.getId());
+        return chr.isPartyLeader();
     }
 
     public boolean isEventLeader(MapleCharacter chr) {
@@ -916,7 +914,7 @@ public class EventInstanceManager {
 
         if (ServerConstants.JAVA_8) {
             for (Object d : list) {
-                intList.add(((Integer) d).intValue());
+                intList.add((Integer) d);
             }
         } else {
             for (Object d : list) {
@@ -938,12 +936,16 @@ public class EventInstanceManager {
     }
 
     public Integer getClearStageExp(int stage) {    //stage counts from ONE.
-        if (stage > onMapClearExp.size()) return 0;
+        if (stage > onMapClearExp.size()) {
+            return 0;
+        }
         return onMapClearExp.get(stage - 1);
     }
 
     public Integer getClearStageMeso(int stage) {   //stage counts from ONE.
-        if (stage > onMapClearMeso.size()) return 0;
+        if (stage > onMapClearMeso.size()) {
+            return 0;
+        }
         return onMapClearMeso.get(stage - 1);
     }
 
@@ -968,9 +970,7 @@ public class EventInstanceManager {
 
         wL.lock();
         try {
-            for (Integer item : exclusive) {
-                exclusiveItems.add(item);
-            }
+            exclusiveItems.addAll(exclusive);
         } finally {
             wL.unlock();
         }
@@ -991,7 +991,9 @@ public class EventInstanceManager {
     public final void setEventRewards(int eventLevel, List<Object> rwds, List<Object> qtys, int expGiven) {
         // fixed EXP will be rewarded at the same time the random item is given
 
-        if (eventLevel <= 0 || eventLevel > YamlConfig.config.server.MAX_EVENT_LEVELS) return;
+        if (eventLevel <= 0 || eventLevel > YamlConfig.config.server.MAX_EVENT_LEVELS) {
+            return;
+        }
         eventLevel--;    //event level starts from 1
 
         List<Integer> rewardIds = convertToIntegerArray(rwds);
@@ -1009,7 +1011,9 @@ public class EventInstanceManager {
     }
 
     private byte getRewardListRequirements(int level) {
-        if (level >= collectionSet.size()) return 0;
+        if (level >= collectionSet.size()) {
+            return 0;
+        }
 
         byte rewardTypes = 0;
         List<Integer> list = collectionSet.get(level);
@@ -1026,8 +1030,9 @@ public class EventInstanceManager {
 
         //iterating over all valid inventory types
         for (byte type = 1; type <= 5; type++) {
-            if ((listReq >> type) % 2 == 1 && !player.hasEmptySlot(type))
+            if ((listReq >> type) % 2 == 1 && !player.hasEmptySlot(type)) {
                 return false;
+            }
         }
 
         return true;
@@ -1045,7 +1050,9 @@ public class EventInstanceManager {
         rL.lock();
         try {
             eventLevel--;       //event level starts counting from 1
-            if (eventLevel >= collectionSet.size()) return true;
+            if (eventLevel >= collectionSet.size()) {
+                return true;
+            }
 
             rewardsSet = collectionSet.get(eventLevel);
             rewardsQty = collectionQty.get(eventLevel);
@@ -1055,20 +1062,28 @@ public class EventInstanceManager {
             rL.unlock();
         }
 
-        if (rewardExp == null) rewardExp = 0;
+        if (rewardExp == null) {
+            rewardExp = 0;
+        }
 
         if (rewardsSet == null || rewardsSet.isEmpty()) {
-            if (rewardExp > 0) player.gainExp(rewardExp);
+            if (rewardExp > 0) {
+                player.gainExp(rewardExp);
+            }
             return true;
         }
 
-        if (!hasRewardSlot(player, eventLevel)) return false;
+        if (!hasRewardSlot(player, eventLevel)) {
+            return false;
+        }
 
         AbstractPlayerInteraction api = player.getAbstractPlayerInteraction();
         int rnd = (int) Math.floor(Math.random() * rewardsSet.size());
 
         api.gainItem(rewardsSet.get(rnd), rewardsQty.get(rnd).shortValue());
-        if (rewardExp > 0) player.gainExp(rewardExp);
+        if (rewardExp > 0) {
+            player.gainExp(rewardExp);
+        }
         return true;
     }
 
@@ -1124,27 +1139,39 @@ public class EventInstanceManager {
 
     private boolean isEventTeamLeaderOn() {
         for (MapleCharacter chr : getPlayers()) {
-            if (chr.getId() == getLeaderId()) return true;
+            if (chr.getId() == getLeaderId()) {
+                return true;
+            }
         }
 
         return false;
     }
 
     public final boolean checkEventTeamLacking(boolean leavingEventMap, int minPlayers) {
-        if (eventCleared && getPlayerCount() > 1) return false;
+        if (eventCleared && getPlayerCount() > 1) {
+            return false;
+        }
 
-        if (!eventCleared && leavingEventMap && !isEventTeamLeaderOn()) return true;
-        if (getPlayerCount() < minPlayers) return true;
+        if (!eventCleared && leavingEventMap && !isEventTeamLeaderOn()) {
+            return true;
+        }
+        if (getPlayerCount() < minPlayers) {
+            return true;
+        }
 
         return false;
     }
 
     public final boolean isExpeditionTeamLackingNow(boolean leavingEventMap, int minPlayers, MapleCharacter quitter) {
         if (eventCleared) {
-            if (leavingEventMap && getPlayerCount() <= 1) return true;
+            if (leavingEventMap && getPlayerCount() <= 1) {
+                return true;
+            }
         } else {
             // thanks Conrad for noticing expeditions don't need to have neither the leader nor meet the minimum requirement inside the event
-            if (getPlayerCount() <= 1) return true;
+            if (getPlayerCount() <= 1) {
+                return true;
+            }
         }
 
         return false;
@@ -1152,10 +1179,16 @@ public class EventInstanceManager {
 
     public final boolean isEventTeamLackingNow(boolean leavingEventMap, int minPlayers, MapleCharacter quitter) {
         if (eventCleared) {
-            if (leavingEventMap && getPlayerCount() <= 1) return true;
+            if (leavingEventMap && getPlayerCount() <= 1) {
+                return true;
+            }
         } else {
-            if (leavingEventMap && getLeaderId() == quitter.getId()) return true;
-            if (getPlayerCount() <= minPlayers) return true;
+            if (leavingEventMap && getLeaderId() == quitter.getId()) {
+                return true;
+            }
+            if (getPlayerCount() <= minPlayers) {
+                return true;
+            }
         }
 
         return false;
@@ -1164,7 +1197,9 @@ public class EventInstanceManager {
     public final boolean isEventTeamTogether() {
         rL.lock();
         try {
-            if (chars.size() <= 1) return true;
+            if (chars.size() <= 1) {
+                return true;
+            }
 
             Iterator<MapleCharacter> iterator = chars.values().iterator();
             MapleCharacter mc = iterator.next();
@@ -1172,7 +1207,9 @@ public class EventInstanceManager {
 
             for (; iterator.hasNext(); ) {
                 mc = iterator.next();
-                if (mc.getMapId() != mapId) return false;
+                if (mc.getMapId() != mapId) {
+                    return false;
+                }
             }
 
             return true;
@@ -1185,8 +1222,9 @@ public class EventInstanceManager {
         List<MapleCharacter> players = getPlayerList();
 
         for (MapleCharacter chr : players) {
-            if (chr.getMapId() == warpFrom)
+            if (chr.getMapId() == warpFrom) {
                 chr.changeMap(warpTo);
+            }
         }
     }
 
@@ -1202,8 +1240,9 @@ public class EventInstanceManager {
         List<MapleCharacter> players = getPlayerList();
 
         for (MapleCharacter chr : players) {
-            if (chr.getMapId() == warpFrom)
+            if (chr.getMapId() == warpFrom) {
                 chr.changeMap(warpTo, toSp);
+            }
         }
     }
 
@@ -1258,7 +1297,9 @@ public class EventInstanceManager {
 
     public final void showClearEffect(boolean hasGate) {
         MapleCharacter leader = getLeader();
-        if (leader != null) showClearEffect(hasGate, leader.getMapId());
+        if (leader != null) {
+            showClearEffect(hasGate, leader.getMapId());
+        }
     }
 
     public final void showClearEffect(int mapId) {
@@ -1387,7 +1428,9 @@ public class EventInstanceManager {
     }
 
     public boolean activatedAllReactorsOnMap(MapleMap map, int minReactorId, int maxReactorId) {
-        if (map == null) return true;
+        if (map == null) {
+            return true;
+        }
 
         for (MapleReactor mr : map.getReactorsByIdRange(minReactorId, maxReactorId)) {
             if (mr.getReactorType() != -1) {

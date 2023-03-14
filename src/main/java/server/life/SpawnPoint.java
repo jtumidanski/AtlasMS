@@ -31,7 +31,7 @@ public class SpawnPoint {
     private int monster, mobTime, team, fh, f;
     private Point pos;
     private long nextPossibleSpawn;
-    private int mobInterval = 5000;
+    private int mobInterval;
     private AtomicInteger spawnedMonsters = new AtomicInteger(0);
     private boolean immobile, denySpawn = false;
 
@@ -86,7 +86,7 @@ public class SpawnPoint {
             public void monsterKilled(int aniTime) {
                 nextPossibleSpawn = Server.getInstance().getCurrentTime();
                 if (mobTime > 0) {
-                    nextPossibleSpawn += mobTime * 1000;
+                    nextPossibleSpawn += mobTime * 1000L;
                 } else {
                     nextPossibleSpawn += aniTime;
                 }

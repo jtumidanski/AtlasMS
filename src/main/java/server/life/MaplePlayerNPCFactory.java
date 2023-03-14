@@ -95,11 +95,7 @@ public class MaplePlayerNPCFactory {
                     equips.put(equippos, equipid);
                 }
 
-                List<MaplePlayerNPC> dnpcSet = dnpcMaps.get(mapid);
-                if (dnpcSet == null) {
-                    dnpcSet = new LinkedList<>();
-                    dnpcMaps.put(mapid, dnpcSet);
-                }
+                List<MaplePlayerNPC> dnpcSet = dnpcMaps.computeIfAbsent(mapid, k -> new LinkedList<>());
 
                 dnpcSet.add(new MaplePlayerNPC(name, scriptId, face, hair, gender, skin, equips, dir, FH, RX0, RX1, CX, CY, runningDeveloperOid));
                 runningDeveloperOid++;
@@ -121,11 +117,7 @@ public class MaplePlayerNPCFactory {
                 equips.put((short) -7, 1072154);
                 equips.put((short) -5, 1040103);
 
-                List<MaplePlayerNPC> dnpcSet = dnpcMaps.get(mapid);
-                if (dnpcSet == null) {
-                    dnpcSet = new LinkedList<>();
-                    dnpcMaps.put(mapid, dnpcSet);
-                }
+                List<MaplePlayerNPC> dnpcSet = dnpcMaps.computeIfAbsent(mapid, k -> new LinkedList<>());
 
                 dnpcSet.add(new MaplePlayerNPC(name, scriptId, face, hair, gender, (byte) skin, equips, dir, FH, RX0, RX1, CX, CY, runningDeveloperOid));
                 runningDeveloperOid++;

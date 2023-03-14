@@ -91,7 +91,7 @@ public class MapleExpeditionBossLog {
     }
 
     private static int countPlayerEntries(int cid, BossLogEntry boss) {
-        int ret_count = 0;
+        int ret_count;
         try {
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement ps;
@@ -164,11 +164,11 @@ public class MapleExpeditionBossLog {
         private int minChannel, maxChannel;
         private boolean week;
 
-        private BossLogEntry(int entries, int timeLength, boolean week) {
+        BossLogEntry(int entries, int timeLength, boolean week) {
             this(entries, 0, Integer.MAX_VALUE, timeLength, week);
         }
 
-        private BossLogEntry(int entries, int minChannel, int maxChannel, int timeLength, boolean week) {
+        BossLogEntry(int entries, int minChannel, int maxChannel, int timeLength, boolean week) {
             this.entries = entries;
             this.minChannel = minChannel;
             this.maxChannel = maxChannel;

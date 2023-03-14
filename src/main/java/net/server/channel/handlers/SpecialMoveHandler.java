@@ -56,7 +56,7 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
 
         Point pos = null;
         int __skillLevel = slea.readByte();
-        Skill skill = SkillFactory.getSkill(skillid);
+        Skill skill = SkillFactory.getSkill(skillid).orElseThrow();
         int skillLevel = chr.getSkillLevel(skill);
         if (skillid % 10000000 == 1010 || skillid % 10000000 == 1011) {
             if (chr.getDojoEnergy() < 10000) { // PE hacking or maybe just lagging
@@ -67,7 +67,9 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
             c.announce(MaplePacketCreator.getEnergy("energy", chr.getDojoEnergy()));
             c.announce(MaplePacketCreator.serverNotice(5, "As you used the secret skill, your energy bar has been reset."));
         }
-        if (skillLevel == 0 || skillLevel != __skillLevel) return;
+        if (skillLevel == 0 || skillLevel != __skillLevel) {
+            return;
+        }
 
         MapleStatEffect effect = skill.getEffect(skillLevel);
         if (effect.getCooldown() > 0) {
@@ -80,7 +82,7 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
                 }
 
                 c.announce(MaplePacketCreator.skillCooldown(skillid, cooldownTime));
-                chr.addCooldown(skillid, currentServerTime(), cooldownTime * 1000);
+                chr.addCooldown(skillid, currentServerTime(), cooldownTime * 1000L);
             }
         }
         if (skillid == Hero.MONSTER_MAGNET || skillid == Paladin.MONSTER_MAGNET || skillid == DarkKnight.MONSTER_MAGNET) { // Monster Magnet
@@ -106,7 +108,7 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
             c.announce(MaplePacketCreator.enableActions());
             return;
         } else if (skillid == Brawler.MP_RECOVERY) {// MP Recovery
-            Skill s = SkillFactory.getSkill(skillid);
+            Skill s = SkillFactory.getSkill(skillid).orElseThrow();
             MapleStatEffect ef = s.getEffect(chr.getSkillLevel(s));
 
             int lose = chr.safeAddHP(-1 * (chr.getCurrentMaxHp() / ef.getX()));

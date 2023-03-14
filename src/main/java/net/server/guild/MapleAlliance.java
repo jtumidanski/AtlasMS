@@ -38,6 +38,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author XoticStory
@@ -46,11 +48,11 @@ import java.util.List;
 public class MapleAlliance {
     final private List<Integer> guilds = new LinkedList<>();
 
-    private int allianceId = -1;
+    private int allianceId;
     private int capacity;
     private String name;
     private String notice = "";
-    private String rankTitles[] = new String[5];
+    private String[] rankTitles = new String[5];
 
     public MapleAlliance(String name, int id) {
         this.name = name;
@@ -87,17 +89,13 @@ public class MapleAlliance {
     }
 
     private static List<MapleCharacter> getPartyGuildMasters(MapleParty party) {
-        List<MapleCharacter> mcl = new LinkedList<>();
-
-        for (MaplePartyCharacter mpc : party.getMembers()) {
-            MapleCharacter chr = mpc.getPlayer();
-            if (chr != null) {
-                MapleCharacter lchr = party.getLeader().getPlayer();
-                if (chr.getGuildRank() == 1 && lchr != null && chr.getMapId() == lchr.getMapId()) {
-                    mcl.add(chr);
-                }
-            }
-        }
+        List<MapleCharacter> mcl = party.getMembers().stream()
+                .map(MaplePartyCharacter::getPlayer)
+                .flatMap(Optional::stream)
+                .filter(c -> c.getGuildRank() == 1)
+                .filter(c -> party.getLeader().getPlayer().isPresent())
+                .filter(c -> c.getMapId() == party.getLeader().getPlayer().map(MapleCharacter::getMapId).orElse(-1))
+                .collect(Collectors.toList());
 
         if (!mcl.isEmpty() && !mcl.get(0).isPartyLeader()) {
             for (int i = 1; i < mcl.size(); i++) {
@@ -114,7 +112,9 @@ public class MapleAlliance {
 
     public static MapleAlliance createAlliance(MapleParty party, String name) {
         List<MapleCharacter> guildMasters = getPartyGuildMasters(party);
-        if (guildMasters.size() != 2) return null;
+        if (guildMasters.size() != 2) {
+            return null;
+        }
 
         List<Integer> guilds = new LinkedList<>();
         for (MapleCharacter mc : guildMasters) guilds.add(mc.getGuildId());
@@ -153,7 +153,7 @@ public class MapleAlliance {
     public static MapleAlliance createAllianceOnDb(List<Integer> guilds, String name) {
         // will create an alliance, where the first guild listed is the leader and the alliance name MUST BE already checked for unicity.
 
-        int id = -1;
+        int id;
         try {
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("INSERT INTO `alliance` (`name`) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -206,7 +206,7 @@ public class MapleAlliance {
             alliance.name = rs.getString("name");
             alliance.notice = rs.getString("notice");
 
-            String ranks[] = new String[5];
+            String[] ranks = new String[5];
             ranks[0] = rs.getString("rank1");
             ranks[1] = rs.getString("rank2");
             ranks[2] = rs.getString("rank3");
@@ -318,14 +318,14 @@ public class MapleAlliance {
     }
 
     public static void sendInvitation(MapleClient c, String targetGuildName, int allianceId) {
-        MapleGuild mg = Server.getInstance().getGuildByName(targetGuildName);
-        if (mg == null) {
+        Optional<MapleGuild> mg = Server.getInstance().getGuildByName(targetGuildName);
+        if (mg.isEmpty()) {
             c.getPlayer().dropMessage(5, "The entered guild does not exist.");
         } else {
-            if (mg.getAllianceId() > 0) {
+            if (mg.get().getAllianceId() > 0) {
                 c.getPlayer().dropMessage(5, "The entered guild is already registered on a guild alliance.");
             } else {
-                MapleCharacter victim = mg.getMGC(mg.getLeaderId()).getCharacter();
+                MapleCharacter victim = mg.get().getMGC(mg.get().getLeaderId()).getCharacter();
                 if (victim == null) {
                     c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently not online.");
                 } else {
@@ -411,7 +411,9 @@ public class MapleAlliance {
     public boolean removeGuild(int gid) {
         synchronized (guilds) {
             int index = getGuildIndex(gid);
-            if (index == -1) return false;
+            if (index == -1) {
+                return false;
+            }
 
             guilds.remove(index);
             return true;
@@ -420,7 +422,9 @@ public class MapleAlliance {
 
     public boolean addGuild(int gid) {
         synchronized (guilds) {
-            if (guilds.size() == capacity || getGuildIndex(gid) > -1) return false;
+            if (guilds.size() == capacity || getGuildIndex(gid) > -1) {
+                return false;
+            }
 
             guilds.add(gid);
             return true;
@@ -496,7 +500,9 @@ public class MapleAlliance {
                 MapleGuild guild = Server.getInstance().getGuild(gId);
                 MapleGuildCharacter mgc = guild.getMGC(guild.getLeaderId());
 
-                if (mgc.getAllianceRank() == 1) return mgc;
+                if (mgc.getAllianceRank() == 1) {
+                    return mgc;
+                }
             }
 
             return null;

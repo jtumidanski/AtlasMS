@@ -9,10 +9,7 @@ import server.life.MobSkill;
 import server.life.MobSkillFactory;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Drago (Dragohe4rt)
@@ -20,8 +17,8 @@ import java.util.Map;
 public class MapleCarnivalFactory {
 
     private final static MapleCarnivalFactory instance = new MapleCarnivalFactory();
-    private final Map<Integer, MCSkill> skills = new HashMap<Integer, MCSkill>();
-    private final Map<Integer, MCSkill> guardians = new HashMap<Integer, MCSkill>();
+    private final Map<Integer, MCSkill> skills = new HashMap<>();
+    private final Map<Integer, MCSkill> guardians = new HashMap<>();
     private final MapleDataProvider dataRoot = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/Skill.wz"));
 
     private final List<Integer> singleTargetedSkills = new ArrayList<>();
@@ -32,7 +29,7 @@ public class MapleCarnivalFactory {
         initialize();
     }
 
-    public static final MapleCarnivalFactory getInstance() {
+    public static MapleCarnivalFactory getInstance() {
         return instance;
     }
 
@@ -97,7 +94,7 @@ public class MapleCarnivalFactory {
             return getMobSkill(skillid, level);
         }
 
-        public MapleDisease getDisease() {
+        public Optional<MapleDisease> getDisease() {
             return MapleDisease.getBySkill(skillid);
         }
     }

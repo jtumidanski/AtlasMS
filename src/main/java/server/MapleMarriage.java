@@ -52,7 +52,7 @@ public class MapleMarriage extends EventInstanceManager {
         if (MapleInventory.checkSpot(chr, gifts)) {
             try {
                 Connection con = DatabaseConnection.getConnection();
-                ItemFactory.MARRIAGE_GIFTS.saveItems(new LinkedList<Pair<Item, MapleInventoryType>>(), chr.getId(), con);
+                ItemFactory.MARRIAGE_GIFTS.saveItems(new LinkedList<>(), chr.getId(), con);
                 con.close();
             } catch (SQLException sqle) {
                 sqle.printStackTrace();

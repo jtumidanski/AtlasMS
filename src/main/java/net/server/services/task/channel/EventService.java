@@ -29,7 +29,7 @@ import net.server.services.BaseService;
  */
 public class EventService extends BaseService {
 
-    private EventScheduler eventSchedulers[] = new EventScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
+    private EventScheduler[] eventSchedulers = new EventScheduler[YamlConfig.config.server.CHANNEL_LOCKS];
 
     public EventService() {
         for (int i = 0; i < YamlConfig.config.server.CHANNEL_LOCKS; i++) {

@@ -4,9 +4,9 @@ import client.MapleCharacter;
 
 public interface MonsterListener {
 
-    public void monsterKilled(int aniTime);
+    void monsterKilled(int aniTime);
 
-    public void monsterDamaged(MapleCharacter from, int trueDmg);
+    void monsterDamaged(MapleCharacter from, int trueDmg);
 
-    public void monsterHealed(int trueHeal);
+    void monsterHealed(int trueHeal);
 }

@@ -60,72 +60,69 @@ public class MapleParty {
     }
 
     public static boolean createParty(MapleCharacter player, boolean silentCheck) {
-        MapleParty party = player.getParty();
-        if (party == null) {
-            if (player.getLevel() < 10 && !YamlConfig.config.server.USE_PARTY_FOR_STARTERS) {
-                player.announce(MaplePacketCreator.partyStatusMessage(10));
-                return false;
-            } else if (player.getAriantColiseum() != null) {
-                player.dropMessage(5, "You cannot request a party creation while participating the Ariant Battle Arena.");
-                return false;
-            }
-
-            MaplePartyCharacter partyplayer = new MaplePartyCharacter(player);
-            party = player.getWorldServer().createParty(partyplayer);
-            player.setParty(party);
-            player.setMPC(partyplayer);
-            player.getMap().addPartyMember(player, party.getId());
-            player.silentPartyUpdate();
-
-            player.updatePartySearchAvailability(false);
-            player.partyOperationUpdate(party, null);
-
-            player.announce(MaplePacketCreator.partyCreated(party, partyplayer.getId()));
-
-            return true;
-        } else {
+        if (player.getParty().isPresent()) {
             if (!silentCheck) {
                 player.announce(MaplePacketCreator.partyStatusMessage(16));
             }
-
             return false;
         }
+
+        if (player.getLevel() < 10 && !YamlConfig.config.server.USE_PARTY_FOR_STARTERS) {
+            player.announce(MaplePacketCreator.partyStatusMessage(10));
+            return false;
+        }
+
+        if (player.getAriantColiseum() != null) {
+            player.dropMessage(5, "You cannot request a party creation while participating the Ariant Battle Arena.");
+            return false;
+        }
+
+        MaplePartyCharacter partyplayer = new MaplePartyCharacter(player);
+        MapleParty party = player.getWorldServer().createParty(partyplayer);
+        player.setParty(party);
+        player.setMPC(partyplayer);
+        player.getMap().addPartyMember(player, party.getId());
+        player.silentPartyUpdate();
+
+        player.updatePartySearchAvailability(false);
+        player.partyOperationUpdate(party, null);
+
+        player.announce(MaplePacketCreator.partyCreated(party, partyplayer.getId()));
+        return true;
     }
 
-    public static boolean joinParty(MapleCharacter player, int partyid, boolean silentCheck) {
-        MapleParty party = player.getParty();
+    public static boolean joinParty(MapleCharacter player, int partyId, boolean silentCheck) {
         World world = player.getWorldServer();
-
-        if (party == null) {
-            party = world.getParty(partyid);
-            if (party != null) {
-                if (party.getMembers().size() < 6) {
-                    MaplePartyCharacter partyplayer = new MaplePartyCharacter(player);
-                    player.getMap().addPartyMember(player, party.getId());
-
-                    world.updateParty(party.getId(), PartyOperation.JOIN, partyplayer);
-                    player.receivePartyMemberHP();
-                    player.updatePartyMemberHP();
-
-                    player.resetPartySearchInvite(party.getLeaderId());
-                    player.updatePartySearchAvailability(false);
-                    player.partyOperationUpdate(party, null);
-                    return true;
-                } else {
-                    if (!silentCheck) {
-                        player.announce(MaplePacketCreator.partyStatusMessage(17));
-                    }
-                }
-            } else {
-                player.announce(MaplePacketCreator.serverNotice(5, "You couldn't join the party since it had already been disbanded."));
-            }
-        } else {
+        if (player.getParty().isPresent()) {
             if (!silentCheck) {
                 player.announce(MaplePacketCreator.serverNotice(5, "You can't join the party as you are already in one."));
             }
+            return false;
         }
 
-        return false;
+        if (world.getParty(partyId).isEmpty()) {
+            player.announce(MaplePacketCreator.serverNotice(5, "You couldn't join the party since it had already been disbanded."));
+            return false;
+        }
+
+        MapleParty party = world.getParty(partyId).get();
+        if (party.getMembers().size() >= 6) {
+            if (!silentCheck) {
+                player.announce(MaplePacketCreator.partyStatusMessage(17));
+            }
+            return false;
+        }
+
+        player.getMap().addPartyMember(player, party.getId());
+
+        world.updateParty(party.getId(), PartyOperation.JOIN, new MaplePartyCharacter(player));
+        player.receivePartyMemberHP();
+        player.updatePartyMemberHP();
+
+        player.resetPartySearchInvite(party.getLeaderId());
+        player.updatePartySearchAvailability(false);
+        player.partyOperationUpdate(party, null);
+        return true;
     }
 
     public static void leaveParty(MapleParty party, MapleClient c) {
@@ -185,31 +182,35 @@ public class MapleParty {
             if (partyplayer.equals(party.getLeader())) {
                 MaplePartyCharacter expelled = party.getMemberById(expelCid);
                 if (expelled != null) {
-                    MapleCharacter emc = expelled.getPlayer();
-                    if (emc != null) {
-                        List<MapleCharacter> partyMembers = emc.getPartyMembersOnline();
 
-                        MapleMap map = emc.getMap();
-                        if (map != null) map.removePartyMember(emc, party.getId());
-
-                        MonsterCarnival mcpq = player.getMonsterCarnival();
-                        if (mcpq != null) {
-                            mcpq.leftParty(emc.getId());
-                        }
-
-                        EventInstanceManager eim = emc.getEventInstance();
-                        if (eim != null) {
-                            eim.leftParty(emc);
-                        }
-
-                        emc.setParty(null);
+                    if (expelled.getPlayer().isEmpty()) {
                         world.updateParty(party.getId(), PartyOperation.EXPEL, expelled);
-
-                        emc.updatePartySearchAvailability(true);
-                        emc.partyOperationUpdate(party, partyMembers);
-                    } else {
-                        world.updateParty(party.getId(), PartyOperation.EXPEL, expelled);
+                        return;
                     }
+
+                    MapleCharacter emc = expelled.getPlayer().get();
+                    List<MapleCharacter> partyMembers = emc.getPartyMembersOnline();
+
+                    MapleMap map = emc.getMap();
+                    if (map != null) {
+                        map.removePartyMember(emc, party.getId());
+                    }
+
+                    MonsterCarnival mcpq = player.getMonsterCarnival();
+                    if (mcpq != null) {
+                        mcpq.leftParty(emc.getId());
+                    }
+
+                    EventInstanceManager eim = emc.getEventInstance();
+                    if (eim != null) {
+                        eim.leftParty(emc);
+                    }
+
+                    emc.setParty(null);
+                    world.updateParty(party.getId(), PartyOperation.EXPEL, expelled);
+
+                    emc.updatePartySearchAvailability(true);
+                    emc.partyOperationUpdate(party, partyMembers);
                 }
             }
         }
@@ -367,7 +368,7 @@ public class MapleParty {
             lock.unlock();
         }
 
-        Collections.sort(histList, new Comparator<Entry<Integer, Integer>>() {
+        histList.sort(new Comparator<>() {
             @Override
             public int compare(Entry<Integer, Integer> o1, Entry<Integer, Integer> o2) {
                 return (o1.getValue()).compareTo(o2.getValue());
@@ -443,12 +444,7 @@ public class MapleParty {
     }
 
     public void disposeLocks() {
-        LockCollector.getInstance().registerDisposeAction(new Runnable() {
-            @Override
-            public void run() {
-                emptyLocks();
-            }
-        });
+        LockCollector.getInstance().registerDisposeAction(this::emptyLocks);
     }
 
     private void emptyLocks() {

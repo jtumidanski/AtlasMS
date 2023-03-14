@@ -48,18 +48,18 @@ public class MapleDataTool {
     }
 
     public static double getDouble(MapleData data) {
-        return ((Double) data.getData()).doubleValue();
+        return (Double) data.getData();
     }
 
     public static float getFloat(MapleData data) {
-        return ((Float) data.getData()).floatValue();
+        return (Float) data.getData();
     }
 
     public static int getInt(MapleData data) {
         if (data == null || data.getData() == null) {
             return 0;// DEF?
         }
-        return ((Integer) data.getData()).intValue();
+        return (Integer) data.getData();
     }
 
     public static int getInt(String path, MapleData data) {

@@ -35,13 +35,15 @@ import tools.Pair;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author Matze, Ronan
  */
 public class MapleInventory implements Iterable<Item> {
     protected MapleCharacter owner;
-    protected Map<Short, Item> inventory = new LinkedHashMap<>();
+    protected Map<Short, Item> inventory;
     protected byte slotLimit;
     protected MapleInventoryType type;
     protected boolean checked = false;
@@ -59,17 +61,10 @@ public class MapleInventory implements Iterable<Item> {
     }
 
     private static boolean checkItemRestricted(List<Pair<Item, MapleInventoryType>> items) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-
-        // thanks Shavit for noticing set creation that would be only effective in rare situations
-        for (Pair<Item, MapleInventoryType> p : items) {
-            int itemid = p.getLeft().getItemId();
-            if (ii.isPickupRestricted(itemid) && p.getLeft().getQuantity() > 1) {
-                return false;
-            }
-        }
-
-        return true;
+        return items.stream()
+                .map(Pair::getLeft)
+                .filter(i -> MapleItemInformationProvider.getInstance().isPickupRestricted(i.getItemId()))
+                .noneMatch(i -> i.getQuantity() > 1);
     }
 
     public static boolean checkSpot(MapleCharacter chr, Item item) {    // thanks Vcoc for noticing pshops not checking item stacks when taking item back
@@ -77,11 +72,9 @@ public class MapleInventory implements Iterable<Item> {
     }
 
     public static boolean checkSpot(MapleCharacter chr, List<Item> items) {
-        List<Pair<Item, MapleInventoryType>> listItems = new LinkedList<>();
-        for (Item item : items) {
-            listItems.add(new Pair<>(item, item.getInventoryType()));
-        }
-
+        List<Pair<Item, MapleInventoryType>> listItems = items.stream()
+                .map(i -> new Pair<>(i, i.getInventoryType()))
+                .collect(Collectors.toList());
         return checkSpotsAndOwnership(chr, listItems);
     }
 
@@ -136,7 +129,9 @@ public class MapleInventory implements Iterable<Item> {
                 int result = MapleInventoryManipulator.checkSpaceProgressively(c, it.getKey(), itValue, "", usedSlots, useProofInv);
                 boolean hasSpace = ((result % 2) != 0);
 
-                if (!hasSpace) return false;
+                if (!hasSpace) {
+                    return false;
+                }
                 typesSlotsUsed.set(itemType, (result >> 1));
             }
         }
@@ -219,7 +214,9 @@ public class MapleInventory implements Iterable<Item> {
                 boolean hasSpace = ((result % 2) != 0);
                 //System.out.print(" -> hasSpace: " + hasSpace + " RESULT : " + result + "\n");
 
-                if (!hasSpace) return false;
+                if (!hasSpace) {
+                    return false;
+                }
                 typesSlotsUsed.set(itemType, (result >> 1));
             }
         }
@@ -248,16 +245,10 @@ public class MapleInventory implements Iterable<Item> {
         lock.lock();
         try {
             if (newLimit < slotLimit) {
-                List<Short> toRemove = new LinkedList<>();
-                for (Item it : list()) {
-                    if (it.getPosition() > newLimit) {
-                        toRemove.add(it.getPosition());
-                    }
-                }
-
-                for (Short slot : toRemove) {
-                    removeSlot(slot);
-                }
+                list().stream()
+                        .map(Item::getPosition)
+                        .filter(pos -> pos > newLimit)
+                        .forEach(this::removeSlot);
             }
 
             slotLimit = (byte) newLimit;
@@ -275,16 +266,13 @@ public class MapleInventory implements Iterable<Item> {
         }
     }
 
-    public Item findById(int itemId) {
-        for (Item item : list()) {
-            if (item.getItemId() == itemId) {
-                return item;
-            }
-        }
-        return null;
+    public Optional<Item> findById(int itemId) {
+        return list().stream()
+                .filter(i -> i.getItemId() == itemId)
+                .findFirst();
     }
 
-    public Item findByName(String name) {
+    public Optional<Item> findByName(String name) {
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         for (Item item : list()) {
             String itemName = ii.getName(item.getItemId());
@@ -294,30 +282,25 @@ public class MapleInventory implements Iterable<Item> {
             }
 
             if (name.compareToIgnoreCase(itemName) == 0) {
-                return item;
+                return Optional.of(item);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public int countById(int itemId) {
-        int qty = 0;
-        for (Item item : list()) {
-            if (item.getItemId() == itemId) {
-                qty += item.getQuantity();
-            }
-        }
-        return qty;
+        return list().stream()
+                .filter(i -> i.getItemId() == itemId)
+                .mapToInt(Item::getQuantity)
+                .sum();
     }
 
     public int countNotOwnedById(int itemId) {
-        int qty = 0;
-        for (Item item : list()) {
-            if (item.getItemId() == itemId && item.getOwner().equals("")) {
-                qty += item.getQuantity();
-            }
-        }
-        return qty;
+        return list().stream()
+                .filter(i -> i.getItemId() == itemId)
+                .filter(i -> i.getOwner().equals(""))
+                .mapToInt(Item::getQuantity)
+                .sum();
     }
 
     public int freeSlotCountById(int itemId, int required) {
@@ -330,7 +313,9 @@ public class MapleInventory implements Iterable<Item> {
 
                 if (required >= 0) {
                     openSlot++;
-                    if (required == 0) return openSlot;
+                    if (required == 0) {
+                        return openSlot;
+                    }
                 } else {
                     return openSlot;
                 }
@@ -341,7 +326,9 @@ public class MapleInventory implements Iterable<Item> {
 
                 if (required >= 0) {
                     openSlot++;
-                    if (required == 0) return openSlot;
+                    if (required == 0) {
+                        return openSlot;
+                    }
                 } else {
                     return openSlot;
                 }
@@ -352,43 +339,17 @@ public class MapleInventory implements Iterable<Item> {
     }
 
     public List<Item> listById(int itemId) {
-        List<Item> ret = new ArrayList<>();
-        for (Item item : list()) {
-            if (item.getItemId() == itemId) {
-                ret.add(item);
-            }
-        }
-
-        if (ret.size() > 1) {
-            Collections.sort(ret, new Comparator<Item>() {
-                @Override
-                public int compare(Item i1, Item i2) {
-                    return i1.getPosition() - i2.getPosition();
-                }
-            });
-        }
-
-        return ret;
+        return list().stream()
+                .filter(i -> i.getItemId() == itemId)
+                .sorted(Comparator.comparingInt(Item::getPosition))
+                .collect(Collectors.toList());
     }
 
     public List<Item> linkedListById(int itemId) {
-        List<Item> ret = new LinkedList<>();
-        for (Item item : list()) {
-            if (item.getItemId() == itemId) {
-                ret.add(item);
-            }
-        }
-
-        if (ret.size() > 1) {
-            Collections.sort(ret, new Comparator<Item>() {
-                @Override
-                public int compare(Item i1, Item i2) {
-                    return i1.getPosition() - i2.getPosition();
-                }
-            });
-        }
-
-        return ret;
+        return list().stream()
+                .filter(i -> i.getItemId() == itemId)
+                .sorted(Comparator.comparingInt(Item::getPosition))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     public short addItem(Item item) {
@@ -410,8 +371,8 @@ public class MapleInventory implements Iterable<Item> {
     public void move(short sSlot, short dSlot, short slotMax) {
         lock.lock();
         try {
-            Item source = (Item) inventory.get(sSlot);
-            Item target = (Item) inventory.get(dSlot);
+            Item source = inventory.get(sSlot);
+            Item target = inventory.get(dSlot);
             if (source == null) {
                 return;
             }
@@ -578,12 +539,10 @@ public class MapleInventory implements Iterable<Item> {
 
         lock.lock();
         try {
-            for (short i = 1; i <= slotLimit; i++) {
-                if (!inventory.containsKey(i)) {
-                    return i;
-                }
-            }
-            return -1;
+            return (short) IntStream.rangeClosed(1, slotLimit)
+                    .filter(slot -> !inventory.containsKey((short) slot))
+                    .findFirst()
+                    .orElse(-1);
         } finally {
             lock.unlock();
         }
@@ -596,13 +555,9 @@ public class MapleInventory implements Iterable<Item> {
 
         lock.lock();
         try {
-            short free = 0;
-            for (short i = 1; i <= slotLimit; i++) {
-                if (!inventory.containsKey(i)) {
-                    free++;
-                }
-            }
-            return free;
+            return (short) IntStream.rangeClosed(1, slotLimit)
+                    .filter(slot -> !inventory.containsKey((short) slot))
+                    .count();
         } finally {
             lock.unlock();
         }
@@ -629,8 +584,9 @@ public class MapleInventory implements Iterable<Item> {
                 equip = (Equip) item;
                 isRing = equip.getRingId() > -1;
             }
-            if ((item.getPetId() > -1 ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId()) == cashId)
+            if ((item.getPetId() > -1 ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId()) == cashId) {
                 return item;
+            }
         }
 
         return null;

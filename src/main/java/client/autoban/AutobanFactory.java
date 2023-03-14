@@ -56,16 +56,16 @@ public enum AutobanFactory {
     private int points;
     private long expiretime;
 
-    private AutobanFactory() {
+    AutobanFactory() {
         this(1, -1);
     }
 
-    private AutobanFactory(int points) {
+    AutobanFactory(int points) {
         this.points = points;
         this.expiretime = -1;
     }
 
-    private AutobanFactory(int points, long expire) {
+    AutobanFactory(int points, long expire) {
         this.points = points;
         this.expiretime = expire;
     }

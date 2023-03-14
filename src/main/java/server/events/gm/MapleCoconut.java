@@ -36,13 +36,13 @@ import java.util.List;
  */
 //Make them better :)
 public class MapleCoconut extends MapleEvent {
-    private MapleMap map = null;
+    private MapleMap map;
     private int MapleScore = 0;
     private int StoryScore = 0;
     private int countBombing = 80;
     private int countFalling = 401;
     private int countStopped = 20;
-    private List<MapleCoconuts> coconuts = new LinkedList<MapleCoconuts>();
+    private List<MapleCoconuts> coconuts = new LinkedList<>();
 
     public MapleCoconut(MapleMap map) {
         super(1, 50);

@@ -84,8 +84,9 @@ public final class WeddingHandler extends AbstractMaplePacketHandler {
                                         }
 
                                         if (newItem != null) {
-                                            if (YamlConfig.config.server.USE_ENFORCE_MERCHANT_SAVE)
+                                            if (YamlConfig.config.server.USE_ENFORCE_MERCHANT_SAVE) {
                                                 chr.saveCharToDB(false);
+                                            }
                                             marriage.saveGiftItemsToDb(c, groomWishlist, cid);
                                         }
                                     } else {

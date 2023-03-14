@@ -30,6 +30,7 @@ import net.server.guild.MapleGuildCharacter;
 import net.server.world.MapleParty;
 import tools.MaplePacketCreator;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -155,7 +156,7 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
             public void onMatchDeclined(int leaderid, Set<MapleCharacter> matchPlayers, String message) {
                 for (MapleCharacter chr : matchPlayers) {
                     if (chr.getId() == leaderid && chr.getClient() != null) {
-                        MapleParty.leaveParty(chr.getParty(), chr.getClient());
+                        chr.getParty().ifPresent(p -> MapleParty.leaveParty(p, chr.getClient()));
                     }
 
                     if (chr.isLoggedinWorld()) {
@@ -165,26 +166,22 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
             }
 
             @Override
-            public void onMatchDismissed(int leaderid, Set<MapleCharacter> matchPlayers, String message) {
+            public void onMatchDismissed(int leaderId, Set<MapleCharacter> matchPlayers, String message) {
 
-                MapleCharacter leader = null;
-                for (MapleCharacter chr : matchPlayers) {
-                    if (chr.getId() == leaderid) {
-                        leader = chr;
-                        break;
-                    }
-                }
+                Optional<MapleCharacter> leader = matchPlayers.stream()
+                        .filter(c -> c.getId() == leaderId)
+                        .findFirst();
 
                 String msg;
-                if (leader != null && leader.getParty() == null) {
+                if (leader.isPresent() && leader.flatMap(MapleCharacter::getParty).isEmpty()) {
                     msg = "The Guild creation has been dismissed since the leader left the founding party.";
                 } else {
                     msg = "The Guild creation has been dismissed since a member was already in a party when they answered.";
                 }
 
                 for (MapleCharacter chr : matchPlayers) {
-                    if (chr.getId() == leaderid && chr.getClient() != null) {
-                        MapleParty.leaveParty(chr.getParty(), chr.getClient());
+                    if (chr.getId() == leaderId && chr.getClient() != null) {
+                        chr.getParty().ifPresent(p -> MapleParty.leaveParty(p, chr.getClient()));
                     }
 
                     if (chr.isLoggedinWorld()) {
