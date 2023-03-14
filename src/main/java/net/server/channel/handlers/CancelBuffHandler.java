@@ -23,7 +23,14 @@ package net.server.channel.handlers;
 
 import client.MapleClient;
 import client.SkillFactory;
-import constants.skills.*;
+import constants.skills.Bishop;
+import constants.skills.Bowmaster;
+import constants.skills.Corsair;
+import constants.skills.Evan;
+import constants.skills.FPArchMage;
+import constants.skills.ILArchMage;
+import constants.skills.Marksman;
+import constants.skills.WindArcher;
 import net.AbstractMaplePacketHandler;
 import net.MaplePacketHandler;
 import tools.MaplePacketCreator;

@@ -35,11 +35,11 @@ public class MaxHpMpCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        MapleCharacter victim = player;
+        MapleCharacter target = player;
 
         int statUpdate = 1;
         if (params.length >= 2) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            target = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
             statUpdate = Integer.parseInt(params[1]);
         } else if (params.length == 1) {
             statUpdate = Integer.parseInt(params[0]);
@@ -47,14 +47,14 @@ public class MaxHpMpCommand extends Command {
             player.yellowMessage("Syntax: !maxhpmp [<playername>] <value>");
         }
 
-        if (victim != null) {
-            int extraHp = victim.getCurrentMaxHp() - victim.getClientMaxHp();
-            int extraMp = victim.getCurrentMaxMp() - victim.getClientMaxMp();
+        if (target != null) {
+            int extraHp = target.getCurrentMaxHp() - target.getClientMaxHp();
+            int extraMp = target.getCurrentMaxMp() - target.getClientMaxMp();
             statUpdate = Math.max(1 + Math.max(extraHp, extraMp), statUpdate);
 
             int maxhpUpdate = statUpdate - extraHp;
             int maxmpUpdate = statUpdate - extraMp;
-            victim.updateMaxHpMaxMp(maxhpUpdate, maxmpUpdate);
+            target.updateMaxHpMaxMp(maxhpUpdate, maxmpUpdate);
         } else {
             player.message("Player '" + params[0] + "' could not be found on this world.");
         }

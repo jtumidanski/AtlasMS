@@ -51,7 +51,7 @@ public class JailCommand extends Command {
             }
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim != null) {
             victim.addJailExpirationTime((long) minutesJailed * 60 * 1000);
 

@@ -27,9 +27,17 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
 import constants.game.GameConstants;
-import server.maps.*;
+import server.maps.FieldLimit;
+import server.maps.MapleMap;
+import server.maps.MapleMapFactory;
+import server.maps.MapleMiniDungeonInfo;
+import server.maps.MaplePortal;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class GotoCommand extends Command {
@@ -92,7 +100,7 @@ public class GotoCommand extends Command {
         }
 
         if (!player.isGM()) {
-            if (player.getEventInstance() != null || MapleMiniDungeonInfo.isDungeonMap(player.getMapId()) || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit())) {
+            if (player.getEventInstance().isPresent() || MapleMiniDungeonInfo.isDungeonMap(player.getMapId()) || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit())) {
                 player.dropMessage(1, "This command can not be used in this map.");
                 return;
             }

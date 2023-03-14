@@ -39,7 +39,7 @@ public class HpMpCommand extends Command {
         int statUpdate = 1;
 
         if (params.length == 2) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
             statUpdate = Integer.parseInt(params[1]);
         } else if (params.length == 1) {
             statUpdate = Integer.parseInt(params[0]);

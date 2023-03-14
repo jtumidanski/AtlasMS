@@ -21,10 +21,21 @@
 */
 package net.server.channel.handlers;
 
-import client.*;
+import client.MapleBuffStat;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.MapleJob;
+import client.Skill;
+import client.SkillFactory;
 import config.YamlConfig;
 import constants.game.GameConstants;
-import constants.skills.*;
+import constants.skills.Crusader;
+import constants.skills.DawnWarrior;
+import constants.skills.DragonKnight;
+import constants.skills.Hero;
+import constants.skills.NightWalker;
+import constants.skills.Rogue;
+import constants.skills.WindArcher;
 import server.MapleStatEffect;
 import tools.MaplePacketCreator;
 import tools.Pair;

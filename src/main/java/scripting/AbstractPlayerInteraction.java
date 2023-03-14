@@ -21,9 +21,20 @@
  */
 package scripting;
 
-import client.*;
+import client.MapleCharacter;
 import client.MapleCharacter.DelayedQuestUpdate;
-import client.inventory.*;
+import client.MapleClient;
+import client.MapleJob;
+import client.MapleQuestStatus;
+import client.Skill;
+import client.SkillFactory;
+import client.inventory.Equip;
+import client.inventory.Item;
+import client.inventory.MapleInventory;
+import client.inventory.MapleInventoryProof;
+import client.inventory.MapleInventoryType;
+import client.inventory.MaplePet;
+import client.inventory.ModifyInventory;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import config.YamlConfig;
 import constants.game.GameConstants;
@@ -41,7 +52,11 @@ import server.MapleMarriage;
 import server.expeditions.MapleExpedition;
 import server.expeditions.MapleExpeditionBossLog;
 import server.expeditions.MapleExpeditionType;
-import server.life.*;
+import server.life.MapleLifeFactory;
+import server.life.MapleMonster;
+import server.life.MapleNPC;
+import server.life.MobSkill;
+import server.life.MobSkillFactory;
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
@@ -52,8 +67,14 @@ import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 
 public class AbstractPlayerInteraction {
 
@@ -166,7 +187,7 @@ public class AbstractPlayerInteraction {
         return getClient().getEventManager(event);
     }
 
-    public EventInstanceManager getEventInstance() {
+    public Optional<EventInstanceManager> getEventInstance() {
         return getPlayer().getEventInstance();
     }
 
@@ -724,18 +745,11 @@ public class AbstractPlayerInteraction {
     }
 
     public void guildMessage(int type, String message) {
-        if (getGuild() != null) {
-            getGuild().guildMessage(MaplePacketCreator.serverNotice(type, message));
-        }
+        getGuild().ifPresent(g -> g.guildMessage(MaplePacketCreator.serverNotice(type, message)));
     }
 
-    public MapleGuild getGuild() {
-        try {
-            return Server.getInstance().getGuild(getPlayer().getGuildId(), getPlayer().getWorld(), null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Optional<MapleGuild> getGuild() {
+        return Server.getInstance().getGuild(getPlayer().getGuildId(), getPlayer().getWorld(), null);
     }
 
     public Optional<MapleParty> getParty() {
@@ -758,7 +772,7 @@ public class AbstractPlayerInteraction {
     }
 
     public boolean isEventLeader() {
-        return getEventInstance() != null && getPlayer().getId() == getEventInstance().getLeaderId();
+        return getEventInstance().map(EventInstanceManager::getLeaderId).filter(id -> id == getPlayer().getId()).isPresent();
     }
 
     public void givePartyItems(int id, short quantity, List<MapleCharacter> party) {
@@ -836,7 +850,7 @@ public class AbstractPlayerInteraction {
                     size--;
                 } else {
                     Optional<MapleCharacter> chr = member.getPlayer();
-                    if (chr.isPresent() && chr.map(MapleCharacter::getEventInstance).isEmpty()) {
+                    if (chr.isPresent() && chr.flatMap(MapleCharacter::getEventInstance).isEmpty()) {
                         size--;
                     }
                 }
@@ -852,7 +866,7 @@ public class AbstractPlayerInteraction {
                 continue;
             }
             MapleCharacter player = member.getPlayer().get();
-            if (instance && player.getEventInstance() == null) {
+            if (instance && player.getEventInstance().isEmpty()) {
                 continue; // They aren't in the instance, don't give EXP.
             }
             int base = PartyQuest.getExp(PQ, player.getLevel());

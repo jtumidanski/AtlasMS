@@ -32,6 +32,18 @@ public class SetGmLevelCommand extends Command {
         setDescription("");
     }
 
+    private static void setLevelError(String targetName, MapleCharacter player) {
+        player.dropMessage("Player '" + targetName + "' was not found on this channel.");
+    }
+
+    private static void setLevel(MapleCharacter player, int newLevel, MapleCharacter target) {
+        target.setGMLevel(newLevel);
+        target.getClient().setGMLevel(newLevel);
+
+        target.dropMessage("You are now a level " + newLevel + " GM. See @commands for a list of available commands.");
+        player.dropMessage(target + " is now a level " + newLevel + " GM.");
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
@@ -40,16 +52,11 @@ public class SetGmLevelCommand extends Command {
             return;
         }
 
+        String targetName = params[0];
         int newLevel = Integer.parseInt(params[1]);
-        MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (target != null) {
-            target.setGMLevel(newLevel);
-            target.getClient().setGMLevel(newLevel);
-
-            target.dropMessage("You are now a level " + newLevel + " GM. See @commands for a list of available commands.");
-            player.dropMessage(target + " is now a level " + newLevel + " GM.");
-        } else {
-            player.dropMessage("Player '" + params[0] + "' was not found on this channel.");
-        }
+        c.getChannelServer()
+                .getPlayerStorage()
+                .getCharacterByName(targetName)
+                .ifPresentOrElse(t -> setLevel(player, newLevel, t), () -> setLevelError(targetName, player));
     }
 }

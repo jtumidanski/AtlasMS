@@ -36,7 +36,7 @@ public class CheckDmgCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim != null) {
             int maxBase = victim.calculateMaxBaseDamage(victim.getTotalWatk());
             Integer watkBuff = victim.getBuffedValue(MapleBuffStat.WATK);

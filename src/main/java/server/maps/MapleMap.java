@@ -55,9 +55,21 @@ import scripting.map.MapScriptManager;
 import server.MapleItemInformationProvider;
 import server.MapleStatEffect;
 import server.TimerManager;
-import server.events.gm.*;
-import server.life.*;
+import server.events.gm.MapleCoconut;
+import server.events.gm.MapleFitness;
+import server.events.gm.MapleOla;
+import server.events.gm.MapleOxQuiz;
+import server.events.gm.MapleSnowball;
+import server.life.MapleLifeFactory;
 import server.life.MapleLifeFactory.selfDestruction;
+import server.life.MapleMonster;
+import server.life.MapleMonsterInformationProvider;
+import server.life.MapleNPC;
+import server.life.MaplePlayerNPC;
+import server.life.MonsterDropEntry;
+import server.life.MonsterGlobalDropEntry;
+import server.life.MonsterListener;
+import server.life.SpawnPoint;
 import server.partyquest.GuardianSpawnPoint;
 import server.partyquest.MapleCarnivalFactory;
 import server.partyquest.MapleCarnivalFactory.MCSkill;
@@ -68,9 +80,23 @@ import tools.Randomizer;
 
 import java.awt.*;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -2625,7 +2651,7 @@ public class MapleMap {
 
         chr.removeSandboxItems();
 
-        if (chr.getChalkboard() != null) {
+        if (chr.getChalkboard().isPresent()) {
             if (!GameConstants.isFreeMarketRoom(mapid)) {
                 chr.announce(MaplePacketCreator.useChalkboard(chr, false)); // update player's chalkboard when changing maps found thanks to Vcoc
             } else {
@@ -2691,8 +2717,8 @@ public class MapleMap {
         if (mapid == 914000200 || mapid == 914000210 || mapid == 914000220) {
             chr.getClient().announce(MaplePacketCreator.aranGodlyStats());
         }
-        if (chr.getEventInstance() != null && chr.getEventInstance().isTimerStarted()) {
-            chr.getClient().announce(MaplePacketCreator.getClock((int) (chr.getEventInstance().getTimeLeft() / 1000)));
+        if (chr.getEventInstance().isPresent() && chr.getEventInstance().get().isTimerStarted()) {
+            chr.getClient().announce(MaplePacketCreator.getClock((int) (chr.getEventInstance().get().getTimeLeft() / 1000)));
         }
         if (chr.getFitness() != null && chr.getFitness().isTimerStarted()) {
             chr.getClient().announce(MaplePacketCreator.getClock((int) (chr.getFitness().getTimeLeft() / 1000)));

@@ -23,7 +23,11 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
-import client.inventory.*;
+import client.inventory.Equip;
+import client.inventory.Item;
+import client.inventory.MapleInventory;
+import client.inventory.MapleInventoryType;
+import client.inventory.ModifyInventory;
 import config.YamlConfig;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;

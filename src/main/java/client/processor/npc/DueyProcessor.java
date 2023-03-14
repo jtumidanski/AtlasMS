@@ -43,8 +43,17 @@ import tools.FilePrinter;
 import tools.MaplePacketCreator;
 import tools.Pair;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author RonanLana - synchronization of Duey modules
@@ -371,21 +380,20 @@ public class DueyProcessor {
                     c.announce(MaplePacketCreator.sendDueyMSG(DueyProcessor.Actions.TOCLIENT_SEND_INCORRECT_REQUEST.getCode()));
                 }
 
-                MapleClient rClient = null;
+                Optional<MapleClient> rClient = Optional.empty();
                 int channel = c.getWorldServer().find(recipient);
                 if (channel > -1) {
                     Channel rcserv = c.getWorldServer().getChannel(channel);
                     if (rcserv != null) {
-                        MapleCharacter rChr = rcserv.getPlayerStorage().getCharacterByName(recipient);
-                        if (rChr != null) {
-                            rClient = rChr.getClient();
-                        }
+                        rClient = rcserv.getPlayerStorage()
+                                .getCharacterByName(recipient)
+                                .map(MapleCharacter::getClient);
                     }
                 }
 
-                if (rClient != null && rClient.isLoggedIn() && !rClient.getPlayer().isAwayFromWorld()) {
-                    showDueyNotification(rClient, rClient.getPlayer());
-                }
+                rClient.filter(MapleClient::isLoggedIn)
+                        .filter(client -> !client.getPlayer().isAwayFromWorld())
+                        .ifPresent(client -> showDueyNotification(client, client.getPlayer()));
             } finally {
                 c.releaseClient();
             }

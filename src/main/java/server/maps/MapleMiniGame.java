@@ -29,6 +29,7 @@ import tools.MaplePacketCreator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Matze
@@ -401,8 +402,8 @@ public class MapleMiniGame extends AbstractMapleMapObject {
         return owner;
     }
 
-    public MapleCharacter getVisitor() {
-        return visitor;
+    public Optional<MapleCharacter> getVisitor() {
+        return Optional.ofNullable(visitor);
     }
 
     public void setPiece(int move1, int move2, int type, MapleCharacter chr) {

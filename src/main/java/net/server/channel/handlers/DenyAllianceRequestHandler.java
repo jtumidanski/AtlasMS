@@ -31,17 +31,16 @@ import tools.data.input.SeekableLittleEndianAccessor;
 public final class DenyAllianceRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readByte();
         String inviterName = slea.readMapleAsciiString();
         String guildName = slea.readMapleAsciiString();
 
-        MapleCharacter chr = c.getWorldServer().getPlayerStorage().getCharacterByName(inviterName);
-        if (chr != null) {
-            MapleAlliance alliance = chr.getAlliance();
-            if (alliance != null) {
-                MapleAlliance.answerInvitation(c.getPlayer().getId(), guildName, alliance.getId(), false);
-            }
-        }
+        c.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterByName(inviterName)
+                .flatMap(MapleCharacter::getAlliance)
+                .map(MapleAlliance::getId)
+                .ifPresent(id -> MapleAlliance.answerInvitation(c.getPlayer().getId(), guildName, id, false));
     }
 }

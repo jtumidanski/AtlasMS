@@ -119,7 +119,7 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                 leader.gainMeso(-YamlConfig.config.server.CREATE_GUILD_COST, true, false, true);
 
                 leader.getMGC().setGuildId(gid);
-                MapleGuild guild = Server.getInstance().getGuild(leader.getGuildId(), leader.getWorld(), leader);  // initialize guild structure
+                Optional<MapleGuild> guild = Server.getInstance().getGuild(leader.getGuildId(), leader.getWorld(), leader);  // initialize guild structure
                 Server.getInstance().changeRank(gid, leader.getId(), 1);
 
                 leader.announce(MaplePacketCreator.showGuildInfo(leader));
@@ -148,8 +148,8 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                     chr.saveGuildStatus(); // update database
                 }
 
-                guild.broadcastNameChanged();
-                guild.broadcastEmblemChanged();
+                guild.ifPresent(MapleGuild::broadcastNameChanged);
+                guild.ifPresent(MapleGuild::broadcastEmblemChanged);
             }
 
             @Override

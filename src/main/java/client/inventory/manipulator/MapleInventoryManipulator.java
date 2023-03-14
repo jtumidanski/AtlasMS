@@ -25,7 +25,12 @@ import client.MapleBuffStat;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.MapleRing;
-import client.inventory.*;
+import client.inventory.Equip;
+import client.inventory.Item;
+import client.inventory.MapleInventory;
+import client.inventory.MapleInventoryType;
+import client.inventory.MaplePet;
+import client.inventory.ModifyInventory;
 import client.newyear.NewYearCardRecord;
 import config.YamlConfig;
 import constants.inventory.ItemConstants;
@@ -577,9 +582,8 @@ public class MapleInventoryManipulator {
             }
         }
         if (dst == -18) {
-            if (chr.getMount() != null) {
-                chr.getMount().setItemId(source.getItemId());
-            }
+            Equip finalSource = source;
+            chr.getMount().ifPresent(m -> m.setItemId(finalSource.getItemId()));
         }
 
         //1112413, 1112414, 1112405 (Lilin's Ring)

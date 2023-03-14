@@ -49,7 +49,7 @@ public class BanCommand extends Command {
         }
         String ign = params[0];
         String reason = joinStringFrom(params, 1);
-        MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(ign);
+        MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(ign).orElse(null);
         if (target != null) {
             String readableTargetName = MapleCharacter.makeMapleReadable(target.getName());
             String ip = target.getClient().getSession().getRemoteAddress().toString().split(":")[0];

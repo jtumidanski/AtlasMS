@@ -35,6 +35,22 @@ public class MonitorCommand extends Command {
         setDescription("");
     }
 
+    private static void toggleMonitor(MapleCharacter player, MapleCharacter target) {
+        boolean monitored = MapleLogger.monitored.contains(target.getId());
+        if (monitored) {
+            MapleLogger.monitored.remove(target.getId());
+        } else {
+            MapleLogger.monitored.add(target.getId());
+        }
+        player.yellowMessage(target.getId() + " is " + (!monitored ? "now being monitored." : "no longer being monitored."));
+        String message = player.getName() + (!monitored ? " has started monitoring " : " has stopped monitoring ") + target.getId() + ".";
+        Server.getInstance().broadcastGMMessage(player.getWorld(), MaplePacketCreator.serverNotice(5, message));
+    }
+
+    private static void monitorCommandError(MapleCharacter player, String targetName) {
+        player.message("Player '" + targetName + "' could not be found on this world.");
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
@@ -42,20 +58,12 @@ public class MonitorCommand extends Command {
             player.yellowMessage("Syntax: !monitor <ign>");
             return;
         }
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim == null) {
-            player.message("Player '" + params[0] + "' could not be found on this world.");
-            return;
-        }
-        boolean monitored = MapleLogger.monitored.contains(victim.getId());
-        if (monitored) {
-            MapleLogger.monitored.remove(victim.getId());
-        } else {
-            MapleLogger.monitored.add(victim.getId());
-        }
-        player.yellowMessage(victim.getId() + " is " + (!monitored ? "now being monitored." : "no longer being monitored."));
-        String message = player.getName() + (!monitored ? " has started monitoring " : " has stopped monitoring ") + victim.getId() + ".";
-        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.serverNotice(5, message));
 
+        String targetName = params[0];
+
+        c.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterByName(targetName)
+                .ifPresentOrElse(t -> toggleMonitor(player, t), () -> monitorCommandError(player, targetName));
     }
 }

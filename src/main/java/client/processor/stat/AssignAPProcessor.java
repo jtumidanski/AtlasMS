@@ -23,13 +23,23 @@
 */
 package client.processor.stat;
 
-import client.*;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.MapleJob;
+import client.MapleStat;
+import client.Skill;
+import client.SkillFactory;
 import client.autoban.AutobanFactory;
 import client.inventory.Equip;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import config.YamlConfig;
-import constants.skills.*;
+import constants.skills.BlazeWizard;
+import constants.skills.Brawler;
+import constants.skills.DawnWarrior;
+import constants.skills.Magician;
+import constants.skills.ThunderBreaker;
+import constants.skills.Warrior;
 import tools.MaplePacketCreator;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;

@@ -39,31 +39,6 @@ import java.util.Optional;
 
 public final class PartyOperationHandler extends AbstractMaplePacketHandler {
 
-    @Override
-    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient client) {
-        int operation = slea.readByte();
-        switch (operation) {
-            case 1 -> createParty(client);
-            case 2 -> leaveOrDisbandParty(client);
-            case 3 -> {
-                int partyId = slea.readInt();
-                joinParty(client, partyId);
-            }
-            case 4 -> {
-                String name = slea.readMapleAsciiString();
-                inviteToParty(client, name);
-            }
-            case 5 -> {
-                int characterId = slea.readInt();
-                expelFromParty(client, characterId);
-            }
-            case 6 -> {
-                int newLeader = slea.readInt();
-                changePartyLeader(client, newLeader);
-            }
-        }
-    }
-
     private static void changePartyLeader(MapleClient client, int newLeader) {
         client.getPlayer().getParty().ifPresent(p -> changePartyLeader(client, p, newLeader));
     }
@@ -79,7 +54,7 @@ public final class PartyOperationHandler extends AbstractMaplePacketHandler {
 
     private static void inviteToParty(MapleClient client, String name) {
         MapleCharacter character = client.getPlayer();
-        MapleCharacter invited = client.getWorldServer().getPlayerStorage().getCharacterByName(name);
+        MapleCharacter invited = client.getWorldServer().getPlayerStorage().getCharacterByName(name).orElse(null);
         if (invited == null) {
             client.announce(MaplePacketCreator.partyStatusMessage(19));
             return;
@@ -149,5 +124,30 @@ public final class PartyOperationHandler extends AbstractMaplePacketHandler {
 
     private static void createParty(MapleClient client) {
         MapleParty.createParty(client.getPlayer(), false);
+    }
+
+    @Override
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient client) {
+        int operation = slea.readByte();
+        switch (operation) {
+            case 1 -> createParty(client);
+            case 2 -> leaveOrDisbandParty(client);
+            case 3 -> {
+                int partyId = slea.readInt();
+                joinParty(client, partyId);
+            }
+            case 4 -> {
+                String name = slea.readMapleAsciiString();
+                inviteToParty(client, name);
+            }
+            case 5 -> {
+                int characterId = slea.readInt();
+                expelFromParty(client, characterId);
+            }
+            case 6 -> {
+                int newLeader = slea.readInt();
+                changePartyLeader(client, newLeader);
+            }
+        }
     }
 }

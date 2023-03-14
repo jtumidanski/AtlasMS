@@ -39,7 +39,11 @@ import tools.FilePrinter;
 import tools.MaplePacketCreator;
 import tools.Pair;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -218,10 +222,7 @@ public class FredrickProcessor {
 
                         World wserv = Server.getInstance().getWorld(cid.getRight());
                         if (wserv != null) {
-                            MapleCharacter chr = wserv.getPlayerStorage().getCharacterById(cid.getLeft());
-                            if (chr != null) {
-                                chr.setMerchantMeso(0);
-                            }
+                            wserv.getPlayerStorage().getCharacterById(cid.getLeft()).ifPresent(c -> c.setMerchantMeso(0));
                         }
                     }
 

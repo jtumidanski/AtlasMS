@@ -6,22 +6,24 @@ import net.AbstractMaplePacketHandler;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public class FamilyPreceptsHandler extends AbstractMaplePacketHandler {
 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        MapleFamily family = c.getPlayer().getFamily();
-        if (family == null) {
+        Optional<MapleFamily> family = c.getPlayer().getFamily();
+        if (family.isEmpty()) {
             return;
         }
-        if (family.getLeader().getChr() != c.getPlayer()) {
+        if (family.get().getLeader().getChr() != c.getPlayer()) {
             return; //only the leader can set the precepts
         }
         String newPrecepts = slea.readMapleAsciiString();
         if (newPrecepts.length() > 200) {
             return;
         }
-        family.setMessage(newPrecepts, true);
+        family.get().setMessage(newPrecepts, true);
         //family.broadcastFamilyInfoUpdate(); //probably don't need to broadcast for this?
         c.announce(MaplePacketCreator.getFamilyInfo(c.getPlayer().getFamilyEntry()));
     }

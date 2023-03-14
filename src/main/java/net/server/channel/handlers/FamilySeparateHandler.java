@@ -27,6 +27,8 @@ import net.AbstractMaplePacketHandler;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public class FamilySeparateHandler extends AbstractMaplePacketHandler {
 
     private static int separateRepCost(MapleFamilyEntry junior) {
@@ -43,14 +45,14 @@ public class FamilySeparateHandler extends AbstractMaplePacketHandler {
         if (!YamlConfig.config.server.USE_FAMILY_SYSTEM) {
             return;
         }
-        MapleFamily oldFamily = c.getPlayer().getFamily();
-        if (oldFamily == null) {
+        Optional<MapleFamily> oldFamily = c.getPlayer().getFamily();
+        if (oldFamily.isEmpty()) {
             return;
         }
         MapleFamilyEntry forkOn;
         boolean isSenior;
         if (slea.available() > 0) { //packet 0x95 doesn't send id, since there is only one senior
-            forkOn = c.getPlayer().getFamily().getEntryByID(slea.readInt());
+            forkOn = c.getPlayer().getFamily().map(f -> f.getEntryByID(slea.readInt())).orElse(null);
             if (!c.getPlayer().getFamilyEntry().isJunior(forkOn)) {
                 return; //packet editing?
             }

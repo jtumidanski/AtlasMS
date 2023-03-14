@@ -31,7 +31,6 @@ import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.MonitoredReentrantLock;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
 import net.server.channel.Channel;
-import net.server.guild.MapleGuild;
 import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import net.server.world.World;
@@ -47,7 +46,17 @@ import tools.exceptions.EventInstanceInProgressException;
 
 import javax.script.Invocable;
 import javax.script.ScriptException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -692,8 +701,13 @@ public class EventManager {
         return startInstance(-1, eim, ldr.getName(), ldr);
     }
 
-    public boolean startInstance(int lobbyId, EventInstanceManager eim, String ldr) {
-        return startInstance(-1, eim, ldr, eim.getEm().getChannelServer().getPlayerStorage().getCharacterByName(ldr));  // things they make me do...
+    public boolean startInstance(int lobbyId, EventInstanceManager eim, String leaderName) {
+        return eim.getEm()
+                .getChannelServer()
+                .getPlayerStorage()
+                .getCharacterByName(leaderName)
+                .filter(character -> startInstance(-1, eim, leaderName, character))
+                .isPresent();
     }
 
     public boolean startInstance(int lobbyId, EventInstanceManager eim, String ldr, MapleCharacter leader) {
@@ -790,20 +804,16 @@ public class EventManager {
     }
 
     private void exportReadyGuild(Integer guildId) {
-        MapleGuild mg = server.getGuild(guildId);
         String callout = "[Guild Quest] Your guild has been registered to attend to the Sharenian Guild Quest at channel " + this.getChannelServer().getId()
                 + " and HAS JUST STARTED THE STRATEGY PHASE. After 3 minutes, no more guild members will be allowed to join the effort."
                 + " Check out Shuang at the excavation site in Perion for more info.";
-
-        mg.dropMessage(6, callout);
+        server.getGuild(guildId).ifPresent(g -> g.dropMessage(6, callout));
     }
 
     private void exportMovedQueueToGuild(Integer guildId, int place) {
-        MapleGuild mg = server.getGuild(guildId);
         String callout = "[Guild Quest] Your guild has been registered to attend to the Sharenian Guild Quest at channel " + this.getChannelServer().getId()
                 + " and is currently on the " + GameConstants.ordinal(place) + " place on the waiting queue.";
-
-        mg.dropMessage(6, callout);
+        server.getGuild(guildId).ifPresent(g -> g.dropMessage(6, callout));
     }
 
     private List<Integer> getNextGuildQueue() {
@@ -878,9 +888,9 @@ public class EventManager {
     }
 
     public boolean attemptStartGuildInstance() {
-        MapleCharacter chr = null;
+        Optional<MapleCharacter> chr = Optional.empty();
         List<Integer> guildInstance = null;
-        while (chr == null) {
+        while (chr.isEmpty()) {
             guildInstance = getNextGuildQueue();
             if (guildInstance == null) {
                 return false;
@@ -889,7 +899,7 @@ public class EventManager {
             chr = cserv.getPlayerStorage().getCharacterById(guildInstance.get(1));
         }
 
-        if (startInstance(chr)) {
+        if (startInstance(chr.get())) {
             exportReadyGuild(guildInstance.get(0));
             return true;
         } else {

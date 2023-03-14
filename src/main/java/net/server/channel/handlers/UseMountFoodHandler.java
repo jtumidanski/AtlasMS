@@ -33,19 +33,21 @@ import net.AbstractMaplePacketHandler;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 /**
  * @author PurpleMadness
  * @author Ronan
  */
 public final class UseMountFoodHandler extends AbstractMaplePacketHandler {
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.skip(4);
         short pos = slea.readShort();
         int itemid = slea.readInt();
 
         MapleCharacter chr = c.getPlayer();
-        MapleMount mount = chr.getMount();
+        Optional<MapleMount> mount = chr.getMount();
         MapleInventory useInv = chr.getInventory(MapleInventoryType.USE);
 
         if (c.tryacquireClient()) {
@@ -55,19 +57,19 @@ public final class UseMountFoodHandler extends AbstractMaplePacketHandler {
                 useInv.lockInventory();
                 try {
                     Item item = useInv.getItem(pos);
-                    if (item != null && item.getItemId() == itemid && mount != null) {
-                        int curTiredness = mount.getTiredness();
+                    if (item != null && item.getItemId() == itemid && mount.isPresent()) {
+                        int curTiredness = mount.get().getTiredness();
                         int healedTiredness = Math.min(curTiredness, 30);
 
                         float healedFactor = (float) healedTiredness / 30;
-                        mount.setTiredness(curTiredness - healedTiredness);
+                        mount.get().setTiredness(curTiredness - healedTiredness);
 
                         if (healedFactor > 0.0f) {
-                            mount.setExp(mount.getExp() + (int) Math.ceil(healedFactor * (2 * mount.getLevel() + 6)));
-                            int level = mount.getLevel();
-                            boolean levelup = mount.getExp() >= ExpTable.getMountExpNeededForLevel(level) && level < 31;
+                            mount.get().setExp(mount.get().getExp() + (int) Math.ceil(healedFactor * (2 * mount.get().getLevel() + 6)));
+                            int level = mount.get().getLevel();
+                            boolean levelup = mount.get().getExp() >= ExpTable.getMountExpNeededForLevel(level) && level < 31;
                             if (levelup) {
-                                mount.setLevel(level + 1);
+                                mount.get().setLevel(level + 1);
                             }
 
                             mountLevelup = levelup;
@@ -80,7 +82,7 @@ public final class UseMountFoodHandler extends AbstractMaplePacketHandler {
                 }
 
                 if (mountLevelup != null) {
-                    chr.getMap().broadcastMessage(MaplePacketCreator.updateMount(chr.getId(), mount, mountLevelup));
+                    chr.getMap().broadcastMessage(MaplePacketCreator.updateMount(chr.getId(), mount.get(), mountLevelup));
                 }
             } finally {
                 c.releaseClient();

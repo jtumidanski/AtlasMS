@@ -23,7 +23,10 @@
 */
 package client.command.commands.gm2;
 
-import client.*;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.MapleJob;
+import client.SkillFactory;
 import client.command.Command;
 import provider.MapleData;
 import provider.MapleDataProviderFactory;
@@ -41,7 +44,7 @@ public class ResetSkillCommand extends Command {
         for (MapleData skill_ : MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/" + "String.wz")).getData("Skill.img").getChildren()) {
             try {
                 SkillFactory.getSkill(Integer.parseInt(skill_.getName()))
-                                .ifPresent(s -> player.changeSkillLevel(s, (byte) 0, s.getMaxLevel(), -1));
+                        .ifPresent(s -> player.changeSkillLevel(s, (byte) 0, s.getMaxLevel(), -1));
             } catch (NumberFormatException nfe) {
                 nfe.printStackTrace();
                 break;
@@ -50,10 +53,10 @@ public class ResetSkillCommand extends Command {
 
         if (player.getJob().isA(MapleJob.ARAN1) || player.getJob().isA(MapleJob.LEGEND)) {
             SkillFactory.getSkill(5001005)
-                            .ifPresent(s -> player.changeSkillLevel(s, (byte) -1, -1, -1));
+                    .ifPresent(s -> player.changeSkillLevel(s, (byte) -1, -1, -1));
         } else {
             SkillFactory.getSkill(21001001)
-                            .ifPresent(s -> player.changeSkillLevel(s, (byte) -1, -1, -1));
+                    .ifPresent(s -> player.changeSkillLevel(s, (byte) -1, -1, -1));
         }
 
         player.yellowMessage("Skills reseted.");

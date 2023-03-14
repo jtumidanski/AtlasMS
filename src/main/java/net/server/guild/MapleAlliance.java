@@ -131,8 +131,11 @@ public class MapleAlliance {
                     Server.getInstance().resetAllianceGuildPlayersRank(guilds.get(i));
 
                     MapleCharacter chr = guildMasters.get(i);
-                    chr.getMGC().setAllianceRank((i == 0) ? 1 : 2);
-                    Server.getInstance().getGuild(chr.getGuildId()).getMGC(chr.getId()).setAllianceRank((i == 0) ? 1 : 2);
+                    int rank = (i == 0) ? 1 : 2;
+                    chr.getMGC().setAllianceRank(rank);
+                    Server.getInstance().getGuild(chr.getGuildId())
+                            .map(g -> g.getMGC(chr.getId()))
+                            .ifPresent(mgc -> mgc.setAllianceRank(rank));
                     chr.saveGuildStatus();
                 }
 
@@ -299,21 +302,25 @@ public class MapleAlliance {
 
     public static boolean removeGuildFromAlliance(int allianceId, int guildId, int worldId) {
         Server srv = Server.getInstance();
-        MapleAlliance alliance = srv.getAlliance(allianceId);
-
-        if (alliance.getLeader().getGuildId() == guildId) {
+        Optional<MapleAlliance> alliance = srv.getAlliance(allianceId);
+        if (alliance.isEmpty()) {
             return false;
         }
 
-        srv.allianceMessage(alliance.getId(), MaplePacketCreator.removeGuildFromAlliance(alliance, guildId, worldId), -1, -1);
-        srv.removeGuildFromAlliance(alliance.getId(), guildId);
+        if (alliance.flatMap(MapleAlliance::getLeader).map(MapleGuildCharacter::getGuildId).orElse(-1) == guildId) {
+            return false;
+        }
+
+        srv.allianceMessage(alliance.get().getId(), MaplePacketCreator.removeGuildFromAlliance(alliance.get(), guildId, worldId), -1, -1);
+        srv.removeGuildFromAlliance(alliance.get().getId(), guildId);
         removeGuildFromAllianceOnDb(guildId);
 
-        srv.allianceMessage(alliance.getId(), MaplePacketCreator.getGuildAlliances(alliance, worldId), -1, -1);
-        srv.allianceMessage(alliance.getId(), MaplePacketCreator.allianceNotice(alliance.getId(), alliance.getNotice()), -1, -1);
-        srv.guildMessage(guildId, MaplePacketCreator.disbandAlliance(alliance.getId()));
+        srv.allianceMessage(alliance.get().getId(), MaplePacketCreator.getGuildAlliances(alliance.get(), worldId), -1, -1);
+        srv.allianceMessage(alliance.get().getId(), MaplePacketCreator.allianceNotice(alliance.get().getId(), alliance.get().getNotice()), -1, -1);
+        srv.guildMessage(guildId, MaplePacketCreator.disbandAlliance(alliance.get().getId()));
 
-        alliance.dropMessage("[" + srv.getGuild(guildId, worldId).getName() + "] guild has left the union.");
+        String guildName = srv.getGuild(guildId, worldId).map(MapleGuild::getName).orElse("UNKNOWN");
+        alliance.get().dropMessage("[" + guildName + "] guild has left the union.");
         return true;
     }
 
@@ -494,18 +501,14 @@ public class MapleAlliance {
         return name;
     }
 
-    public MapleGuildCharacter getLeader() {
+    public Optional<MapleGuildCharacter> getLeader() {
         synchronized (guilds) {
-            for (Integer gId : guilds) {
-                MapleGuild guild = Server.getInstance().getGuild(gId);
-                MapleGuildCharacter mgc = guild.getMGC(guild.getLeaderId());
-
-                if (mgc.getAllianceRank() == 1) {
-                    return mgc;
-                }
-            }
-
-            return null;
+            return guilds.stream()
+                    .map(id -> Server.getInstance().getGuild(id))
+                    .flatMap(Optional::stream)
+                    .map(g -> g.getMGC(g.getLeaderId()))
+                    .filter(mgc -> mgc.getAllianceRank() == 1)
+                    .findFirst();
         }
     }
 
@@ -515,10 +518,10 @@ public class MapleAlliance {
 
     public void dropMessage(int type, String message) {
         synchronized (guilds) {
-            for (Integer gId : guilds) {
-                MapleGuild guild = Server.getInstance().getGuild(gId);
-                guild.dropMessage(type, message);
-            }
+            guilds.stream()
+                    .map(id -> Server.getInstance().getGuild(id))
+                    .flatMap(Optional::stream)
+                    .forEach(g -> g.dropMessage(type, message));
         }
     }
 

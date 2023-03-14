@@ -40,9 +40,9 @@ public class DcCommand extends Command {
             return;
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim == null) {
-            victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
+            victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
             if (victim == null) {
                 victim = player.getMap().getCharacterByName(params[0]);
                 if (victim != null) {

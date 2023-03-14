@@ -23,7 +23,12 @@ package net.server.channel.handlers;
 
 import net.AbstractMaplePacketHandler;
 import server.maps.AnimatedMapleMapObject;
-import server.movement.*;
+import server.movement.AbsoluteLifeMovement;
+import server.movement.ChangeEquip;
+import server.movement.JumpDownMovement;
+import server.movement.LifeMovementFragment;
+import server.movement.RelativeLifeMovement;
+import server.movement.TeleportMovement;
 import tools.data.input.LittleEndianAccessor;
 import tools.exceptions.EmptyMovementException;
 

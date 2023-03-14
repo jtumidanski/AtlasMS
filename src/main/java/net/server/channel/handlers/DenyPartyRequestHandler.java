@@ -30,20 +30,22 @@ import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public final class DenyPartyRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readByte();
         String[] cname = slea.readMapleAsciiString().split("PS: ");
 
-        MapleCharacter cfrom = c.getChannelServer().getPlayerStorage().getCharacterByName(cname[cname.length - 1]);
-        if (cfrom != null) {
+        Optional<MapleCharacter> cfrom = c.getChannelServer().getPlayerStorage().getCharacterByName(cname[cname.length - 1]);
+        if (cfrom.isPresent()) {
             MapleCharacter chr = c.getPlayer();
 
-            if (MapleInviteCoordinator.answerInvite(InviteType.PARTY, chr.getId(), cfrom.getPartyId(), false).result == InviteResult.DENIED) {
+            if (MapleInviteCoordinator.answerInvite(InviteType.PARTY, chr.getId(), cfrom.get().getPartyId(), false).result == InviteResult.DENIED) {
                 chr.updatePartySearchAvailability(chr.getParty().isEmpty());
-                cfrom.getClient().announce(MaplePacketCreator.partyStatusMessage(23, chr.getName()));
+                cfrom.get().getClient().announce(MaplePacketCreator.partyStatusMessage(23, chr.getName()));
             }
         }
     }

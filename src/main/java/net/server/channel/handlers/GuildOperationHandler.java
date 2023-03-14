@@ -28,7 +28,6 @@ import constants.game.GameConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import net.server.coordinator.matchchecker.MatchCheckerListenerFactory.MatchCheckerType;
-import net.server.guild.MapleAlliance;
 import net.server.guild.MapleGuild;
 import net.server.guild.MapleGuildResponse;
 import net.server.world.MapleParty;
@@ -143,14 +142,14 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
 
                 c.announce(MaplePacketCreator.showGuildInfo(mc));
 
-                allianceId = mc.getGuild().getAllianceId();
+                allianceId = mc.getGuild().map(MapleGuild::getAllianceId).orElse(0);
                 if (allianceId > 0) {
-                    Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                    Server.getInstance().getAlliance(allianceId).ifPresent(a -> a.updateAlliancePackets(mc));
                 }
 
                 mc.saveGuildStatus(); // update database
-                mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildNameChanged(mc.getId(), mc.getGuild().getName())); // thanks Vcoc for pointing out an issue with updating guild tooltip to players in the map
-                mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildMarkChanged(mc.getId(), mc.getGuild()));
+                mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildNameChanged(mc.getId(), mc.getGuild().map(MapleGuild::getName).orElse("")));
+                mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildMarkChanged(mc.getId(), mc.getGuild().orElseThrow()));
                 break;
             case 0x07:
                 cid = slea.readInt();
@@ -160,14 +159,14 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                     return;
                 }
 
-                allianceId = mc.getGuild().getAllianceId();
+                allianceId = mc.getGuild().map(MapleGuild::getAllianceId).orElse(0);
 
                 c.announce(MaplePacketCreator.updateGP(mc.getGuildId(), 0));
                 Server.getInstance().leaveGuild(mc.getMGC());
 
                 c.announce(MaplePacketCreator.showGuildInfo(null));
                 if (allianceId > 0) {
-                    Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                    Server.getInstance().getAlliance(allianceId).ifPresent(a -> a.updateAlliancePackets(mc));
                 }
 
                 mc.getMGC().setGuildId(0);
@@ -176,7 +175,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildNameChanged(mc.getId(), ""));
                 break;
             case 0x08:
-                allianceId = mc.getGuild().getAllianceId();
+                allianceId = mc.getGuild().map(MapleGuild::getAllianceId).orElse(0);
 
                 cid = slea.readInt();
                 name = slea.readMapleAsciiString();
@@ -187,7 +186,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
 
                 Server.getInstance().expelMember(mc.getMGC(), name, cid);
                 if (allianceId > 0) {
-                    Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
+                    Server.getInstance().getAlliance(allianceId).ifPresent(a -> a.updateAlliancePackets(mc));
                 }
                 break;
             case 0x0d:
@@ -229,14 +228,13 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 byte logocolor = slea.readByte();
                 Server.getInstance().setGuildEmblem(mc.getGuildId(), bg, bgcolor, logo, logocolor);
 
-                if (mc.getGuild() != null && mc.getGuild().getAllianceId() > 0) {
-                    MapleAlliance alliance = mc.getAlliance();
-                    Server.getInstance().allianceMessage(alliance.getId(), MaplePacketCreator.getGuildAlliances(alliance, c.getWorld()), -1, -1);
+                if (mc.getGuild().isPresent() && mc.getGuild().map(MapleGuild::getAllianceId).orElse(0) > 0) {
+                    mc.getAlliance().ifPresent(a -> Server.getInstance().allianceMessage(a.getId(), MaplePacketCreator.getGuildAlliances(a, c.getWorld()), -1, -1));
                 }
 
                 mc.gainMeso(-YamlConfig.config.server.CHANGE_EMBLEM_COST, true, false, true);
-                mc.getGuild().broadcastNameChanged();
-                mc.getGuild().broadcastEmblemChanged();
+                mc.getGuild().ifPresent(MapleGuild::broadcastNameChanged);
+                mc.getGuild().ifPresent(MapleGuild::broadcastEmblemChanged);
                 break;
             case 0x10:
                 if (mc.getGuildId() <= 0 || mc.getGuildRank() > 2) {
@@ -264,13 +262,11 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 if (leaderid != -1) {
                     boolean result = slea.readByte() != 0;
                     if (result && wserv.getMatchCheckerCoordinator().isMatchConfirmationActive(mc.getId())) {
-                        MapleCharacter leader = wserv.getPlayerStorage().getCharacterById(leaderid);
-                        if (leader != null) {
-                            int partyid = leader.getPartyId();
-                            if (partyid != -1) {
-                                MapleParty.joinParty(mc, partyid, true);    // GMS gimmick "party to form guild" recalled thanks to Vcoc
-                            }
-                        }
+                        wserv.getPlayerStorage()
+                                .getCharacterById(leaderid)
+                                .map(MapleCharacter::getPartyId)
+                                .filter(id -> id != -1)
+                                .ifPresent(id -> MapleParty.joinParty(mc, id, true));
                     }
 
                     wserv.getMatchCheckerCoordinator().answerMatchConfirmation(mc.getId(), result);

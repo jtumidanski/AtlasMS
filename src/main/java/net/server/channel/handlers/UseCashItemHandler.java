@@ -21,10 +21,23 @@
  */
 package net.server.channel.handlers;
 
-import client.*;
-import client.creator.veteran.*;
-import client.inventory.*;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.Skill;
+import client.SkillFactory;
+import client.SkillMacro;
+import client.creator.veteran.BowmanCreator;
+import client.creator.veteran.MagicianCreator;
+import client.creator.veteran.PirateCreator;
+import client.creator.veteran.ThiefCreator;
+import client.creator.veteran.WarriorCreator;
+import client.inventory.Equip;
 import client.inventory.Equip.ScrollResult;
+import client.inventory.Item;
+import client.inventory.MapleInventory;
+import client.inventory.MapleInventoryType;
+import client.inventory.MaplePet;
+import client.inventory.ModifyInventory;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import client.inventory.manipulator.MapleKarmaManipulator;
 import client.processor.npc.DueyProcessor;
@@ -39,7 +52,12 @@ import server.MapleItemInformationProvider;
 import server.MapleShop;
 import server.MapleShopFactory;
 import server.TimerManager;
-import server.maps.*;
+import server.maps.AbstractMapleMapObject;
+import server.maps.FieldLimit;
+import server.maps.MapleKite;
+import server.maps.MapleMap;
+import server.maps.MaplePlayerShopItem;
+import server.maps.MapleTVEffect;
 import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
@@ -152,8 +170,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                 }
             } else {
                 String name = slea.readMapleAsciiString();
-                MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(name);
-
+                MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(name).orElse(null);
                 if (victim != null) {
                     MapleMap targetMap = victim.getMap();
                     if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (targetMap.getForcedReturnId() == 999999999 || targetMap.getId() < 100000000)) {
@@ -331,7 +348,7 @@ public final class UseCashItemHandler extends AbstractMaplePacketHandler {
                             slea.readByte();
                         }
                         if (tvType != 4) {
-                            victim = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString());
+                            victim = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString()).orElse(null);
                         }
                     }
                     List<String> messages = new LinkedList<>();

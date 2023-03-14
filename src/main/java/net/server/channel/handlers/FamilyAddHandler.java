@@ -30,40 +30,64 @@ import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
-/**
- * @author Jay Estrella
- * @author Ubaware
- */
+import java.util.Optional;
+
 public final class FamilyAddHandler extends AbstractMaplePacketHandler {
+    private static void handlePacket(MapleClient c, MapleCharacter addChr) {
+        MapleCharacter chr = c.getPlayer();
+        if (addChr == chr) {
+            c.announce(MaplePacketCreator.enableActions());
+            return;
+        }
+
+        if (addChr.getMap() != chr.getMap() || (addChr.isHidden()) && chr.gmLevel() < addChr.gmLevel()) {
+            c.announce(MaplePacketCreator.sendFamilyMessage(69, 0));
+            return;
+        }
+
+        if (addChr.getLevel() <= 10) {
+            c.announce(MaplePacketCreator.sendFamilyMessage(77, 0));
+            return;
+        }
+
+        if (Math.abs(addChr.getLevel() - chr.getLevel()) > 20) {
+            c.announce(MaplePacketCreator.sendFamilyMessage(72, 0));
+            return;
+        }
+
+        if (addChr.getFamily().isPresent() && addChr.getFamily() == chr.getFamily()) {
+            c.announce(MaplePacketCreator.enableActions());
+            return;
+        }
+
+        if (MapleInviteCoordinator.hasInvite(InviteType.FAMILY, addChr.getId())) {
+            c.announce(MaplePacketCreator.sendFamilyMessage(73, 0));
+            return;
+        }
+
+        if (chr.getFamily().isPresent() && addChr.getFamily().isPresent() && addChr.getFamily().get().getTotalGenerations() + chr.getFamily().get().getTotalGenerations() > YamlConfig.config.server.FAMILY_MAX_GENERATIONS) {
+            c.announce(MaplePacketCreator.sendFamilyMessage(76, 0));
+            return;
+        }
+
+        MapleInviteCoordinator.createInvite(InviteType.FAMILY, chr, addChr, addChr.getId());
+        addChr.getClient().announce(MaplePacketCreator.sendFamilyInvite(chr.getId(), chr.getName()));
+        chr.dropMessage("The invite has been sent.");
+        c.announce(MaplePacketCreator.enableActions());
+    }
+
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (!YamlConfig.config.server.USE_FAMILY_SYSTEM) {
             return;
         }
         String toAdd = slea.readMapleAsciiString();
-        MapleCharacter addChr = c.getChannelServer().getPlayerStorage().getCharacterByName(toAdd);
-        MapleCharacter chr = c.getPlayer();
-        if (addChr == null) {
+        Optional<MapleCharacter> addChr = c.getChannelServer().getPlayerStorage().getCharacterByName(toAdd);
+        if (addChr.isEmpty()) {
             c.announce(MaplePacketCreator.sendFamilyMessage(65, 0));
-        } else if (addChr == chr) { //only possible through packet editing/client editing i think?
-            c.announce(MaplePacketCreator.enableActions());
-        } else if (addChr.getMap() != chr.getMap() || (addChr.isHidden()) && chr.gmLevel() < addChr.gmLevel()) {
-            c.announce(MaplePacketCreator.sendFamilyMessage(69, 0));
-        } else if (addChr.getLevel() <= 10) {
-            c.announce(MaplePacketCreator.sendFamilyMessage(77, 0));
-        } else if (Math.abs(addChr.getLevel() - chr.getLevel()) > 20) {
-            c.announce(MaplePacketCreator.sendFamilyMessage(72, 0));
-        } else if (addChr.getFamily() != null && addChr.getFamily() == chr.getFamily()) { //same family
-            c.announce(MaplePacketCreator.enableActions());
-        } else if (MapleInviteCoordinator.hasInvite(InviteType.FAMILY, addChr.getId())) {
-            c.announce(MaplePacketCreator.sendFamilyMessage(73, 0));
-        } else if (chr.getFamily() != null && addChr.getFamily() != null && addChr.getFamily().getTotalGenerations() + chr.getFamily().getTotalGenerations() > YamlConfig.config.server.FAMILY_MAX_GENERATIONS) {
-            c.announce(MaplePacketCreator.sendFamilyMessage(76, 0));
-        } else {
-            MapleInviteCoordinator.createInvite(InviteType.FAMILY, chr, addChr, addChr.getId());
-            addChr.getClient().announce(MaplePacketCreator.sendFamilyInvite(chr.getId(), chr.getName()));
-            chr.dropMessage("The invite has been sent.");
-            c.announce(MaplePacketCreator.enableActions());
+            return;
         }
+
+        handlePacket(c, addChr.get());
     }
 }

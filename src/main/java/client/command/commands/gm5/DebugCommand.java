@@ -36,7 +36,6 @@ import server.maps.MaplePortal;
 import server.maps.MapleReactor;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
 
 public class DebugCommand extends Command {
@@ -110,10 +109,10 @@ public class DebugCommand extends Command {
                 break;
 
             case "event":
-                if (player.getEventInstance() == null) {
+                if (player.getEventInstance().isEmpty()) {
                     player.dropMessage(6, "Player currently not in an event.");
                 } else {
-                    player.dropMessage(6, "Current event name: " + player.getEventInstance().getName() + ".");
+                    player.dropMessage(6, "Current event name: " + player.getEventInstance().get().getName() + ".");
                 }
                 break;
 

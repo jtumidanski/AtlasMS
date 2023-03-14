@@ -30,25 +30,32 @@ import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class SpouseChatHandler extends AbstractMaplePacketHandler {
+    private static void spouseChat(MapleClient c, String msg, MapleCharacter spouse) {
+        spouse.announce(MaplePacketCreator.OnCoupleMessage(c.getPlayer().getName(), msg, true));
+        c.announce(MaplePacketCreator.OnCoupleMessage(c.getPlayer().getName(), msg, true));
+        if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
+            LogHelper.logChat(c, "Spouse", msg);
+        }
+    }
+
+    private static void spouseChatError(MapleClient c) {
+        c.getPlayer().dropMessage(5, "Your spouse is currently offline.");
+    }
+
     @Override
     public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readMapleAsciiString();//recipient
         String msg = slea.readMapleAsciiString();
 
         int partnerId = c.getPlayer().getPartnerId();
-        if (partnerId > 0) { // yay marriage
-            MapleCharacter spouse = c.getWorldServer().getPlayerStorage().getCharacterById(partnerId);
-            if (spouse != null) {
-                spouse.announce(MaplePacketCreator.OnCoupleMessage(c.getPlayer().getName(), msg, true));
-                c.announce(MaplePacketCreator.OnCoupleMessage(c.getPlayer().getName(), msg, true));
-                if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
-                    LogHelper.logChat(c, "Spouse", msg);
-                }
-            } else {
-                c.getPlayer().dropMessage(5, "Your spouse is currently offline.");
-            }
-        } else {
+        if (partnerId <= 0) {
             c.getPlayer().dropMessage(5, "You don't have a spouse.");
+            return;
         }
+
+        c.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterById(partnerId)
+                .ifPresentOrElse(s -> spouseChat(c, msg, s), () -> spouseChatError(c));
     }
 }

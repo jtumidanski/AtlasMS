@@ -40,7 +40,7 @@ public class GiveVpCommand extends Command {
             return;
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim != null) {
             victim.getClient().addVotePoints(Integer.parseInt(params[1]));
             player.message("VP given.");

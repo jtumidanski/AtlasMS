@@ -21,7 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package scripting.npc;
 
-import client.*;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.MapleJob;
+import client.MapleSkinColor;
+import client.MapleStat;
+import client.SkillFactory;
 import client.inventory.Item;
 import client.inventory.ItemFactory;
 import client.inventory.MaplePet;
@@ -39,8 +44,14 @@ import net.server.world.MaplePartyCharacter;
 import provider.MapleData;
 import provider.MapleDataProviderFactory;
 import scripting.AbstractPlayerInteraction;
-import server.*;
+import server.MapleItemInformationProvider;
+import server.MapleMarriage;
+import server.MapleShop;
+import server.MapleShopFactory;
+import server.MapleSkillbookInformationProvider;
 import server.MapleSkillbookInformationProvider.SkillBookEntry;
+import server.MapleStatEffect;
+import server.TimerManager;
 import server.events.gm.MapleEvent;
 import server.expeditions.MapleExpedition;
 import server.expeditions.MapleExpeditionType;
@@ -64,8 +75,15 @@ import tools.packets.Wedding;
 import java.awt.*;
 import java.io.File;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Matze
@@ -415,12 +433,16 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void upgradeAlliance() {
-        MapleAlliance alliance = Server.getInstance().getAlliance(c.getPlayer().getGuild().getAllianceId());
-        alliance.increaseCapacity(1);
+        getPlayer().getGuild()
+                .map(MapleGuild::getAllianceId)
+                .flatMap(id -> Server.getInstance().getAlliance(id))
+                .ifPresent(this::upgradeAlliance);
+    }
 
+    private void upgradeAlliance(MapleAlliance alliance) {
+        alliance.increaseCapacity(1);
         Server.getInstance().allianceMessage(alliance.getId(), MaplePacketCreator.getGuildAlliances(alliance, c.getWorld()), -1, -1);
         Server.getInstance().allianceMessage(alliance.getId(), MaplePacketCreator.allianceNotice(alliance.getId(), alliance.getNotice()), -1, -1);
-
         c.announce(MaplePacketCreator.updateAllianceInfo(alliance, c.getWorld()));  // thanks Vcoc for finding an alliance update to leader issue
     }
 
@@ -437,7 +459,11 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public int getAllianceCapacity() {
-        return Server.getInstance().getAlliance(getPlayer().getGuild().getAllianceId()).getCapacity();
+        return getPlayer().getGuild()
+                .map(MapleGuild::getAllianceId)
+                .flatMap(id -> Server.getInstance().getAlliance(id))
+                .map(MapleAlliance::getCapacity)
+                .orElse(0);
     }
 
     public boolean hasMerchant() {
@@ -484,7 +510,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         }
     }
 
-    public MapleCharacter getMapleCharacter(String player) {
+    public Optional<MapleCharacter> getMapleCharacter(String player) {
         return Server.getInstance().getWorld(c.getWorld()).getChannel(c.getChannel()).getPlayerStorage().getCharacterByName(player);
     }
 
@@ -690,7 +716,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         }
     }
 
-    public MapleCharacter getChrById(int id) {
+    public Optional<MapleCharacter> getChrById(int id) {
         return c.getChannelServer().getPlayerStorage().getCharacterById(id);
     }
 
@@ -1081,7 +1107,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void sendMarriageWishlist(boolean groom) {
         MapleCharacter player = this.getPlayer();
-        MapleMarriage marriage = player.getMarriageInstance();
+        MapleMarriage marriage = player.getMarriageInstance().orElse(null);
         if (marriage != null) {
             int cid = marriage.getIntProperty(groom ? "groomId" : "brideId");
             MapleCharacter chr = marriage.getPlayerById(cid);
@@ -1101,7 +1127,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public boolean createMarriageWishlist() {
-        MapleMarriage marriage = this.getPlayer().getMarriageInstance();
+        MapleMarriage marriage = this.getPlayer().getMarriageInstance().orElse(null);
         if (marriage != null) {
             Boolean groom = marriage.isMarriageGroom(this.getPlayer());
             if (groom != null) {

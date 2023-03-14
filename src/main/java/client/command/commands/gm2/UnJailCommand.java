@@ -32,6 +32,20 @@ public class UnJailCommand extends Command {
         setDescription("");
     }
 
+    private static void unjail(MapleCharacter player, MapleCharacter target) {
+        if (target.getJailExpirationTimeLeft() <= 0) {
+            player.message("This player is already free.");
+            return;
+        }
+        target.removeJailExpirationTime();
+        target.message("By lack of concrete proof you are now unjailed. Enjoy freedom!");
+        player.message(target.getName() + " was unjailed.");
+    }
+
+    private static void unjailError(MapleCharacter player, String targetName) {
+        player.message("Player '" + targetName + "' could not be found.");
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
@@ -39,18 +53,11 @@ public class UnJailCommand extends Command {
             player.yellowMessage("Syntax: !unjail <playername>");
             return;
         }
+        String targetName = params[0];
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim != null) {
-            if (victim.getJailExpirationTimeLeft() <= 0) {
-                player.message("This player is already free.");
-                return;
-            }
-            victim.removeJailExpirationTime();
-            victim.message("By lack of concrete proof you are now unjailed. Enjoy freedom!");
-            player.message(victim.getName() + " was unjailed.");
-        } else {
-            player.message("Player '" + params[0] + "' could not be found.");
-        }
+        c.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterByName(targetName)
+                .ifPresentOrElse(t -> unjail(c.getPlayer(), t), () -> unjailError(c.getPlayer(), targetName));
     }
 }

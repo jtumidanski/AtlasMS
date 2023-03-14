@@ -37,20 +37,56 @@ import tools.MaplePacketCreator;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public final class AdminCommandHandler extends AbstractMaplePacketHandler {
 
+    private static void issueWarn(MapleClient c, String victim, String message) {
+        c.getChannelServer()
+                .getPlayerStorage()
+                .getCharacterByName(victim)
+                .ifPresentOrElse(v -> sendWarningMessage(c, v, message), () -> sendWarningMessage(c));
+    }
+
+    private static void sendWarningMessage(MapleClient client, MapleCharacter target, String message) {
+        target.getClient().announce(MaplePacketCreator.serverNotice(1, message));
+        client.announce(MaplePacketCreator.getGMEffect(0x1E, (byte) 1));
+    }
+
+    private static void sendWarningMessage(MapleClient c) {
+        c.announce(MaplePacketCreator.getGMEffect(0x1E, (byte) 0));
+    }
+
+    private static void performHide(MapleClient c, byte hide) {
+        c.getPlayer().Hide(hide == 1);
+    }
+
+    private static void deprecatedBan(MapleClient c) {
+        c.getPlayer().yellowMessage("Please use !ban <IGN> <Reason>");
+    }
+
+    private static void setExp(MapleClient c, int exp) {
+        c.getPlayer().setExp(exp);
+    }
+
+    private static void killMonster(MapleClient c, int mobToKill, int amount) {
+        List<MapleMapObject> monsterx = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
+        for (int x = 0; x < amount; x++) {
+            MapleMonster monster = (MapleMonster) monsterx.get(x);
+            if (monster.getId() == mobToKill) {
+                c.getPlayer().getMap().killMonster(monster, c.getPlayer(), true);
+            }
+        }
+    }
+
     @Override
-    public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (!c.getPlayer().isGM()) {
             return;
         }
         byte mode = slea.readByte();
         String victim;
-        MapleCharacter target;
         switch (mode) {
             case 0x00: // Level1~Level8 & Package1~Package2
                 int[][] toSpawn = MapleItemInformationProvider.getInstance().getSummonMobs(slea.readInt());
@@ -79,10 +115,11 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
                 break;
             }
             case 0x02: // Exp
-                c.getPlayer().setExp(slea.readInt());
+                int exp = slea.readInt();
+                setExp(c, exp);
                 break;
             case 0x03: // /ban <name>
-                c.getPlayer().yellowMessage("Please use !ban <IGN> <Reason>");
+                deprecatedBan(c);
                 break;
             case 0x04: // /block <name> <duration (in days)> <HACK/BOT/AD/HARASS/CURSE/SCAM/MISCONDUCT/SELL/ICASH/TEMP/GM/IPROGRAM/MEGAPHONE>
                 victim = slea.readMapleAsciiString();
@@ -90,16 +127,16 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
                 int duration = slea.readInt();
                 String description = slea.readMapleAsciiString();
                 String reason = c.getPlayer().getName() + " used /ban to ban";
-                target = c.getChannelServer().getPlayerStorage().getCharacterByName(victim);
-                if (target != null) {
-                    String readableTargetName = MapleCharacter.makeMapleReadable(target.getName());
-                    String ip = target.getClient().getSession().getRemoteAddress().toString().split(":")[0];
+                Optional<MapleCharacter> target = c.getChannelServer().getPlayerStorage().getCharacterByName(victim);
+                if (target.isPresent()) {
+                    String readableTargetName = MapleCharacter.makeMapleReadable(target.get().getName());
+                    String ip = target.get().getClient().getSession().getRemoteAddress().toString().split(":")[0];
                     reason += readableTargetName + " (IP: " + ip + ")";
                     if (duration == -1) {
-                        target.ban(description + " " + reason);
+                        target.get().ban(description + " " + reason);
                     } else {
-                        target.block(type, duration, description);
-                        target.sendPolice(duration, reason, 6000);
+                        target.get().block(type, duration, description);
+                        target.get().sendPolice(duration, reason, 6000);
                     }
                     c.announce(MaplePacketCreator.getGMEffect(4, (byte) 0));
                 } else if (MapleCharacter.ban(victim, reason, false)) {
@@ -109,7 +146,8 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
                 }
                 break;
             case 0x10: // /h, information added by vana -- <and tele mode f1> ... hide ofcourse
-                c.getPlayer().Hide(slea.readByte() == 1);
+                byte hide = slea.readByte();
+                performHide(c, hide);
                 break;
             case 0x11: // Entering a map
                 switch (slea.readByte()) {
@@ -128,7 +166,9 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
             case 0x12: // Send
                 victim = slea.readMapleAsciiString();
                 int mapId = slea.readInt();
-                c.getChannelServer().getPlayerStorage().getCharacterByName(victim).changeMap(c.getChannelServer().getMapFactory().getMap(mapId));
+                c.getChannelServer().getPlayerStorage()
+                        .getCharacterByName(victim)
+                        .ifPresent(character -> character.changeMap(mapId));
                 break;
             case 0x15: // Kill
                 int mobToKill = slea.readInt();
@@ -159,13 +199,7 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
             case 0x1E: // Warn
                 victim = slea.readMapleAsciiString();
                 String message = slea.readMapleAsciiString();
-                target = c.getChannelServer().getPlayerStorage().getCharacterByName(victim);
-                if (target != null) {
-                    target.getClient().announce(MaplePacketCreator.serverNotice(1, message));
-                    c.announce(MaplePacketCreator.getGMEffect(0x1E, (byte) 1));
-                } else {
-                    c.announce(MaplePacketCreator.getGMEffect(0x1E, (byte) 0));
-                }
+                issueWarn(c, victim, message);
                 break;
             case 0x24:// /Artifact Ranking
                 break;
@@ -179,16 +213,6 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
             default:
                 System.out.println("New GM packet encountered (MODE : " + mode + ": " + slea);
                 break;
-        }
-    }
-
-    private static void killMonster(MapleClient c, int mobToKill, int amount) {
-        List<MapleMapObject> monsterx = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
-        for (int x = 0; x < amount; x++) {
-            MapleMonster monster = (MapleMonster) monsterx.get(x);
-            if (monster.getId() == mobToKill) {
-                c.getPlayer().getMap().killMonster(monster, c.getPlayer(), true);
-            }
         }
     }
 }

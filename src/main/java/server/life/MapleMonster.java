@@ -21,11 +21,25 @@
  */
 package server.life;
 
-import client.*;
+import client.MapleBuffStat;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.MapleFamilyEntry;
+import client.MapleJob;
+import client.Skill;
+import client.SkillFactory;
 import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import config.YamlConfig;
-import constants.skills.*;
+import constants.skills.Crusader;
+import constants.skills.FPMage;
+import constants.skills.Hermit;
+import constants.skills.ILMage;
+import constants.skills.NightLord;
+import constants.skills.NightWalker;
+import constants.skills.Priest;
+import constants.skills.Shadower;
+import constants.skills.WhiteKnight;
 import net.server.audit.LockCollector;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.MonitoredReentrantLock;
@@ -54,9 +68,19 @@ import tools.Randomizer;
 
 import java.awt.*;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1111,7 +1135,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     }
 
     private int broadcastStatusEffect(final MonsterStatusEffect status) {
-        int animationTime = status.getSkill().getAnimationTime();
+        int animationTime = status.getSkill().map(Skill::getAnimationTime).orElse(0);
         byte[] packet = MaplePacketCreator.applyMonsterStatus(getObjectId(), status, null);
         broadcastMonsterStatusMessage(packet);
 
@@ -1123,7 +1147,14 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     }
 
     public boolean applyStatus(MapleCharacter from, final MonsterStatusEffect status, boolean poison, long duration, boolean venom) {
-        switch (getMonsterEffectiveness(status.getSkill().getElement())) {
+        Optional<Skill> fromSkill = status.getSkill();
+        if (fromSkill.isEmpty()) {
+            System.out.println("Unknown skill causing this effect.");
+            return false;
+        }
+        Skill skill = fromSkill.get();
+
+        switch (getMonsterEffectiveness(skill.getElement())) {
             case IMMUNE:
             case STRONG:
             case NEUTRAL:
@@ -1132,22 +1163,22 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             case WEAK:
                 break;
             default: {
-                System.out.println("Unknown elemental effectiveness: " + getMonsterEffectiveness(status.getSkill().getElement()));
+                System.out.println("Unknown elemental effectiveness: " + getMonsterEffectiveness(skill.getElement()));
                 return false;
             }
         }
 
-        if (status.getSkill().getId() == FPMage.ELEMENT_COMPOSITION) { // fp compo
+        if (skill.getId() == FPMage.ELEMENT_COMPOSITION) { // fp compo
             ElementalEffectiveness effectiveness = getMonsterEffectiveness(Element.POISON);
             if (effectiveness == ElementalEffectiveness.IMMUNE || effectiveness == ElementalEffectiveness.STRONG) {
                 return false;
             }
-        } else if (status.getSkill().getId() == ILMage.ELEMENT_COMPOSITION) { // il compo
+        } else if (skill.getId() == ILMage.ELEMENT_COMPOSITION) { // il compo
             ElementalEffectiveness effectiveness = getMonsterEffectiveness(Element.ICE);
             if (effectiveness == ElementalEffectiveness.IMMUNE || effectiveness == ElementalEffectiveness.STRONG) {
                 return false;
             }
-        } else if (status.getSkill().getId() == NightLord.VENOMOUS_STAR || status.getSkill().getId() == Shadower.VENOMOUS_STAB || status.getSkill().getId() == NightWalker.VENOM) {// venom
+        } else if (skill.getId() == NightLord.VENOMOUS_STAR || skill.getId() == Shadower.VENOMOUS_STAB || skill.getId() == NightWalker.VENOM) {// venom
             if (getMonsterEffectiveness(Element.POISON) == ElementalEffectiveness.WEAK) {
                 return false;
             }
@@ -1212,7 +1243,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
 
         int animationTime;
         if (poison) {
-            int poisonLevel = from.getSkillLevel(status.getSkill());
+            int poisonLevel = from.getSkillLevel(skill);
             int poisonDamage = Math.min(Short.MAX_VALUE, (int) (getMaxHp() / (70.0 - poisonLevel) + 0.999));
             status.setValue(MonsterStatus.POISON, poisonDamage);
             animationTime = broadcastStatusEffect(status);
@@ -1258,8 +1289,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             overtimeAction = new DamageTask(webDamage, from, status, 1);
             overtimeDelay = 3500;
             */
-        } else if (status.getSkill().getId() == 4121004 || status.getSkill().getId() == 4221004) { // Ninja Ambush
-            final Skill skill = SkillFactory.getSkill(status.getSkill().getId()).orElseThrow();
+        } else if (skill.getId() == 4121004 || skill.getId() == 4221004) { // Ninja Ambush
             final byte level = from.getSkillLevel(skill);
             final int damage = (int) ((from.getStr() + from.getLuk()) * ((3.7 * skill.getEffect(level).getDamage()) / 100));
 

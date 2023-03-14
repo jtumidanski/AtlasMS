@@ -32,14 +32,20 @@ public class HealPersonCommand extends Command {
         setDescription("");
     }
 
+    private static void healError(MapleCharacter player, String targetName) {
+        player.message("Player '" + targetName + "' could not be found.");
+    }
+
+    private static void heal(MapleCharacter victim) {
+        victim.healHpMp();
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
-        MapleCharacter player = c.getPlayer();
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim != null) {
-            victim.healHpMp();
-        } else {
-            player.message("Player '" + params[0] + "' could not be found.");
-        }
+        String targetName = params[0];
+        c.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterByName(targetName)
+                .ifPresentOrElse(HealPersonCommand::heal, () -> healError(c.getPlayer(), targetName));
     }
 }

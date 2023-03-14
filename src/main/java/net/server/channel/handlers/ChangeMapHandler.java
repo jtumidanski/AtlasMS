@@ -94,8 +94,8 @@ public final class ChangeMapHandler extends AbstractMaplePacketHandler {
                             chr.changeMap(map, map.findClosestPlayerSpawnpoint(chr.getPosition()));
                         } else {
                             boolean executeStandardPath = true;
-                            if (chr.getEventInstance() != null) {
-                                executeStandardPath = chr.getEventInstance().revivePlayer(chr);
+                            if (chr.getEventInstance().isPresent()) {
+                                executeStandardPath = chr.getEventInstance().get().revivePlayer(chr);
                             }
                             if (executeStandardPath) {
                                 chr.respawn(map.getReturnMapId());

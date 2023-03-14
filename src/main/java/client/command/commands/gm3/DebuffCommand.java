@@ -32,7 +32,6 @@ import server.life.MobSkillFactory;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class DebuffCommand extends Command {

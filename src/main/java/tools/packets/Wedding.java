@@ -8,6 +8,7 @@ package tools.packets;
 
 import client.MapleCharacter;
 import client.inventory.Item;
+import net.server.guild.MapleGuild;
 import tools.MaplePacketCreator;
 import tools.StringUtil;
 import tools.data.output.MaplePacketLittleEndianWriter;
@@ -105,11 +106,11 @@ public class Wedding extends MaplePacketCreator {
             mplew.writeInt(30000); // v20 = *(_DWORD *)(v13 + 2192) -- new groom marriage ID??
             mplew.writeInt(30000); // v20 = *(_DWORD *)(v13 + 2192) -- new bride marriage ID??
             mplew.writeMapleAsciiString(guest.getName());
-            mplew.writeMapleAsciiString(guest.getGuildId() > 0 && guest.getGuild() != null ? guest.getGuild().getName() : "");
-            mplew.writeShort(guest.getGuildId() > 0 && guest.getGuild() != null ? guest.getGuild().getLogoBG() : 0);
-            mplew.write(guest.getGuildId() > 0 && guest.getGuild() != null ? guest.getGuild().getLogoBGColor() : 0);
-            mplew.writeShort(guest.getGuildId() > 0 && guest.getGuild() != null ? guest.getGuild().getLogo() : 0);
-            mplew.write(guest.getGuildId() > 0 && guest.getGuild() != null ? guest.getGuild().getLogoColor() : 0);
+            mplew.writeMapleAsciiString(guest.getGuild().map(MapleGuild::getName).orElse(""));
+            mplew.writeShort(guest.getGuild().map(MapleGuild::getLogoBG).orElse(0));
+            mplew.write(guest.getGuild().map(MapleGuild::getLogoBGColor).orElse(0));
+            mplew.writeShort(guest.getGuild().map(MapleGuild::getLogo).orElse(0));
+            mplew.write(guest.getGuild().map(MapleGuild::getLogoColor).orElse(0));
             mplew.writeShort(guest.getPosition().x); // v18 = *(_DWORD *)(v13 + 3204);
             mplew.writeShort(guest.getPosition().y); // v20 = *(_DWORD *)(v13 + 3208);
             // Begin Screenshot Encoding

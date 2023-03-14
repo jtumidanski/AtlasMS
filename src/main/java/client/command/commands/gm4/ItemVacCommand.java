@@ -29,7 +29,6 @@ import client.command.Command;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ItemVacCommand extends Command {

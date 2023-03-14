@@ -30,7 +30,13 @@ import net.server.audit.locks.MonitoredWriteLock;
 import net.server.audit.locks.factory.MonitoredReadLockFactory;
 import net.server.audit.locks.factory.MonitoredWriteLockFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class PlayerStorage {
     private final MonitoredReentrantReadWriteLock locks = new MonitoredReentrantReadWriteLock(MonitoredLockType.PLAYER_STORAGE, true);
@@ -63,19 +69,19 @@ public class PlayerStorage {
         }
     }
 
-    public MapleCharacter getCharacterByName(String name) {
+    public Optional<MapleCharacter> getCharacterByName(String name) {
         rlock.lock();
         try {
-            return nameStorage.get(name.toLowerCase());
+            return Optional.ofNullable(nameStorage.get(name.toLowerCase()));
         } finally {
             rlock.unlock();
         }
     }
 
-    public MapleCharacter getCharacterById(int id) {
+    public Optional<MapleCharacter> getCharacterById(int id) {
         rlock.lock();
         try {
-            return storage.get(id);
+            return Optional.ofNullable(storage.get(id));
         } finally {
             rlock.unlock();
         }

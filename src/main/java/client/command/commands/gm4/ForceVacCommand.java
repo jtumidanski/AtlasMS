@@ -33,7 +33,6 @@ import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 import tools.MaplePacketCreator;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ForceVacCommand extends Command {

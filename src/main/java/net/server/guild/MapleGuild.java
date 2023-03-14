@@ -24,7 +24,6 @@ package net.server.guild;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
-import net.server.PlayerStorage;
 import net.server.Server;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
@@ -40,7 +39,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 public class MapleGuild {
@@ -150,17 +156,21 @@ public class MapleGuild {
     }
 
     public static MapleGuildResponse sendInvitation(MapleClient c, String targetName) {
-        MapleCharacter mc = c.getChannelServer().getPlayerStorage().getCharacterByName(targetName);
-        if (mc == null) {
+        Optional<MapleCharacter> target = c.getChannelServer().getPlayerStorage().getCharacterByName(targetName);
+        if (target.isEmpty()) {
             return MapleGuildResponse.NOT_IN_CHANNEL;
         }
-        if (mc.getGuildId() > 0) {
+        return sendInvitation(c, target.get());
+    }
+
+    private static MapleGuildResponse sendInvitation(MapleClient c, MapleCharacter target) {
+        if (target.getGuildId() > 0) {
             return MapleGuildResponse.ALREADY_IN_GUILD;
         }
 
         MapleCharacter sender = c.getPlayer();
-        if (MapleInviteCoordinator.createInvite(InviteType.GUILD, sender, sender.getGuildId(), mc.getId())) {
-            mc.getClient().announce(MaplePacketCreator.guildInvite(sender.getGuildId(), sender.getName()));
+        if (MapleInviteCoordinator.createInvite(InviteType.GUILD, sender, sender.getGuildId(), target.getId())) {
+            target.getClient().announce(MaplePacketCreator.guildInvite(sender.getGuildId(), sender.getName()));
             return null;
         } else {
             return MapleGuildResponse.MANAGING_INVITE;
@@ -196,7 +206,7 @@ public class MapleGuild {
 
         MapleMatchCheckerCoordinator mmce = guildLeader.getWorldServer().getMatchCheckerCoordinator();
         for (MapleCharacter chr : guildLeader.getMap().getAllPlayers()) {
-            if (chr.getParty().isEmpty() && chr.getGuild() == null && mmce.getMatchConfirmationLeaderid(chr.getId()) == -1) {
+            if (chr.getParty().isEmpty() && chr.getGuild().isEmpty() && mmce.getMatchConfirmationLeaderid(chr.getId()) == -1) {
                 guildMembers.add(chr);
             }
         }
@@ -397,45 +407,30 @@ public class MapleGuild {
     }
 
     public void broadcastNameChanged() {
-        PlayerStorage ps = Server.getInstance().getWorld(world).getPlayerStorage();
-
-        for (MapleGuildCharacter mgc : getMembers()) {
-            MapleCharacter chr = ps.getCharacterById(mgc.getId());
-            if (chr == null || !chr.isLoggedinWorld()) {
-                continue;
-            }
-
-            byte[] packet = MaplePacketCreator.guildNameChanged(chr.getId(), this.getName());
-            chr.getMap().broadcastMessage(chr, packet);
-        }
+        getMembers().stream()
+                .map(MapleGuildCharacter::getId)
+                .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(MapleCharacter::isLoggedinWorld)
+                .forEach(c -> c.getMap().broadcastMessage(c, MaplePacketCreator.guildNameChanged(c.getId(), getName())));
     }
 
     public void broadcastEmblemChanged() {
-        PlayerStorage ps = Server.getInstance().getWorld(world).getPlayerStorage();
-
-        for (MapleGuildCharacter mgc : getMembers()) {
-            MapleCharacter chr = ps.getCharacterById(mgc.getId());
-            if (chr == null || !chr.isLoggedinWorld()) {
-                continue;
-            }
-
-            byte[] packet = MaplePacketCreator.guildMarkChanged(chr.getId(), this);
-            chr.getMap().broadcastMessage(chr, packet);
-        }
+        getMembers().stream()
+                .map(MapleGuildCharacter::getId)
+                .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(MapleCharacter::isLoggedinWorld)
+                .forEach(c -> c.getMap().broadcastMessage(c, MaplePacketCreator.guildMarkChanged(c.getId(), this)));
     }
 
     public void broadcastInfoChanged() {
-        PlayerStorage ps = Server.getInstance().getWorld(world).getPlayerStorage();
-
-        for (MapleGuildCharacter mgc : getMembers()) {
-            MapleCharacter chr = ps.getCharacterById(mgc.getId());
-            if (chr == null || !chr.isLoggedinWorld()) {
-                continue;
-            }
-
-            byte[] packet = MaplePacketCreator.showGuildInfo(chr);
-            chr.announce(packet);
-        }
+        getMembers().stream()
+                .map(MapleGuildCharacter::getId)
+                .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(MapleCharacter::isLoggedinWorld)
+                .forEach(c -> c.getMap().broadcastMessage(c, MaplePacketCreator.showGuildInfo(c)));
     }
 
     public void broadcast(final byte[] packet) {
@@ -478,10 +473,12 @@ public class MapleGuild {
     public void guildMessage(final byte[] serverNotice) {
         membersLock.lock();
         try {
+            //TODO why is this only to the first member?
             for (MapleGuildCharacter mgc : members) {
                 for (Channel cs : Server.getInstance().getChannelsFromWorld(world)) {
-                    if (cs.getPlayerStorage().getCharacterById(mgc.getId()) != null) {
-                        cs.getPlayerStorage().getCharacterById(mgc.getId()).getClient().announce(serverNotice);
+                    Optional<MapleCharacter> character = cs.getPlayerStorage().getCharacterById(mgc.getId());
+                    if (character.isPresent()) {
+                        character.get().getClient().announce(serverNotice);
                         break;
                     }
                 }

@@ -56,7 +56,7 @@ public class WarpCommand extends Command {
             }
 
             if (!player.isGM()) {
-                if (player.getEventInstance() != null || MapleMiniDungeonInfo.isDungeonMap(player.getMapId()) || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit())) {
+                if (player.getEventInstance().isPresent() || MapleMiniDungeonInfo.isDungeonMap(player.getMapId()) || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit())) {
                     player.dropMessage(1, "This command cannot be used in this map.");
                     return;
                 }

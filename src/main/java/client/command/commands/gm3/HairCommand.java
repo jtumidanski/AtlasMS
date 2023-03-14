@@ -61,7 +61,7 @@ public class HairCommand extends Command {
                     return;
                 }
 
-                MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
+                MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
                 if (victim != null) {
                     victim.setHair(itemId);
                     victim.updateSingleStat(MapleStat.HAIR, itemId);

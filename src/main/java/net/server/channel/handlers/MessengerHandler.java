@@ -85,7 +85,7 @@ public final class MessengerHandler extends AbstractMaplePacketHandler {
                             c.announce(MaplePacketCreator.messengerChat(player.getName() + " : This Maple Messenger is currently unavailable. Please quit this chat."));
                         } else if (messenger.getMembers().size() < 3) {
                             input = slea.readMapleAsciiString();
-                            MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(input);
+                            MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(input).orElse(null);
                             if (target != null) {
                                 if (target.getMessenger() == null) {
                                     if (MapleInviteCoordinator.createInvite(InviteType.MESSENGER, c.getPlayer(), messenger.getId(), target.getId())) {

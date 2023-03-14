@@ -53,7 +53,7 @@ public class JobCommand extends Command {
             player.changeJob(job.get());
             player.equipChanged();
         } else if (params.length == 2) {
-            MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
 
             if (victim != null) {
                 int jobid = Integer.parseInt(params[1]);

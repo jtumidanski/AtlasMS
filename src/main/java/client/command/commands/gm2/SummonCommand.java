@@ -30,6 +30,8 @@ import net.server.Server;
 import net.server.channel.Channel;
 import server.maps.MapleMap;
 
+import java.util.Optional;
+
 public class SummonCommand extends Command {
     {
         setDescription("");
@@ -43,31 +45,31 @@ public class SummonCommand extends Command {
             return;
         }
 
-        MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim == null) {
+        Optional<MapleCharacter> victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
+        if (victim.isEmpty()) {
             //If victim isn't on current channel, loop all channels on current world.
 
             for (Channel ch : Server.getInstance().getChannelsFromWorld(c.getWorld())) {
                 victim = ch.getPlayerStorage().getCharacterByName(params[0]);
-                if (victim != null) {
+                if (victim.isPresent()) {
                     break;//We found the person, no need to continue the loop.
                 }
             }
         }
-        if (victim != null) {
-            if (!victim.isLoggedinWorld()) {
+        if (victim.isPresent()) {
+            if (!victim.get().isLoggedinWorld()) {
                 player.dropMessage(6, "Player currently not logged in or unreachable.");
                 return;
             }
 
-            if (player.getClient().getChannel() != victim.getClient().getChannel()) {//And then change channel if needed.
-                victim.dropMessage("Changing channel, please wait a moment.");
-                victim.getClient().changeChannel(player.getClient().getChannel());
+            if (player.getClient().getChannel() != victim.get().getClient().getChannel()) {//And then change channel if needed.
+                victim.get().dropMessage("Changing channel, please wait a moment.");
+                victim.get().getClient().changeChannel(player.getClient().getChannel());
             }
 
             try {
                 for (int i = 0; i < 7; i++) {   // poll for a while until the player reconnects
-                    if (victim.isLoggedinWorld()) {
+                    if (victim.get().isLoggedinWorld()) {
                         break;
                     }
                     Thread.sleep(1777);
@@ -76,8 +78,8 @@ public class SummonCommand extends Command {
             }
 
             MapleMap map = player.getMap();
-            victim.saveLocationOnWarp();
-            victim.forceChangeMap(map, map.findClosestPortal(player.getPosition()));
+            victim.get().saveLocationOnWarp();
+            victim.get().forceChangeMap(map, map.findClosestPortal(player.getPosition()));
         } else {
             player.dropMessage(6, "Unknown player.");
         }

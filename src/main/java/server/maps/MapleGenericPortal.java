@@ -143,16 +143,16 @@ public class MapleGenericPortal implements MaplePortal {
             }
         } else if (getTargetMapId() != 999999999) {
             MapleCharacter chr = c.getPlayer();
-            if (!(chr.getChalkboard() != null && GameConstants.isFreeMarketRoom(getTargetMapId()))) {
-                MapleMap to = chr.getEventInstance() == null ? c.getChannelServer().getMapFactory().getMap(getTargetMapId()) : chr.getEventInstance().getMapInstance(getTargetMapId());
+            if (chr.getChalkboard().isPresent() && GameConstants.isFreeMarketRoom(getTargetMapId())) {
+                chr.dropMessage(5, "You cannot enter this map with the chalkboard opened.");
+            } else {
+                MapleMap to = chr.getEventInstance().map(ei -> ei.getMapInstance(getTargetMapId())).orElse(c.getChannelServer().getMapFactory().getMap(getTargetMapId()));
                 MaplePortal pto = to.getPortal(getTarget());
                 if (pto == null) {// fallback for missing portals - no real life case anymore - interesting for not implemented areas
                     pto = to.getPortal(0);
                 }
                 chr.changeMap(to, pto); //late resolving makes this harder but prevents us from loading the whole world at once
                 changed = true;
-            } else {
-                chr.dropMessage(5, "You cannot enter this map with the chalkboard opened.");
             }
         }
         if (!changed) {

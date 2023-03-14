@@ -229,23 +229,15 @@ public class MapleReactor extends AbstractMapleMapObject {
         if (timeOut > -1) {
             final byte nextState = stats.getTimeoutState(state);
 
-            timeoutTask = TimerManager.getInstance().schedule(new Runnable() {
-                @Override
-                public void run() {
-                    timeoutTask = null;
-                    tryForceHitReactor(nextState);
-                }
+            timeoutTask = TimerManager.getInstance().schedule(() -> {
+                timeoutTask = null;
+                tryForceHitReactor(nextState);
             }, timeOut);
         }
     }
 
     public void delayedHitReactor(final MapleClient c, long delay) {
-        TimerManager.getInstance().schedule(new Runnable() {
-            @Override
-            public void run() {
-                hitReactor(c);
-            }
-        }, delay);
+        TimerManager.getInstance().schedule(() -> hitReactor(c), delay);
     }
 
     public void hitReactor(MapleClient c) {
@@ -368,12 +360,9 @@ public class MapleReactor extends AbstractMapleMapObject {
     }
 
     public void delayedRespawn() {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                delayedRespawnRun = null;
-                respawn();
-            }
+        Runnable r = () -> {
+            delayedRespawnRun = null;
+            respawn();
         };
 
         delayedRespawnRun = r;

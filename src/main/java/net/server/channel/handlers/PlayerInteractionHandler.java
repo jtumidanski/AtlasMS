@@ -35,8 +35,15 @@ import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import server.MapleItemInformationProvider;
 import server.MapleTrade;
-import server.maps.*;
+import server.maps.FieldLimit;
+import server.maps.MapleHiredMerchant;
+import server.maps.MapleMapObject;
+import server.maps.MapleMapObjectType;
+import server.maps.MapleMiniGame;
 import server.maps.MapleMiniGame.MiniGameType;
+import server.maps.MaplePlayerShop;
+import server.maps.MaplePlayerShopItem;
+import server.maps.MaplePortal;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
@@ -56,11 +63,11 @@ public final class PlayerInteractionHandler extends AbstractMaplePacketHandler {
             return 11;
         }
 
-        if (chr.getChalkboard() != null) {
+        if (chr.getChalkboard().isPresent()) {
             return 13;
         }
 
-        if (chr.getEventInstance() != null) {
+        if (chr.getEventInstance().isPresent()) {
             return 5;
         }
 
@@ -776,12 +783,7 @@ public final class PlayerInteractionHandler extends AbstractMaplePacketHandler {
             } else if (mode == Action.EXPEL.getCode()) {
                 MapleMiniGame miniGame = chr.getMiniGame();
                 if (miniGame != null && miniGame.isOwner(chr)) {
-                    MapleCharacter visitor = miniGame.getVisitor();
-
-                    if (visitor != null) {
-                        visitor.closeMiniGame(false);
-                        visitor.announce(MaplePacketCreator.getMiniGameClose(true, 5));
-                    }
+                    miniGame.getVisitor().ifPresent(PlayerInteractionHandler::closeForVisitor);
                 }
             } else if (mode == Action.EXIT_AFTER_GAME.getCode()) {
                 MapleMiniGame miniGame = chr.getMiniGame();
@@ -797,6 +799,11 @@ public final class PlayerInteractionHandler extends AbstractMaplePacketHandler {
         } finally {
             c.releaseClient();
         }
+    }
+
+    private static void closeForVisitor(MapleCharacter visitor) {
+        visitor.closeMiniGame(false);
+        visitor.announce(MaplePacketCreator.getMiniGameClose(true, 5));
     }
 
     public enum Action {

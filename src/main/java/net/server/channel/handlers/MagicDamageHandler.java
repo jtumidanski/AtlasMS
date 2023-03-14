@@ -21,7 +21,11 @@
  */
 package net.server.channel.handlers;
 
-import client.*;
+import client.MapleBuffStat;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.Skill;
+import client.SkillFactory;
 import config.YamlConfig;
 import constants.game.GameConstants;
 import constants.skills.Bishop;

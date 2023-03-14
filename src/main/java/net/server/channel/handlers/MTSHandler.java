@@ -506,7 +506,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                         if (c.getPlayer().getCashShop().getCash(4) >= price) { //FIX
                             boolean alwaysnull = true;
                             for (Channel cserv : Server.getInstance().getAllChannels()) {
-                                MapleCharacter victim = cserv.getPlayerStorage().getCharacterById(rs.getInt("seller"));
+                                MapleCharacter victim = cserv.getPlayerStorage().getCharacterById(rs.getInt("seller")).orElse(null);
                                 if (victim != null) {
                                     victim.getCashShop().gainCash(4, rs.getInt("price"));
                                     alwaysnull = false;
@@ -569,7 +569,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                         int price = rs.getInt("price") + 100 + (int) (rs.getInt("price") * 0.1);
                         if (c.getPlayer().getCashShop().getCash(4) >= price) {
                             for (Channel cserv : Server.getInstance().getAllChannels()) {
-                                MapleCharacter victim = cserv.getPlayerStorage().getCharacterById(rs.getInt("seller"));
+                                MapleCharacter victim = cserv.getPlayerStorage().getCharacterById(rs.getInt("seller")).orElse(null);
                                 if (victim != null) {
                                     victim.getCashShop().gainCash(4, rs.getInt("price"));
                                 } else {

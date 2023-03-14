@@ -1,24 +1,3 @@
-/*
-This file is part of the OdinMS Maple Story Server
-Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc>
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation version 3 as published by
-the Free Software Foundation. You may not use, modify or distribute
-this program under any other version of the GNU Affero General Public
-License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package net.server.channel;
 
 import client.MapleCharacter;
@@ -30,7 +9,11 @@ import net.mina.MapleCodecFactory;
 import net.server.PlayerStorage;
 import net.server.Server;
 import net.server.audit.LockCollector;
-import net.server.audit.locks.*;
+import net.server.audit.locks.MonitoredLockType;
+import net.server.audit.locks.MonitoredReadLock;
+import net.server.audit.locks.MonitoredReentrantLock;
+import net.server.audit.locks.MonitoredReentrantReadWriteLock;
+import net.server.audit.locks.MonitoredWriteLock;
 import net.server.audit.locks.factory.MonitoredReadLockFactory;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
 import net.server.audit.locks.factory.MonitoredWriteLockFactory;
@@ -42,7 +25,6 @@ import net.server.world.MaplePartyCharacter;
 import net.server.world.World;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
-import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -53,14 +35,28 @@ import server.TimerManager;
 import server.events.gm.MapleEvent;
 import server.expeditions.MapleExpedition;
 import server.expeditions.MapleExpeditionType;
-import server.maps.*;
+import server.maps.MapleHiredMerchant;
+import server.maps.MapleMap;
+import server.maps.MapleMapManager;
+import server.maps.MapleMiniDungeon;
+import server.maps.MapleMiniDungeonInfo;
 import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
@@ -383,7 +379,7 @@ public final class Channel {
                 .filter(c -> c.getChannel() == getId())
                 .map(MaplePartyCharacter::getName)
                 .map(name -> getPlayerStorage().getCharacterByName(name))
-                .filter(Objects::nonNull)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }
 
@@ -403,7 +399,7 @@ public final class Channel {
         World wserv = getWorldServer();
         playersAway.stream()
                 .map(id -> wserv.getPlayerStorage().getCharacterById(id))
-                .filter(Objects::nonNull)
+                .flatMap(Optional::stream)
                 .filter(MapleCharacter::isLoggedin)
                 .map(MapleCharacter::getClient)
                 .forEach(MapleClient::forceDisconnect);
@@ -437,16 +433,12 @@ public final class Channel {
     }
 
     public int[] multiBuddyFind(int charIdFrom, int[] characterIds) {
-        List<Integer> ret = new ArrayList<>(characterIds.length);
-        PlayerStorage playerStorage = getPlayerStorage();
-        for (int characterId : characterIds) {
-            MapleCharacter chr = playerStorage.getCharacterById(characterId);
-            if (chr != null) {
-                if (chr.getBuddylist().containsVisible(charIdFrom)) {
-                    ret.add(characterId);
-                }
-            }
-        }
+        List<Integer> ret = Arrays.stream(characterIds)
+                .mapToObj(id -> getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(c -> c.getBuddylist().containsVisible(charIdFrom))
+                .map(MapleCharacter::getId)
+                .toList();
         int[] retArr = new int[ret.size()];
         int pos = 0;
         for (Integer i : ret) {
@@ -484,7 +476,7 @@ public final class Channel {
     }
 
     public boolean isConnected(String name) {
-        return getPlayerStorage().getCharacterByName(name) != null;
+        return getPlayerStorage().getCharacterByName(name).isPresent();
     }
 
     public boolean isActive() {

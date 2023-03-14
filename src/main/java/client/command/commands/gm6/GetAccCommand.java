@@ -39,7 +39,7 @@ public class GetAccCommand extends Command {
             player.yellowMessage("Syntax: !getacc <playername>");
             return;
         }
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim != null) {
             player.message(victim.getName() + "'s account name is " + victim.getClient().getAccountName() + ".");
         } else {

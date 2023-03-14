@@ -30,6 +30,8 @@ import tools.FilePrinter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author kevintjuh93
@@ -45,14 +47,13 @@ public class PartyQuest {
         channel = leader.getChannel();
         world = leader.getWorld();
         int mapid = leader.getMapId();
-        for (MaplePartyCharacter pchr : party.getMembers()) {
-            if (pchr.getChannel() == channel && pchr.getMapId() == mapid) {
-                MapleCharacter chr = Server.getInstance().getWorld(world).getChannel(channel).getPlayerStorage().getCharacterById(pchr.getId());
-                if (chr != null) {
-                    this.participants.add(chr);
-                }
-            }
-        }
+
+        participants = party.getMembers().stream()
+                .filter(c -> c.getChannel() == channel)
+                .filter(c -> c.getMapId() == mapid)
+                .map(c -> Server.getInstance().getWorld(world).getChannel(channel).getPlayerStorage().getCharacterById(c.getId()))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
     }
 
     public static int getExp(String PQ, int level) {

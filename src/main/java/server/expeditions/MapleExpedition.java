@@ -23,7 +23,6 @@
 package server.expeditions;
 
 import client.MapleCharacter;
-import net.server.PlayerStorage;
 import net.server.Server;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.MonitoredReentrantLock;
@@ -36,11 +35,19 @@ import tools.LogHelper;
 import tools.MaplePacketCreator;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 /**
  * @author Alan (SharpAceX)
@@ -247,14 +254,14 @@ public class MapleExpedition {
                 broadcastExped(MaplePacketCreator.serverNotice(6, "[Expedition] " + chr.getValue() + " has been banned from the expedition."));
             }
 
-            MapleCharacter player = startMap.getWorldServer().getPlayerStorage().getCharacterById(cid);
-            if (player != null && player.isLoggedinWorld()) {
-                player.announce(MaplePacketCreator.removeClock());
+            Optional<MapleCharacter> player = startMap.getWorldServer().getPlayerStorage().getCharacterById(cid);
+            if (player.isPresent() && player.get().isLoggedinWorld()) {
+                player.get().announce(MaplePacketCreator.removeClock());
                 if (!silent) {
-                    player.dropMessage(6, "[Expedition] You have been banned from this expedition.");
+                    player.get().dropMessage(6, "[Expedition] You have been banned from this expedition.");
                 }
                 if (MapleExpeditionType.ARIANT.equals(type) || MapleExpeditionType.ARIANT1.equals(type) || MapleExpeditionType.ARIANT2.equals(type)) {
-                    player.changeMap(980010000);
+                    player.get().changeMap(980010000);
                 }
             }
         }
@@ -292,18 +299,12 @@ public class MapleExpedition {
         return type;
     }
 
-    public List<MapleCharacter> getActiveMembers() {    // thanks MedicOP for figuring out an issue with broadcasting packets to offline members
-        PlayerStorage ps = startMap.getWorldServer().getPlayerStorage();
-
-        List<MapleCharacter> activeMembers = new LinkedList<>();
-        for (Integer chrid : getMembers().keySet()) {
-            MapleCharacter chr = ps.getCharacterById(chrid);
-            if (chr != null && chr.isLoggedinWorld()) {
-                activeMembers.add(chr);
-            }
-        }
-
-        return activeMembers;
+    public List<MapleCharacter> getActiveMembers() {
+        return getMembers().keySet().stream()
+                .map(id -> startMap.getWorldServer().getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(MapleCharacter::isLoggedinWorld)
+                .collect(Collectors.toList());
     }
 
     public Map<Integer, String> getMembers() {

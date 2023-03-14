@@ -33,7 +33,11 @@ import net.server.coordinator.session.MapleSessionCoordinator;
 import net.server.coordinator.session.MapleSessionCoordinator.AntiMulticlientResult;
 import net.server.guild.MapleGuild;
 import net.server.guild.MapleGuildCharacter;
-import net.server.world.*;
+import net.server.world.MapleMessengerCharacter;
+import net.server.world.MapleParty;
+import net.server.world.MaplePartyCharacter;
+import net.server.world.PartyOperation;
+import net.server.world.World;
 import org.apache.mina.core.session.IoSession;
 import scripting.AbstractPlayerInteraction;
 import scripting.event.EventInstanceManager;
@@ -47,7 +51,13 @@ import server.life.MapleMonster;
 import server.maps.FieldLimit;
 import server.maps.MapleMap;
 import server.maps.MapleMiniDungeonInfo;
-import tools.*;
+import tools.BCrypt;
+import tools.DatabaseConnection;
+import tools.FilePrinter;
+import tools.HexTool;
+import tools.LogHelper;
+import tools.MapleAESOFB;
+import tools.MaplePacketCreator;
 
 import javax.script.ScriptEngine;
 import java.io.IOException;
@@ -59,7 +69,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 
@@ -904,10 +926,7 @@ public class MapleClient {
             if (!serverTransition) {    // thanks MedicOP for detecting an issue with party leader change on changing channels
                 removePartyPlayer(wserv);
 
-                EventInstanceManager eim = player.getEventInstance();
-                if (eim != null) {
-                    eim.playerDisconnected(player);
-                }
+                player.getEventInstance().ifPresent(ei ->   ei.playerDisconnected(player));
 
                 if (player.getMonsterCarnival() != null) {
                     player.getMonsterCarnival().playerDisconnected(getPlayer().getId());
@@ -964,7 +983,6 @@ public class MapleClient {
             final BuddyList bl = player.getBuddylist();
             final MapleMessengerCharacter chrm = new MapleMessengerCharacter(player, 0);
             final MapleGuildCharacter chrg = player.getMGC();
-            final MapleGuild guild = player.getGuild();
 
             player.cancelMagicDoor();
 
@@ -987,9 +1005,9 @@ public class MapleClient {
 
                             player.forfeitExpirableQuests();    //This is for those quests that you have to stay logged in for a certain amount of time
 
-                            if (guild != null) {
-                                final Server server = Server.getInstance();
-                                server.setGuildMemberOnline(player, false, player.getClient().getChannel());
+                            Optional<MapleGuild> guild = player.getGuild();
+                            if (guild.isPresent()) {
+                                Server.getInstance().setGuildMemberOnline(player, false, player.getClient().getChannel());
                                 player.getClient().announce(MaplePacketCreator.showGuildInfo(player));
                             }
                             if (bl != null) {

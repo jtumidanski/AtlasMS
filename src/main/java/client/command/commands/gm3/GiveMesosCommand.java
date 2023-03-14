@@ -32,6 +32,15 @@ public class GiveMesosCommand extends Command {
         setDescription("");
     }
 
+    private static void giveMeso(MapleCharacter player, int amount, MapleCharacter target) {
+        target.gainMeso(amount, true);
+        player.message("MESO given.");
+    }
+
+    private static void giveError(MapleCharacter player, String targetName) {
+        player.message("Player '" + targetName + "' could not be found.");
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
@@ -66,12 +75,10 @@ public class GiveMesosCommand extends Command {
             }
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(recv_);
-        if (victim != null) {
-            victim.gainMeso((int) mesos_, true);
-            player.message("MESO given.");
-        } else {
-            player.message("Player '" + recv_ + "' could not be found.");
-        }
+        long amount = mesos_;
+        c.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterByName(recv_)
+                .ifPresentOrElse(t -> giveMeso(player, (int) amount, t), () -> giveError(player, recv_));
     }
 }

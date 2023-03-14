@@ -23,7 +23,10 @@
 */
 package client.command.commands.gm2;
 
-import client.*;
+import client.MapleCharacter;
+import client.MapleClient;
+import client.MapleJob;
+import client.SkillFactory;
 import client.command.Command;
 import provider.MapleData;
 import provider.MapleDataProviderFactory;

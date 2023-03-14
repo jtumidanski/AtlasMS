@@ -20,10 +20,29 @@
  */
 package tools;
 
-import client.*;
+import client.BuddylistEntry;
+import client.MapleBuffStat;
+import client.MapleCharacter;
 import client.MapleCharacter.SkillEntry;
-import client.inventory.*;
+import client.MapleClient;
+import client.MapleDisease;
+import client.MapleFamilyEntitlement;
+import client.MapleFamilyEntry;
+import client.MapleMount;
+import client.MapleQuestStatus;
+import client.MapleRing;
+import client.MapleStat;
+import client.MonsterBook;
+import client.Skill;
+import client.SkillMacro;
+import client.inventory.Equip;
 import client.inventory.Equip.ScrollResult;
+import client.inventory.Item;
+import client.inventory.ItemFactory;
+import client.inventory.MapleInventory;
+import client.inventory.MapleInventoryType;
+import client.inventory.MaplePet;
+import client.inventory.ModifyInventory;
 import client.keybind.MapleKeyBinding;
 import client.keybind.MapleQuickslotBinding;
 import client.newyear.NewYearCardRecord;
@@ -53,14 +72,30 @@ import net.server.world.World;
 import server.CashShop.CashItem;
 import server.CashShop.CashItemFactory;
 import server.CashShop.SpecialCashItem;
-import server.*;
+import server.DueyPackage;
+import server.MTSItemInfo;
+import server.MapleItemInformationProvider;
+import server.MapleShopItem;
+import server.MapleTrade;
 import server.events.gm.MapleSnowball;
 import server.life.MapleMonster;
 import server.life.MapleNPC;
 import server.life.MaplePlayerNPC;
 import server.life.MobSkill;
-import server.maps.*;
+import server.maps.AbstractMapleMapObject;
+import server.maps.MapleDoor;
+import server.maps.MapleDoorObject;
+import server.maps.MapleDragon;
+import server.maps.MapleHiredMerchant;
+import server.maps.MapleMap;
+import server.maps.MapleMapItem;
+import server.maps.MapleMiniGame;
 import server.maps.MapleMiniGame.MiniGameResult;
+import server.maps.MapleMist;
+import server.maps.MaplePlayerShop;
+import server.maps.MaplePlayerShopItem;
+import server.maps.MapleReactor;
+import server.maps.MapleSummon;
 import server.movement.LifeMovementFragment;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.data.output.LittleEndianWriter;
@@ -70,9 +105,18 @@ import java.awt.*;
 import java.net.InetAddress;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * @author Frz
@@ -1465,8 +1509,7 @@ public class MaplePacketCreator {
                         break;
                 }
             } else {
-                Skill skill = mse.getSkill();
-                mplew.writeInt(skill != null ? skill.getId() : 0);
+                mplew.writeInt(mse.getSkill().map(Skill::getId).orElse(0));
             }
 
             mplew.writeShort(-1);    // duration
@@ -1933,13 +1976,8 @@ public class MaplePacketCreator {
         // Monster Riding
         Integer bv = chr.getBuffedValue(MapleBuffStat.MONSTER_RIDING);
         if (bv != null) {
-            MapleMount mount = chr.getMount();
-            if (mount != null) {
-                mplew.writeInt(mount.getItemId());
-                mplew.writeInt(mount.getSkillId());
-            } else {
-                mplew.writeLong(0);
-            }
+            mplew.writeInt(chr.getMount().map(MapleMount::getItemId).orElse(0));
+            mplew.writeInt(chr.getMount().map(MapleMount::getSkillId).orElse(0));
         } else {
             mplew.writeLong(0);
         }
@@ -2029,14 +2067,9 @@ public class MaplePacketCreator {
             }
         }
         mplew.write(0); //end of pets
-        if (chr.getMount() == null) {
-            mplew.writeInt(1); // mob level
-            mplew.writeLong(0); // mob exp + tiredness
-        } else {
-            mplew.writeInt(chr.getMount().getLevel());
-            mplew.writeInt(chr.getMount().getExp());
-            mplew.writeInt(chr.getMount().getTiredness());
-        }
+        mplew.writeInt(chr.getMount().map(MapleMount::getLevel).orElse(1));
+        mplew.writeInt(chr.getMount().map(MapleMount::getExp).orElse(0));
+        mplew.writeInt(chr.getMount().map(MapleMount::getTiredness).orElse(0));
 
         MaplePlayerShop mps = chr.getPlayerShop();
         if (mps != null && mps.isOwner(chr)) {
@@ -2058,9 +2091,9 @@ public class MaplePacketCreator {
             }
         }
 
-        if (chr.getChalkboard() != null) {
+        if (chr.getChalkboard().isPresent()) {
             mplew.write(1);
-            mplew.writeMapleAsciiString(chr.getChalkboard());
+            mplew.writeMapleAsciiString(chr.getChalkboard().get());
         } else {
             mplew.write(0);
         }
@@ -2192,24 +2225,23 @@ public class MaplePacketCreator {
     }
 
     private static void addMarriageRingLook(MapleClient target, final MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
-        MapleRing ring = chr.getMarriageRing();
+        Optional<MapleRing> ring = chr.getMarriageRing();
 
-        if (ring == null || !ring.equipped()) {
+        if (ring.isEmpty() || !ring.get().equipped()) {
             mplew.write(0);
-        } else {
-            mplew.write(1);
-
-            MapleCharacter targetChr = target.getPlayer();
-            if (targetChr != null && targetChr.getPartnerId() == chr.getId()) {
-                mplew.writeInt(0);
-                mplew.writeInt(0);
-            } else {
-                mplew.writeInt(chr.getId());
-                mplew.writeInt(ring.getPartnerChrId());
-            }
-
-            mplew.writeInt(ring.getItemId());
+            return;
         }
+
+        mplew.write(1);
+        MapleCharacter targetChr = target.getPlayer();
+        if (targetChr != null && targetChr.getPartnerId() == chr.getId()) {
+            mplew.writeInt(0);
+            mplew.writeInt(0);
+        } else {
+            mplew.writeInt(chr.getId());
+            mplew.writeInt(ring.get().getPartnerChrId());
+        }
+        mplew.writeInt(ring.get().getItemId());
     }
 
     /**
@@ -2798,17 +2830,19 @@ public class MaplePacketCreator {
         mplew.write(chr.getLevel());
         mplew.writeShort(chr.getJob().getId());
         mplew.writeShort(chr.getFame());
-        mplew.write(chr.getMarriageRing() != null ? 1 : 0);
+        mplew.write(chr.getMarriageRing().isPresent() ? 1 : 0);
         String guildName = "";
         String allianceName = "";
         if (chr.getGuildId() > 0) {
-            MapleGuild mg = Server.getInstance().getGuild(chr.getGuildId());
-            guildName = mg.getName();
+            guildName = Server.getInstance().getGuild(chr.getGuildId())
+                    .map(MapleGuild::getName)
+                    .orElse("");
 
-            MapleAlliance alliance = Server.getInstance().getAlliance(chr.getGuild().getAllianceId());
-            if (alliance != null) {
-                allianceName = alliance.getName();
-            }
+            allianceName = chr.getGuild()
+                    .map(MapleGuild::getAllianceId)
+                    .flatMap(id -> Server.getInstance().getAlliance(id))
+                    .map(MapleAlliance::getName)
+                    .orElse("");
         }
         mplew.writeMapleAsciiString(guildName);
         mplew.writeMapleAsciiString(allianceName);  // does not seem to work
@@ -2831,12 +2865,11 @@ public class MaplePacketCreator {
         mplew.write(0); //end of pets
 
         Item mount;     //mounts can potentially crash the client if the player's level is not properly checked
-        if (chr.getMount() != null && (mount = chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -18)) != null && MapleItemInformationProvider.getInstance().getEquipLevelReq(mount.getItemId()) <= chr.getLevel()) {
-            MapleMount mmount = chr.getMount();
-            mplew.write(mmount.getId()); //mount
-            mplew.writeInt(mmount.getLevel()); //level
-            mplew.writeInt(mmount.getExp()); //exp
-            mplew.writeInt(mmount.getTiredness()); //tiredness
+        if (chr.getMount().isPresent() && (mount = chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -18)) != null && MapleItemInformationProvider.getInstance().getEquipLevelReq(mount.getItemId()) <= chr.getLevel()) {
+            mplew.write(chr.getMount().map(MapleMount::getId).orElse(0));
+            mplew.writeInt(chr.getMount().map(MapleMount::getLevel).orElse(0));
+            mplew.writeInt(chr.getMount().map(MapleMount::getExp).orElse(0));
+            mplew.writeInt(chr.getMount().map(MapleMount::getTiredness).orElse(0));
         } else {
             mplew.write(0);
         }
@@ -3648,8 +3681,8 @@ public class MaplePacketCreator {
         for (int x = 0; x < 90; x++) {
             MapleKeyBinding binding = keybindings.get(x);
             if (binding != null) {
-                mplew.write(binding.getType());
-                mplew.writeInt(binding.getAction());
+                mplew.write(binding.type());
+                mplew.writeInt(binding.action());
             } else {
                 mplew.write(0);
                 mplew.writeInt(0);
@@ -4156,7 +4189,7 @@ public class MaplePacketCreator {
                 mplew.writeShort(mse.getMobSkill().getSkillId());
                 mplew.writeShort(mse.getMobSkill().getSkillLevel());
             } else {
-                mplew.writeInt(mse.getSkill().getId());
+                mplew.writeInt(mse.getSkill().map(Skill::getId).orElse(0));
             }
             mplew.writeShort(-1); // might actually be the buffTime but it's not displayed anywhere
         }
@@ -4485,18 +4518,18 @@ public class MaplePacketCreator {
             mplew.write(0);
             return mplew.getPacket();
         }
-        MapleGuild g = chr.getClient().getWorldServer().getGuild(chr.getMGC());
-        if (g == null) { //failed to read from DB - don't show a guild
+        Optional<MapleGuild> g = chr.getClient().getWorldServer().getGuild(chr.getMGC());
+        if (g.isEmpty()) { //failed to read from DB - don't show a guild
             mplew.write(0);
             return mplew.getPacket();
         }
         mplew.write(1); //bInGuild
-        mplew.writeInt(g.getId());
-        mplew.writeMapleAsciiString(g.getName());
+        mplew.writeInt(g.get().getId());
+        mplew.writeMapleAsciiString(g.get().getName());
         for (int i = 1; i <= 5; i++) {
-            mplew.writeMapleAsciiString(g.getRankTitle(i));
+            mplew.writeMapleAsciiString(g.get().getRankTitle(i));
         }
-        Collection<MapleGuildCharacter> members = g.getMembers();
+        Collection<MapleGuildCharacter> members = g.get().getMembers();
         mplew.write(members.size()); //then it is the size of all the members
         for (MapleGuildCharacter mgc : members) {//and each of their character ids o_O
             mplew.writeInt(mgc.getId());
@@ -4507,17 +4540,17 @@ public class MaplePacketCreator {
             mplew.writeInt(mgc.getLevel());
             mplew.writeInt(mgc.getGuildRank());
             mplew.writeInt(mgc.isOnline() ? 1 : 0);
-            mplew.writeInt(g.getSignature());
+            mplew.writeInt(g.get().getSignature());
             mplew.writeInt(mgc.getAllianceRank());
         }
-        mplew.writeInt(g.getCapacity());
-        mplew.writeShort(g.getLogoBG());
-        mplew.write(g.getLogoBGColor());
-        mplew.writeShort(g.getLogo());
-        mplew.write(g.getLogoColor());
-        mplew.writeMapleAsciiString(g.getNotice());
-        mplew.writeInt(g.getGP());
-        mplew.writeInt(g.getAllianceId());
+        mplew.writeInt(g.get().getCapacity());
+        mplew.writeShort(g.get().getLogoBG());
+        mplew.write(g.get().getLogoBGColor());
+        mplew.writeShort(g.get().getLogo());
+        mplew.write(g.get().getLogoColor());
+        mplew.writeMapleAsciiString(g.get().getNotice());
+        mplew.writeInt(g.get().getGP());
+        mplew.writeInt(g.get().getAllianceId());
         return mplew.getPacket();
     }
 
@@ -5218,12 +5251,7 @@ public class MaplePacketCreator {
         mplew.write(0);
         addCharLook(mplew, minigame.getOwner(), false);
         mplew.writeMapleAsciiString(minigame.getOwner().getName());
-        if (minigame.getVisitor() != null) {
-            MapleCharacter visitor = minigame.getVisitor();
-            mplew.write(1);
-            addCharLook(mplew, visitor, false);
-            mplew.writeMapleAsciiString(visitor.getName());
-        }
+        minigame.getVisitor().ifPresent(v -> writeMiniGameVisitorLook(mplew, v));
         mplew.write(0xFF);
         mplew.write(0);
         mplew.writeInt(1);
@@ -5231,20 +5259,27 @@ public class MaplePacketCreator {
         mplew.writeInt(minigame.getOwner().getMiniGamePoints(MiniGameResult.TIE, true));
         mplew.writeInt(minigame.getOwner().getMiniGamePoints(MiniGameResult.LOSS, true));
         mplew.writeInt(minigame.getOwnerScore());
-        if (minigame.getVisitor() != null) {
-            MapleCharacter visitor = minigame.getVisitor();
-            mplew.write(1);
-            mplew.writeInt(1);
-            mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.WIN, true));
-            mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.TIE, true));
-            mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.LOSS, true));
-            mplew.writeInt(minigame.getVisitorScore());
-        }
+        minigame.getVisitor().ifPresent(v -> writeMiniGameVisitorScore(minigame, mplew, v, 1));
         mplew.write(0xFF);
         mplew.writeMapleAsciiString(minigame.getDescription());
         mplew.write(piece);
         mplew.write(0);
         return mplew.getPacket();
+    }
+
+    private static void writeMiniGameVisitorScore(MapleMiniGame minigame, MaplePacketLittleEndianWriter mplew, MapleCharacter visitor, int mode) {
+        mplew.write(1);
+        mplew.writeInt(mode);
+        mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.WIN, true));
+        mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.TIE, true));
+        mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.LOSS, true));
+        mplew.writeInt(minigame.getVisitorScore());
+    }
+
+    private static void writeMiniGameVisitorLook(MaplePacketLittleEndianWriter mplew, MapleCharacter visitor) {
+        mplew.write(1);
+        addCharLook(mplew, visitor, false);
+        mplew.writeMapleAsciiString(visitor.getName());
     }
 
     public static byte[] getMiniGameReady(MapleMiniGame game) {
@@ -5379,9 +5414,9 @@ public class MaplePacketCreator {
             mplew.writeInt(game.getOwnerScore()); // points
 
             mplew.writeInt(0); // unknown
-            mplew.writeInt(game.getVisitor().getMiniGamePoints(MiniGameResult.WIN, omok)); // wins
-            mplew.writeInt(game.getVisitor().getMiniGamePoints(MiniGameResult.TIE, omok)); // ties
-            mplew.writeInt(game.getVisitor().getMiniGamePoints(MiniGameResult.LOSS, omok)); // losses
+            mplew.writeInt(game.getVisitor().map(v -> v.getMiniGamePoints(MiniGameResult.WIN, omok)).orElse(0)); // wins
+            mplew.writeInt(game.getVisitor().map(v -> v.getMiniGamePoints(MiniGameResult.TIE, omok)).orElse(0)); // ties
+            mplew.writeInt(game.getVisitor().map(v -> v.getMiniGamePoints(MiniGameResult.LOSS, omok)).orElse(0)); // losses
             mplew.writeInt(game.getVisitorScore()); // points
             mplew.write(0);
         } else {
@@ -5391,9 +5426,9 @@ public class MaplePacketCreator {
             mplew.writeInt(game.getOwner().getMiniGamePoints(MiniGameResult.LOSS, omok)); // losses
             mplew.writeInt(game.getOwnerScore()); // points
             mplew.writeInt(0);
-            mplew.writeInt(game.getVisitor().getMiniGamePoints(MiniGameResult.WIN, omok)); // wins
-            mplew.writeInt(game.getVisitor().getMiniGamePoints(MiniGameResult.TIE, omok)); // ties
-            mplew.writeInt(game.getVisitor().getMiniGamePoints(MiniGameResult.LOSS, omok)); // losses
+            mplew.writeInt(game.getVisitor().map(v -> v.getMiniGamePoints(MiniGameResult.WIN, omok)).orElse(0)); // wins
+            mplew.writeInt(game.getVisitor().map(v -> v.getMiniGamePoints(MiniGameResult.TIE, omok)).orElse(0)); // ties
+            mplew.writeInt(game.getVisitor().map(v -> v.getMiniGamePoints(MiniGameResult.LOSS, omok)).orElse(0)); // losses
             mplew.writeInt(game.getVisitorScore()); // points
         }
 
@@ -5431,12 +5466,7 @@ public class MaplePacketCreator {
         mplew.write(0);
         addCharLook(mplew, minigame.getOwner(), false);
         mplew.writeMapleAsciiString(minigame.getOwner().getName());
-        if (minigame.getVisitor() != null) {
-            MapleCharacter visitor = minigame.getVisitor();
-            mplew.write(1);
-            addCharLook(mplew, visitor, false);
-            mplew.writeMapleAsciiString(visitor.getName());
-        }
+        minigame.getVisitor().ifPresent(v -> writeMiniGameVisitorLook(mplew, v));
         mplew.write(0xFF);
         mplew.write(0);
         mplew.writeInt(2);
@@ -5446,15 +5476,7 @@ public class MaplePacketCreator {
 
         //set vs
         mplew.writeInt(minigame.getOwnerScore());
-        if (minigame.getVisitor() != null) {
-            MapleCharacter visitor = minigame.getVisitor();
-            mplew.write(1);
-            mplew.writeInt(2);
-            mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.WIN, false));
-            mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.TIE, false));
-            mplew.writeInt(visitor.getMiniGamePoints(MiniGameResult.LOSS, false));
-            mplew.writeInt(minigame.getVisitorScore());
-        }
+        minigame.getVisitor().ifPresent(v -> writeMiniGameVisitorScore(minigame, mplew, v, 2));
         mplew.write(0xFF);
         mplew.writeMapleAsciiString(minigame.getDescription());
         mplew.write(piece);
@@ -6100,7 +6122,7 @@ public class MaplePacketCreator {
             mplew.write(0);
         } else {
             mplew.write(1);
-            mplew.writeMapleAsciiString(chr.getChalkboard());
+            mplew.writeMapleAsciiString(chr.getChalkboard().orElse(""));
         }
         return mplew.getPacket();
     }
@@ -7272,9 +7294,10 @@ public class MaplePacketCreator {
         }
         mplew.writeInt(alliance.getCapacity()); // probably capacity
         mplew.writeShort(0);
-        for (Integer guildid : alliance.getGuilds()) {
-            getGuildInfo(mplew, Server.getInstance().getGuild(guildid, world));
-        }
+        alliance.getGuilds().stream()
+                .map(id -> Server.getInstance().getGuild(id, world))
+                .flatMap(Optional::stream)
+                .forEach(g -> getGuildInfo(mplew, g));
         return mplew.getPacket();
     }
 
@@ -7283,9 +7306,10 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.ALLIANCE_OPERATION.getValue());
         mplew.write(0x0D);
         mplew.writeInt(alliance.getGuilds().size());
-        for (Integer guild : alliance.getGuilds()) {
-            getGuildInfo(mplew, Server.getInstance().getGuild(guild, worldId));
-        }
+        alliance.getGuilds().stream()
+                .map(id -> Server.getInstance().getGuild(id, worldId))
+                .flatMap(Optional::stream)
+                .forEach(g -> getGuildInfo(mplew, g));
         return mplew.getPacket();
     }
 
@@ -7305,7 +7329,7 @@ public class MaplePacketCreator {
         mplew.writeInt(alliance.getCapacity());
         mplew.writeMapleAsciiString(alliance.getNotice());
         mplew.writeInt(newGuild);
-        getGuildInfo(mplew, Server.getInstance().getGuild(newGuild, c.getWorld(), null));
+        getGuildInfo(mplew, Server.getInstance().getGuild(newGuild, c.getWorld(), null).orElseThrow());
         return mplew.getPacket();
     }
 
@@ -7313,7 +7337,7 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.ALLIANCE_OPERATION.getValue());
         mplew.write(0x0E);
-        mplew.writeInt(mc.getGuild().getAllianceId());
+        mplew.writeInt(mc.getGuild().map(MapleGuild::getAllianceId).orElse(0));
         mplew.writeInt(mc.getGuildId());
         mplew.writeInt(mc.getId());
         mplew.write(online ? 1 : 0);
@@ -7344,7 +7368,7 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.ALLIANCE_OPERATION.getValue());
         mplew.write(0x18);
-        mplew.writeInt(mc.getGuild().getAllianceId());
+        mplew.writeInt(mc.getGuild().map(MapleGuild::getAllianceId).orElse(0));
         mplew.writeInt(mc.getGuildId());
         mplew.writeInt(mc.getId());
         mplew.writeInt(mc.getLevel());
@@ -7368,7 +7392,7 @@ public class MaplePacketCreator {
         mplew.writeInt(alliance.getCapacity());
         mplew.writeMapleAsciiString(alliance.getNotice());
         mplew.writeInt(expelledGuild);
-        getGuildInfo(mplew, Server.getInstance().getGuild(expelledGuild, worldId, null));
+        getGuildInfo(mplew, Server.getInstance().getGuild(expelledGuild, worldId, null).orElseThrow());
         mplew.write(0x01);
         return mplew.getPacket();
     }
@@ -7686,20 +7710,15 @@ public class MaplePacketCreator {
         }
 
         if (chr.getPartnerId() > 0) {
-            MapleRing marriageRing = chr.getMarriageRing();
-
             mplew.writeShort(1);
             mplew.writeInt(chr.getRelationshipId());
             mplew.writeInt(chr.getGender() == 0 ? chr.getId() : chr.getPartnerId());
             mplew.writeInt(chr.getGender() == 0 ? chr.getPartnerId() : chr.getId());
-            mplew.writeShort((marriageRing != null) ? 3 : 1);
-            if (marriageRing != null) {
-                mplew.writeInt(marriageRing.getItemId());
-                mplew.writeInt(marriageRing.getItemId());
-            } else {
-                mplew.writeInt(1112803); // Engagement Ring's Outcome (doesn't matter for engagement)
-                mplew.writeInt(1112803); // Engagement Ring's Outcome (doesn't matter for engagement)
-            }
+
+            Optional<MapleRing> marriageRing = chr.getMarriageRing();
+            mplew.writeShort((marriageRing.isPresent()) ? 3 : 1);
+            mplew.writeInt(marriageRing.map(MapleRing::getItemId).orElse(1112803));
+            mplew.writeInt(marriageRing.map(MapleRing::getItemId).orElse(1112803));
             mplew.writeAsciiString(StringUtil.getRightPaddedStr(chr.getGender() == 0 ? chr.getName() : MapleCharacter.getNameById(chr.getPartnerId()), '\0', 13));
             mplew.writeAsciiString(StringUtil.getRightPaddedStr(chr.getGender() == 0 ? MapleCharacter.getNameById(chr.getPartnerId()) : chr.getName(), '\0', 13));
         } else {

@@ -34,6 +34,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * @author Ronan
@@ -136,10 +137,10 @@ public final class NewYearCardHandler extends AbstractMaplePacketHandler {
 
                         player.getMap().broadcastMessage(MaplePacketCreator.onNewYearCardRes(player, newyear, 0xD, 0));
 
-                        MapleCharacter sender = c.getWorldServer().getPlayerStorage().getCharacterById(newyear.getSenderId());
-                        if (sender != null && sender.isLoggedinWorld()) {
-                            sender.getMap().broadcastMessage(MaplePacketCreator.onNewYearCardRes(sender, newyear, 0xD, 0));
-                            sender.dropMessage(6, "[New Year] Your addressee successfully received the New Year card.");
+                        Optional<MapleCharacter> sender = c.getWorldServer().getPlayerStorage().getCharacterById(newyear.getSenderId());
+                        if (sender.isPresent() && sender.get().isLoggedinWorld()) {
+                            sender.get().getMap().broadcastMessage(MaplePacketCreator.onNewYearCardRes(sender.get(), newyear, 0xD, 0));
+                            sender.get().dropMessage(6, "[New Year] Your addressee successfully received the New Year card.");
                         }
                     } else {
                         player.announce(MaplePacketCreator.onNewYearCardRes(player, -1, 5, 0x10));  // inventory full

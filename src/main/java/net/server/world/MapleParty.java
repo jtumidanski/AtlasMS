@@ -36,7 +36,13 @@ import server.maps.MapleMap;
 import server.partyquest.MonsterCarnival;
 import tools.MaplePacketCreator;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class MapleParty {
@@ -141,10 +147,7 @@ public class MapleParty {
 
                 world.updateParty(party.getId(), PartyOperation.DISBAND, partyplayer);
 
-                EventInstanceManager eim = player.getEventInstance();
-                if (eim != null) {
-                    eim.disbandParty();
-                }
+                player.getEventInstance().ifPresent(EventInstanceManager::disbandParty);
             } else {
                 MapleMap map = player.getMap();
                 if (map != null) {
@@ -158,10 +161,7 @@ public class MapleParty {
 
                 world.updateParty(party.getId(), PartyOperation.LEAVE, partyplayer);
 
-                EventInstanceManager eim = player.getEventInstance();
-                if (eim != null) {
-                    eim.leftParty(player);
-                }
+                player.getEventInstance().ifPresent(ei -> ei.leftParty(player));
             }
 
             player.setParty(null);
@@ -201,11 +201,7 @@ public class MapleParty {
                         mcpq.leftParty(emc.getId());
                     }
 
-                    EventInstanceManager eim = emc.getEventInstance();
-                    if (eim != null) {
-                        eim.leftParty(emc);
-                    }
-
+                    emc.getEventInstance().ifPresent(ei -> ei.leftParty(emc));
                     emc.setParty(null);
                     world.updateParty(party.getId(), PartyOperation.EXPEL, expelled);
 

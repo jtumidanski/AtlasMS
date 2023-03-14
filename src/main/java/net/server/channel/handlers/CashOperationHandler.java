@@ -148,10 +148,10 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }
-                    MapleCharacter receiver = c.getChannelServer().getPlayerStorage().getCharacterByName(recipient.get("name"));
-                    if (receiver != null) {
-                        receiver.showNote();
-                    }
+                    c.getChannelServer()
+                            .getPlayerStorage()
+                            .getCharacterByName(recipient.get("name"))
+                            .ifPresent(MapleCharacter::showNote);
                 } else if (action == 0x05) { // Modify wish list
                     cs.clearWishList();
                     for (byte i = 0; i < 10; i++) {
@@ -332,7 +332,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                         String recipientName = slea.readMapleAsciiString();
                         String text = slea.readMapleAsciiString();
                         CashItem itemRing = CashItemFactory.getItem(SN);
-                        MapleCharacter partner = c.getChannelServer().getPlayerStorage().getCharacterByName(recipientName);
+                        MapleCharacter partner = c.getChannelServer().getPlayerStorage().getCharacterByName(recipientName).orElse(null);
                         if (partner == null) {
                             chr.getClient().announce(MaplePacketCreator.serverNotice(1, "The partner you specified cannot be found.\r\nPlease make sure your partner is online and in the same channel."));
                         } else {
@@ -404,7 +404,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                         int available = slea.readShort() - 1;
                         String text = slea.readAsciiString(available);
                         slea.readByte();
-                        MapleCharacter partner = c.getChannelServer().getPlayerStorage().getCharacterByName(sentTo);
+                        MapleCharacter partner = c.getChannelServer().getPlayerStorage().getCharacterByName(sentTo).orElse(null);
                         if (partner == null) {
                             c.announce(MaplePacketCreator.showCashShopMessage((byte) 0xBE));
                         } else {

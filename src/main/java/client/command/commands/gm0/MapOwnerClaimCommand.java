@@ -41,7 +41,7 @@ public class MapOwnerClaimCommand extends Command {
                 MapleCharacter chr = c.getPlayer();
 
                 if (YamlConfig.config.server.USE_MAP_OWNERSHIP_SYSTEM) {
-                    if (chr.getEventInstance() == null) {
+                    if (chr.getEventInstance().isEmpty()) {
                         MapleMap map = chr.getMap();
                         if (map.countBosses() == 0) {   // thanks Conrad for suggesting bosses prevent map leasing
                             MapleMap ownedMap = chr.getOwnedMap();  // thanks Conrad for suggesting not unlease a map as soon as player exits it

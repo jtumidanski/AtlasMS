@@ -32,14 +32,18 @@ public class HurtCommand extends Command {
         setDescription("");
     }
 
+    private static void hurtError(MapleCharacter player, String target) {
+        player.message("Player '" + target + "' could not be found.");
+    }
+
+    private static void hurt(MapleCharacter victim) {
+        victim.updateHp(1);
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
-        MapleCharacter player = c.getPlayer();
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim != null) {
-            victim.updateHp(1);
-        } else {
-            player.message("Player '" + params[0] + "' could not be found.");
-        }
+        String targetName = params[0];
+        c.getWorldServer().getPlayerStorage().getCharacterByName(targetName)
+                .ifPresentOrElse(HurtCommand::hurt, () -> hurtError(c.getPlayer(), targetName));
     }
 }

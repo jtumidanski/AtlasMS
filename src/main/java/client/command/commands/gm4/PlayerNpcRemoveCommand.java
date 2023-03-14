@@ -40,6 +40,9 @@ public class PlayerNpcRemoveCommand extends Command {
             player.yellowMessage("Syntax: !playernpcremove <playername>");
             return;
         }
-        MaplePlayerNPC.removePlayerNPC(c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]));
+        c.getChannelServer()
+                .getPlayerStorage()
+                .getCharacterByName(params[0])
+                .ifPresent(MaplePlayerNPC::removePlayerNPC);
     }
 }

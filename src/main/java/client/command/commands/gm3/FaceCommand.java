@@ -35,6 +35,16 @@ public class FaceCommand extends Command {
         setDescription("");
     }
 
+    private static void setFaceError(String targetName, MapleCharacter player) {
+        player.yellowMessage("Player '" + targetName + "' has not been found on this channel.");
+    }
+
+    private static void setFace(int itemId, MapleCharacter victim) {
+        victim.setFace(itemId);
+        victim.updateSingleStat(MapleStat.FACE, itemId);
+        victim.equipChanged();
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
@@ -51,25 +61,17 @@ public class FaceCommand extends Command {
                     return;
                 }
 
-                player.setFace(itemId);
-                player.updateSingleStat(MapleStat.FACE, itemId);
-                player.equipChanged();
+                setFace(itemId, player);
             } else {
                 int itemId = Integer.parseInt(params[1]);
                 if (!ItemConstants.isFace(itemId) || MapleItemInformationProvider.getInstance().getName(itemId) == null) {
                     player.yellowMessage("Face id '" + params[1] + "' does not exist.");
                 }
 
-                MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
-                if (victim == null) {
-                    victim.setFace(itemId);
-                    victim.updateSingleStat(MapleStat.FACE, itemId);
-                    victim.equipChanged();
-                } else {
-                    player.yellowMessage("Player '" + params[0] + "' has not been found on this channel.");
-                }
+                c.getChannelServer().getPlayerStorage().getCharacterByName(params[0])
+                        .ifPresentOrElse(t -> setFace(itemId, t), () -> setFaceError(params[0], player));
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
     }

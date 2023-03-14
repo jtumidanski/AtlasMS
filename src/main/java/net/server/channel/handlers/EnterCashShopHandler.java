@@ -43,7 +43,7 @@ public class EnterCashShopHandler extends AbstractMaplePacketHandler {
                 return;
             }
 
-            if (mc.getEventInstance() != null) {
+            if (mc.getEventInstance().isPresent()) {
                 c.announce(MaplePacketCreator.serverNotice(5, "Entering Cash Shop or MTS are disabled when registered on an event."));
                 c.announce(MaplePacketCreator.enableActions());
                 return;

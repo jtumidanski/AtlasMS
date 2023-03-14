@@ -20,14 +20,18 @@
 package net.server.coordinator.matchchecker;
 
 import client.MapleCharacter;
-import net.server.PlayerStorage;
 import net.server.Server;
 import net.server.coordinator.matchchecker.MatchCheckerListenerFactory.MatchCheckerType;
-import net.server.world.World;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
 
 /**
  * @author Ronan
@@ -380,21 +384,10 @@ public class MapleMatchCheckerCoordinator {
         }
 
         private Set<MapleCharacter> getMatchCharacters() {
-            Set<MapleCharacter> players = new HashSet<>();
-
-            World wserv = Server.getInstance().getWorld(world);
-            if (wserv != null) {
-                PlayerStorage ps = wserv.getPlayerStorage();
-
-                for (Integer cid : getMatchPlayers()) {
-                    MapleCharacter chr = ps.getCharacterById(cid);
-                    if (chr != null) {
-                        players.add(chr);
-                    }
-                }
-            }
-
-            return players;
+            return getMatchPlayers().stream()
+                    .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.toSet());
         }
 
         private void dispatchMatchCreated() {

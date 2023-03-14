@@ -41,7 +41,7 @@ public class FameCommand extends Command {
             return;
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim != null) {
             victim.setFame(Integer.parseInt(params[1]));
             victim.updateSingleStat(MapleStat.FAME, victim.getFame());

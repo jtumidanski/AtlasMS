@@ -27,6 +27,7 @@ import client.autoban.AutobanFactory;
 import config.YamlConfig;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
+import net.server.guild.MapleGuild;
 import net.server.world.World;
 import tools.FilePrinter;
 import tools.LogHelper;
@@ -70,8 +71,8 @@ public final class MultiChatHandler extends AbstractMaplePacketHandler {
             if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
                 LogHelper.logChat(c, "Guild", chattext);
             }
-        } else if (type == 3 && player.getGuild() != null) {
-            int allianceId = player.getGuild().getAllianceId();
+        } else if (type == 3 && player.getGuild().isPresent()) {
+            int allianceId = player.getGuild().map(MapleGuild::getAllianceId).orElse(0);
             if (allianceId > 0) {
                 Server.getInstance().allianceMessage(allianceId, MaplePacketCreator.multiChat(player.getName(), chattext, 3), player.getId(), -1);
                 if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {

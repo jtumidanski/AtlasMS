@@ -58,7 +58,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
 
     public static void sendEngageProposal(final MapleClient c, final String name, final int itemid) {
         final int newBoxId = getBoxId(itemid);
-        final MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(name);
+        final MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(name).orElse(null);
         final MapleCharacter source = c.getPlayer();
 
         // TODO: get the correct packet bytes for these popups
@@ -185,9 +185,9 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
         }
 
         chr.getClient().getWorldServer().deleteRelationship(chr.getId(), partnerid);
-        MapleRing.removeRing(chr.getMarriageRing());
+        chr.getMarriageRing().ifPresent(MapleRing::removeRing);
 
-        MapleCharacter partner = chr.getClient().getWorldServer().getPlayerStorage().getCharacterById(partnerid);
+        MapleCharacter partner = chr.getClient().getWorldServer().getPlayerStorage().getCharacterById(partnerid).orElse(null);
         if (partner == null) {
             eraseEngagementOffline(partnerid);
         } else {
@@ -212,7 +212,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
     }
 
     private static void resetRingId(MapleCharacter player) {
-        int ringitemid = player.getMarriageRing().getItemId();
+        int ringitemid = player.getMarriageRing().map(MapleRing::getItemId).orElse(-1);
         player.getInventory(MapleInventoryType.EQUIP).findById(ringitemid)
                 .or(() -> player.getInventory(MapleInventoryType.EQUIPPED).findById(ringitemid))
                 .map(i -> (Equip) i)
@@ -225,7 +225,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
 
         chr.getClient().getWorldServer().deleteRelationship(chr.getId(), partnerid);
 
-        MapleCharacter partner = chr.getClient().getWorldServer().getPlayerStorage().getCharacterById(partnerid);
+        MapleCharacter partner = chr.getClient().getWorldServer().getPlayerStorage().getCharacterById(partnerid).orElse(null);
         if (partner == null) {
             breakEngagementOffline(partnerid);
         } else {
@@ -318,7 +318,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                 name = slea.readMapleAsciiString();
                 final int id = slea.readInt();
 
-                final MapleCharacter source = c.getWorldServer().getPlayerStorage().getCharacterByName(name);
+                final MapleCharacter source = c.getWorldServer().getPlayerStorage().getCharacterByName(name).orElse(null);
                 final MapleCharacter target = c.getPlayer();
 
                 if (source == null) {
@@ -411,7 +411,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                             if (resStatus > 0) {
                                 long expiration = cserv.getWeddingTicketExpireTime(resStatus + 1);
 
-                                MapleCharacter guestChr = c.getWorldServer().getPlayerStorage().getCharacterById(guest);
+                                MapleCharacter guestChr = c.getWorldServer().getPlayerStorage().getCharacterById(guest).orElse(null);
                                 if (guestChr != null && MapleInventoryManipulator.checkSpace(guestChr.getClient(), newItemId, 1, "") && MapleInventoryManipulator.addById(guestChr.getClient(), newItemId, (short) 1, expiration)) {
                                     guestChr.dropMessage(6, "[Wedding] You've been invited to " + groom + " and " + bride + "'s Wedding!");
                                 } else {
@@ -472,7 +472,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
 
                     MapleCharacter player = c.getPlayer();
 
-                    EventInstanceManager eim = player.getEventInstance();
+                    EventInstanceManager eim = player.getEventInstance().orElse(null);
                     if (eim != null) {
                         boolean isMarrying = (player.getId() == eim.getIntProperty("groomId") || player.getId() == eim.getIntProperty("brideId"));
 

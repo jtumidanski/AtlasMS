@@ -41,7 +41,7 @@ public class ReachCommand extends Command {
             return;
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim != null && victim.isLoggedin()) {
             if (player.getClient().getChannel() != victim.getClient().getChannel()) {
                 player.dropMessage(5, "Player '" + victim.getName() + "' is at channel " + victim.getClient().getChannel() + ".");

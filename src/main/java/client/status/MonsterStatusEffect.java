@@ -25,6 +25,7 @@ import client.Skill;
 import server.life.MobSkill;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MonsterStatusEffect {
@@ -34,9 +35,9 @@ public class MonsterStatusEffect {
     private MobSkill mobskill;
     private boolean monsterSkill;
 
-    public MonsterStatusEffect(Map<MonsterStatus, Integer> stati, Skill skillId, MobSkill mobskill, boolean monsterSkill) {
+    public MonsterStatusEffect(Map<MonsterStatus, Integer> stati, Skill skill, MobSkill mobskill, boolean monsterSkill) {
         this.stati = new ConcurrentHashMap<>(stati);
-        this.skill = skillId;
+        this.skill = skill;
         this.monsterSkill = monsterSkill;
         this.mobskill = mobskill;
     }
@@ -49,8 +50,8 @@ public class MonsterStatusEffect {
         return stati.put(status, newVal);
     }
 
-    public Skill getSkill() {
-        return skill;
+    public Optional<Skill> getSkill() {
+        return Optional.ofNullable(skill);
     }
 
     public boolean isMonsterSkill() {

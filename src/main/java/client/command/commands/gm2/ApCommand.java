@@ -51,7 +51,7 @@ public class ApCommand extends Command {
 
             player.changeRemainingAp(newAp, false);
         } else {
-            MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
             if (victim != null) {
                 int newAp = Integer.parseInt(params[1]);
                 if (newAp < 0) {

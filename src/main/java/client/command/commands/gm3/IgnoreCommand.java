@@ -42,7 +42,7 @@ public class IgnoreCommand extends Command {
             player.yellowMessage("Syntax: !ignore <ign>");
             return;
         }
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
         if (victim == null) {
             player.message("Player '" + params[0] + "' could not be found on this world.");
             return;

@@ -9,6 +9,16 @@ public class GiveRpCommand extends Command {
         setDescription("");
     }
 
+    private static void giveRpError(MapleCharacter player, String targetName) {
+        player.message("Player '" + targetName + "' could not be found.");
+    }
+
+    private static void giveRp(MapleCharacter player, String targetName, int points, MapleCharacter victim) {
+        victim.setRewardPoints(victim.getRewardPoints() + points);
+        player.message("RP given. Player " + targetName + " now has " + victim.getRewardPoints()
+                + " reward points.");
+    }
+
     @Override
     public void execute(MapleClient client, String[] params) {
         MapleCharacter player = client.getPlayer();
@@ -17,13 +27,12 @@ public class GiveRpCommand extends Command {
             return;
         }
 
-        MapleCharacter victim = client.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim != null) {
-            victim.setRewardPoints(victim.getRewardPoints() + Integer.parseInt(params[1]));
-            player.message("RP given. Player " + params[0] + " now has " + victim.getRewardPoints()
-                    + " reward points.");
-        } else {
-            player.message("Player '" + params[0] + "' could not be found.");
-        }
+        String targetName = params[0];
+        int points = Integer.parseInt(params[1]);
+
+        client.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterByName(targetName)
+                .ifPresentOrElse(t -> giveRp(player, targetName, points, t), () -> giveRpError(player, targetName));
     }
 }

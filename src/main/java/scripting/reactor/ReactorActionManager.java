@@ -72,10 +72,10 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
 
         for (ReactorDropEntry mde : from) {
-            if (!ii.isQuestItem(mde.itemId)) {
+            if (!ii.isQuestItem(mde.itemId())) {
                 item.add(mde);
             } else {
-                if (chr.needQuestItem(mde.questid, mde.itemId)) {
+                if (chr.needQuestItem(mde.questId(), mde.itemId())) {
                     visibleQuest.add(mde);
                 } else {
                     otherQuest.add(mde);
@@ -176,7 +176,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
                 dropPos.x = posX + ((p % 2 == 0) ? (25 * ((p + 1) / 2)) : -(25 * (p / 2)));
                 p++;
 
-                if (d.itemId == 0) {
+                if (d.itemId() == 0) {
                     int range = maxMeso - minMeso;
                     int displayDrop = (int) (Math.random() * range) + minMeso;
                     int mesoDrop = (displayDrop * c.getWorldServer().getMesoRate());
@@ -184,13 +184,13 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
                 } else {
                     Item drop;
 
-                    if (ItemConstants.getInventoryType(d.itemId) != MapleInventoryType.EQUIP) {
-                        drop = new Item(d.itemId, (short) 0, (short) 1);
+                    if (ItemConstants.getInventoryType(d.itemId()) != MapleInventoryType.EQUIP) {
+                        drop = new Item(d.itemId(), (short) 0, (short) 1);
                     } else {
-                        drop = ii.randomizeStats((Equip) ii.getEquipById(d.itemId));
+                        drop = ii.randomizeStats((Equip) ii.getEquipById(d.itemId()));
                     }
 
-                    reactor.getMap().dropFromReactor(getPlayer(), reactor, drop, dropPos, (short) d.questid);
+                    reactor.getMap().dropFromReactor(getPlayer(), reactor, drop, dropPos, (short) d.questId());
                 }
             }
         } else {
@@ -209,7 +209,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
                     }
 
                     ReactorDropEntry d = dropItems.remove(0);
-                    if (d.itemId == 0) {
+                    if (d.itemId() == 0) {
                         int range = maxMeso - minMeso;
                         int displayDrop = (int) (Math.random() * range) + minMeso;
                         int mesoDrop = (displayDrop * worldMesoRate);
@@ -217,14 +217,14 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
                     } else {
                         Item drop;
 
-                        if (ItemConstants.getInventoryType(d.itemId) != MapleInventoryType.EQUIP) {
-                            drop = new Item(d.itemId, (short) 0, (short) 1);
+                        if (ItemConstants.getInventoryType(d.itemId()) != MapleInventoryType.EQUIP) {
+                            drop = new Item(d.itemId(), (short) 0, (short) 1);
                         } else {
                             MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-                            drop = ii.randomizeStats((Equip) ii.getEquipById(d.itemId));
+                            drop = ii.randomizeStats((Equip) ii.getEquipById(d.itemId()));
                         }
 
-                        r.getMap().dropFromReactor(getPlayer(), r, drop, dropPos, (short) d.questid);
+                        r.getMap().dropFromReactor(getPlayer(), r, drop, dropPos, (short) d.questId());
                     }
 
                     dropPos.x += 25;
@@ -244,7 +244,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
         }
 
         for (ReactorDropEntry mde : drops) {
-            if (Math.random() < (dropRate / (double) mde.chance)) {
+            if (Math.random() < (dropRate / (double) mde.chance())) {
                 items.add(mde);
             }
         }

@@ -32,6 +32,15 @@ public class GiveNxCommand extends Command {
         setDescription("");
     }
 
+    private static void giveNx(MapleCharacter player, String typeStr, int value, int type, MapleCharacter victim) {
+        victim.getCashShop().gainCash(type, value);
+        player.message(typeStr.toUpperCase() + " given.");
+    }
+
+    private static void giveNxError(MapleCharacter player, String recv) {
+        player.message("Player '" + recv + "' could not be found.");
+    }
+
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
@@ -40,7 +49,7 @@ public class GiveNxCommand extends Command {
             return;
         }
 
-        String recv, typeStr = "nx";
+        String recv, typeStr;
         int value, type = 1;
         if (params.length > 1) {
             if (params[0].length() == 2) {
@@ -64,20 +73,20 @@ public class GiveNxCommand extends Command {
                     value = Integer.parseInt(params[1]);
                 }
             } else {
+                typeStr = "nx";
                 recv = params[0];
                 value = Integer.parseInt(params[1]);
             }
         } else {
+            typeStr = "nx";
             recv = c.getPlayer().getName();
             value = Integer.parseInt(params[0]);
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(recv);
-        if (victim != null) {
-            victim.getCashShop().gainCash(type, value);
-            player.message(typeStr.toUpperCase() + " given.");
-        } else {
-            player.message("Player '" + recv + "' could not be found.");
-        }
+        int finalType = type;
+        c.getWorldServer()
+                .getPlayerStorage()
+                .getCharacterByName(recv)
+                .ifPresentOrElse(t -> giveNx(player, typeStr, value, finalType, t), () -> giveNxError(player, recv));
     }
 }

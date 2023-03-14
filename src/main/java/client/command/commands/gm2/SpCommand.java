@@ -51,7 +51,7 @@ public class SpCommand extends Command {
 
             player.updateRemainingSp(newSp);
         } else {
-            MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
             if (victim != null) {
                 int newSp = Integer.parseInt(params[1]);
                 if (newSp < 0) {

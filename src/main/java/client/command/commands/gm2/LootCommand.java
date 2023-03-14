@@ -29,7 +29,6 @@ import server.maps.MapleMapItem;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class LootCommand extends Command {

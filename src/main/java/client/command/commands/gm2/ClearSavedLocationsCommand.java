@@ -38,7 +38,7 @@ public class ClearSavedLocationsCommand extends Command {
         MapleCharacter player = c.getPlayer(), victim;
 
         if (params.length > 0) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
             if (victim == null) {
                 player.message("Player '" + params[0] + "' could not be found.");
                 return;
