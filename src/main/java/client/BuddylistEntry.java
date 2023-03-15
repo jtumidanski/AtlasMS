@@ -101,9 +101,6 @@ public class BuddylistEntry {
             return false;
         }
         final BuddylistEntry other = (BuddylistEntry) obj;
-        if (cid != other.cid) {
-            return false;
-        }
-        return true;
+        return cid == other.cid;
     }
 }

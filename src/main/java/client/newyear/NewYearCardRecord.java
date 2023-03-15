@@ -21,6 +21,7 @@ package client.newyear;
 
 import client.MapleCharacter;
 import net.server.Server;
+import net.server.world.World;
 import server.TimerManager;
 import tools.DatabaseConnection;
 import tools.MaplePacketCreator;
@@ -340,17 +341,17 @@ public class NewYearCardRecord {
         sendTask = TimerManager.getInstance().register(() -> {
             Server server = Server.getInstance();
 
-            int world = server.getCharacterWorld(receiverId);
-            if (world == -1) {
+            Optional<Integer> worldId = server.getCharacterWorld(receiverId);
+            if (worldId.isEmpty()) {
                 sendTask.cancel(false);
                 sendTask = null;
 
                 return;
             }
 
-            server.getWorld(world)
-                    .getPlayerStorage()
-                    .getCharacterById(receiverId)
+            server.getWorld(worldId.get())
+                    .map(World::getPlayerStorage)
+                    .flatMap(s -> s.getCharacterById(receiverId))
                     .filter(MapleCharacter::isLoggedinWorld)
                     .ifPresent(t -> t.announce(MaplePacketCreator.onNewYearCardRes(t, NewYearCardRecord.this, 0xC, 0)));
         }, 1000 * 60 * 60); //1 Hour

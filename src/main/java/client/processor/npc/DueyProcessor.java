@@ -383,12 +383,10 @@ public class DueyProcessor {
                 Optional<MapleClient> rClient = Optional.empty();
                 int channel = c.getWorldServer().find(recipient);
                 if (channel > -1) {
-                    Channel rcserv = c.getWorldServer().getChannel(channel);
-                    if (rcserv != null) {
-                        rClient = rcserv.getPlayerStorage()
-                                .getCharacterByName(recipient)
-                                .map(MapleCharacter::getClient);
-                    }
+                    rClient = c.getWorldServer().getChannel(channel)
+                            .map(Channel::getPlayerStorage)
+                            .flatMap(s -> s.getCharacterByName(recipient))
+                            .map(MapleCharacter::getClient);
                 }
 
                 rClient.filter(MapleClient::isLoggedIn)

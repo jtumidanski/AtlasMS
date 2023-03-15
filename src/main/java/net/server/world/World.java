@@ -100,7 +100,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -108,6 +107,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class World {
 
@@ -335,14 +335,13 @@ public class World {
         }
     }
 
-    public Channel getChannel(int channel) {
+    public Optional<Channel> getChannel(int channel) {
         chnRLock.lock();
         try {
-            try {
-                return channels.get(channel - 1);
-            } catch (IndexOutOfBoundsException e) {
-                return null;
+            if ((channel - 1) < 0 || (channel - 1) >= channels.size()) {
+                return Optional.empty();
             }
+            return Optional.ofNullable(channels.get(channel - 1));
         } finally {
             chnRLock.unlock();
         }
@@ -827,8 +826,7 @@ public class World {
                 .filter(i -> i != exception)
                 .map(i -> getPlayerStorage().getCharacterById(i))
                 .flatMap(Optional::stream)
-                .map(MapleCharacter::getClient)
-                .forEach(c -> c.announce(packet));
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
     public boolean isGuildQueued(int guildId) {
@@ -1128,22 +1126,22 @@ public class World {
     }
 
     public void partyChat(MapleParty party, String chatText, String nameFrom) {
+        byte[] packet = MaplePacketCreator.multiChat(nameFrom, chatText, 1);
         party.getMembers().stream()
                 .map(MaplePartyCharacter::getName)
                 .filter(name -> !name.equals(nameFrom))
                 .map(name -> getPlayerStorage().getCharacterByName(name))
                 .flatMap(Optional::stream)
-                .map(MapleCharacter::getClient)
-                .forEach(c -> c.announce(MaplePacketCreator.multiChat(nameFrom, chatText, 1)));
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
     public void buddyChat(int[] recipientCharacterIds, int cidFrom, String nameFrom, String chatText) {
+        byte[] packet = MaplePacketCreator.multiChat(nameFrom, chatText, 0);
         Arrays.stream(recipientCharacterIds)
                 .mapToObj(id -> getPlayerStorage().getCharacterById(id))
                 .flatMap(Optional::stream)
                 .filter(c -> c.getBuddylist().containsVisible(cidFrom))
-                .map(MapleCharacter::getClient)
-                .forEach(c -> c.announce(MaplePacketCreator.multiChat(nameFrom, chatText, 0)));
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
     public CharacterIdChannelPair[] multiBuddyFind(int charIdFrom, int[] characterIds) {
@@ -1156,37 +1154,41 @@ public class World {
         return foundsChars.toArray(new CharacterIdChannelPair[0]);
     }
 
-    public MapleMessenger getMessenger(int messengerid) {
-        return messengers.get(messengerid);
+    public Optional<MapleMessenger> getMessenger(int messengerId) {
+        return Optional.ofNullable(messengers.get(messengerId));
     }
 
-    public void leaveMessenger(int messengerid, MapleMessengerCharacter target) {
-        MapleMessenger messenger = getMessenger(messengerid);
-        if (messenger == null) {
-            throw new IllegalArgumentException("No messenger with the specified messengerid exists");
+    public void leaveMessenger(int messengerId, String name) {
+        Optional<MapleMessenger> messenger = getMessenger(messengerId);
+        if (messenger.isEmpty()) {
+            throw new IllegalArgumentException("No messenger with the specified messengerId exists");
         }
-        int position = messenger.getPositionByName(target.getName());
-        messenger.removeMember(target);
+        leaveMessenger(messenger.get(), name);
+    }
+
+    private void leaveMessenger(MapleMessenger messenger, String name) {
+        int position = messenger.getPositionByName(name);
+        messenger.removeMember(name);
         removeMessengerPlayer(messenger, position);
     }
 
-    public void messengerInvite(String sender, int messengerid, String target, int fromchannel) {
+    public void messengerInvite(String sender, int messengerId, String target, int fromChannel) {
         if (isConnected(target)) {
             Optional<MapleCharacter> targetChr = getPlayerStorage().getCharacterByName(target);
             if (targetChr.isPresent()) {
-                MapleMessenger messenger = targetChr.get().getMessenger();
-                Optional<MapleCharacter> from = getChannel(fromchannel).getPlayerStorage().getCharacterByName(sender);
-                if (messenger == null) {
+                Optional<MapleMessenger> messenger = targetChr.get().getMessenger();
+                Optional<MapleCharacter> from = getChannel(fromChannel).flatMap(c -> c.getPlayerStorage().getCharacterByName(sender));
+                if (messenger.isEmpty()) {
                     if (from.isPresent()) {
-                        if (MapleInviteCoordinator.createInvite(InviteType.MESSENGER, from.get(), messengerid, targetChr.get().getId())) {
-                            targetChr.get().getClient().announce(MaplePacketCreator.messengerInvite(sender, messengerid));
-                            from.get().getClient().announce(MaplePacketCreator.messengerNote(target, 4, 1));
+                        if (MapleInviteCoordinator.createInvite(InviteType.MESSENGER, from.get(), messengerId, targetChr.get().getId())) {
+                            targetChr.get().announce(MaplePacketCreator.messengerInvite(sender, messengerId));
+                            from.get().announce(MaplePacketCreator.messengerNote(target, 4, 1));
                         } else {
                             from.get().announce(MaplePacketCreator.messengerChat(sender + " : " + target + " is already managing a Maple Messenger invitation"));
                         }
                     }
                 } else {
-                    from.ifPresent(character -> character.getClient().announce(MaplePacketCreator.messengerChat(sender + " : " + target + " is already using Maple Messenger")));
+                    from.ifPresent(character -> character.announce(MaplePacketCreator.messengerChat(sender + " : " + target + " is already using Maple Messenger")));
                 }
             }
         }
@@ -1194,104 +1196,100 @@ public class World {
 
     public void addMessengerPlayer(MapleMessenger messenger, String namefrom, int fromchannel, int position) {
         for (MapleMessengerCharacter messengerchar : messenger.getMembers()) {
-            Optional<MapleCharacter> chr = getPlayerStorage().getCharacterByName(messengerchar.getName());
+            Optional<MapleCharacter> chr = getPlayerStorage().getCharacterByName(messengerchar.name());
             if (chr.isEmpty()) {
                 continue;
             }
-            if (!messengerchar.getName().equals(namefrom)) {
-                Optional<MapleCharacter> from = getChannel(fromchannel).getPlayerStorage().getCharacterByName(namefrom);
-                chr.get().getClient().announce(MaplePacketCreator.addMessengerPlayer(namefrom, from.get(), position, (byte) (fromchannel - 1)));
-                from.get().getClient().announce(MaplePacketCreator.addMessengerPlayer(chr.get().getName(), chr.get(), messengerchar.getPosition(), (byte) (messengerchar.getChannel() - 1)));
+            if (!messengerchar.name().equals(namefrom)) {
+                Optional<MapleCharacter> from = getChannel(fromchannel).flatMap(c -> c.getPlayerStorage().getCharacterByName(namefrom));
+                chr.get().announce(MaplePacketCreator.addMessengerPlayer(namefrom, from.get(), position, (byte) (fromchannel - 1)));
+                from.get().announce(MaplePacketCreator.addMessengerPlayer(chr.get().getName(), chr.get(), messengerchar.position(), (byte) (messengerchar.channelId() - 1)));
             } else {
-                chr.get().getClient().announce(MaplePacketCreator.joinMessenger(messengerchar.getPosition()));
+                chr.get().announce(MaplePacketCreator.joinMessenger(messengerchar.position()));
             }
         }
     }
 
     public void removeMessengerPlayer(MapleMessenger messenger, int position) {
-        messenger.getMembers().stream()
-                .map(MapleMessengerCharacter::getName)
+        byte[] packet = MaplePacketCreator.removeMessengerPlayer(position);
+        messenger.getMembersStream()
+                .map(MapleMessengerCharacter::name)
                 .map(name -> getPlayerStorage().getCharacterByName(name))
                 .flatMap(Optional::stream)
-                .map(MapleCharacter::getClient)
-                .forEach(c -> c.announce(MaplePacketCreator.removeMessengerPlayer(position)));
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
-    public void messengerChat(MapleMessenger messenger, String chattext, String namefrom) {
-        String from = "";
-        String to1 = "";
-        String to2 = "";
-        for (MapleMessengerCharacter messengerchar : messenger.getMembers()) {
-            if (!(messengerchar.getName().equals(namefrom))) {
-                Optional<MapleCharacter> chr = getPlayerStorage().getCharacterByName(messengerchar.getName());
-                if (chr.isPresent()) {
-                    chr.get().getClient().announce(MaplePacketCreator.messengerChat(chattext));
-                    if (to1.equals("")) {
-                        to1 = messengerchar.getName();
-                    } else if (to2.equals("")) {
-                        to2 = messengerchar.getName();
-                    }
+    public void messengerChat(MapleMessenger messenger, String text, String nameFrom) {
+        byte[] packet = MaplePacketCreator.messengerChat(text);
+        messenger.getOtherMembersStream(nameFrom)
+                .map(MapleMessengerCharacter::name)
+                .map(name -> getPlayerStorage().getCharacterByName(name))
+                .flatMap(Optional::stream)
+                .forEach(MapleCharacter.announcePacket(packet));
+    }
+
+    public void declineChat(String senderName, MapleCharacter player) {
+        if (isConnected(senderName)) {
+            Optional<MapleCharacter> senderChr = getPlayerStorage().getCharacterByName(senderName);
+            Optional<MapleMessenger> messenger = senderChr.flatMap(MapleCharacter::getMessenger);
+            if (senderChr.isPresent() && messenger.isPresent()) {
+                if (MapleInviteCoordinator.answerInvite(InviteType.MESSENGER, player.getId(), messenger.get().getId(), false).result == InviteResult.DENIED) {
+                    senderChr.get().announce(MaplePacketCreator.messengerNote(player.getName(), 5, 0));
                 }
             }
         }
     }
 
-    public void declineChat(String sender, MapleCharacter player) {
-        if (isConnected(sender)) {
-            Optional<MapleCharacter> senderChr = getPlayerStorage().getCharacterByName(sender);
-            if (senderChr.isPresent() && senderChr.get().getMessenger() != null) {
-                if (MapleInviteCoordinator.answerInvite(InviteType.MESSENGER, player.getId(), senderChr.get().getMessenger().getId(), false).result == InviteResult.DENIED) {
-                    senderChr.get().getClient().announce(MaplePacketCreator.messengerNote(player.getName(), 5, 0));
-                }
-            }
+    public void updateMessenger(int messengerId, String nameFrom, int fromChannel) {
+        getMessenger(messengerId).ifPresent(m -> updateMessenger(m, nameFrom, fromChannel));
+    }
+
+    private void updateMessenger(MapleMessenger messenger, String nameFrom, int fromChannel) {
+        int position = messenger.getPositionByName(nameFrom);
+        updateMessenger(messenger, nameFrom, position, fromChannel);
+    }
+
+    public void updateMessenger(MapleMessenger messenger, String nameFrom, int position, int fromChannelId) {
+        Optional<Channel> fromChannel = getChannel(fromChannelId);
+        if (fromChannel.isEmpty()) {
+            return;
         }
-    }
 
-    public void updateMessenger(int messengerid, String namefrom, int fromchannel) {
-        MapleMessenger messenger = getMessenger(messengerid);
-        int position = messenger.getPositionByName(namefrom);
-        updateMessenger(messenger, namefrom, position, fromchannel);
-    }
-
-    public void updateMessenger(MapleMessenger messenger, String namefrom, int position, int fromchannel) {
-        for (MapleMessengerCharacter messengerchar : messenger.getMembers()) {
-            Channel ch = getChannel(fromchannel);
-            if (!(messengerchar.getName().equals(namefrom))) {
-                Optional<MapleCharacter> character = ch.getPlayerStorage().getCharacterByName(messengerchar.getName());
-                Optional<MapleCharacter> from = getChannel(fromchannel).getPlayerStorage().getCharacterByName(namefrom);
-                character.map(MapleCharacter::getClient).ifPresent(c -> from.ifPresent(f -> c.announce(MaplePacketCreator.updateMessengerPlayer(namefrom, f, position, (byte) (fromchannel - 1)))));
-            }
+        Optional<MapleCharacter> fromCharacter = fromChannel.flatMap(c -> c.getPlayerStorage().getCharacterByName(nameFrom));
+        if (fromCharacter.isEmpty()) {
+            return;
         }
+
+        byte[] packet = MaplePacketCreator.updateMessengerPlayer(nameFrom, fromCharacter.get(), position, (byte) (fromChannelId - 1));
+        messenger.getOtherMembersStream(nameFrom)
+                .map(MapleMessengerCharacter::name)
+                .map(n -> fromChannel.flatMap(c -> c.getPlayerStorage().getCharacterByName(n)))
+                .flatMap(Optional::stream)
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
-    public void silentLeaveMessenger(int messengerid, MapleMessengerCharacter target) {
-        MapleMessenger messenger = getMessenger(messengerid);
-        if (messenger == null) {
-            throw new IllegalArgumentException("No messenger with the specified messengerid exists");
+    public void joinMessenger(int messengerId, int targetId, String targetName, String inviteFromName, int fromChannel) {
+        Optional<MapleMessenger> messenger = getMessenger(messengerId);
+        if (messenger.isEmpty()) {
+            throw new IllegalArgumentException("No messenger with the specified messengerId exists");
         }
-        messenger.addMember(target, target.getPosition());
+
+        MapleMessengerCharacter messengerCharacter = messenger.get().addMember(targetId, targetName, fromChannel);
+        addMessengerPlayer(messenger.get(), inviteFromName, fromChannel, messengerCharacter.position());
     }
 
-    public void joinMessenger(int messengerid, MapleMessengerCharacter target, String from, int fromchannel) {
-        MapleMessenger messenger = getMessenger(messengerid);
-        if (messenger == null) {
-            throw new IllegalArgumentException("No messenger with the specified messengerid exists");
+    public void silentJoinMessenger(int messengerId, int targetId, String targetName, int channelId) {
+        Optional<MapleMessenger> messenger = getMessenger(messengerId);
+        if (messenger.isEmpty()) {
+            throw new IllegalArgumentException("No messenger with the specified messengerId exists");
         }
-        messenger.addMember(target, target.getPosition());
-        addMessengerPlayer(messenger, from, fromchannel, target.getPosition());
+        messenger.get().addMember(targetId, targetName, channelId);
     }
 
-    public void silentJoinMessenger(int messengerid, MapleMessengerCharacter target, int position) {
-        MapleMessenger messenger = getMessenger(messengerid);
-        if (messenger == null) {
-            throw new IllegalArgumentException("No messenger with the specified messengerid exists");
-        }
-        messenger.addMember(target, position);
-    }
-
-    public MapleMessenger createMessenger(MapleMessengerCharacter chrfor) {
-        int messengerid = runningMessengerId.getAndIncrement();
-        MapleMessenger messenger = new MapleMessenger(messengerid, chrfor);
+    public MapleMessenger createMessenger(int creatorId, String creatorName, int channelId) {
+        int messengerId = runningMessengerId.getAndIncrement();
+        MapleMessenger messenger = new MapleMessenger(messengerId);
+        messenger.addMember(creatorId, creatorName, channelId);
         messengers.put(messenger.getId(), messenger);
         return messenger;
     }
@@ -1303,7 +1301,6 @@ public class World {
     public void whisper(String sender, String target, int channel, String message) {
         if (isConnected(target)) {
             getPlayerStorage().getCharacterByName(target)
-                    .map(MapleCharacter::getClient)
                     .ifPresent(c -> c.announce(MaplePacketCreator.getWhisper(sender, channel, message)));
         }
     }
@@ -1332,39 +1329,42 @@ public class World {
     }
 
     public void buddyChanged(int cid, int cidFrom, String name, int channel, BuddyOperation operation) {
-        Optional<MapleCharacter> addChar = getPlayerStorage().getCharacterById(cid);
-        if (addChar.isPresent()) {
-            BuddyList buddylist = addChar.get().getBuddylist();
-            switch (operation) {
-                case ADDED:
-                    if (buddylist.contains(cidFrom)) {
-                        buddylist.put(new BuddylistEntry(name, "Default Group", cidFrom, channel, true));
-                        addChar.get().getClient().announce(MaplePacketCreator.updateBuddyChannel(cidFrom, (byte) (channel - 1)));
-                    }
-                    break;
-                case DELETED:
-                    if (buddylist.contains(cidFrom)) {
-                        //TODO clean this up
-                        buddylist.put(new BuddylistEntry(name, "Default Group", cidFrom, (byte) -1, buddylist.get(cidFrom).get().isVisible()));
-                        addChar.get().getClient().announce(MaplePacketCreator.updateBuddyChannel(cidFrom, (byte) -1));
-                    }
-                    break;
-            }
+        getPlayerStorage().getCharacterById(cid).ifPresent(c -> buddyChanged(c, cidFrom, name, channel, operation));
+    }
+
+    private void buddyChanged(MapleCharacter character, int characterIdFrom, String name, int channelId, BuddyOperation operation) {
+        switch (operation) {
+            case ADDED -> buddyAdded(characterIdFrom, name, channelId, character);
+            case DELETED -> buddyDeleted(characterIdFrom, name, character);
         }
     }
 
-    public void loggedOff(String name, int characterId, int channel, int[] buddies) {
+    private static void buddyDeleted(int cidFrom, String name, MapleCharacter addChar) {
+        if (addChar.getBuddylist().contains(cidFrom)) {
+            Optional<BuddylistEntry> entry = addChar.getBuddylist().get(cidFrom);
+            addChar.getBuddylist().put(new BuddylistEntry(name, "Default Group", cidFrom, (byte) -1, entry.map(BuddylistEntry::isVisible).orElse(false)));
+            addChar.announce(MaplePacketCreator.updateBuddyChannel(cidFrom, (byte) -1));
+        }
+    }
+
+    private static void buddyAdded(int cidFrom, String name, int channel, MapleCharacter addChar) {
+        if (addChar.getBuddylist().contains(cidFrom)) {
+            addChar.getBuddylist().put(new BuddylistEntry(name, "Default Group", cidFrom, channel, true));
+            addChar.announce(MaplePacketCreator.updateBuddyChannel(cidFrom, (byte) (channel - 1)));
+        }
+    }
+
+    public void loggedOff(int characterId, int channel, int[] buddies) {
         updateBuddies(characterId, channel, buddies, true);
     }
 
-    public void loggedOn(String name, int characterId, int channel, int[] buddies) {
+    public void loggedOn(int characterId, int channel, int[] buddies) {
         updateBuddies(characterId, channel, buddies, false);
     }
 
     private void updateBuddies(int characterId, int channel, int[] buddies, boolean offline) {
-        PlayerStorage playerStorage = getPlayerStorage();
         for (int buddy : buddies) {
-            Optional<MapleCharacter> chr = playerStorage.getCharacterById(buddy);
+            Optional<MapleCharacter> chr = getPlayerStorage().getCharacterById(buddy);
             if (chr.isPresent()) {
                 Optional<BuddylistEntry> ble = chr.get().getBuddylist().get(characterId);
                 if (ble.isEmpty() || !ble.get().isVisible()) {
@@ -1380,7 +1380,7 @@ public class World {
                     mcChannel = (byte) (channel - 1);
                 }
                 chr.get().getBuddylist().put(ble.get());
-                chr.get().getClient().announce(MaplePacketCreator.updateBuddyChannel(ble.get().getCharacterId(), mcChannel));
+                chr.get().announce(MaplePacketCreator.updateBuddyChannel(ble.get().getCharacterId(), mcChannel));
             }
         }
     }
@@ -1394,20 +1394,16 @@ public class World {
         }
     }
 
-    public List<Pair<Integer, Integer>> getOwlSearchedItems() {
+    public List<OwlSearchResult> getOwlSearchedItems() {
         if (YamlConfig.config.server.USE_ENFORCE_ITEM_SUGGESTION) {
-            return new ArrayList<>(0);
+            return Collections.emptyList();
         }
 
         suggestRLock.lock();
         try {
-            List<Pair<Integer, Integer>> searchCounts = new ArrayList<>(owlSearched.size());
-
-            for (Entry<Integer, Integer> e : owlSearched.entrySet()) {
-                searchCounts.add(new Pair<>(e.getKey(), e.getValue()));
-            }
-
-            return searchCounts;
+            return owlSearched.entrySet().stream()
+                    .map(e -> new OwlSearchResult(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList());
         } finally {
             suggestRLock.unlock();
         }
@@ -1417,7 +1413,6 @@ public class World {
         suggestWLock.lock();
         try {
             Map<Integer, Integer> tabItemBought = cashItemBought.get(snid / 10000000);
-
             tabItemBought.merge(snid, 1, Integer::sum);
         } finally {
             suggestWLock.unlock();
@@ -1457,20 +1452,12 @@ public class World {
     }
 
     private List<Integer> getMostSellerOnTab(List<Pair<Integer, Integer>> tabSellers) {
-        List<Integer> tabLeaderboards;
-
-        // descending order
-        Comparator<Pair<Integer, Integer>> comparator = (p1, p2) -> p2.getRight().compareTo(p1.getRight());
-
-        PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(Math.max(1, tabSellers.size()), comparator);
-        queue.addAll(tabSellers);
-
-        tabLeaderboards = new LinkedList<>();
-        for (int i = 0; i < Math.min(tabSellers.size(), 5); i++) {
-            tabLeaderboards.add(queue.remove().getLeft());
-        }
-
-        return tabLeaderboards;
+        Comparator<Pair<Integer, Integer>> comparator = Comparator.comparing(Pair::getRight);
+        return tabSellers.stream()
+                .sorted(comparator.reversed())
+                .limit(Math.min(tabSellers.size(), 5))
+                .map(Pair::getLeft)
+                .collect(Collectors.toList());
     }
 
     public List<List<Integer>> getMostSellerCashItems() {
@@ -1714,7 +1701,7 @@ public class World {
                     activeMerchants.put(hm.getOwnerId(), new Pair<>(dm.getValue().getLeft(), timeOn + 1));
                 } else {
                     hm.forceClose();
-                    this.getChannel(hm.getChannel()).removeHiredMerchant(hm.getOwnerId());
+                    getChannel(hm.getChannel()).ifPresent(c -> c.removeHiredMerchant(hm.getOwnerId()));
 
                     activeMerchants.remove(dm.getKey());
                 }
@@ -1725,27 +1712,22 @@ public class World {
     }
 
     public List<MapleHiredMerchant> getActiveMerchants() {
-        List<MapleHiredMerchant> hmList = new ArrayList<>();
         activeMerchantsLock.lock();
         try {
-            for (Pair<MapleHiredMerchant, Integer> hmp : activeMerchants.values()) {
-                MapleHiredMerchant hm = hmp.getLeft();
-                if (hm.isOpen()) {
-                    hmList.add(hm);
-                }
-            }
-
-            return hmList;
+            return activeMerchants.values().stream()
+                    .map(Pair::getLeft)
+                    .filter(MapleHiredMerchant::isOpen)
+                    .collect(Collectors.toList());
         } finally {
             activeMerchantsLock.unlock();
         }
     }
 
-    public MapleHiredMerchant getHiredMerchant(int ownerid) {
+    public MapleHiredMerchant getHiredMerchant(int ownerId) {
         activeMerchantsLock.lock();
         try {
-            if (activeMerchants.containsKey(ownerid)) {
-                return activeMerchants.get(ownerid).getLeft();
+            if (activeMerchants.containsKey(ownerId)) {
+                return activeMerchants.get(ownerId).getLeft();
             }
 
             return null;
@@ -1765,28 +1747,21 @@ public class World {
     }
 
     public void runTimedMapObjectSchedule() {
-        List<Runnable> toRemove = new LinkedList<>();
+        List<Runnable> toRemove;
 
         timedMapObjectLock.lock();
         try {
             long timeNow = Server.getInstance().getCurrentTime();
-
-            for (Entry<Runnable, Long> rtmo : registeredTimedMapObjects.entrySet()) {
-                if (rtmo.getValue() <= timeNow) {
-                    toRemove.add(rtmo.getKey());
-                }
-            }
-
-            for (Runnable r : toRemove) {
-                registeredTimedMapObjects.remove(r);
-            }
+            toRemove = registeredTimedMapObjects.entrySet().stream()
+                    .filter(e -> e.getValue() <= timeNow)
+                    .map(Entry::getKey)
+                    .collect(Collectors.toList());
+            toRemove.forEach(registeredTimedMapObjects::remove);
         } finally {
             timedMapObjectLock.unlock();
         }
 
-        for (Runnable r : toRemove) {
-            r.run();
-        }
+        toRemove.forEach(Runnable::run);
     }
 
     public void resetDisabledServerMessages() {
@@ -1798,11 +1773,11 @@ public class World {
         }
     }
 
-    public boolean registerDisabledServerMessage(int chrid) {
+    public boolean registerDisabledServerMessage(int characterId) {
         srvMessagesLock.lock();
         try {
-            boolean alreadyDisabled = disabledServerMessages.containsKey(chrid);
-            disabledServerMessages.put(chrid, 0);
+            boolean alreadyDisabled = disabledServerMessages.containsKey(characterId);
+            disabledServerMessages.put(characterId, 0);
 
             return alreadyDisabled;
         } finally {
@@ -1810,10 +1785,10 @@ public class World {
         }
     }
 
-    public boolean unregisterDisabledServerMessage(int chrid) {
+    public boolean unregisterDisabledServerMessage(int characterId) {
         srvMessagesLock.lock();
         try {
-            return disabledServerMessages.remove(chrid) != null;
+            return disabledServerMessages.remove(characterId) != null;
         } finally {
             srvMessagesLock.unlock();
         }
@@ -1845,34 +1820,33 @@ public class World {
                     .map(id -> players.getCharacterById(id))
                     .flatMap(Optional::stream)
                     .filter(MapleCharacter::isLoggedinWorld)
-                    .map(MapleCharacter::getClient)
-                    .forEach(c -> c.announce(MaplePacketCreator.serverMessage(c.getChannelServer().getServerMessage())));
+                    .forEach(c -> c.announce(MaplePacketCreator.serverMessage(c.getClient().getChannelServer().getServerMessage())));
         }
     }
 
-    public void setPlayerNpcMapStep(int mapid, int step) {
-        setPlayerNpcMapData(mapid, step, -1, false);
+    public void setPlayerNpcMapStep(int mapId, int step) {
+        setPlayerNpcMapData(mapId, step, -1, false);
     }
 
-    public void setPlayerNpcMapPodiumData(int mapid, int podium) {
-        setPlayerNpcMapData(mapid, -1, podium, false);
+    public void setPlayerNpcMapPodiumData(int mapId, int podium) {
+        setPlayerNpcMapData(mapId, -1, podium, false);
     }
 
-    public void setPlayerNpcMapData(int mapid, int step, int podium) {
-        setPlayerNpcMapData(mapid, step, podium, true);
+    public void setPlayerNpcMapData(int mapId, int step, int podium) {
+        setPlayerNpcMapData(mapId, step, podium, true);
     }
 
-    private void setPlayerNpcMapData(int mapid, int step, int podium, boolean silent) {
+    private void setPlayerNpcMapData(int mapId, int step, int podium, boolean silent) {
         if (!silent) {
             try {
                 Connection con = DatabaseConnection.getConnection();
 
                 if (step != -1) {
-                    executePlayerNpcMapDataUpdate(con, false, pnpcStep, step, id, mapid);
+                    executePlayerNpcMapDataUpdate(con, false, pnpcStep, step, id, mapId);
                 }
 
                 if (podium != -1) {
-                    executePlayerNpcMapDataUpdate(con, true, pnpcPodium, podium, id, mapid);
+                    executePlayerNpcMapDataUpdate(con, true, pnpcPodium, podium, id, mapId);
                 }
 
                 con.close();
@@ -1882,27 +1856,19 @@ public class World {
         }
 
         if (step != -1) {
-            pnpcStep.put(mapid, (byte) step);
+            pnpcStep.put(mapId, (byte) step);
         }
         if (podium != -1) {
-            pnpcPodium.put(mapid, (short) podium);
+            pnpcPodium.put(mapId, (short) podium);
         }
     }
 
-    public int getPlayerNpcMapStep(int mapid) {
-        try {
-            return pnpcStep.get(mapid);
-        } catch (NullPointerException npe) {
-            return 0;
-        }
+    public int getPlayerNpcMapStep(int mapId) {
+        return pnpcStep.get(mapId);
     }
 
-    public int getPlayerNpcMapPodiumData(int mapid) {
-        try {
-            return pnpcPodium.get(mapid);
-        } catch (NullPointerException npe) {
-            return 1;
-        }
+    public int getPlayerNpcMapPodiumData(int mapId) {
+        return pnpcPodium.get(mapId);
     }
 
     public void resetPlayerNpcMapData() {
@@ -1911,15 +1877,11 @@ public class World {
     }
 
     public void setServerMessage(String msg) {
-        for (Channel ch : getChannels()) {
-            ch.setServerMessage(msg);
-        }
+        getChannels().forEach(c -> c.setServerMessage(msg));
     }
 
-    public void broadcastPacket(final byte[] data) {
-        for (MapleCharacter chr : players.getAllCharacters()) {
-            chr.announce(data);
-        }
+    public void broadcastPacket(final byte[] packet) {
+        players.getAllCharacters().forEach(MapleCharacter.announcePacket(packet));
     }
 
     public List<Pair<MaplePlayerShopItem, AbstractMapleMapObject>> getAvailableItemBundles(int itemid) {
@@ -2003,9 +1965,7 @@ public class World {
     }
 
     public void dropMessage(int type, String message) {
-        for (MapleCharacter player : getPlayerStorage().getAllCharacters()) {
-            player.dropMessage(type, message);
-        }
+        getPlayerStorage().getAllCharacters().forEach(c -> c.dropMessage(type, message));
     }
 
     public boolean registerFisherPlayer(MapleCharacter chr, int baitLevel) {

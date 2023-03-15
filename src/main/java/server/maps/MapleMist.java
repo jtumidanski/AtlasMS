@@ -137,14 +137,14 @@ public class MapleMist extends AbstractMapleMapObject {
 
     public final byte[] makeSpawnData() {
         if (owner != null) {
-            return MaplePacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().getId(), owner.getSkillLevel(SkillFactory.getSkill(source.getSourceId()).orElseThrow()), this);
+            return MaplePacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().id(), owner.getSkillLevel(SkillFactory.getSkill(source.getSourceId()).orElseThrow()), this);
         }
         return MaplePacketCreator.spawnMist(getObjectId(), mob.getId(), skill.getSkillId(), skill.getSkillLevel(), this);
     }
 
     public final byte[] makeFakeSpawnData(int level) {
         if (owner != null) {
-            return MaplePacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().getId(), level, this);
+            return MaplePacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().id(), level, this);
         }
         return MaplePacketCreator.spawnMist(getObjectId(), mob.getId(), skill.getSkillId(), skill.getSkillLevel(), this);
     }

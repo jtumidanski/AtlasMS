@@ -8,7 +8,7 @@ import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import net.AbstractMaplePacketHandler;
 import server.ItemInformationProvider;
-import server.ItemInformationProvider.QuestConsItem;
+import server.QuestConsumableItem;
 import server.quest.MapleQuest;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
@@ -16,28 +16,23 @@ import tools.data.input.SeekableLittleEndianAccessor;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * @author Xari
- * @author Ronan - added concurrency protection and quest progress limit
- */
 public class RaiseIncExpHandler extends AbstractMaplePacketHandler {
-
     @Override
     public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        byte typeIndex = slea.readByte();//nItemIT
-        short slot = slea.readShort();//nSlotPosition
-        int itemid = slea.readInt();//nItemID
+        byte typeIndex = slea.readByte();
+        short slot = slea.readShort();
+        int itemId = slea.readInt();
 
         if (c.tryacquireClient()) {
             try {
                 ItemInformationProvider ii = ItemInformationProvider.getInstance();
-                QuestConsItem consItem = ii.getQuestConsumablesInfo(itemid);
-                if (consItem == null) {
+                Optional<QuestConsumableItem> consumableItem = ii.getQuestConsumablesInfo(itemId);
+                if (consumableItem.isEmpty()) {
                     return;
                 }
 
-                int infoNumber = consItem.questid;
-                Map<Integer, Integer> consumables = consItem.items;
+                int infoNumber = consumableItem.get().questId();
+                Map<Integer, Integer> consumables = consumableItem.get().items();
 
                 MapleCharacter chr = c.getPlayer();
                 MapleQuest quest = MapleQuest.getInstanceFromInfoNumber(infoNumber);
@@ -66,9 +61,9 @@ public class RaiseIncExpHandler extends AbstractMaplePacketHandler {
                     inv.unlockInventory();
                 }
 
-                int questid = quest.getId();
-                int nextValue = Math.min(consumables.get(consId) + c.getAbstractPlayerInteraction().getQuestProgressInt(questid, infoNumber), consItem.exp * consItem.grade);
-                c.getAbstractPlayerInteraction().setQuestProgress(questid, infoNumber, nextValue);
+                int questId = quest.getId();
+                int nextValue = Math.min(consumables.get(consId) + c.getAbstractPlayerInteraction().getQuestProgressInt(questId, infoNumber), consumableItem.get().experience() * consumableItem.get().grade());
+                c.getAbstractPlayerInteraction().setQuestProgress(questId, infoNumber, nextValue);
 
                 c.announce(MaplePacketCreator.enableActions());
             } finally {

@@ -73,8 +73,8 @@ import server.CashShop.CashItem;
 import server.CashShop.CashItemFactory;
 import server.CashShop.SpecialCashItem;
 import server.DueyPackage;
-import server.MTSItemInfo;
 import server.ItemInformationProvider;
+import server.MTSItemInfo;
 import server.MapleShopItem;
 import server.MapleTrade;
 import server.events.gm.MapleSnowball;
@@ -108,6 +108,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -484,10 +485,7 @@ public class MaplePacketCreator {
 
     private static void addInventoryInfo(final MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
         for (byte i = 1; i <= 5; i++) {
-            byte limit = MapleInventoryType.getByType(i)
-                    .map(chr::getInventory)
-                    .map(MapleInventory::getSlotLimit)
-                    .orElse((byte) 0);
+            byte limit = MapleInventoryType.getByType(i).map(chr::getInventory).map(MapleInventory::getSlotLimit).orElse((byte) 0);
             mplew.write(limit);
         }
         mplew.writeLong(getTime(-2));
@@ -538,17 +536,17 @@ public class MaplePacketCreator {
         // We don't want to include any hidden skill in this, so subtract them from the size list and ignore them.
         for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext(); ) {
             Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
-            if (GameConstants.isHiddenSkills(skill.getKey().getId())) {
+            if (GameConstants.isHiddenSkills(skill.getKey().id())) {
                 skillsSize--;
             }
         }
         mplew.writeShort(skillsSize);
         for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext(); ) {
             Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
-            if (GameConstants.isHiddenSkills(skill.getKey().getId())) {
+            if (GameConstants.isHiddenSkills(skill.getKey().id())) {
                 continue;
             }
-            mplew.writeInt(skill.getKey().getId());
+            mplew.writeInt(skill.getKey().id());
             mplew.writeInt(skill.getValue().skillevel);
             addExpirationTime(mplew, skill.getValue().expiration);
             if (skill.getKey().isFourthJob()) {
@@ -1033,38 +1031,40 @@ public class MaplePacketCreator {
         for (Pair<MapleStat, Integer> statupdate : stats) {
             updateMask |= statupdate.getLeft().getValue();
         }
-        if (stats.size() > 1) {
-            stats.sort((o1, o2) -> {
-                int val1 = o1.getLeft().getValue();
-                int val2 = o2.getLeft().getValue();
-                return (Integer.compare(val1, val2));
-            });
-        }
+
+        Comparator<Pair<MapleStat, Integer>> comparator = (o1, o2) -> {
+            int val1 = o1.getLeft().getValue();
+            int val2 = o2.getLeft().getValue();
+            return (Integer.compare(val1, val2));
+        };
+
         mplew.writeInt(updateMask);
-        for (Pair<MapleStat, Integer> statupdate : stats) {
-            if (statupdate.getLeft().getValue() >= 1) {
-                if (statupdate.getLeft().getValue() == 0x1) {
-                    mplew.write(statupdate.getRight().byteValue());
-                } else if (statupdate.getLeft().getValue() <= 0x4) {
-                    mplew.writeInt(statupdate.getRight());
-                } else if (statupdate.getLeft().getValue() < 0x20) {
-                    mplew.write(statupdate.getRight().shortValue());
-                } else if (statupdate.getLeft().getValue() == 0x8000) {
-                    if (GameConstants.hasSPTable(chr.getJob())) {
-                        addRemainingSkillInfo(mplew, chr);
-                    } else {
-                        mplew.writeShort(statupdate.getRight().shortValue());
-                    }
-                } else if (statupdate.getLeft().getValue() < 0xFFFF) {
-                    mplew.writeShort(statupdate.getRight().shortValue());
-                } else if (statupdate.getLeft().getValue() == 0x20000) {
-                    mplew.writeShort(statupdate.getRight().shortValue());
+        stats.stream().sorted(comparator).forEach(stat -> updatePlayerStat(mplew, chr, stat));
+        return mplew.getPacket();
+    }
+
+    private static void updatePlayerStat(MaplePacketLittleEndianWriter mplew, MapleCharacter chr, Pair<MapleStat, Integer> statupdate) {
+        if (statupdate.getLeft().getValue() >= 1) {
+            if (statupdate.getLeft().getValue() == 0x1) {
+                mplew.write(statupdate.getRight().byteValue());
+            } else if (statupdate.getLeft().getValue() <= 0x4) {
+                mplew.writeInt(statupdate.getRight());
+            } else if (statupdate.getLeft().getValue() < 0x20) {
+                mplew.write(statupdate.getRight().shortValue());
+            } else if (statupdate.getLeft().getValue() == 0x8000) {
+                if (GameConstants.hasSPTable(chr.getJob())) {
+                    addRemainingSkillInfo(mplew, chr);
                 } else {
-                    mplew.writeInt(statupdate.getRight());
+                    mplew.writeShort(statupdate.getRight().shortValue());
                 }
+            } else if (statupdate.getLeft().getValue() < 0xFFFF) {
+                mplew.writeShort(statupdate.getRight().shortValue());
+            } else if (statupdate.getLeft().getValue() == 0x20000) {
+                mplew.writeShort(statupdate.getRight().shortValue());
+            } else {
+                mplew.writeInt(statupdate.getRight());
             }
         }
-        return mplew.getPacket();
     }
 
     /**
@@ -1509,7 +1509,7 @@ public class MaplePacketCreator {
                         break;
                 }
             } else {
-                mplew.writeInt(mse.getSkill().map(Skill::getId).orElse(0));
+                mplew.writeInt(mse.getSkill().map(Skill::id).orElse(0));
             }
 
             mplew.writeShort(-1);    // duration
@@ -2834,15 +2834,9 @@ public class MaplePacketCreator {
         String guildName = "";
         String allianceName = "";
         if (chr.getGuildId() > 0) {
-            guildName = Server.getInstance().getGuild(chr.getGuildId())
-                    .map(MapleGuild::getName)
-                    .orElse("");
+            guildName = Server.getInstance().getGuild(chr.getGuildId()).map(MapleGuild::getName).orElse("");
 
-            allianceName = chr.getGuild()
-                    .map(MapleGuild::getAllianceId)
-                    .flatMap(id -> Server.getInstance().getAlliance(id))
-                    .map(MapleAlliance::getName)
-                    .orElse("");
+            allianceName = chr.getGuild().map(MapleGuild::getAllianceId).flatMap(id -> Server.getInstance().getAlliance(id)).map(MapleAlliance::getName).orElse("");
         }
         mplew.writeMapleAsciiString(guildName);
         mplew.writeMapleAsciiString(allianceName);  // does not seem to work
@@ -4189,7 +4183,7 @@ public class MaplePacketCreator {
                 mplew.writeShort(mse.getMobSkill().getSkillId());
                 mplew.writeShort(mse.getMobSkill().getSkillLevel());
             } else {
-                mplew.writeInt(mse.getSkill().map(Skill::getId).orElse(0));
+                mplew.writeInt(mse.getSkill().map(Skill::id).orElse(0));
             }
             mplew.writeShort(-1); // might actually be the buffTime but it's not displayed anywhere
         }
@@ -7294,10 +7288,7 @@ public class MaplePacketCreator {
         }
         mplew.writeInt(alliance.getCapacity()); // probably capacity
         mplew.writeShort(0);
-        alliance.getGuilds().stream()
-                .map(id -> Server.getInstance().getGuild(id, world))
-                .flatMap(Optional::stream)
-                .forEach(g -> getGuildInfo(mplew, g));
+        alliance.getGuilds().stream().map(id -> Server.getInstance().getGuild(id, world)).flatMap(Optional::stream).forEach(g -> getGuildInfo(mplew, g));
         return mplew.getPacket();
     }
 
@@ -7306,10 +7297,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.ALLIANCE_OPERATION.getValue());
         mplew.write(0x0D);
         mplew.writeInt(alliance.getGuilds().size());
-        alliance.getGuilds().stream()
-                .map(id -> Server.getInstance().getGuild(id, worldId))
-                .flatMap(Optional::stream)
-                .forEach(g -> getGuildInfo(mplew, g));
+        alliance.getGuilds().stream().map(id -> Server.getInstance().getGuild(id, worldId)).flatMap(Optional::stream).forEach(g -> getGuildInfo(mplew, g));
         return mplew.getPacket();
     }
 

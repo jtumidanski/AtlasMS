@@ -113,7 +113,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
 
         if (fixedTime == 0) {
             animationTime = SkillFactory.getSkill(skillid)
-                    .map(Skill::getAnimationTime)
+                    .map(Skill::animationTime)
                     .orElse(0);
         } else {
             animationTime = fixedTime;
@@ -831,10 +831,10 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
 
             if (ret.skill != 0) {
                 Skill skill = SkillFactory.getSkill(ret.skill).orElseThrow();
-                if (skill.getElement() != Element.NEUTRAL && chr.getBuffedValue(MapleBuffStat.ELEMENTAL_RESET) == null) {
+                if (skill.element() != Element.NEUTRAL && chr.getBuffedValue(MapleBuffStat.ELEMENTAL_RESET) == null) {
                     // The skill has an element effect, so we need to factor that in.
                     if (monster != null) {
-                        ElementalEffectiveness eff = monster.getElementalEffectiveness(skill.getElement());
+                        ElementalEffectiveness eff = monster.getElementalEffectiveness(skill.element());
                         if (eff == ElementalEffectiveness.WEAK) {
                             calcDmgMax *= 1.5;
                         } else if (eff == ElementalEffectiveness.STRONG) {
@@ -945,7 +945,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             }
 
             int skillLevel = chr.getSkillLevel(mySkill.get());
-            if (skillLevel == 0 && GameConstants.isPqSkillMap(chr.getMapId()) && GameConstants.isPqSkill(mySkill.get().getId())) {
+            if (skillLevel == 0 && GameConstants.isPqSkillMap(chr.getMapId()) && GameConstants.isPqSkill(mySkill.get().id())) {
                 skillLevel = 1;
             }
 
@@ -953,7 +953,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                 return Optional.empty();
             }
             if (display > 80) { //Hmm
-                if (!mySkill.get().getAction()) {
+                if (!mySkill.get().action()) {
                     AutobanFactory.FAST_ATTACK.autoban(chr, "WZ Edit; adding action to a skill: " + display);
                     return Optional.empty();
                 }

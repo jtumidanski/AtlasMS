@@ -45,7 +45,7 @@ public final class DenyPartyRequestHandler extends AbstractMaplePacketHandler {
 
             if (MapleInviteCoordinator.answerInvite(InviteType.PARTY, chr.getId(), cfrom.get().getPartyId(), false).result == InviteResult.DENIED) {
                 chr.updatePartySearchAvailability(chr.getParty().isEmpty());
-                cfrom.get().getClient().announce(MaplePacketCreator.partyStatusMessage(23, chr.getName()));
+                cfrom.get().announce(MaplePacketCreator.partyStatusMessage(23, chr.getName()));
             }
         }
     }

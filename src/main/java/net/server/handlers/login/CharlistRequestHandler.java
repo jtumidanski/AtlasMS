@@ -29,6 +29,8 @@ import net.server.world.World;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public final class CharlistRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
@@ -36,15 +38,15 @@ public final class CharlistRequestHandler extends AbstractMaplePacketHandler {
         slea.readByte();
         int world = slea.readByte();
 
-        World wserv = Server.getInstance().getWorld(world);
-        if (wserv == null || wserv.isWorldCapacityFull()) {
+        Optional<World> wserv = Server.getInstance().getWorld(world);
+        if (wserv.isEmpty() || wserv.get().isWorldCapacityFull()) {
             c.announce(MaplePacketCreator.getServerStatus(2));
             return;
         }
 
         int channel = slea.readByte() + 1;
-        Channel ch = wserv.getChannel(channel);
-        if (ch == null) {
+        Optional<Channel> ch = wserv.get().getChannel(channel);
+        if (ch.isEmpty()) {
             c.announce(MaplePacketCreator.getServerStatus(2));
             return;
         }

@@ -107,7 +107,6 @@ public class PlayerStorage {
 
         chrList.stream()
                 .map(MapleCharacter::getClient)
-                .filter(Objects::nonNull)
                 .forEach(MapleClient::forceDisconnect);
 
         wlock.lock();

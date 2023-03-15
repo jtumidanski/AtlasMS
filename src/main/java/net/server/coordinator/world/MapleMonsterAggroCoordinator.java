@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 
@@ -298,11 +299,11 @@ public class MapleMonsterAggroCoordinator {
 
             MapleMap map = mob.getMap();
             for (PlayerAggroEntry pae : mobAggroList) {
-                MapleCharacter chr = map.getCharacterById(pae.cid);
-                if (chr != null) {
+                Optional<MapleCharacter> chr = map.getCharacterById(pae.cid);
+                if (chr.isPresent()) {
                     if (player.getId() == pae.cid) {
                         return true;
-                    } else if (pae.updateStreak < YamlConfig.config.server.MOB_STATUS_AGGRO_PERSISTENCE && chr.isAlive()) {  // verifies currently leading players activity
+                    } else if (pae.updateStreak < YamlConfig.config.server.MOB_STATUS_AGGRO_PERSISTENCE && chr.get().isAlive()) {  // verifies currently leading players activity
                         return false;
                     }
                 }

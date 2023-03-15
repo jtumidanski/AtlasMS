@@ -34,6 +34,7 @@ import config.YamlConfig;
 import net.server.Server;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
+import net.server.world.World;
 import server.ItemInformationProvider;
 import server.MapleTrade;
 import tools.DatabaseConnection;
@@ -46,9 +47,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -110,11 +113,9 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
     }
 
     private void broadcastToVisitors(final byte[] packet) {
-        for (MapleCharacter visitor : visitors) {
-            if (visitor != null) {
-                visitor.getClient().announce(packet);
-            }
-        }
+        Arrays.stream(visitors)
+                .filter(Objects::nonNull)
+                .forEach(v -> v.announce(packet));
     }
 
     public byte[] getShopRoomInfo() {
@@ -199,8 +200,8 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
                 if (visitor != null) {
                     visitor.setHiredMerchant(null);
 
-                    visitor.getClient().announce(MaplePacketCreator.leaveHiredMerchant(i + 1, 0x11));
-                    visitor.getClient().announce(MaplePacketCreator.hiredMerchantMaintenanceMessage());
+                    visitor.announce(MaplePacketCreator.leaveHiredMerchant(i + 1, 0x11));
+                    visitor.announce(MaplePacketCreator.hiredMerchantMaintenanceMessage());
 
                     visitors[i] = null;
                 }
@@ -304,7 +305,9 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
                         announceItemSold(newItem, price, getQuantityLeft(pItem.getItem().getItemId()));
                     }
 
-                    Optional<MapleCharacter> owner = Server.getInstance().getWorld(world).getPlayerStorage().getCharacterByName(ownerName);
+                    Optional<MapleCharacter> owner = Server.getInstance().getWorld(world)
+                            .map(World::getPlayerStorage)
+                            .flatMap(w -> w.getCharacterByName(ownerName));
                     if (owner.isPresent()) {
                         owner.get().addMerchantMesos(price);
                     } else {
@@ -356,7 +359,9 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
         String itemName = ItemInformationProvider.getInstance().getName(item.getItemId());
         String message = "[Hired Merchant] Item '" + itemName + "'" + qtyStr + " has been sold for " + mesos + " mesos. (" + inStore + " left)";
 
-        Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(ownerId)
+        Server.getInstance().getWorld(world)
+                .map(World::getPlayerStorage)
+                .flatMap(w -> w.getCharacterById(ownerId))
                 .filter(MapleCharacter::isLoggedinWorld)
                 .ifPresent(c -> c.dropMessage(6, message));
     }
@@ -372,7 +377,9 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
             setOpen(false);
             removeAllVisitors();
 
-            Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(ownerId)
+            Server.getInstance().getWorld(world)
+                    .map(World::getPlayerStorage)
+                    .flatMap(w -> w.getCharacterById(ownerId))
                     .filter(MapleCharacter::isLoggedinWorld)
                     .filter(o -> o.getHiredMerchant() == this)
                     .ifPresent(this::closeOwnerMerchant);
@@ -380,7 +387,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
             visitorLock.unlock();
         }
 
-        Server.getInstance().getWorld(world).unregisterHiredMerchant(this);
+        Server.getInstance().getWorld(world).ifPresent(w -> w.unregisterHiredMerchant(this));
 
         try {
             saveItems(true);
@@ -391,7 +398,9 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
             ex.printStackTrace();
         }
 
-        Optional<MapleCharacter> player = Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(ownerId);
+        Optional<MapleCharacter> player = Server.getInstance().getWorld(world)
+                .map(World::getPlayerStorage)
+                .flatMap(w -> w.getCharacterById(ownerId));
         if (player.isPresent()) {
             player.get().setHasMerchant(false);
         } else {
@@ -473,7 +482,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
             e.printStackTrace();
         }
 
-        Server.getInstance().getWorld(world).unregisterHiredMerchant(this);
+        Server.getInstance().getWorld(world).ifPresent(w -> w.unregisterHiredMerchant(this));
     }
 
     public synchronized void visitShop(MapleCharacter chr) {

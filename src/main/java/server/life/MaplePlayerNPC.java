@@ -47,11 +47,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -469,16 +471,16 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
     }
 
     private static MaplePlayerNPC getPlayerNPCFromWorldMap(String name, int world, int map) {
-        World wserv = Server.getInstance().getWorld(world);
-        for (MapleMapObject pnpcObj : wserv.getChannel(1).getMapFactory().getMap(map).getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.PLAYER_NPC))) {
-            MaplePlayerNPC pn = (MaplePlayerNPC) pnpcObj;
-
-            if (name.contentEquals(pn.getName()) && pn.getScriptId() < 9977777) {
-                return pn;
-            }
-        }
-
-        return null;
+        return Server.getInstance().getChannel(world, 1)
+                .map(Channel::getMapFactory)
+                .map(f -> f.getMap(map))
+                .map(m -> m.getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.PLAYER_NPC)))
+                .orElse(Collections.emptyList()).stream()
+                .map(o -> (MaplePlayerNPC) o)
+                .filter(n -> name.contentEquals(n.getName()))
+                .filter(n -> n.getScriptId() < 9977777)
+                .findFirst()
+                .orElse(null);
     }
 
     public static void removePlayerNPC(MapleCharacter chr) {
@@ -505,8 +507,8 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
     }
 
     public static void multicastSpawnPlayerNPC(int mapid, int world) {
-        World wserv = Server.getInstance().getWorld(world);
-        if (wserv == null) {
+        Optional<World> wserv = Server.getInstance().getWorld(world);
+        if (wserv.isEmpty()) {
             return;
         }
 
@@ -514,7 +516,7 @@ public class MaplePlayerNPC extends AbstractMapleMapObject {
         c.setWorld(world);
         c.setChannel(1);
 
-        for (MapleCharacter mc : wserv.loadAndGetAllCharactersView()) {
+        for (MapleCharacter mc : wserv.get().loadAndGetAllCharactersView()) {
             mc.setClient(c);
             spawnPlayerNPC(mapid, mc);
         }

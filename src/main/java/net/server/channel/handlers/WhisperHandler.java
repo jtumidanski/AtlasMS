@@ -148,7 +148,7 @@ public final class WhisperHandler extends AbstractMaplePacketHandler {
     }
 
     private static void handleWhisper(MapleClient c, MapleCharacter recipient, String text) {
-        recipient.getClient().announce(MaplePacketCreator.getWhisper(c.getPlayer().getName(), c.getChannel(), text));
+        recipient.announce(MaplePacketCreator.getWhisper(c.getPlayer().getName(), c.getChannel(), text));
         if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
             LogHelper.logChat(c, "Whisper To " + recipient.getName(), text);
         }

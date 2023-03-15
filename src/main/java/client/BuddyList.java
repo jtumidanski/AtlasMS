@@ -39,9 +39,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BuddyList {
-    private Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<>();
+    private final Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<>();
     private int capacity;
-    private Deque<CharacterNameAndId> pendingRequests = new LinkedList<>();
+    private final Deque<CharacterNameAndId> pendingRequests = new LinkedList<>();
 
     public BuddyList(int capacity) {
         this.capacity = capacity;
@@ -123,7 +123,7 @@ public class BuddyList {
                 .mapToObj(pstorage::getCharacterById)
                 .flatMap(Optional::stream)
                 .filter(MapleCharacter::isLoggedinWorld)
-                .forEach(c -> c.announce(packet));
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
     public void loadFromDb(int characterId) {

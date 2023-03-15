@@ -314,7 +314,7 @@ public final class Channel {
     }
 
     public World getWorldServer() {
-        return Server.getInstance().getWorld(world);
+        return Server.getInstance().getWorld(world).orElseThrow();
     }
 
     public void addPlayer(MapleCharacter chr) {
@@ -344,8 +344,8 @@ public final class Channel {
         return (int) (Math.ceil(((float) players.getAllCharacters().size() / YamlConfig.config.server.CHANNEL_LOAD) * 800));
     }
 
-    public void broadcastPacket(final byte[] data) {
-        players.getAllCharacters().forEach(c -> c.announce(data));
+    public void broadcastPacket(final byte[] packet) {
+        players.getAllCharacters().forEach(MapleCharacter.announcePacket(packet));
     }
 
     public int getId() {
@@ -368,10 +368,10 @@ public final class Channel {
         return eventSM;
     }
 
-    public void broadcastGMPacket(final byte[] data) {
+    public void broadcastGMPacket(final byte[] packet) {
         players.getAllCharacters().stream()
                 .filter(MapleCharacter::isGM)
-                .forEach(c -> c.announce(data));
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
     public List<MapleCharacter> getPartyMembers(MapleParty party) {

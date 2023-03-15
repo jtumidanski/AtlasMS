@@ -27,6 +27,8 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
 
+import java.util.Optional;
+
 public class DcCommand extends Command {
     {
         setDescription("");
@@ -40,15 +42,15 @@ public class DcCommand extends Command {
             return;
         }
 
-        MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
-        if (victim == null) {
-            victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
-            if (victim == null) {
+        Optional<MapleCharacter> victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        if (victim.isEmpty()) {
+            victim = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
+            if (victim.isEmpty()) {
                 victim = player.getMap().getCharacterByName(params[0]);
-                if (victim != null) {
+                if (victim.isPresent()) {
                     try {//sometimes bugged because the map = null
-                        victim.getClient().disconnect(true, false);
-                        player.getMap().removePlayer(victim);
+                        victim.get().getClient().disconnect(true, false);
+                        player.getMap().removePlayer(victim.get());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -57,9 +59,9 @@ public class DcCommand extends Command {
                 }
             }
         }
-        if (player.gmLevel() < victim.gmLevel()) {
-            victim = player;
+        if (player.gmLevel() < victim.get().gmLevel()) {
+            victim = Optional.of(player);
         }
-        victim.getClient().disconnect(false, false);
+        victim.get().getClient().disconnect(false, false);
     }
 }

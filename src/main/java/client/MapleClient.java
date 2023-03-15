@@ -33,7 +33,7 @@ import net.server.coordinator.session.MapleSessionCoordinator;
 import net.server.coordinator.session.MapleSessionCoordinator.AntiMulticlientResult;
 import net.server.guild.MapleGuild;
 import net.server.guild.MapleGuildCharacter;
-import net.server.world.MapleMessengerCharacter;
+import net.server.world.MapleMessenger;
 import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import net.server.world.PartyOperation;
@@ -68,6 +68,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -683,9 +684,10 @@ public class MapleClient {
             if (!rs.next()) {
                 return null;
             }
-            long blubb = rs.getLong("tempban");
 
-            if (blubb == 0 || rs.getString("tempban").equals("2018-06-20 00:00:00.0")) { // 0000-00-00 or 2018-06-20 (default set in LoginPasswordHandler)
+            Timestamp blubb = rs.getTimestamp("tempban");
+
+            if (blubb == null || rs.getString("tempban").equals("2018-06-20 00:00:00.0")) { // 0000-00-00 or 2018-06-20 (default set in LoginPasswordHandler)
                 return null;
             }
             lTempban.setTimeInMillis(rs.getTimestamp("tempban").getTime());
@@ -901,7 +903,7 @@ public class MapleClient {
             if (party.get().getLeader().getId() == idz && map != null) {
                 MaplePartyCharacter lchr = null;
                 for (MaplePartyCharacter pchr : party.get().getMembers()) {
-                    if (pchr != null && pchr.getId() != idz && (lchr == null || lchr.getLevel() <= pchr.getLevel()) && map.getCharacterById(pchr.getId()) != null) {
+                    if (pchr != null && pchr.getId() != idz && (lchr == null || lchr.getLevel() <= pchr.getLevel()) && map.getCharacterById(pchr.getId()).isPresent()) {
                         lchr = pchr;
                     }
                 }
@@ -972,10 +974,9 @@ public class MapleClient {
 
     private void disconnectInternal(boolean shutdown, boolean cashshop) {//once per MapleClient instance
         if (player != null && player.isLoggedin() && player.getClient() != null) {
-            final int messengerid = player.getMessenger() == null ? 0 : player.getMessenger().getId();
+            int messengerId = player.getMessenger().map(MapleMessenger::getId).orElse(0);
             //final int fid = player.getFamilyId();
             final BuddyList bl = player.getBuddylist();
-            final MapleMessengerCharacter chrm = new MapleMessengerCharacter(player, 0);
             final MapleGuildCharacter chrg = player.getMGC();
 
             player.cancelMagicDoor();
@@ -987,8 +988,8 @@ public class MapleClient {
                 if (!(channel == -1 || shutdown)) {
                     if (!cashshop) {
                         if (!this.serverTransition) { // meaning not changing channels
-                            if (messengerid > 0) {
-                                wserv.leaveMessenger(messengerid, chrm);
+                            if (messengerId > 0) {
+                                wserv.leaveMessenger(messengerId, player.getName());
                             }
                                                         /*
                                                         if (fid > 0) {
@@ -1002,16 +1003,16 @@ public class MapleClient {
                             Optional<MapleGuild> guild = player.getGuild();
                             if (guild.isPresent()) {
                                 Server.getInstance().setGuildMemberOnline(player, false, player.getClient().getChannel());
-                                player.getClient().announce(MaplePacketCreator.showGuildInfo(player));
+                                player.announce(MaplePacketCreator.showGuildInfo(player));
                             }
                             if (bl != null) {
-                                wserv.loggedOff(player.getName(), player.getId(), channel, player.getBuddylist().getBuddyIds());
+                                wserv.loggedOff(player.getId(), channel, player.getBuddylist().getBuddyIds());
                             }
                         }
                     } else {
                         if (!this.serverTransition) { // if dc inside of cash shop.
                             if (bl != null) {
-                                wserv.loggedOff(player.getName(), player.getId(), channel, player.getBuddylist().getBuddyIds());
+                                wserv.loggedOff(player.getId(), channel, player.getBuddylist().getBuddyIds());
                             }
                         }
                     }
@@ -1098,14 +1099,14 @@ public class MapleClient {
     }
 
     public Channel getChannelServer() {
-        return Server.getInstance().getChannel(world, channel);
+        return Server.getInstance().getChannel(world, channel).orElseThrow();
     }
 
     public World getWorldServer() {
-        return Server.getInstance().getWorld(world);
+        return Server.getInstance().getWorld(world).orElseThrow();
     }
 
-    public Channel getChannelServer(byte channel) {
+    public Optional<Channel> getChannelServer(byte channel) {
         return Server.getInstance().getChannel(world, channel);
     }
 

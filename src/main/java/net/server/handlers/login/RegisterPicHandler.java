@@ -72,7 +72,7 @@ public final class RegisterPicHandler extends AbstractMaplePacketHandler {
         if (c.getPic() == null || c.getPic().equals("")) {
             c.setPic(pic);
 
-            c.setWorld(server.getCharacterWorld(charId));
+            c.setWorld(server.getCharacterWorld(charId).orElseThrow());
             World wserv = c.getWorldServer();
             if (wserv == null || wserv.isWorldCapacityFull()) {
                 c.announce(MaplePacketCreator.getAfterLoginError(10));

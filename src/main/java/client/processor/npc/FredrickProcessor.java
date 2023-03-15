@@ -220,10 +220,10 @@ public class FredrickProcessor {
                         ps.setInt(1, cid.getLeft());
                         ps.addBatch();
 
-                        World wserv = Server.getInstance().getWorld(cid.getRight());
-                        if (wserv != null) {
-                            wserv.getPlayerStorage().getCharacterById(cid.getLeft()).ifPresent(c -> c.setMerchantMeso(0));
-                        }
+                        Server.getInstance().getWorld(cid.getRight())
+                                .map(World::getPlayerStorage)
+                                .flatMap(s -> s.getCharacterById(cid.getLeft()))
+                                .ifPresent(c -> c.setMerchantMeso(0));
                     }
 
                     ps.executeBatch();

@@ -32,6 +32,7 @@ import net.server.coordinator.matchchecker.MapleMatchCheckerCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import net.server.coordinator.world.MapleInviteCoordinator.MapleInviteResult;
+import net.server.world.World;
 import tools.DatabaseConnection;
 import tools.MaplePacketCreator;
 
@@ -68,7 +69,7 @@ public class MapleGuild {
             con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT * FROM guilds WHERE guildid = " + guildid);
             ResultSet rs = ps.executeQuery();
-            if (!rs.first()) {
+            if (!rs.next()) {
                 id = -1;
                 ps.close();
                 rs.close();
@@ -170,7 +171,7 @@ public class MapleGuild {
 
         MapleCharacter sender = c.getPlayer();
         if (MapleInviteCoordinator.createInvite(InviteType.GUILD, sender, sender.getGuildId(), target.getId())) {
-            target.getClient().announce(MaplePacketCreator.guildInvite(sender.getGuildId(), sender.getName()));
+            target.announce(MaplePacketCreator.guildInvite(sender.getGuildId(), sender.getName()));
             return null;
         } else {
             return MapleGuildResponse.MANAGING_INVITE;
@@ -409,7 +410,9 @@ public class MapleGuild {
     public void broadcastNameChanged() {
         getMembers().stream()
                 .map(MapleGuildCharacter::getId)
-                .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                .map(id -> Server.getInstance().getWorld(world)
+                        .map(World::getPlayerStorage)
+                        .flatMap(w -> w.getCharacterById(id)))
                 .flatMap(Optional::stream)
                 .filter(MapleCharacter::isLoggedinWorld)
                 .forEach(c -> c.getMap().broadcastMessage(c, MaplePacketCreator.guildNameChanged(c.getId(), getName())));
@@ -418,7 +421,9 @@ public class MapleGuild {
     public void broadcastEmblemChanged() {
         getMembers().stream()
                 .map(MapleGuildCharacter::getId)
-                .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                .map(id -> Server.getInstance().getWorld(world)
+                        .map(World::getPlayerStorage)
+                        .flatMap(w -> w.getCharacterById(id)))
                 .flatMap(Optional::stream)
                 .filter(MapleCharacter::isLoggedinWorld)
                 .forEach(c -> c.getMap().broadcastMessage(c, MaplePacketCreator.guildMarkChanged(c.getId(), this)));
@@ -427,7 +432,9 @@ public class MapleGuild {
     public void broadcastInfoChanged() {
         getMembers().stream()
                 .map(MapleGuildCharacter::getId)
-                .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                .map(id -> Server.getInstance().getWorld(world)
+                        .map(World::getPlayerStorage)
+                        .flatMap(w -> w.getCharacterById(id)))
                 .flatMap(Optional::stream)
                 .filter(MapleCharacter::isLoggedinWorld)
                 .forEach(c -> c.getMap().broadcastMessage(c, MaplePacketCreator.showGuildInfo(c)));
@@ -452,11 +459,11 @@ public class MapleGuild {
                     for (Integer b : Server.getInstance().getOpenChannels(world)) {
                         if (notifications.get(b).size() > 0) {
                             if (bcop == BCOp.DISBAND) {
-                                Server.getInstance().getWorld(world).setGuildAndRank(notifications.get(b), 0, 5, exceptionId);
+                                Server.getInstance().getWorld(world).ifPresent(w -> w.setGuildAndRank(notifications.get(b), 0, 5, exceptionId));
                             } else if (bcop == BCOp.EMBLEMCHANGE) {
-                                Server.getInstance().getWorld(world).changeEmblem(this.id, notifications.get(b), new MapleGuildSummary(this));
+                                Server.getInstance().getWorld(world).ifPresent(w -> w.changeEmblem(this.id, notifications.get(b), new MapleGuildSummary(this)));
                             } else {
-                                Server.getInstance().getWorld(world).sendPacket(notifications.get(b), packet, exceptionId);
+                                Server.getInstance().getWorld(world).ifPresent(w -> w.sendPacket(notifications.get(b), packet, exceptionId));
                             }
                         }
                     }
@@ -478,7 +485,7 @@ public class MapleGuild {
                 for (Channel cs : Server.getInstance().getChannelsFromWorld(world)) {
                     Optional<MapleCharacter> character = cs.getPlayerStorage().getCharacterById(mgc.getId());
                     if (character.isPresent()) {
-                        character.get().getClient().announce(serverNotice);
+                        character.get().announce(serverNotice);
                         break;
                     }
                 }
@@ -591,7 +598,7 @@ public class MapleGuild {
                     bDirty = true;
                     try {
                         if (mgc.isOnline()) {
-                            Server.getInstance().getWorld(mgc.getWorld()).setGuildAndRank(cid, 0, 5);
+                            Server.getInstance().getWorld(mgc.getWorld()).ifPresent(w -> w.setGuildAndRank(cid, 0, 5));
                         } else {
                             try {
                                 Connection con = DatabaseConnection.getConnection();
@@ -608,7 +615,7 @@ public class MapleGuild {
                                 e.printStackTrace();
                                 System.out.println("expelMember - MapleGuild " + e);
                             }
-                            Server.getInstance().getWorld(mgc.getWorld()).setOfflineGuildStatus((short) 0, (byte) 5, cid);
+                            Server.getInstance().getWorld(mgc.getWorld()).ifPresent(w -> w.setOfflineGuildStatus((short) 0, (byte) 5, cid));
                         }
                     } catch (Exception re) {
                         re.printStackTrace();
@@ -640,10 +647,10 @@ public class MapleGuild {
     public void changeRank(MapleGuildCharacter mgc, int newRank) {
         try {
             if (mgc.isOnline()) {
-                Server.getInstance().getWorld(mgc.getWorld()).setGuildAndRank(mgc.getId(), this.id, newRank);
+                Server.getInstance().getWorld(mgc.getWorld()).ifPresent(w ->w.setGuildAndRank(mgc.getId(), this.id, newRank));
                 mgc.setGuildRank(newRank);
             } else {
-                Server.getInstance().getWorld(mgc.getWorld()).setOfflineGuildStatus((short) this.id, (byte) newRank, mgc.getId());
+                Server.getInstance().getWorld(mgc.getWorld()).ifPresent(w -> w.setOfflineGuildStatus((short) this.id, (byte) newRank, mgc.getId()));
                 mgc.setOfflineGuildRank(newRank);
             }
         } catch (Exception re) {

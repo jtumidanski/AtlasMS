@@ -123,12 +123,12 @@ public final class MonsterCarnivalHandler extends AbstractMaplePacketHandler {
                         } else {
                             int amount = enemies.getMembers().size() - 1;
                             int randd = (int) Math.floor(Math.random() * amount);
-                            MapleCharacter chrApp = c.getPlayer().getMap().getCharacterById(enemies.getMemberByPos(randd).getId());
-                            if (chrApp != null && chrApp.getMap().isCPQMap()) {
+                            Optional<MapleCharacter> chrApp = c.getPlayer().getMap().getCharacterById(enemies.getMemberByPos(randd).getId());
+                            if (chrApp.isPresent() && chrApp.get().getMap().isCPQMap()) {
                                 if (dis.isEmpty()) {
-                                    chrApp.dispel();
+                                    chrApp.get().dispel();
                                 } else {
-                                    chrApp.giveDebuff(dis.get(), skill.getSkill());
+                                    chrApp.get().giveDebuff(dis.get(), skill.getSkill());
                                 }
                             }
                         }

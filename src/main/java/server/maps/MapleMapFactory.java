@@ -88,7 +88,7 @@ public class MapleMapFactory {
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT * FROM plife WHERE map = ? and world = ?");
             ps.setInt(1, map.getId());
-            ps.setInt(2, map.getWorld());
+            ps.setInt(2, map.getWorldId());
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -151,7 +151,7 @@ public class MapleMapFactory {
         if (mobRate != null) {
             monsterRate = (Float) mobRate.getData();
         }
-        map = new MapleMap(mapid, world, channel, MapleDataTool.getInt("returnMap", infoData), monsterRate);
+        map = new MapleMap(mapid, world, channel, MapleDataTool.getInt("returnMap", infoData));
         map.setEventInstance(event);
 
         String onFirstEnter = MapleDataTool.getString(infoData.getChildByPath("onFirstUserEnter"), String.valueOf(mapid));

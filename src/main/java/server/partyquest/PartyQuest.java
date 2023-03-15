@@ -24,6 +24,7 @@ package server.partyquest;
 
 import client.MapleCharacter;
 import net.server.Server;
+import net.server.channel.Channel;
 import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import tools.FilePrinter;
@@ -51,7 +52,10 @@ public class PartyQuest {
         participants = party.getMembers().stream()
                 .filter(c -> c.getChannel() == channel)
                 .filter(c -> c.getMapId() == mapid)
-                .map(c -> Server.getInstance().getWorld(world).getChannel(channel).getPlayerStorage().getCharacterById(c.getId()))
+                .map(c -> Server.getInstance().getWorld(world)
+                        .flatMap(w -> w.getChannel(channel))
+                        .map(Channel::getPlayerStorage)
+                        .flatMap(s -> s.getCharacterById(c.getId())))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }

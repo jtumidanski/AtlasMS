@@ -59,7 +59,7 @@ public final class DeleteCharHandler extends AbstractMaplePacketHandler {
                     c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x16));
                     return;
                 } else if (familyId != -1) {
-                    MapleFamily family = Server.getInstance().getWorld(world).getFamily(familyId);
+                    MapleFamily family = Server.getInstance().getWorld(world).orElseThrow().getFamily(familyId);
                     if (family != null && family.getTotalMembers() > 1) {
                         c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x1D));
                         return;

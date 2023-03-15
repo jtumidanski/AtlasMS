@@ -1,62 +1,36 @@
-/*
-    This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2019 RonanLana
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation version 3 as published by
-    the Free Software Foundation. You may not use, modify or distribute
-    this program under any other version of the GNU Affero General Public
-    License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package net.server.channel.handlers;
 
 import client.MapleClient;
 import constants.game.GameConstants;
 import net.AbstractMaplePacketHandler;
+import net.server.world.OwlSearchResult;
 import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
-/**
- * @author Ronan
- */
 public final class UseOwlOfMinervaHandler extends AbstractMaplePacketHandler {
 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        List<Pair<Integer, Integer>> owlSearched = c.getWorldServer().getOwlSearchedItems();
+        List<OwlSearchResult> owlSearched = c.getWorldServer().getOwlSearchedItems();
         List<Integer> owlLeaderboards;
 
         if (owlSearched.size() < 5) {
-            owlLeaderboards = new LinkedList<>();
-            for (int i : GameConstants.OWL_DATA) {
-                owlLeaderboards.add(i);
-            }
+            owlLeaderboards = Arrays.stream(GameConstants.OWL_DATA).boxed()
+                    .collect(Collectors.toList());
         } else {
-            // descending order
-            Comparator<Pair<Integer, Integer>> comparator = (p1, p2) -> p2.getRight().compareTo(p1.getRight());
-
-            PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(Math.max(1, owlSearched.size()), comparator);
-            queue.addAll(owlSearched);
-
-            owlLeaderboards = new LinkedList<>();
-            for (int i = 0; i < Math.min(owlSearched.size(), 10); i++) {
-                owlLeaderboards.add(queue.remove().getLeft());
-            }
+            owlLeaderboards = owlSearched.stream()
+                    .sorted(Comparator.comparingInt(OwlSearchResult::count).reversed())
+                    .limit(Math.min(owlSearched.size(), 10))
+                    .map(OwlSearchResult::itemId)
+                    .collect(Collectors.toList());
         }
 
         c.announce(MaplePacketCreator.getOwlOpen(owlLeaderboards));

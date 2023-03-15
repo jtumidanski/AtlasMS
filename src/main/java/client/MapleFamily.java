@@ -109,8 +109,8 @@ public class MapleFamily {
                     int repsToSenior = rsEntries.getInt("reptosenior");
                     String precepts = rsEntries.getString("precepts");
                     //Timestamp lastResetTime = rsEntries.getTimestamp("lastresettime"); //taken care of by FamilyDailyResetTask
-                    World wserv = Server.getInstance().getWorld(world);
-                    if (wserv == null) {
+                    Optional<World> wserv = Server.getInstance().getWorld(world);
+                    if (wserv.isEmpty()) {
                         continue;
                     }
                     Optional<MapleJob> job = MapleJob.getById(jobId);
@@ -118,10 +118,11 @@ public class MapleFamily {
                         continue;
                     }
 
-                    MapleFamily family = wserv.getFamily(familyid);
+                    MapleFamily family = wserv.map(w -> w.getFamily(familyid)).orElse(null);
                     if (family == null) {
                         family = new MapleFamily(familyid, world);
-                        Server.getInstance().getWorld(world).addFamily(familyid, family);
+                        MapleFamily finalFamily = family;
+                        Server.getInstance().getWorld(world).ifPresent(w -> w.addFamily(familyid, finalFamily));
                     }
                     MapleFamilyEntry familyEntry = new MapleFamilyEntry(family, cid, name, level, job.get());
                     family.addEntry(familyEntry);
@@ -159,7 +160,7 @@ public class MapleFamily {
                 int world = unmatchedJunior.getLeft().getLeft();
                 int seniorid = unmatchedJunior.getLeft().getRight();
                 MapleFamilyEntry junior = unmatchedJunior.getRight();
-                MapleFamilyEntry senior = Server.getInstance().getWorld(world).getFamily(junior.getFamily().getID()).getEntryByID(seniorid);
+                MapleFamilyEntry senior = Server.getInstance().getWorld(world).orElseThrow().getFamily(junior.getFamily().getID()).getEntryByID(seniorid);
                 if (senior != null) {
                     junior.setSenior(senior, false);
                 } else {
@@ -264,15 +265,14 @@ public class MapleFamily {
                 .map(MapleFamilyEntry::getChr)
                 .filter(Objects::nonNull)
                 .filter(c -> c.getId() != ignoreID)
-                .map(MapleCharacter::getClient)
-                .forEach(c -> c.announce(packet));
+                .forEach(MapleCharacter.announcePacket(packet));
     }
 
     public void broadcastFamilyInfoUpdate() {
         for (MapleFamilyEntry entry : members.values()) {
             MapleCharacter chr = entry.getChr();
             if (chr != null) {
-                chr.getClient().announce(MaplePacketCreator.getFamilyInfo(entry));
+                chr.announce(MaplePacketCreator.getFamilyInfo(entry));
             }
         }
     }

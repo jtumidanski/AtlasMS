@@ -344,7 +344,7 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
         try {
             for (int i = 0; i < 3; i++) {
                 if (visitors[i] != null) {
-                    visitors[i].getClient().announce(packet);
+                    visitors[i].announce(packet);
                 }
             }
         } finally {
@@ -357,13 +357,13 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
         try {
             for (int i = 0; i < 3; i++) {
                 if (visitors[i] != null) {
-                    visitors[i].getClient().announce(MaplePacketCreator.getPlayerShopRemoveVisitor(i + 1));
+                    visitors[i].announce(MaplePacketCreator.getPlayerShopRemoveVisitor(i + 1));
                 }
             }
 
             for (int i = 0; i < 3; i++) {
                 if (visitors[i] != null) {
-                    visitors[i].getClient().announce(MaplePacketCreator.getPlayerShop(this, false));
+                    visitors[i].announce(MaplePacketCreator.getPlayerShop(this, false));
                 }
             }
 
@@ -381,7 +381,7 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
             try {
                 for (int i = 0; i < 3; i++) {
                     if (visitors[i] != null) {
-                        visitors[i].getClient().announce(MaplePacketCreator.shopErrorMessage(10, 1));
+                        visitors[i].announce(MaplePacketCreator.shopErrorMessage(10, 1));
                         visitorList.add(visitors[i]);
                     }
                 }
@@ -400,7 +400,7 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
 
     public void broadcast(final byte[] packet) {
         if (owner.getClient() != null && owner.getClient().getSession() != null) {
-            owner.getClient().announce(packet);
+            owner.announce(packet);
         }
         broadcastToVisitors(packet);
     }
@@ -526,7 +526,7 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
         }
 
         if (target != null) {
-            target.getClient().announce(MaplePacketCreator.shopErrorMessage(5, 1));
+            target.announce(MaplePacketCreator.shopErrorMessage(5, 1));
             removeVisitor(target);
         }
     }

@@ -29,6 +29,7 @@ import net.server.Server;
 import net.server.guild.MapleAlliance;
 import net.server.guild.MapleGuild;
 import net.server.guild.MapleGuildCharacter;
+import net.server.world.World;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.data.output.MaplePacketLittleEndianWriter;
@@ -216,13 +217,15 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
                     return;
                 }
                 int victimid = slea.readInt();
-                MapleCharacter player = Server.getInstance().getWorld(client.getWorld()).getPlayerStorage().getCharacterById(victimid).orElse(null);
-                if (player.getAllianceRank() != 2) {
+                Optional<MapleCharacter> player = Server.getInstance().getWorld(client.getWorld())
+                        .map(World::getPlayerStorage)
+                        .flatMap(s -> s.getCharacterById(victimid));
+                if (player.isEmpty() || player.get().getAllianceRank() != 2) {
                     return;
                 }
 
                 //Server.getInstance().allianceMessage(alliance.getId(), sendChangeLeader(chr.getGuild().getAllianceId(), chr.getId(), slea.readInt()), -1, -1);
-                changeLeaderAllianceRank(alliance.get(), player);
+                changeLeaderAllianceRank(alliance.get(), player.get());
                 break;
             }
             case 0x08:
@@ -238,9 +241,13 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
                 byte byte1 = slea.readByte();
 
                 //Server.getInstance().allianceMessage(alliance.getId(), sendChangeRank(chr.getGuild().getAllianceId(), chr.getId(), int1, byte1), -1, -1);
-                MapleCharacter player = Server.getInstance().getWorld(client.getWorld()).getPlayerStorage().getCharacterById(int1).orElse(null);
-                changePlayerAllianceRank(alliance.get(), player, (byte1 > 0));
-
+                Optional<MapleCharacter> player = Server.getInstance().getWorld(client.getWorld())
+                        .map(World::getPlayerStorage)
+                        .flatMap(s -> s.getCharacterById(int1));
+                if (player.isEmpty()) {
+                    return;
+                }
+                changePlayerAllianceRank(alliance.get(), player.get(), (byte1 > 0));
                 break;
             }
             case 0x0A:

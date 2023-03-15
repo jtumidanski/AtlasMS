@@ -808,7 +808,6 @@ public class AbstractPlayerInteraction {
                 .map(MaplePartyCharacter::getPlayer)
                 .flatMap(Optional::stream)
                 .map(MapleCharacter::getClient)
-                .filter(Objects::nonNull)
                 .forEach(c -> removeAll(id, c));
     }
 
@@ -964,7 +963,7 @@ public class AbstractPlayerInteraction {
                 getPlayer().changeSkillLevel(skill, (byte) Math.max(skillEntry.skillevel, level), Math.max(skillEntry.masterlevel, masterLevel), expiration == -1 ? -1 : Math.max(skillEntry.expiration, expiration));
                 return;
             }
-        } else if (GameConstants.isAranSkills(skill.getId())) {
+        } else if (GameConstants.isAranSkills(skill.id())) {
             c.announce(MaplePacketCreator.showInfo("Effect/BasicEff.img/AranGetSkill"));
         }
 

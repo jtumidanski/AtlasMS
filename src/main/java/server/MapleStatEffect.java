@@ -88,6 +88,7 @@ import constants.skills.ThunderBreaker;
 import constants.skills.WhiteKnight;
 import constants.skills.WindArcher;
 import net.server.Server;
+import net.server.channel.Channel;
 import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import provider.MapleData;
@@ -1020,7 +1021,10 @@ public class MapleStatEffect {
                         pt = target.getPortal(lastBanishInfo.getRight());
                     }
                 } else {
-                    target = applyto.getClient().getWorldServer().getChannel(applyto.getClient().getChannel()).getMapFactory().getMap(moveTo);
+                    target = applyto.getClient().getWorldServer().getChannel(applyto.getClient().getChannel())
+                            .map(Channel::getMapFactory)
+                            .map(f -> f.getMap(moveTo))
+                            .orElse(null);
                     int targetid = target.getId() / 10000000;
                     if (targetid != 60 && applyto.getMapId() / 10000000 != 61 && targetid != applyto.getMapId() / 10000000 && targetid != 21 && targetid != 20 && targetid != 12 && (applyto.getMapId() / 10000000 != 10 && applyto.getMapId() / 10000000 != 12)) {
                         return false;
@@ -1153,12 +1157,12 @@ public class MapleStatEffect {
                     int amount = opposition.map(MapleParty::getMembers).map(Collection::size).orElse(0);
                     int randd = (int) Math.floor(Math.random() * amount);
                     int randomOppositionId = opposition.map(p -> p.getMemberByPos(randd)).map(MaplePartyCharacter::getId).orElse(-1);
-                    MapleCharacter chrApp = applyfrom.getMap().getCharacterById(randomOppositionId);
-                    if (chrApp != null && chrApp.getMap().isCPQMap()) {
+                    Optional<MapleCharacter> chrApp = applyfrom.getMap().getCharacterById(randomOppositionId);
+                    if (chrApp.isPresent() && chrApp.get().getMap().isCPQMap()) {
                         if (dis.isEmpty()) {
-                            chrApp.dispel();
+                            chrApp.get().dispel();
                         } else {
-                            chrApp.giveDebuff(dis.get(), MCSkill.getMobSkill(dis.get().getDisease(), skill.level));
+                            chrApp.get().giveDebuff(dis.get(), MCSkill.getMobSkill(dis.get().getDisease(), skill.level));
                         }
                     }
                 }
@@ -1230,14 +1234,14 @@ public class MapleStatEffect {
             }
 
             if (isDispel()) {
-                monster.debuffMob(skill.get().getId());
+                monster.debuffMob(skill.get().id());
             } else if (isSeal() && monster.isBoss()) {  // thanks IxianMace for noticing seal working on bosses
                 // do nothing
             } else {
                 if (makeChanceResult()) {
                     monster.applyStatus(applyFrom, new MonsterStatusEffect(getMonsterStati(), skill.get(), null, false), isPoison(), getDuration());
                     if (isCrash()) {
-                        monster.debuffMob(skill.get().getId());
+                        monster.debuffMob(skill.get().id());
                     }
                 }
             }

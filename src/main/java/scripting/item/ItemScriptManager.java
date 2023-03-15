@@ -23,7 +23,7 @@ package scripting.item;
 
 import client.MapleClient;
 import scripting.npc.NPCScriptManager;
-import server.ItemInformationProvider.ScriptedItem;
+import server.ScriptedItem;
 
 public class ItemScriptManager {
 

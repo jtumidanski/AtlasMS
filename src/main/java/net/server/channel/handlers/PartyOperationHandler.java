@@ -94,7 +94,7 @@ public final class PartyOperationHandler extends AbstractMaplePacketHandler {
         }
 
         if (MapleInviteCoordinator.createInvite(InviteType.PARTY, character, party.get().getId(), invited.getId())) {
-            invited.getClient().announce(MaplePacketCreator.partyInvite(character));
+            invited.announce(MaplePacketCreator.partyInvite(character));
         } else {
             client.announce(MaplePacketCreator.partyStatusMessage(22, invited.getName()));
         }

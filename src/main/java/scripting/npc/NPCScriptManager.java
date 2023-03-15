@@ -25,7 +25,7 @@ import client.MapleCharacter;
 import client.MapleClient;
 import net.server.world.MaplePartyCharacter;
 import scripting.AbstractScriptManager;
-import server.ItemInformationProvider.ScriptedItem;
+import server.ScriptedItem;
 import tools.FilePrinter;
 import tools.MaplePacketCreator;
 
@@ -75,7 +75,7 @@ public class NPCScriptManager extends AbstractScriptManager {
     }
 
     public boolean start(MapleClient c, ScriptedItem scriptItem, MapleCharacter chr) {
-        return start(c, scriptItem.getNpc(), -1, scriptItem.getScript(), chr, true, "im");
+        return start(c, scriptItem.npcId(), -1, scriptItem.script(), chr, true, "im");
     }
 
     public void start(String filename, MapleClient c, int npc, List<MaplePartyCharacter> chrs) {

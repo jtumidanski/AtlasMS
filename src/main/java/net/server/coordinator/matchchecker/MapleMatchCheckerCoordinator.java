@@ -22,6 +22,7 @@ package net.server.coordinator.matchchecker;
 import client.MapleCharacter;
 import net.server.Server;
 import net.server.coordinator.matchchecker.MatchCheckerListenerFactory.MatchCheckerType;
+import net.server.world.World;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -385,7 +386,7 @@ public class MapleMatchCheckerCoordinator {
 
         private Set<MapleCharacter> getMatchCharacters() {
             return getMatchPlayers().stream()
-                    .map(id -> Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(id))
+                    .map(id -> Server.getInstance().getWorld(world).map(World::getPlayerStorage).flatMap(w -> w.getCharacterById(id)))
                     .flatMap(Optional::stream)
                     .collect(Collectors.toSet());
         }

@@ -88,7 +88,7 @@ public final class CharSelectedHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        c.setWorld(server.getCharacterWorld(charId));
+        c.setWorld(server.getCharacterWorld(charId).orElseThrow());
         World wserv = c.getWorldServer();
         if (wserv == null || wserv.isWorldCapacityFull()) {
             c.announce(MaplePacketCreator.getAfterLoginError(10));

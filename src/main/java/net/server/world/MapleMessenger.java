@@ -25,19 +25,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class MapleMessenger {
 
-    private int id;
-    private List<MapleMessengerCharacter> members = new ArrayList<>(3);
-    private boolean[] pos = new boolean[3];
+    private final int id;
+    private final List<MapleMessengerCharacter> members = new ArrayList<>(3);
+    private final boolean[] pos = new boolean[3];
 
-    public MapleMessenger(int id, MapleMessengerCharacter chrfor) {
+    public MapleMessenger(int id) {
         this.id = id;
-        for (int i = 0; i < 3; i++) {
-            pos[i] = false;
-        }
-        addMember(chrfor, chrfor.getPosition());
     }
 
     public int getId() {
@@ -48,14 +47,32 @@ public final class MapleMessenger {
         return Collections.unmodifiableList(members);
     }
 
-    public void addMember(MapleMessengerCharacter member, int position) {
-        members.add(member);
-        member.setPosition(position);
-        pos[position] = true;
+    public Stream<MapleMessengerCharacter> getMembersStream() {
+        return getMembers().stream();
     }
 
-    public void removeMember(MapleMessengerCharacter member) {
-        int position = member.getPosition();
+    public Stream<MapleMessengerCharacter> getOtherMembersStream(String name) {
+        return getMembersStream().filter(m -> !m.name().equals(name));
+    }
+
+    public MapleMessengerCharacter addMember(int id, String name, int channelId) {
+        return addMember(new MapleMessengerCharacter(id, name, channelId));
+    }
+
+    public MapleMessengerCharacter addMember(MapleMessengerCharacter member) {
+        int position = getLowestPosition();
+        MapleMessengerCharacter newMember = member.setPosition(position);
+        members.add(newMember);
+        pos[position] = true;
+        return newMember;
+    }
+
+    public void removeMember(String name) {
+        getMemberByName(name).ifPresent(this::removeMember);
+    }
+
+    private void removeMember(MapleMessengerCharacter member) {
+        int position = member.position();
         pos[position] = false;
         members.remove(member);
     }
@@ -69,13 +86,18 @@ public final class MapleMessenger {
         return -1;
     }
 
+    public Optional<MapleMessengerCharacter> getMemberByName(String name) {
+        return members.stream()
+                .filter(c -> c.name().equals(name))
+                .findFirst();
+    }
+
     public int getPositionByName(String name) {
-        for (MapleMessengerCharacter messengerchar : members) {
-            if (messengerchar.getName().equals(name)) {
-                return messengerchar.getPosition();
-            }
-        }
-        return -1;
+        return members.stream()
+                .filter(c -> c.name().equals(name))
+                .map(MapleMessengerCharacter::position)
+                .findFirst()
+                .orElse(-1);
     }
 }
 

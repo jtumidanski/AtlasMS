@@ -179,24 +179,24 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
 
         if (c.tryacquireClient()) { // thanks MedicOP for assisting on concurrency protection here
             try {
-                World wserv = server.getWorld(c.getWorld());
-                if (wserv == null) {
+                Optional<World> wserv = server.getWorld(c.getWorld());
+                if (wserv.isEmpty()) {
                     c.disconnect(true, false);
                     return;
                 }
 
-                Channel cserv = wserv.getChannel(c.getChannel());
-                if (cserv == null) {
+                Optional<Channel> cserv = wserv.get().getChannel(c.getChannel());
+                if (cserv.isEmpty()) {
                     c.setChannel(1);
-                    cserv = wserv.getChannel(c.getChannel());
+                    cserv = wserv.get().getChannel(c.getChannel());
 
-                    if (cserv == null) {
+                    if (cserv.isEmpty()) {
                         c.disconnect(true, false);
                         return;
                     }
                 }
 
-                MapleCharacter player = wserv.getPlayerStorage().getCharacterById(cid).orElse(null);
+                MapleCharacter player = wserv.get().getPlayerStorage().getCharacterById(cid).orElse(null);
                 IoSession session = c.getSession();
 
                 String remoteHwid;
@@ -288,8 +288,8 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                     player.newClient(c);
                 }
 
-                cserv.addPlayer(player);
-                wserv.addPlayer(player);
+                cserv.get().addPlayer(player);
+                wserv.get().addPlayer(player);
                 player.setEnteredChannelWorld();
 
                 List<PlayerBuffValueHolder> buffs = server.getPlayerBuffStorage().getBuffsFromStorage(cid);
@@ -325,10 +325,10 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
 
                 BuddyList bl = player.getBuddylist();
                 int[] buddyIds = bl.getBuddyIds();
-                wserv.loggedOn(player.getName(), player.getId(), c.getChannel(), buddyIds);
+                wserv.get().loggedOn(player.getId(), c.getChannel(), buddyIds);
 
                 //TODO clean this up
-                for (CharacterIdChannelPair onlineBuddy : wserv.multiBuddyFind(player.getId(), buddyIds)) {
+                for (CharacterIdChannelPair onlineBuddy : wserv.get().multiBuddyFind(player.getId(), buddyIds)) {
                     bl.get(onlineBuddy.getCharacterId()).ifPresent(buddy -> {
                         buddy.setChannel(onlineBuddy.getChannel());
                         bl.put(buddy);
@@ -338,7 +338,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
 
                 c.announce(MaplePacketCreator.loadFamily(player));
                 if (player.getFamilyId() > 0) {
-                    MapleFamily f = wserv.getFamily(player.getFamilyId());
+                    MapleFamily f = wserv.get().getFamily(player.getFamilyId());
                     if (f != null) {
                         MapleFamilyEntry familyEntry = f.getEntryByID(player.getId());
                         if (familyEntry != null) {
@@ -420,7 +420,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 if (newcomer) {
                     for (MaplePet pet : player.getPets()) {
                         if (pet != null) {
-                            wserv.registerPetHunger(player, player.getPetIndex(pet));
+                            wserv.get().registerPetHunger(player, player.getPetIndex(pet));
                         }
                     }
 
@@ -479,8 +479,8 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 if (player.getPartnerId() > 0) {
                     int partnerId = player.getPartnerId();
                     final MapleCharacter finalPlayer = player;
-                    wserv.getPlayerStorage()
-                            .getCharacterById(partnerId)
+                    wserv.map(World::getPlayerStorage)
+                            .flatMap(s -> s.getCharacterById(partnerId))
                             .filter(partner -> !partner.isAwayFromWorld())
                             .ifPresent(partner -> {
                                 finalPlayer.announce(Wedding.OnNotifyWeddingPartnerTransfer(partnerId, partner.getMapId()));

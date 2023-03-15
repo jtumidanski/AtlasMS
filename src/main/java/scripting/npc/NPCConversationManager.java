@@ -511,7 +511,10 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public Optional<MapleCharacter> getMapleCharacter(String player) {
-        return Server.getInstance().getWorld(c.getWorld()).getChannel(c.getChannel()).getPlayerStorage().getCharacterByName(player);
+        return Server.getInstance().getWorld(c.getWorld())
+                .flatMap(w -> w.getChannel(c.getChannel()))
+                .map(Channel::getPlayerStorage)
+                .flatMap(s -> s.getCharacterByName(player));
     }
 
     public void logLeaf(String prize) {
@@ -751,7 +754,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         List<MaplePartyCharacter> partyMembers = party.getPartyMembers();
         for (MaplePartyCharacter pchr : partyMembers) {
             if (pchr.getLevel() >= cpqMinLvl && pchr.getLevel() <= cpqMaxLvl) {
-                if (lobby.getCharacterById(pchr.getId()) == null) {
+                if (lobby.getCharacterById(pchr.getId()).isEmpty()) {
                     return 1;  // party member detected out of area
                 }
             } else {

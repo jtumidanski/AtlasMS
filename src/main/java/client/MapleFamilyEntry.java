@@ -144,7 +144,7 @@ public class MapleFamilyEntry {
         newFamily.getLeader().doFullCount(); //easier than keeping track of numbers
         oldFamily.setMessage(null, true);
         newFamily.addEntryTree(this);
-        Server.getInstance().getWorld(oldFamily.getWorld()).removeFamily(oldFamily.getID());
+        Server.getInstance().getWorld(oldFamily.getWorld()).ifPresent(w -> w.removeFamily(oldFamily.getID()));
 
         //db
         try (Connection con = DatabaseConnection.getConnection()) {
@@ -173,7 +173,7 @@ public class MapleFamilyEntry {
         MapleFamily oldFamily = getFamily();
         MapleFamilyEntry oldSenior = getSenior();
         family = new MapleFamily(-1, oldFamily.getWorld());
-        Server.getInstance().getWorld(family.getWorld()).addFamily(family.getID(), family);
+        Server.getInstance().getWorld(family.getWorld()).ifPresent(w ->w.addFamily(family.getID(), family));
         setSenior(null, false);
         family.setLeader(this);
         addSeniorCount(-getTotalSeniors(), family);

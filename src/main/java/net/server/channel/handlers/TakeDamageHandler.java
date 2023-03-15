@@ -177,7 +177,7 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
                             }
                             map.damageMonster(chr, attacker, bouncedamage);
                             map.broadcastMessage(chr, MaplePacketCreator.damageMonster(oid, bouncedamage), true);
-                            chr.getClient().announce(MaplePacketCreator.showOwnBuffEffect(id, 5));
+                            chr.announce(MaplePacketCreator.showOwnBuffEffect(id, 5));
                             map.broadcastMessage(chr, MaplePacketCreator.showBuffeffect(chr.getId(), id, 5), false);
                         }
                     }

@@ -93,7 +93,7 @@ public class EventManager {
         this.server = Server.getInstance();
         this.iv = iv;
         this.cserv = cserv;
-        this.wserv = server.getWorld(cserv.getWorld());
+        this.wserv = server.getWorld(cserv.getWorld()).orElseThrow();
         this.name = name;
 
         this.openedLobbys = new ArrayList<>();

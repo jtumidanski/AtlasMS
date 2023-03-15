@@ -50,7 +50,7 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
     }
 
     private static void sendWarningMessage(MapleClient client, MapleCharacter target, String message) {
-        target.getClient().announce(MaplePacketCreator.serverNotice(1, message));
+        target.announce(MaplePacketCreator.serverNotice(1, message));
         client.announce(MaplePacketCreator.getGMEffect(0x1E, (byte) 1));
     }
 

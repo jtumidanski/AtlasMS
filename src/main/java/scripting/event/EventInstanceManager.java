@@ -64,6 +64,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
@@ -321,10 +322,8 @@ public class EventInstanceManager {
     }
 
     private void dismissEventTimer() {
-        for (MapleCharacter chr : getPlayers()) {
-            chr.getClient().announce(MaplePacketCreator.removeClock());
-        }
-
+        byte[] packet = MaplePacketCreator.removeClock();
+        getPlayers().forEach(MapleCharacter.announcePacket(packet));
         event_schedule = null;
         eventTime = 0;
         timeStarted = 0;
@@ -354,14 +353,12 @@ public class EventInstanceManager {
     }
 
     public void registerParty(MapleParty party, MapleMap map) {
-        for (MaplePartyCharacter mpc : party.getEligibleMembers()) {
-            if (mpc.isOnline()) {   // thanks resinate
-                MapleCharacter chr = map.getCharacterById(mpc.getId());
-                if (chr != null) {
-                    registerPlayer(chr);
-                }
-            }
-        }
+        party.getEligibleMembers().stream()
+                .filter(MaplePartyCharacter::isOnline)
+                .map(MaplePartyCharacter::getId)
+                .map(map::getCharacterById)
+                .flatMap(Optional::stream)
+                .forEach(this::registerPlayer);
     }
 
     public void registerExpedition(MapleExpedition exped) {
@@ -371,12 +368,9 @@ public class EventInstanceManager {
 
     private void registerExpeditionTeam(MapleExpedition exped, int recruitMap) {
         expedition = exped;
-
-        for (MapleCharacter chr : exped.getActiveMembers()) {
-            if (chr.getMapId() == recruitMap) {
-                registerPlayer(chr);
-            }
-        }
+        exped.getActiveMembers().stream()
+                .filter(c -> c.getMapId() == recruitMap)
+                .forEach(this::registerPlayer);
     }
 
     public void unregisterPlayer(final MapleCharacter chr) {

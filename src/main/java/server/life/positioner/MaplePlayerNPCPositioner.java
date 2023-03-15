@@ -145,7 +145,7 @@ public class MaplePlayerNPCPositioner {
 
             playerNpcs.sort(Comparator.comparingInt(MaplePlayerNPC::getScriptId));
 
-            for (Channel ch : Server.getInstance().getChannelsFromWorld(map.getWorld())) {
+            for (Channel ch : Server.getInstance().getChannelsFromWorld(map.getWorldId())) {
                 MapleMap m = ch.getMapFactory().getMap(map.getId());
 
                 for (MaplePlayerNPC pn : playerNpcs) {
@@ -157,7 +157,7 @@ public class MaplePlayerNPCPositioner {
 
             Point ret = rearrangePlayerNpcs(map, newStep, playerNpcs);
 
-            for (Channel ch : Server.getInstance().getChannelsFromWorld(map.getWorld())) {
+            for (Channel ch : Server.getInstance().getChannelsFromWorld(map.getWorldId())) {
                 MapleMap m = ch.getMapFactory().getMap(map.getId());
 
                 for (MaplePlayerNPC pn : playerNpcs) {

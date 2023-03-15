@@ -83,11 +83,11 @@ public class AssignSPProcessor {
                 } else {
                     player.announce(MaplePacketCreator.enableActions());
                 }
-                if (skill.getId() == Aran.FULL_SWING) {
+                if (skill.id() == Aran.FULL_SWING) {
                     player.changeSkillLevel(skill, (byte) (curLevel + 1), player.getMasterLevel(skill), player.getSkillExpiration(skill));
                     player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_FULL_DOUBLE).orElseThrow(), player.getSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
                     player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_FULL_TRIPLE).orElseThrow(), player.getSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
-                } else if (skill.getId() == Aran.OVER_SWING) {
+                } else if (skill.id() == Aran.OVER_SWING) {
                     player.changeSkillLevel(skill, (byte) (curLevel + 1), player.getMasterLevel(skill), player.getSkillExpiration(skill));
                     player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_OVER_DOUBLE).orElseThrow(), player.getSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
                     player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_OVER_TRIPLE).orElseThrow(), player.getSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));

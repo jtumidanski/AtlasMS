@@ -98,7 +98,7 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                     return;
                 }
                 for (MapleCharacter chr : matchPlayers) {
-                    if (leader.getMap().getCharacterById(chr.getId()) == null) {
+                    if (leader.getMap().getCharacterById(chr.getId()).isEmpty()) {
                         leader.dropMessage(1, "You cannot establish the creation of a new Guild if one of the members is not present here.");
                         broadcastGuildCreationDismiss(matchPlayers);
                         return;

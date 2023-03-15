@@ -1,24 +1,3 @@
-/*
-	This file is part of the OdinMS Maple Story Server
-    Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc>
-		       Matthias Butz <matze@odinms.de>
-		       Jan Christian Meyer <vimes@odinms.de>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation version 3 as published by
-    the Free Software Foundation. You may not use, modify or distribute
-    this program under any other version of the GNU Affero General Public
-    License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package net.server.channel.handlers;
 
 import client.MapleClient;
@@ -27,12 +6,11 @@ import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import scripting.item.ItemScriptManager;
 import server.ItemInformationProvider;
-import server.ItemInformationProvider.ScriptedItem;
+import server.ScriptedItem;
 import tools.data.input.SeekableLittleEndianAccessor;
 
-/**
- * @author Jay Estrella
- */
+import java.util.Optional;
+
 public final class ScriptedItemHandler extends AbstractMaplePacketHandler {
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
@@ -41,8 +19,8 @@ public final class ScriptedItemHandler extends AbstractMaplePacketHandler {
         int itemId = slea.readInt();
 
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
-        ScriptedItem info = ii.getScriptedItemInfo(itemId);
-        if (info == null) {
+        Optional<ScriptedItem> info = ii.getScriptedItemInfo(itemId);
+        if (info.isEmpty()) {
             return;
         }
 
@@ -51,7 +29,6 @@ public final class ScriptedItemHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        ItemScriptManager ism = ItemScriptManager.getInstance();
-        ism.runItemScript(c, info);
+        ItemScriptManager.getInstance().runItemScript(c, info.get());
     }
 }

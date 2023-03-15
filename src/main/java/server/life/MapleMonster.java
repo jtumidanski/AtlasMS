@@ -441,8 +441,8 @@ public class MapleMonster extends AbstractLoadedMapleLife {
                     .orElse(Collections.emptyList()).stream()
                     .map(MaplePartyCharacter::getId)
                     .map(id -> from.getMap().getCharacterById(id))
-                    .filter(Objects::nonNull)
-                    .forEach(c -> c.announce(packet.clone()));
+                    .flatMap(Optional::stream)
+                    .forEach(MapleCharacter.announcePacket(packet));
         }
     }
 
@@ -852,8 +852,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             System.out.println("[CRITICAL LOSS] toSpawn is null for " + this.getName());
         }
 
-        MapleCharacter looter = map.getCharacterById(getHighestDamagerId());
-        return looter != null ? looter : killer;
+        return map.getCharacterById(getHighestDamagerId()).orElse(killer);
     }
 
     public void dropFromFriendlyMonster(long delay) {
@@ -1129,7 +1128,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
     }
 
     private int broadcastStatusEffect(final MonsterStatusEffect status) {
-        int animationTime = status.getSkill().map(Skill::getAnimationTime).orElse(0);
+        int animationTime = status.getSkill().map(Skill::animationTime).orElse(0);
         byte[] packet = MaplePacketCreator.applyMonsterStatus(getObjectId(), status, null);
         broadcastMonsterStatusMessage(packet);
 
@@ -1148,7 +1147,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
         }
         Skill skill = fromSkill.get();
 
-        switch (getMonsterEffectiveness(skill.getElement())) {
+        switch (getMonsterEffectiveness(skill.element())) {
             case IMMUNE:
             case STRONG:
             case NEUTRAL:
@@ -1157,22 +1156,22 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             case WEAK:
                 break;
             default: {
-                System.out.println("Unknown elemental effectiveness: " + getMonsterEffectiveness(skill.getElement()));
+                System.out.println("Unknown elemental effectiveness: " + getMonsterEffectiveness(skill.element()));
                 return false;
             }
         }
 
-        if (skill.getId() == FPMage.ELEMENT_COMPOSITION) { // fp compo
+        if (skill.id() == FPMage.ELEMENT_COMPOSITION) { // fp compo
             ElementalEffectiveness effectiveness = getMonsterEffectiveness(Element.POISON);
             if (effectiveness == ElementalEffectiveness.IMMUNE || effectiveness == ElementalEffectiveness.STRONG) {
                 return false;
             }
-        } else if (skill.getId() == ILMage.ELEMENT_COMPOSITION) { // il compo
+        } else if (skill.id() == ILMage.ELEMENT_COMPOSITION) { // il compo
             ElementalEffectiveness effectiveness = getMonsterEffectiveness(Element.ICE);
             if (effectiveness == ElementalEffectiveness.IMMUNE || effectiveness == ElementalEffectiveness.STRONG) {
                 return false;
             }
-        } else if (skill.getId() == NightLord.VENOMOUS_STAR || skill.getId() == Shadower.VENOMOUS_STAB || skill.getId() == NightWalker.VENOM) {// venom
+        } else if (skill.id() == NightLord.VENOMOUS_STAR || skill.id() == Shadower.VENOMOUS_STAB || skill.id() == NightWalker.VENOM) {// venom
             if (getMonsterEffectiveness(Element.POISON) == ElementalEffectiveness.WEAK) {
                 return false;
             }
@@ -1279,7 +1278,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             overtimeAction = new DamageTask(webDamage, from, status, 1);
             overtimeDelay = 3500;
             */
-        } else if (skill.getId() == 4121004 || skill.getId() == 4221004) { // Ninja Ambush
+        } else if (skill.id() == 4121004 || skill.id() == 4221004) { // Ninja Ambush
             final byte level = from.getSkillLevel(skill);
             final int damage = (int) ((from.getStr() + from.getLuk()) * ((3.7 * skill.getEffect(level).getDamage()) / 100));
 
@@ -1973,11 +1972,11 @@ public class MapleMonster extends AbstractLoadedMapleLife {
             List<Integer> toRemovePuppets = new LinkedList<>();
 
             for (Integer cid : puppetOwners) {
-                MapleCharacter chr = map.getCharacterById(cid);
+                Optional<MapleCharacter> chr = map.getCharacterById(cid);
 
-                if (chr != null) {
-                    if (isCharacterPuppetInVicinity(chr)) {
-                        newController = chr;
+                if (chr.isPresent()) {
+                    if (isCharacterPuppetInVicinity(chr.get())) {
+                        newController = chr.get();
                         break;
                     }
                 } else {

@@ -28,14 +28,16 @@ import net.server.world.World;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public final class ServerStatusRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        byte world = (byte) slea.readShort();
-        World wserv = Server.getInstance().getWorld(world);
-        if (wserv != null) {
-            int status = wserv.getWorldCapacityStatus();
+        byte worldId = (byte) slea.readShort();
+        Optional<World> wserv = Server.getInstance().getWorld(worldId);
+        if (wserv.isPresent()) {
+            int status = wserv.get().getWorldCapacityStatus();
             c.announce(MaplePacketCreator.getServerStatus(status));
         } else {
             c.announce(MaplePacketCreator.getServerStatus(2));

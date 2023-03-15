@@ -159,7 +159,7 @@ public class CashShop {
     public void gainCash(int type, CashItem buyItem, int world) {
         gainCash(type, -buyItem.getPrice());
         if (!YamlConfig.config.server.USE_ENFORCE_ITEM_SUGGESTION) {
-            Server.getInstance().getWorld(world).addCashItemBought(buyItem.getSN());
+            Server.getInstance().getWorld(world).ifPresent(w -> w.addCashItemBought(buyItem.getSN()));
         }
     }
 

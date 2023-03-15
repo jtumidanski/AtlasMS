@@ -70,14 +70,14 @@ public final class ViewAllCharRegisterPicHandler extends AbstractMaplePacketHand
             return;
         }
 
-        c.setWorld(server.getCharacterWorld(charId));
+        c.setWorld(server.getCharacterWorld(charId).orElseThrow());
         World wserv = c.getWorldServer();
         if (wserv == null || wserv.isWorldCapacityFull()) {
             c.announce(MaplePacketCreator.getAfterLoginError(10));
             return;
         }
 
-        int channel = Randomizer.rand(1, server.getWorld(c.getWorld()).getChannelsSize());
+        int channel = Randomizer.rand(1, server.getWorld(c.getWorld()).orElseThrow().getChannelsSize());
         c.setChannel(channel);
 
         String pic = slea.readMapleAsciiString();

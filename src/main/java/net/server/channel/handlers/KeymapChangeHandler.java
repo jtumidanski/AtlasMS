@@ -46,8 +46,8 @@ public final class KeymapChangeHandler extends AbstractMaplePacketHandler {
                         boolean isBanndedSkill;
                         Skill skill = SkillFactory.getSkill(action).orElse(null);
                         if (skill != null) {
-                            isBanndedSkill = GameConstants.bannedBindSkills(skill.getId());
-                            if (isBanndedSkill || (!c.getPlayer().isGM() && GameConstants.isGMSkills(skill.getId())) || (!GameConstants.isInJobTree(skill.getId(), c.getPlayer().getJob().getId()) && !c.getPlayer().isGM())) {
+                            isBanndedSkill = GameConstants.bannedBindSkills(skill.id());
+                            if (isBanndedSkill || (!c.getPlayer().isGM() && GameConstants.isGMSkills(skill.id())) || (!GameConstants.isInJobTree(skill.id(), c.getPlayer().getJob().getId()) && !c.getPlayer().isGM())) {
                                 continue;
                             }
                         }
