@@ -37,12 +37,7 @@ public final class AutoAggroHandler extends AbstractMaplePacketHandler {
             return; // Don't auto aggro GM's in hide...
         }
 
-        MapleMap map = player.getMap();
         int oid = slea.readInt();
-
-        MapleMonster monster = map.getMonsterByOid(oid);
-        if (monster != null) {
-            monster.aggroAutoAggroUpdate(player);
-        }
+        player.getMap().getMonsterByOid(oid).ifPresent(m -> m.aggroAutoAggroUpdate(player));
     }
 }

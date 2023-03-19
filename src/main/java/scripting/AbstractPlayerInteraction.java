@@ -241,15 +241,8 @@ public class AbstractPlayerInteraction {
 
     private List<Integer> convertToIntegerArray(List<Object> list) {
         List<Integer> intList = new ArrayList<>();      // JAVA 7 Rhino script engine. Thanks Bruno, felipepm10 for noticing a typecast issue here.
-
-        if (ServerConstants.JAVA_8) {
-            for (Object d : list) {
-                intList.add((Integer) d);
-            }
-        } else {
-            for (Object d : list) {
-                intList.add(((Double) d).intValue());
-            }
+        for (Object d : list) {
+            intList.add((Integer) d);
         }
 
         return intList;
@@ -257,21 +250,11 @@ public class AbstractPlayerInteraction {
 
     public boolean canHoldAll(List<Object> itemids) {
         List<Object> quantity = new LinkedList<>();
+        Integer intOne = 1;
 
-        if (ServerConstants.JAVA_8) {
-            Integer intOne = 1;
-
-            for (int i = 0; i < itemids.size(); i++) {
-                quantity.add(intOne);
-            }
-        } else {
-            Double doubleOne = 1.0;
-
-            for (int i = 0; i < itemids.size(); i++) {
-                quantity.add(doubleOne);
-            }
+        for (int i = 0; i < itemids.size(); i++) {
+            quantity.add(intOne);
         }
-
         return canHoldAll(itemids, quantity);
     }
 

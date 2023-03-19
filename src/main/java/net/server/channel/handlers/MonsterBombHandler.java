@@ -31,13 +31,17 @@ public final class MonsterBombHandler extends AbstractMaplePacketHandler {
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int oid = slea.readInt();
-        MapleMonster monster = c.getPlayer().getMap().getMonsterByOid(oid);
-        if (!c.getPlayer().isAlive() || monster == null) {
+        if (!c.getPlayer().isAlive()) {
             return;
         }
+
+        c.getPlayer().getMap().getMonsterByOid(oid).ifPresent(m -> handleBomb(c, m));
+    }
+
+    private static void handleBomb(MapleClient c, MapleMonster monster) {
         if (monster.getId() == 8500003 || monster.getId() == 8500004) {
             monster.getMap().broadcastMessage(MaplePacketCreator.killMonster(monster.getObjectId(), 4));
-            c.getPlayer().getMap().removeMapObject(oid);
+            c.getPlayer().getMap().removeMapObject(monster.getObjectId());
         }
     }
 }

@@ -34,7 +34,7 @@ public final class GiveFameHandler extends AbstractMaplePacketHandler {
 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        MapleCharacter target = (MapleCharacter) c.getPlayer().getMap().getMapObject(slea.readInt());
+        MapleCharacter target = (MapleCharacter) c.getPlayer().getMap().getMapObject(slea.readInt()).orElse(null);
         int mode = slea.readByte();
         int famechange = 2 * mode - 1;
         MapleCharacter player = c.getPlayer();

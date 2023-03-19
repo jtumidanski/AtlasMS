@@ -36,6 +36,8 @@ import server.MapleStatEffect;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public final class MagicDamageHandler extends AbstractDealDamageHandler {
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
@@ -81,9 +83,10 @@ public final class MagicDamageHandler extends AbstractDealDamageHandler {
         Skill eaterSkill = SkillFactory.getSkill((chr.getJob().getId() - (chr.getJob().getId() % 10)) * 10000).orElseThrow();// MP Eater, works with right job
         int eaterLevel = chr.getSkillLevel(eaterSkill);
         if (eaterLevel > 0) {
-            for (Integer singleDamage : attack.allDamage.keySet()) {
-                eaterSkill.getEffect(eaterLevel).applyPassive(chr, chr.getMap().getMapObject(singleDamage), 0);
-            }
+            attack.allDamage.keySet().stream()
+                    .map(id -> chr.getMap().getMapObject(id))
+                    .flatMap(Optional::stream)
+                    .forEach(o -> eaterSkill.getEffect(eaterLevel).applyPassive(chr, o, 0));
         }
     }
 }

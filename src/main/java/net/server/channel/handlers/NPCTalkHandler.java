@@ -47,7 +47,7 @@ public final class NPCTalkHandler extends AbstractMaplePacketHandler {
         }
 
         int oid = slea.readInt();
-        MapleMapObject obj = c.getPlayer().getMap().getMapObject(oid);
+        MapleMapObject obj = c.getPlayer().getMap().getMapObject(oid).orElse(null);
         if (obj instanceof MapleNPC) {
             MapleNPC npc = (MapleNPC) obj;
             if (YamlConfig.config.server.USE_DEBUG == true) {

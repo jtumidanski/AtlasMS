@@ -39,7 +39,7 @@ public final class DamageSummonHandler extends AbstractMaplePacketHandler {
         int monsterIdFrom = slea.readInt();
 
         MapleCharacter player = c.getPlayer();
-        MapleMapObject mmo = player.getMap().getMapObject(oid);
+        MapleMapObject mmo = player.getMap().getMapObject(oid).orElse(null);
 
         if (mmo != null && mmo instanceof MapleSummon) {
             MapleSummon summon = (MapleSummon) mmo;

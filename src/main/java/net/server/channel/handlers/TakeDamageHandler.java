@@ -78,7 +78,7 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
             oid = slea.readInt();
 
             try {
-                MapleMapObject mmo = map.getMapObject(oid);
+                MapleMapObject mmo = map.getMapObject(oid).orElse(null);
                 if (mmo instanceof MapleMonster) {
                     attacker = (MapleMonster) mmo;
                     if (attacker.getId() != monsteridfrom) {

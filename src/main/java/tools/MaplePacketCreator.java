@@ -1576,7 +1576,7 @@ public class MaplePacketCreator {
          */
 
         if (life.getParentMobOid() != 0) {
-            MapleMonster parentMob = life.getMap().getMonsterByOid(life.getParentMobOid());
+            MapleMonster parentMob = life.getMap().getMonsterByOid(life.getParentMobOid()).orElse(null);
             if (parentMob != null && parentMob.isAlive()) {
                 mplew.write(effect != 0 ? effect : -3);
                 mplew.writeInt(life.getParentMobOid());

@@ -40,6 +40,7 @@ import tools.exceptions.EmptyMovementException;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Danny (Leifde)
@@ -63,12 +64,12 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
 
         int objectid = slea.readInt();
         short moveid = slea.readShort();
-        MapleMapObject mmo = map.getMapObject(objectid);
-        if (mmo == null || mmo.getType() != MapleMapObjectType.MONSTER) {
+        Optional<MapleMapObject> mmo = map.getMapObject(objectid);
+        if (mmo.isEmpty() || mmo.get().getType() != MapleMapObjectType.MONSTER) {
             return;
         }
 
-        MapleMonster monster = (MapleMonster) mmo;
+        MapleMonster monster = (MapleMonster) mmo.get();
         List<MapleCharacter> banishPlayers = null;
 
         byte pNibbles = slea.readByte();

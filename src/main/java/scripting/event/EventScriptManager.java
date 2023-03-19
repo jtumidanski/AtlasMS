@@ -41,13 +41,13 @@ import java.util.logging.Logger;
 public class EventScriptManager extends AbstractScriptManager {
     private static final String INJECTED_VARIABLE_NAME = "em";
     private static EventEntry fallback;
-    private Map<String, EventEntry> events = new ConcurrentHashMap<>();
+    private final Map<String, EventEntry> events = new ConcurrentHashMap<>();
     private boolean active = false;
 
     public EventScriptManager(Channel channel, String[] scripts) {
         super();
         for (String script : scripts) {
-            if (!script.equals("")) {
+            if (!script.isEmpty()) {
                 events.put(script, initializeEventEntry(script, channel));
             }
         }
@@ -100,12 +100,6 @@ public class EventScriptManager extends AbstractScriptManager {
         EventManager eventManager = new EventManager(channel, iv, script);
         engine.put(INJECTED_VARIABLE_NAME, eventManager);
         return new EventEntry(iv, eventManager);
-    }
-
-    public void reload() {
-        cancel();
-        reloadScripts();
-        init();
     }
 
     public void cancel() {

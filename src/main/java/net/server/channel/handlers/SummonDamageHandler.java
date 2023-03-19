@@ -108,7 +108,7 @@ public final class SummonDamageHandler extends AbstractDealDamageHandler {
         int maxDmg = calcMaxDamage(summonEffect, player, magic);    // thanks Darter (YungMoozi) for reporting unchecked max dmg
         for (SummonAttackEntry attackEntry : allDamage) {
             int damage = attackEntry.getDamage();
-            MapleMonster target = player.getMap().getMonsterByOid(attackEntry.getMonsterOid());
+            MapleMonster target = player.getMap().getMonsterByOid(attackEntry.getMonsterOid()).orElse(null);
             if (target != null) {
                 if (damage > maxDmg) {
                     AutobanFactory.DAMAGE_HACK.alert(c.getPlayer(), "Possible packet editing summon damage exploit.");

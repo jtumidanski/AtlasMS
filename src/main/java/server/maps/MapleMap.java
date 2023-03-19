@@ -1362,9 +1362,9 @@ public class MapleMap {
     public boolean damageMonster(final MapleCharacter chr, final MapleMonster monster, final int damage) {
         if (monster.getId() == 8800000) {
             for (MapleMapObject object : chr.getMap().getMapObjects()) {
-                MapleMonster mons = chr.getMap().getMonsterByOid(object.getObjectId());
-                if (mons != null) {
-                    if (mons.getId() >= 8800003 && mons.getId() <= 8800010) {
+                Optional<MapleMonster> mons = chr.getMap().getMonsterByOid(object.getObjectId());
+                if (mons.isPresent()) {
+                    if (mons.get().getId() >= 8800003 && mons.get().getId() <= 8800010) {
                         return true;
                     }
                 }
@@ -1475,9 +1475,9 @@ public class MapleMap {
                         boolean makeZakReal = true;
                         Collection<MapleMapObject> objects = getMapObjects();
                         for (MapleMapObject object : objects) {
-                            MapleMonster mons = getMonsterByOid(object.getObjectId());
-                            if (mons != null) {
-                                if (mons.getId() >= 8800003 && mons.getId() <= 8800010) {
+                            Optional<MapleMonster> mons = getMonsterByOid(object.getObjectId());
+                            if (mons.isPresent()) {
+                                if (mons.get().getId() >= 8800003 && mons.get().getId() <= 8800010) {
                                     makeZakReal = false;
                                     break;
                                 }
@@ -1487,10 +1487,10 @@ public class MapleMap {
                             MapleMap map = chr.getMap();
 
                             for (MapleMapObject object : objects) {
-                                MapleMonster mons = map.getMonsterByOid(object.getObjectId());
-                                if (mons != null) {
-                                    if (mons.getId() == 8800000) {
-                                        makeMonsterReal(mons);
+                                Optional<MapleMonster> mons = map.getMonsterByOid(object.getObjectId());
+                                if (mons.isPresent()) {
+                                    if (mons.get().getId() == 8800000) {
+                                        makeMonsterReal(mons.get());
                                         break;
                                     }
                                 }
@@ -1613,11 +1613,11 @@ public class MapleMap {
     }
 
     public void destroyReactor(int oid) {
-        final MapleReactor reactor = getReactorByOid(oid);
+        Optional<MapleReactor> reactor = getReactorByOid(oid);
 
-        if (reactor != null) {
-            if (reactor.destroy()) {
-                removeMapObject(reactor);
+        if (reactor.isPresent()) {
+            if (reactor.get().destroy()) {
+                removeMapObject(reactor.get());
             }
         }
     }
@@ -1796,30 +1796,31 @@ public class MapleMap {
         }
     }
 
-    public MapleMapObject getMapObject(int oid) {
+    public Optional<MapleMapObject> getMapObject(int oid) {
         objectRLock.lock();
         try {
-            return mapobjects.get(oid);
+            return Optional.ofNullable(mapobjects.get(oid));
         } finally {
             objectRLock.unlock();
         }
     }
 
-    /**
-     * returns a monster with the given oid, if no such monster exists returns
-     * null
-     *
-     * @param oid
-     * @return
-     */
-    public MapleMonster getMonsterByOid(int oid) {
-        MapleMapObject mmo = getMapObject(oid);
-        return (mmo != null && mmo.getType() == MapleMapObjectType.MONSTER) ? (MapleMonster) mmo : null;
+    public Optional<MapleMonster> getMonsterByOid(int oid) {
+        return getMapObject(oid)
+                .filter(o -> o.getType() == MapleMapObjectType.MONSTER)
+                .map(o -> (MapleMonster) o);
     }
 
-    public MapleReactor getReactorByOid(int oid) {
-        MapleMapObject mmo = getMapObject(oid);
-        return (mmo != null && mmo.getType() == MapleMapObjectType.REACTOR) ? (MapleReactor) mmo : null;
+    public Optional<MapleReactor> getReactorByOid(int oid) {
+        return getMapObject(oid)
+                .filter(o -> o.getType() == MapleMapObjectType.REACTOR)
+                .map(o -> (MapleReactor) o);
+    }
+
+    public Optional<MapleCharacter> getCharacterByOid(int oid) {
+        return getMapObject(oid)
+                .filter(o -> o.getType() == MapleMapObjectType.PLAYER)
+                .map(o -> (MapleCharacter) o);
     }
 
     public MapleReactor getReactorById(int Id) {
@@ -3412,7 +3413,7 @@ public class MapleMap {
     }
 
     public boolean makeDisappearItemFromMap(MapleMapItem mapitem) {
-        if (mapitem == null || mapitem != getMapObject(mapitem.getObjectId())) {
+        if (mapitem == null || mapitem != getMapObject(mapitem.getObjectId()).orElseThrow()) {
             return false;
         }
 
@@ -4178,7 +4179,7 @@ public class MapleMap {
             this.spawnReactor(reactor);
             reactor.setGuardian(pt);
             this.buffMonsters(team, skill);
-            getReactorByOid(reactor.getObjectId()).hitReactor(((MapleCharacter) this.getAllPlayer().get(0)).getClient());
+            getReactorByOid(reactor.getObjectId()).ifPresent(r -> r.hitReactor(((MapleCharacter) this.getAllPlayer().get(0)).getClient()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -4399,7 +4400,7 @@ public class MapleMap {
             reactor.hitLockReactor();
             try {
                 if (reactor.getReactorType() == 100) {
-                    if (reactor.getShouldCollect() == true && mapitem != null && mapitem == getMapObject(mapitem.getObjectId())) {
+                    if (reactor.getShouldCollect() == true && mapitem != null && mapitem == getMapObject(mapitem.getObjectId()).orElseThrow()) {
                         mapitem.lockItem();
                         try {
                             if (mapitem.isPickedUp()) {

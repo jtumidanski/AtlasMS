@@ -210,7 +210,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             if (attack.skill == ChiefBandit.MESO_EXPLOSION) {
                 int delay = 0;
                 for (Integer oned : attack.allDamage.keySet()) {
-                    MapleMapObject mapobject = map.getMapObject(oned);
+                    MapleMapObject mapobject = map.getMapObject(oned).orElse(null);
                     if (mapobject != null && mapobject.getType() == MapleMapObjectType.ITEM) {
                         final MapleMapItem mapitem = (MapleMapItem) mapobject;
                         if (mapitem.getMeso() == 0) { //Maybe it is possible some how?
@@ -243,7 +243,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                 }
             }
             for (Integer oned : attack.allDamage.keySet()) {
-                final MapleMonster monster = map.getMonsterByOid(oned);
+                final MapleMonster monster = map.getMonsterByOid(oned).orElse(null);
                 if (monster != null) {
                     double distance = player.getPosition().distanceSq(monster.getPosition());
                     double distanceToDetect = 200000.0;
@@ -798,7 +798,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             int oid = lea.readInt();
             lea.skip(14);
             List<Integer> allDamageNumbers = new ArrayList<>();
-            MapleMonster monster = chr.getMap().getMonsterByOid(oid);
+            MapleMonster monster = chr.getMap().getMonsterByOid(oid).orElse(null);
 
             if (chr.getBuffEffect(MapleBuffStat.WK_CHARGE) != null) {
                 // Charge, so now we need to check elemental effectiveness

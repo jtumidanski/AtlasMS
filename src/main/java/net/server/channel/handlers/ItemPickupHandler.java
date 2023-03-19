@@ -1,27 +1,5 @@
-/*
- This file is part of the OdinMS Maple Story Server
- Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc>
- Matthias Butz <matze@odinms.de>
- Jan Christian Meyer <vimes@odinms.de>
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU Affero General Public License as
- published by the Free Software Foundation version 3 as published by
- the Free Software Foundation. You may not use, modify or distribute
- this program under any other version of the GNU Affero General Public
- License.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Affero General Public License for more details.
-
- You should have received a copy of the GNU Affero General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package net.server.channel.handlers;
 
-import client.MapleCharacter;
 import client.MapleClient;
 import net.AbstractMaplePacketHandler;
 import server.maps.MapleMapObject;
@@ -30,10 +8,6 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.awt.*;
 
-/**
- * @author Matze
- * @author Ronan
- */
 public final class ItemPickupHandler extends AbstractMaplePacketHandler {
 
     @Override
@@ -42,19 +16,17 @@ public final class ItemPickupHandler extends AbstractMaplePacketHandler {
         slea.readByte();
         slea.readPos(); //cpos
         int oid = slea.readInt();
-        MapleCharacter chr = c.getPlayer();
-        MapleMapObject ob = chr.getMap().getMapObject(oid);
-        if (ob == null) {
-            return;
-        }
+        c.getPlayer().getMap().getMapObject(oid).ifPresent(o -> performPickup(c, o));
+    }
 
-        Point charPos = chr.getPosition();
+    private static void performPickup(MapleClient c, MapleMapObject ob) {
+        Point charPos = c.getPlayer().getPosition();
         Point obPos = ob.getPosition();
         if (Math.abs(charPos.getX() - obPos.getX()) > 800 || Math.abs(charPos.getY() - obPos.getY()) > 600) {
-            FilePrinter.printError(FilePrinter.EXPLOITS + c.getPlayer().getName() + ".txt", c.getPlayer().getName() + " tried to pick up an item too far away. Mapid: " + chr.getMapId() + " Player pos: " + charPos + " Object pos: " + obPos);
+            FilePrinter.printError(FilePrinter.EXPLOITS + c.getPlayer().getName() + ".txt", c.getPlayer().getName() + " tried to pick up an item too far away. Mapid: " + c.getPlayer().getMapId() + " Player pos: " + charPos + " Object pos: " + obPos);
             return;
         }
 
-        chr.pickupItem(ob);
+        c.getPlayer().pickupItem(ob);
     }
 }

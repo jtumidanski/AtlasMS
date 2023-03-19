@@ -562,13 +562,7 @@ public class EventInstanceManager {
 
     public void monsterKilled(MapleCharacter chr, final MapleMonster mob) {
         try {
-            int inc;
-
-            if (ServerConstants.JAVA_8) {
-                inc = (int) invokeScriptFunction("monsterValue", EventInstanceManager.this, mob.getId());
-            } else {
-                inc = ((Double) invokeScriptFunction("monsterValue", EventInstanceManager.this, mob.getId())).intValue();
-            }
+            final int inc = (int) invokeScriptFunction("monsterValue", EventInstanceManager.this, mob.getId());
 
             if (inc != 0) {
                 Integer kc = killCount.get(chr);
@@ -902,14 +896,8 @@ public class EventInstanceManager {
     private List<Integer> convertToIntegerArray(List<Object> list) {
         List<Integer> intList = new ArrayList<>();
 
-        if (ServerConstants.JAVA_8) {
-            for (Object d : list) {
-                intList.add((Integer) d);
-            }
-        } else {
-            for (Object d : list) {
-                intList.add(((Double) d).intValue());
-            }
+        for (Object object : list) {
+            intList.add((Integer) object);
         }
 
         return intList;

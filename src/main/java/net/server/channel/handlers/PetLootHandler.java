@@ -50,7 +50,7 @@ public final class PetLootHandler extends AbstractMaplePacketHandler {
 
         slea.skip(13);
         int oid = slea.readInt();
-        MapleMapObject ob = chr.getMap().getMapObject(oid);
+        MapleMapObject ob = chr.getMap().getMapObject(oid).orElse(null);
         try {
             MapleMapItem mapitem = (MapleMapItem) ob;
             if (mapitem.getMeso() > 0) {

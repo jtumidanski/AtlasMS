@@ -94,8 +94,8 @@ public final class MobDamageMobHandler extends AbstractMaplePacketHandler {
         MapleCharacter chr = c.getPlayer();
 
         MapleMap map = chr.getMap();
-        MapleMonster attacker = map.getMonsterByOid(from);
-        MapleMonster damaged = map.getMonsterByOid(to);
+        MapleMonster attacker = map.getMonsterByOid(from).orElse(null);
+        MapleMonster damaged = map.getMonsterByOid(to).orElse(null);
 
         if (attacker != null && damaged != null) {
             int maxDmg = calcMaxDamage(attacker, damaged, magic);     // thanks Darter (YungMoozi) for reporting unchecked dmg

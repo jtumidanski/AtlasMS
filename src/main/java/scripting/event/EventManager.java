@@ -24,7 +24,6 @@ package scripting.event;
 import client.MapleCharacter;
 import config.YamlConfig;
 import constants.game.GameConstants;
-import constants.net.ServerConstants;
 import net.server.Server;
 import net.server.audit.LockCollector;
 import net.server.audit.locks.MonitoredLockType;
@@ -48,6 +47,7 @@ import javax.script.Invocable;
 import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -158,17 +158,9 @@ public class EventManager {
 
     private List<Integer> convertToIntegerArray(List<Object> list) {
         List<Integer> intList = new ArrayList<>();
-
-        if (ServerConstants.JAVA_8) {
-            for (Object d : list) {
-                intList.add((Integer) d);
-            }
-        } else {
-            for (Object d : list) {
-                intList.add(((Double) d).intValue());
-            }
+        for (Object d : list) {
+            intList.add((Integer) d);
         }
-
         return intList;
     }
 
@@ -757,7 +749,7 @@ public class EventManager {
 
     public List<MaplePartyCharacter> getEligibleParty(MapleParty party) {
         if (party == null) {
-            return (new ArrayList<>());
+            return Collections.emptyList();
         }
         try {
             Object p = iv.invokeFunction("getEligibleParty", party.getPartyMembersOnline());
@@ -771,7 +763,7 @@ public class EventManager {
             ex.printStackTrace();
         }
 
-        return (new ArrayList<>());
+        return Collections.emptyList();
     }
 
     public void clearPQ(EventInstanceManager eim) {
@@ -791,7 +783,7 @@ public class EventManager {
     }
 
     public MapleMonster getMonster(int mid) {
-        return (MapleLifeFactory.getMonster(mid));
+        return MapleLifeFactory.getMonster(mid);
     }
 
     private void exportReadyGuild(Integer guildId) {

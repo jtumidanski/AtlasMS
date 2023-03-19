@@ -97,14 +97,11 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
                 int mobOid = slea.readInt();
                 byte success = slea.readByte();
                 chr.getMap().broadcastMessage(chr, MaplePacketCreator.catchMonster(mobOid, success), false);
-                MapleMonster monster = chr.getMap().getMonsterByOid(mobOid);
+                MapleMonster monster = chr.getMap().getMonsterByOid(mobOid).orElse(null);
                 if (monster != null) {
                     if (!monster.isBoss()) {
                         monster.aggroClearDamages();
                         monster.aggroMonsterDamage(chr, 1);
-
-                        // thanks onechord for pointing out Magnet crashing the caster (issue would actually happen upon failing to catch mob)
-                        // thanks Conrad for noticing Magnet crashing when trying to pull bosses and fixed mobs
                         monster.aggroSwitchController(chr, true);
                     }
                 }

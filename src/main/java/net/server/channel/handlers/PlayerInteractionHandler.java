@@ -275,7 +275,7 @@ public final class PlayerInteractionHandler extends AbstractMaplePacketHandler {
                     }
 
                     int oid = slea.readInt();
-                    MapleMapObject ob = chr.getMap().getMapObject(oid);
+                    MapleMapObject ob = chr.getMap().getMapObject(oid).orElse(null);
                     if (ob instanceof MaplePlayerShop) {
                         MaplePlayerShop shop = (MaplePlayerShop) ob;
                         shop.visitShop(chr);
