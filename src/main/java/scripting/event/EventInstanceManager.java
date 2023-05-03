@@ -25,7 +25,6 @@ import client.MapleCharacter;
 import client.SkillFactory;
 import config.YamlConfig;
 import constants.inventory.ItemConstants;
-import constants.net.ServerConstants;
 import net.server.audit.LockCollector;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.MonitoredReadLock;

@@ -29,6 +29,8 @@ import client.command.Command;
 import net.server.Server;
 import net.server.channel.Channel;
 
+import java.util.Collection;
+
 public class OnlineTwoCommand extends Command {
     {
         setDescription("");
@@ -39,14 +41,18 @@ public class OnlineTwoCommand extends Command {
         MapleCharacter player = c.getPlayer();
         int total = 0;
         for (Channel ch : Server.getInstance().getChannelsFromWorld(player.getWorld())) {
-            int size = ch.getPlayerStorage().getAllCharacters().size();
-            total += size;
-            String s = "(Channel " + ch.getId() + " Online: " + size + ") : ";
-            if (ch.getPlayerStorage().getAllCharacters().size() < 50) {
-                for (MapleCharacter chr : ch.getPlayerStorage().getAllCharacters()) {
-                    s += MapleCharacter.makeMapleReadable(chr.getName()) + ", ";
-                }
-                player.dropMessage(6, s.substring(0, s.length() - 2));
+            Collection<MapleCharacter> characters = ch.getPlayerStorage().getAllCharacters();
+
+            total += characters.size();
+            if (characters.size() < 50) {
+                String message = characters.stream()
+                        .map(MapleCharacter::getName)
+                        .map(MapleCharacter::makeMapleReadable)
+                        .reduce(new StringBuilder(String.format("(Channel %d Online: %d) : ", ch.getId(), characters.size())),
+                                (acc, name) -> acc.append(name).append(", "),
+                                StringBuilder::append)
+                        .toString();
+                player.dropMessage(6, message.substring(0, message.length() - 2));
             }
         }
 

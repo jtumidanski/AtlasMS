@@ -33,16 +33,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -616,26 +608,29 @@ public class MapleSessionCoordinator {
     }
 
     public void printSessionTrace(MapleClient c) {
-        String str = "Opened server sessions:\r\n\r\n";
+        StringBuilder str = new StringBuilder("Opened server sessions:\r\n\r\n");
 
         if (!onlineClients.isEmpty()) {
             List<Entry<Integer, MapleClient>> elist = new ArrayList<>(onlineClients.entrySet());
             elist.sort(Entry.comparingByKey());
 
-            str += ("Current online clients:\r\n");
-            for (Entry<Integer, MapleClient> e : elist) {
-                str += ("  " + e.getKey() + "\r\n");
-            }
+            str.append("Current online clients:\r\n");
+            str.append(elist.stream()
+                    .map(Entry::getKey)
+                    .reduce(new StringBuilder(),
+                            (sb, key) -> sb.append("  ").append(key).append("\r\n"),
+                            StringBuilder::append));
         }
 
         if (!onlineRemoteHwids.isEmpty()) {
             List<String> slist = new ArrayList<>(onlineRemoteHwids);
             Collections.sort(slist);
 
-            str += ("Current online HWIDs:\r\n");
-            for (String s : slist) {
-                str += ("  " + s + "\r\n");
-            }
+            str.append("Current online HWIDs:\r\n");
+            str.append(slist.stream()
+                    .reduce(new StringBuilder(),
+                            (sb, key) -> sb.append("  ").append(key).append("\r\n"),
+                            StringBuilder::append));
         }
 
         if (!loginRemoteHosts.isEmpty()) {
@@ -643,13 +638,14 @@ public class MapleSessionCoordinator {
 
             elist.sort(Entry.comparingByKey());
 
-            str += ("Current login sessions:\r\n");
-            for (Entry<String, Set<IoSession>> e : elist) {
-                str += ("  " + e.getKey() + ", IP: " + e.getValue() + "\r\n");
-            }
+            str.append("Current login sessions:\r\n");
+            str.append(elist.stream()
+                    .reduce(new StringBuilder(),
+                            (sb, e) -> sb.append("  ").append(e.getKey()).append(", IP: ").append(e.getValue()).append("\r\n"),
+                            StringBuilder::append));
         }
 
-        c.getAbstractPlayerInteraction().npcTalk(2140000, str);
+        c.getAbstractPlayerInteraction().npcTalk(2140000, str.toString());
     }
 
     public enum AntiMulticlientResult {

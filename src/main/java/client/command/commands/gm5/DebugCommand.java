@@ -37,6 +37,7 @@ import server.maps.MapleReactor;
 
 import java.awt.*;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class DebugCommand extends Command {
     private final static String[] debugTypes = {"monster", "packet", "portal", "spawnpoint", "pos", "map", "mobsp", "event", "areas", "reactors", "servercoupons", "playercoupons", "timer", "marriage", "buff", ""};
@@ -57,21 +58,11 @@ public class DebugCommand extends Command {
         switch (params[0]) {
             case "type":
             case "help":
-                String msgTypes = "Available #bdebug types#k:\r\n\r\n";
-                for (int i = 0; i < debugTypes.length; i++) {
-                    msgTypes += ("#L" + i + "#" + debugTypes[i] + "#l\r\n");
-                }
-
-                c.getAbstractPlayerInteraction().npcTalk(9201143, msgTypes);
+                debugHelp(c);
                 break;
 
             case "monster":
-                List<MapleMapObject> monsters = player.getMap().getMapObjectsInRange(player.getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
-                for (MapleMapObject monstermo : monsters) {
-                    MapleMonster monster = (MapleMonster) monstermo;
-                    MapleCharacter controller = monster.getController();
-                    player.message("Monster ID: " + monster.getId() + " Aggro target: " + ((controller != null) ? controller.getName() + " Has aggro: " + monster.isControllerHasAggro() + " Knowns aggro: " + monster.isControllerKnowsAboutAggro() : "<none>"));
-                }
+                debugMonster(player);
                 break;
 
             case "packet":
@@ -79,21 +70,11 @@ public class DebugCommand extends Command {
                 break;
 
             case "portal":
-                MaplePortal portal = player.getMap().findClosestPortal(player.getPosition());
-                if (portal != null) {
-                    player.dropMessage(6, "Closest portal: " + portal.getId() + " '" + portal.getName() + "' Type: " + portal.getType() + " --> toMap: " + portal.getTargetMapId() + " scriptname: '" + portal.getScriptName() + "' state: " + (portal.getPortalState() ? 1 : 0) + ".");
-                } else {
-                    player.dropMessage(6, "There is no portal on this map.");
-                }
+                debugPortal(player);
                 break;
 
             case "spawnpoint":
-                SpawnPoint sp = player.getMap().findClosestSpawnpoint(player.getPosition());
-                if (sp != null) {
-                    player.dropMessage(6, "Closest mob spawn point: " + " Position: x " + sp.getPosition().getX() + " y " + sp.getPosition().getY() + " Spawns mobid: '" + sp.getMonsterId() + "' --> canSpawn: " + !sp.getDenySpawn() + " canSpawnRightNow: " + sp.shouldSpawn() + ".");
-                } else {
-                    player.dropMessage(6, "There is no mob spawn point on this map.");
-                }
+                debugSpawnPoint(player);
                 break;
 
             case "pos":
@@ -109,54 +90,28 @@ public class DebugCommand extends Command {
                 break;
 
             case "event":
-                if (player.getEventInstance().isEmpty()) {
-                    player.dropMessage(6, "Player currently not in an event.");
-                } else {
-                    player.dropMessage(6, "Current event name: " + player.getEventInstance().get().getName() + ".");
-                }
+                debugEvent(player);
                 break;
 
             case "areas":
-                player.dropMessage(6, "Configured areas on map " + player.getMapId() + ":");
-
-                byte index = 0;
-                for (Rectangle rect : player.getMap().getAreas()) {
-                    player.dropMessage(6, "Id: " + index + " -> posX: " + rect.getX() + " posY: '" + rect.getY() + "' dX: " + rect.getWidth() + " dY: " + rect.getHeight() + ".");
-                    index++;
-                }
+                debugAreas(player);
                 break;
 
             case "reactors":
-                player.dropMessage(6, "Current reactor states on map " + player.getMapId() + ":");
-
-                for (MapleMapObject mmo : player.getMap().getReactors()) {
-                    MapleReactor mr = (MapleReactor) mmo;
-                    player.dropMessage(6, "Id: " + mr.getId() + " Oid: " + mr.getObjectId() + " name: '" + mr.getName() + "' -> Type: " + mr.getReactorType() + " State: " + mr.getState() + " Event State: " + mr.getEventState() + " Position: x " + mr.getPosition().getX() + " y " + mr.getPosition().getY() + ".");
-                }
+                debugReactors(player);
                 break;
 
             case "servercoupons":
             case "coupons":
-                String s = "Currently active SERVER coupons: ";
-                for (Integer i : Server.getInstance().getActiveCoupons()) {
-                    s += (i + " ");
-                }
-
-                player.dropMessage(6, s);
+                debugCoupons(player);
                 break;
 
             case "playercoupons":
-                String st = "Currently active PLAYER coupons: ";
-                for (Integer i : player.getActiveCoupons()) {
-                    st += (i + " ");
-                }
-
-                player.dropMessage(6, st);
+                debugPlayerCoupons(player);
                 break;
 
             case "timer":
-                TimerManager tMan = TimerManager.getInstance();
-                player.dropMessage(6, "Total Task: " + tMan.getTaskCount() + " Current Task: " + tMan.getQueuedTasks() + " Active Task: " + tMan.getActiveCount() + " Completed Task: " + tMan.getCompletedTaskCount());
+                debugTimer(player);
                 break;
 
             case "marriage":
@@ -167,5 +122,95 @@ public class DebugCommand extends Command {
                 c.getPlayer().debugListAllBuffs();
                 break;
         }
+    }
+
+    private static void debugTimer(MapleCharacter player) {
+        TimerManager tMan = TimerManager.getInstance();
+        player.dropMessage(6, "Total Task: " + tMan.getTaskCount() + " Current Task: " + tMan.getQueuedTasks() + " Active Task: " + tMan.getActiveCount() + " Completed Task: " + tMan.getCompletedTaskCount());
+    }
+
+    private static void debugPlayerCoupons(MapleCharacter player) {
+        String message = player.getActiveCoupons().stream()
+                .reduce(new StringBuilder("Currently active PLAYER coupons: "),
+                        (sb, i) -> sb.append(i).append(" "),
+                        StringBuilder::append)
+                .toString();
+        player.dropMessage(6, message);
+    }
+
+    private static void debugCoupons(MapleCharacter player) {
+        String message = Server.getInstance().getActiveCoupons().stream()
+                .reduce(new StringBuilder("Currently active SERVER coupons: "),
+                        (sb, i) -> sb.append(i).append(" "),
+                        StringBuilder::append)
+                .toString();
+        player.dropMessage(6, message);
+    }
+
+    private static void debugReactors(MapleCharacter player) {
+        player.dropMessage(6, "Current reactor states on map " + player.getMapId() + ":");
+        player.getMap()
+                .getReactors().stream()
+                .map(o -> (MapleReactor) o)
+                .map(DebugCommand::reactorDebugMessage)
+                .forEach(message -> player.dropMessage(6, message));
+    }
+
+    private static String reactorDebugMessage(MapleReactor r) {
+        return String.format("Id: %d Oid: %d name: %s -> Type: %d State: %d Event State: %d Position: x %f y %f.", r.getId(), r.getObjectId(), r.getName(), r.getReactorType(), r.getState(), r.getEventState(), r.getPosition().getX(), r.getPosition().getY());
+    }
+
+    private static void debugAreas(MapleCharacter player) {
+        player.dropMessage(6, "Configured areas on map " + player.getMapId() + ":");
+
+        byte index = 0;
+        for (Rectangle rect : player.getMap().getAreas()) {
+            player.dropMessage(6, "Id: " + index + " -> posX: " + rect.getX() + " posY: '" + rect.getY() + "' dX: " + rect.getWidth() + " dY: " + rect.getHeight() + ".");
+            index++;
+        }
+    }
+
+    private static void debugEvent(MapleCharacter player) {
+        if (player.getEventInstance().isEmpty()) {
+            player.dropMessage(6, "Player currently not in an event.");
+        } else {
+            player.dropMessage(6, "Current event name: " + player.getEventInstance().get().getName() + ".");
+        }
+    }
+
+    private static void debugSpawnPoint(MapleCharacter player) {
+        SpawnPoint sp = player.getMap().findClosestSpawnpoint(player.getPosition());
+        if (sp != null) {
+            player.dropMessage(6, "Closest mob spawn point: " + " Position: x " + sp.getPosition().getX() + " y " + sp.getPosition().getY() + " Spawns mobid: '" + sp.getMonsterId() + "' --> canSpawn: " + !sp.getDenySpawn() + " canSpawnRightNow: " + sp.shouldSpawn() + ".");
+        } else {
+            player.dropMessage(6, "There is no mob spawn point on this map.");
+        }
+    }
+
+    private static void debugPortal(MapleCharacter player) {
+        MaplePortal portal = player.getMap().findClosestPortal(player.getPosition());
+        if (portal != null) {
+            player.dropMessage(6, "Closest portal: " + portal.getId() + " '" + portal.getName() + "' Type: " + portal.getType() + " --> toMap: " + portal.getTargetMapId() + " scriptname: '" + portal.getScriptName() + "' state: " + (portal.getPortalState() ? 1 : 0) + ".");
+        } else {
+            player.dropMessage(6, "There is no portal on this map.");
+        }
+    }
+
+    private static void debugMonster(MapleCharacter player) {
+        player.getMap()
+                .getMapObjectsInRange(player.getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER)).stream()
+                .map(o -> (MapleMonster) o)
+                .map(m -> "Monster ID: " + m.getId() + " Aggro target: " + ((m.getController() != null) ? m.getController().getName() + " Has aggro: " + m.isControllerHasAggro() + " Knowns aggro: " + m.isControllerKnowsAboutAggro() : "<none>"))
+                .forEach(player::message);
+    }
+
+    private static void debugHelp(MapleClient c) {
+        String message = IntStream.range(0, debugTypes.length)
+                .mapToObj(i -> String.format("#L%d#%s#l\r\n", i, debugTypes[i]))
+                .reduce(new StringBuilder("Available #bdebug types#k:\r\n\r\n"),
+                        StringBuilder::append,
+                        StringBuilder::append)
+                .toString();
+        c.getAbstractPlayerInteraction().npcTalk(9201143, message);
     }
 }

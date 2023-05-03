@@ -5,14 +5,11 @@ import constants.game.GameConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.world.OwlSearchResult;
 import tools.MaplePacketCreator;
-import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
 public final class UseOwlOfMinervaHandler extends AbstractMaplePacketHandler {

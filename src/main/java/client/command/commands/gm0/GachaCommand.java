@@ -28,6 +28,11 @@ import client.command.Command;
 import server.ItemInformationProvider;
 import server.gachapon.MapleGachapon;
 
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
+
 public class GachaCommand extends Command {
     {
         setDescription("");
@@ -35,32 +40,31 @@ public class GachaCommand extends Command {
 
     @Override
     public void execute(MapleClient c, String[] params) {
-        MapleGachapon.Gachapon gacha = null;
         String search = c.getPlayer().getLastCommandMessage();
-        String gachaName = "";
         String[] names = {"Henesys", "Ellinia", "Perion", "Kerning City", "Sleepywood", "Mushroom Shrine", "Showa Spa Male", "Showa Spa Female", "New Leaf City", "Nautilus Harbor"};
         int[] ids = {9100100, 9100101, 9100102, 9100103, 9100104, 9100105, 9100106, 9100107, 9100109, 9100117};
-        for (int i = 0; i < names.length; i++) {
-            if (search.equalsIgnoreCase(names[i])) {
-                gachaName = names[i];
-                gacha = MapleGachapon.Gachapon.getByNpcId(ids[i]);
-            }
-        }
-        if (gacha == null) {
+
+        Optional<Integer> index = IntStream.range(0, names.length)
+                .filter(i -> search.equalsIgnoreCase(names[i]))
+                .boxed()
+                .findFirst();
+        Optional<MapleGachapon.Gachapon> gachapon = index.map(i -> ids[i]).map(MapleGachapon.Gachapon::getByNpcId);
+        Optional<String> gachaponName = index.map(i -> names[i]);
+
+        if (gachapon.isEmpty()) {
             c.getPlayer().yellowMessage("Please use @gacha <name> where name corresponds to one of the below:");
-            for (String name : names) {
-                c.getPlayer().yellowMessage(name);
-            }
+            Arrays.stream(names).forEach(n -> c.getPlayer().yellowMessage(n));
             return;
         }
-        String talkStr = "The #b" + gachaName + "#k Gachapon contains the following items.\r\n\r\n";
-        for (int i = 0; i < 2; i++) {
-            for (int id : gacha.getItems(i)) {
-                talkStr += "-" + ItemInformationProvider.getInstance().getName(id) + "\r\n";
-            }
-        }
-        talkStr += "\r\nPlease keep in mind that there are items that are in all gachapons and are not listed here.";
 
-        c.getAbstractPlayerInteraction().npcTalk(9010000, talkStr);
+        String message = IntStream.range(0, 2)
+                .flatMap(i -> Arrays.stream(gachapon.get().getItems(i)))
+                .mapToObj(id -> ItemInformationProvider.getInstance().getName(id))
+                .reduce(new StringBuilder(String.format("The #b%s#k Gachapon contains the following items.\\r\\n\\r\\n", gachaponName)),
+                        (sb, name) -> sb.append("-").append(name).append("\r\n"),
+                        StringBuilder::append)
+                .append("\r\nPlease keep in mind that there are items that are in all gachapons and are not listed here.")
+                .toString();
+        c.getAbstractPlayerInteraction().npcTalk(9010000, message);
     }
 }

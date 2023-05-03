@@ -482,10 +482,9 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                                 amount = 10;
                             }
 
-                            String wishlistItems = "";
+                            StringBuilder wishlistItems = new StringBuilder();
                             for (int i = 0; i < amount; i++) {
-                                String s = slea.readMapleAsciiString();
-                                wishlistItems += (s + "\r\n");
+                                wishlistItems.append(slea.readMapleAsciiString()).append("\r\n");
                             }
 
                             String wlKey;
@@ -496,7 +495,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                             }
 
                             if (eim.getProperty(wlKey).contentEquals("")) {
-                                eim.setProperty(wlKey, wishlistItems);
+                                eim.setProperty(wlKey, wishlistItems.toString());
                             }
                         }
                     }

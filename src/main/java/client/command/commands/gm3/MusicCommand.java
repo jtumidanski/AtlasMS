@@ -35,12 +35,11 @@ public class MusicCommand extends Command {
     }
 
     private static String getSongList() {
-        String songList = "Song:\r\n";
-        for (String s : GameConstants.GAME_SONGS) {
-            songList += ("  " + s + "\r\n");
-        }
-
-        return songList;
+        return GameConstants.GAME_SONGS.stream()
+                .reduce(new StringBuilder("Song:\r\n"),
+                        (sb, s) -> sb.append("  ").append(s).append("\r\n"),
+                        StringBuilder::append)
+                .toString();
     }
 
     @Override
