@@ -32,6 +32,7 @@ import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Ronan
@@ -55,7 +56,7 @@ public final class PlayerMapTransitionHandler extends AbstractMaplePacketHandler
             for (MapleMapObject mo : chr.getMap().getMonsters()) {    // thanks BHB, IxianMace, Jefe for noticing several issues regarding mob statuses (such as freeze)
                 MapleMonster m = (MapleMonster) mo;
                 if (m.getSpawnEffect() == 0 || m.getHp() < m.getMaxHp()) {     // avoid effect-spawning mobs
-                    if (m.getController() == chr) {
+                    if (m.getController().filter(controller -> controller == chr).isPresent()) {
                         c.announce(MaplePacketCreator.stopControllingMonster(m.getObjectId()));
                         m.sendDestroyData(c);
                         m.aggroRemoveController();

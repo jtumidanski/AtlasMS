@@ -27,6 +27,7 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
 import net.server.Server;
+import scripting.event.EventInstanceManager;
 import server.TimerManager;
 import server.life.MapleMonster;
 import server.life.SpawnPoint;
@@ -82,7 +83,7 @@ public class DebugCommand extends Command {
                 break;
 
             case "map":
-                player.dropMessage(6, "Current map id " + player.getMap().getId() + ", event: '" + ((player.getMap().getEventInstance() != null) ? player.getMap().getEventInstance().getName() : "null") + "'; Players: " + player.getMap().getAllPlayers().size() + ", Mobs: " + player.getMap().countMonsters() + ", Reactors: " + player.getMap().countReactors() + ", Items: " + player.getMap().countItems() + ", Objects: " + player.getMap().getMapObjects().size() + ".");
+                player.dropMessage(6, "Current map id " + player.getMap().getId() + ", event: '" + player.getMap().getEventInstance().map(EventInstanceManager::getName).orElse ("null") + "'; Players: " + player.getMap().getAllPlayers().size() + ", Mobs: " + player.getMap().countMonsters() + ", Reactors: " + player.getMap().countReactors() + ", Items: " + player.getMap().countItems() + ", Objects: " + player.getMap().getMapObjects().size() + ".");
                 break;
 
             case "mobsp":
@@ -200,7 +201,7 @@ public class DebugCommand extends Command {
         player.getMap()
                 .getMapObjectsInRange(player.getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER)).stream()
                 .map(o -> (MapleMonster) o)
-                .map(m -> "Monster ID: " + m.getId() + " Aggro target: " + ((m.getController() != null) ? m.getController().getName() + " Has aggro: " + m.isControllerHasAggro() + " Knowns aggro: " + m.isControllerKnowsAboutAggro() : "<none>"))
+                .map(m -> "Monster ID: " + m.getId() + " Aggro target: " + ((m.getController().isPresent()) ? m.getController().get().getName() + " Has aggro: " + m.isControllerHasAggro() + " Knowns aggro: " + m.isControllerKnowsAboutAggro() : "<none>"))
                 .forEach(player::message);
     }
 

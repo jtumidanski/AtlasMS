@@ -46,10 +46,7 @@ public final class MobDamageMobFriendlyHandler extends AbstractMaplePacketHandle
 
             map.killFriendlies(monster);
         } else {
-            EventInstanceManager eim = map.getEventInstance();
-            if (eim != null) {
-                eim.friendlyDamaged(monster);
-            }
+            map.getEventInstance().ifPresent(e -> e.friendlyDamaged(monster));
         }
 
         monster.applyAndGetHpDamage(damage, false);

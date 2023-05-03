@@ -61,7 +61,7 @@ public final class FamilyUseHandler extends AbstractMaplePacketHandler {
                     if (targetMap != null) {
                         if (type == MapleFamilyEntitlement.FAMILY_REUINION) {
                             if (!FieldLimit.CANNOTMIGRATE.check(ownMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit())
-                                    && (targetMap.getForcedReturnId() == 999999999 || targetMap.getId() < 100000000) && targetMap.getEventInstance() == null) {
+                                    && (targetMap.getForcedReturnId() == 999999999 || targetMap.getId() < 100000000) && targetMap.getEventInstance().isEmpty()) {
 
                                 c.getPlayer().changeMap(victim.getMap(), victim.getMap().getPortal(0));
                                 useEntitlement(entry, type);
@@ -71,7 +71,7 @@ public final class FamilyUseHandler extends AbstractMaplePacketHandler {
                             }
                         } else {
                             if (!FieldLimit.CANNOTMIGRATE.check(targetMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(ownMap.getFieldLimit())
-                                    && (ownMap.getForcedReturnId() == 999999999 || ownMap.getId() < 100000000) && ownMap.getEventInstance() == null) {
+                                    && (ownMap.getForcedReturnId() == 999999999 || ownMap.getId() < 100000000) && ownMap.getEventInstance().isEmpty()) {
 
                                 if (MapleInviteCoordinator.hasInvite(InviteType.FAMILY_SUMMON, victim.getId())) {
                                     c.announce(MaplePacketCreator.sendFamilyMessage(74, 0));

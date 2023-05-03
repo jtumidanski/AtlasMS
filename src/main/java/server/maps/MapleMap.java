@@ -292,8 +292,8 @@ public class MapleMap {
         return 0.70 + (0.05 * Math.min(6, numPlayers));
     }
 
-    public EventInstanceManager getEventInstance() {
-        return event;
+    public Optional<EventInstanceManager> getEventInstance() {
+        return Optional.ofNullable(event);
     }
 
     public void setEventInstance(EventInstanceManager eim) {
@@ -1921,9 +1921,7 @@ public class MapleMap {
 
     public void spawnRevives(final MapleMonster monster) {
         monster.setMap(this);
-        if (getEventInstance() != null) {
-            getEventInstance().registerMonster(monster);
-        }
+        getEventInstance().ifPresent(e -> e.registerMonster(monster));
 
         spawnAndAddRangedMapObject(monster, c -> c.announce(MaplePacketCreator.spawnMonster(monster, false)));
 
@@ -2006,9 +2004,7 @@ public class MapleMap {
         monster.changeDifficulty(difficulty, isPq);
 
         monster.setMap(this);
-        if (getEventInstance() != null) {
-            getEventInstance().registerMonster(monster);
-        }
+        getEventInstance().ifPresent(e -> e.registerMonster(monster));
 
         spawnAndAddRangedMapObject(monster, c -> c.announce(MaplePacketCreator.spawnMonster(monster, true)), null);
 
@@ -2063,9 +2059,7 @@ public class MapleMap {
             return;
         }
 
-        if (getEventInstance() != null) {
-            getEventInstance().registerMonster(monster);
-        }
+        getEventInstance().ifPresent(e -> e.registerMonster(monster));
 
         spos.y--;
         monster.setPosition(spos);

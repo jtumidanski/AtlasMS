@@ -2958,8 +2958,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         canWarpCounter++;
         eventChangedMap(999999999);
 
-        EventInstanceManager mapEim = target.getEventInstance();
-        if (mapEim != null) {
+        Optional<EventInstanceManager> mapEim = target.getEventInstance();
+        if (mapEim.isPresent()) {
             Optional<EventInstanceManager> playerEim = this.getEventInstance();
             if (playerEim.isPresent()) {
                 playerEim.get().exitPlayer(this);
@@ -2969,7 +2969,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             }
 
             // thanks Thora for finding an issue with players not being actually warped into the target event map (rather sent to the event starting map)
-            mapEim.registerPlayer(this, false);
+            mapEim.get().registerPlayer(this, false);
         }
 
         MapleMap to = target; // warps directly to the target intead of the target's map id, this allows GMs to patrol players inside instances.
