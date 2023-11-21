@@ -24,8 +24,6 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import net.AbstractMaplePacketHandler;
-import server.life.MapleMonster;
-import server.maps.MapleMap;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class AutoAggroHandler extends AbstractMaplePacketHandler {

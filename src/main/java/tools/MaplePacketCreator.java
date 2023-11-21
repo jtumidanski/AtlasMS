@@ -1542,7 +1542,7 @@ public class MaplePacketCreator {
             mplew.writeShort(SendOpcode.SPAWN_MONSTER.getValue());
         }
         mplew.writeInt(life.getObjectId());
-        mplew.write(life.getController() == null ? 5 : 1);
+        mplew.write(life.getController().isEmpty() ? 5 : 1);
         mplew.writeInt(life.getId());
 
         if (requestController) {

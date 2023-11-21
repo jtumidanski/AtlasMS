@@ -29,6 +29,7 @@ import server.TimerManager;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.TimeZone;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,12 +55,10 @@ public class TrackerReadLock extends ReentrantReadWriteLock.ReadLock implements 
     }
 
     private static String printStackTrace(StackTraceElement[] list) {
-        String s = "";
-        for (int i = 0; i < list.length; i++) {
-            s += ("    " + list[i].toString() + "\r\n");
-        }
-
-        return s;
+        return Arrays.stream(list)
+                .map(StackTraceElement::toString)
+                .reduce(new StringBuilder(), (sb, text) -> sb.append("    ").append(text).append("\r\n"), StringBuilder::append)
+                .toString();
     }
 
     @Override

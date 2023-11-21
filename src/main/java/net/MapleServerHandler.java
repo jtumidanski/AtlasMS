@@ -120,7 +120,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
         }
 
         if (!isLoginServerHandler()) {
-            if (Server.getInstance().getChannel(world, channel) == null) {
+            if (Server.getInstance().getChannel(world, channel).isEmpty()) {
                 MapleSessionCoordinator.getInstance().closeSession(session, true);
                 return;
             }

@@ -88,7 +88,6 @@ public class Pair<E, F> {
     /**
      * Checks to see if two pairs are equal.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

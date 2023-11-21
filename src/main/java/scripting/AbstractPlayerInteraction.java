@@ -21,25 +21,13 @@
  */
 package scripting;
 
-import client.MapleCharacter;
+import client.*;
 import client.MapleCharacter.DelayedQuestUpdate;
-import client.MapleClient;
-import client.MapleJob;
-import client.MapleQuestStatus;
-import client.Skill;
-import client.SkillFactory;
-import client.inventory.Equip;
-import client.inventory.Item;
-import client.inventory.MapleInventory;
-import client.inventory.MapleInventoryProof;
-import client.inventory.MapleInventoryType;
-import client.inventory.MaplePet;
-import client.inventory.ModifyInventory;
+import client.inventory.*;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import config.YamlConfig;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
-import constants.net.ServerConstants;
 import net.server.Server;
 import net.server.guild.MapleGuild;
 import net.server.world.MapleParty;
@@ -52,11 +40,7 @@ import server.MapleMarriage;
 import server.expeditions.MapleExpedition;
 import server.expeditions.MapleExpeditionBossLog;
 import server.expeditions.MapleExpeditionType;
-import server.life.MapleLifeFactory;
-import server.life.MapleMonster;
-import server.life.MapleNPC;
-import server.life.MobSkill;
-import server.life.MobSkillFactory;
+import server.life.*;
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
@@ -67,14 +51,8 @@ import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class AbstractPlayerInteraction {
 
@@ -1117,12 +1095,11 @@ public class AbstractPlayerInteraction {
     }
 
     public String getExpeditionMemberNames(MapleExpeditionType type) {
-        String members = "";
-        MapleExpedition exped = getExpedition(type);
-        for (String memberName : exped.getMembers().values()) {
-            members += "" + memberName + ", ";
-        }
-        return members;
+        return getExpedition(type)
+                .getMembers()
+                .values().stream()
+                .reduce(new StringBuilder(), (sb, name) -> sb.append(name).append(", "), StringBuilder::append)
+                .toString();
     }
 
     public boolean isLeaderExpedition(MapleExpeditionType type) {

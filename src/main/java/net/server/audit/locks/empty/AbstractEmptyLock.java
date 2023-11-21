@@ -12,13 +12,13 @@ public abstract class AbstractEmptyLock {
         dateFormat.setTimeZone(TimeZone.getDefault());
         String df = dateFormat.format(new Date());
 
-        String s = "\r\n" + df + "\r\n";
+        StringBuilder s = new StringBuilder("\r\n" + df + "\r\n");
         for (StackTraceElement stackTraceElement : list) {
-            s += ("    " + stackTraceElement.toString() + "\r\n");
+            s.append("    ").append(stackTraceElement.toString()).append("\r\n");
         }
-        s += "----------------------------\r\n\r\n";
+        s.append("----------------------------\r\n\r\n");
 
-        return s;
+        return s.toString();
     }
 
 }

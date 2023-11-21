@@ -26,10 +26,8 @@ import net.server.audit.locks.MonitoredReentrantLock;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
 import net.server.services.BaseScheduler;
 import net.server.services.BaseService;
-import net.server.services.SchedulerListener;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
