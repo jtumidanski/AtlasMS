@@ -38,6 +38,7 @@ import tools.data.output.MaplePacketLittleEndianWriter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Optional;
 import java.util.Properties;
 
 public class PeCommand extends Command {
@@ -65,11 +66,11 @@ public class PeCommand extends Command {
         mplew.write(HexTool.getByteArrayFromHexString(packet));
         SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new ByteArrayByteStream(mplew.getPacket()));
         short packetId = slea.readShort();
-        final MaplePacketHandler packetHandler = PacketProcessor.getProcessor(0, c.getChannel()).getHandler(packetId);
-        if (packetHandler != null && packetHandler.validateState(c)) {
+        Optional<MaplePacketHandler> packetHandler = PacketProcessor.getProcessor(0, c.getChannel()).getHandler(packetId);
+        if (packetHandler.isPresent() && packetHandler.get().validateState(c)) {
             try {
                 player.yellowMessage("Receiving: " + packet);
-                packetHandler.handlePacket(slea, c);
+                packetHandler.get().handlePacket(slea, c);
             } catch (final Throwable t) {
                 FilePrinter.printError(FilePrinter.PACKET_HANDLER + packetHandler.getClass().getName() + ".txt", t, "Error for " + (c.getPlayer() == null ? "" : "player ; " + c.getPlayer() + " on map ; " + c.getPlayer().getMapId() + " - ") + "account ; " + c.getAccountName() + "\r\n" + slea);
             }

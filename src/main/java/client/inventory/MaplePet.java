@@ -38,6 +38,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Matze
@@ -60,7 +61,7 @@ public class MaplePet extends Item {
         this.pos = new Point(0, 0);
     }
 
-    public static MaplePet loadFromDb(int itemid, short position, int petid) {
+    public static Optional<MaplePet> loadFromDb(int itemid, short position, int petid) {
         try {
             MaplePet ret = new MaplePet(itemid, position, petid);
             Connection con = DatabaseConnection.getConnection();
@@ -77,10 +78,10 @@ public class MaplePet extends Item {
             rs.close();
             ps.close();
             con.close();
-            return ret;
+            return Optional.of(ret);
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
+            return Optional.empty();
         }
     }
 

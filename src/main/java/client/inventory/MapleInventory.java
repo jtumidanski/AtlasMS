@@ -579,7 +579,7 @@ public class MapleInventory implements Iterable<Item> {
                 equip = (Equip) item;
                 isRing = equip.getRingId() > -1;
             }
-            if ((item.getPetId() > -1 ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId()) == cashId) {
+            if ((item.isPet() ? item.getPetId().orElseThrow() : isRing ? equip.getRingId() : item.getCashId()) == cashId) {
                 return Optional.of(item);
             }
         }

@@ -956,11 +956,11 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         return character;
     }
 
-    private static MapleStatEffect getEffectFromBuffSource(Map<MapleBuffStat, MapleBuffStatValueHolder> buffSource) {
+    private static Optional<MapleStatEffect> getEffectFromBuffSource(Map<MapleBuffStat, MapleBuffStatValueHolder> buffSource) {
         try {
-            return buffSource.entrySet().iterator().next().getValue().effect;
+            return Optional.ofNullable(buffSource.entrySet().iterator().next().getValue().effect);
         } catch (Exception e) {
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -1354,10 +1354,10 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
                 ret.getInventory(item.getRight()).addItemFromDB(item.getLeft());
                 Item itemz = item.getLeft();
-                if (itemz.getPetId() > -1) {
-                    MaplePet pet = itemz.getPet();
-                    if (pet != null && pet.isSummoned()) {
-                        ret.addPet(pet);
+                Optional<MaplePet> pet = itemz.getPet();
+                if (pet.isPresent()) {
+                    if (pet.get().isSummoned()) {
+                        ret.addPet(pet.get());
                     }
                     continue;
                 }
@@ -1366,7 +1366,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                 if (mit.equals(MapleInventoryType.EQUIP) || mit.equals(MapleInventoryType.EQUIPPED)) {
                     Equip equip = (Equip) item.getLeft();
                     if (equip.getRingId() > -1) {
-                        MapleRing ring = MapleRing.loadFromDb(equip.getRingId());
+                        MapleRing ring = MapleRing.loadFromDb(equip.getRingId()).orElseThrow();
                         if (item.getRight().equals(MapleInventoryType.EQUIPPED)) {
                             ring.equip();
                         }
@@ -4143,10 +4143,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                                         deletedCoupon = true;
                                     }
                                 } else {
-                                    MaplePet pet = item.getPet();   // thanks Lame for noticing pets not getting despawned after expiration time
-                                    if (pet != null) {
-                                        unequipPet(pet, true);
-                                    }
+                                    // thanks Lame for noticing pets not getting despawned after expiration time
+                                    item.getPet().ifPresent(p -> unequipPet(p, true));
 
                                     if (ItemConstants.isExpirablePet(item.getItemId())) {
                                         client.announce(MaplePacketCreator.itemExpired(item.getItemId()));
@@ -4938,6 +4936,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
             Set<MapleBuffStat> updatedBuffs = buffEffects.values().stream()
                     .map(MapleCharacter::getEffectFromBuffSource)
+                    .flatMap(Optional::stream)
                     .filter(se -> isUpdatingEffect(activeEffects, se))
                     .map(MapleStatEffect::getStatups)
                     .flatMap(Collection::stream)

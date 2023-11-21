@@ -140,7 +140,7 @@ function action(mode, type, selection) {
             status = 1;
             choice = 2;
         } else {
-            if (cm.createAlliance(guildName) == null)
+            if (cm.createAlliance(guildName).isEmpty())
                 cm.sendOk("Please check if you and the other one guild leader in your party are both here on this room right now, and make sure both guilds are currently unregistered on unions. No other guild leaders should be present with you 2 on this process.");
             else {
                 cm.gainMeso(-allianceCost);

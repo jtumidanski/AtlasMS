@@ -190,7 +190,7 @@ public class ThreadTracker {
                     //FilePrinter.printError(FilePrinter.DEADLOCK_STATE, "[" + dateFormat.format(new Date()) + "] Presenting current lock path for lockid " + lockId.name() + ".\r\n" + printLockStatus(lockId) + "\r\n-------------------------------");
                 }
             } else {
-                long tid = Thread.currentThread().getId();
+                long tid = Thread.currentThread().threadId();
 
                 if (lock) {
                     AtomicInteger c = lockCount.get(lockOid);

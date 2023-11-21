@@ -28,16 +28,15 @@ import server.ItemInformationProvider;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Item implements Comparable<Item> {
-
     private static AtomicInteger runningCashId = new AtomicInteger(777000000);  // pets & rings shares cashid values
     protected List<String> log;
     private int id, cashId, sn;
     private short position;
     private short quantity;
-    private int petid = -1;
     private MaplePet pet = null;
     private String owner = "";
     private short flag;
@@ -57,18 +56,14 @@ public class Item implements Comparable<Item> {
         this.position = position;
         this.quantity = quantity;
         if (petid > -1) {   // issue with null "pet" having petid > -1 found thanks to MedicOP
-            this.pet = MaplePet.loadFromDb(id, position, petid);
-            if (this.pet == null) {
-                petid = -1;
-            }
+            this.pet = MaplePet.loadFromDb(id, position, petid).orElse(null);
         }
-        this.petid = petid;
         this.flag = 0;
         this.log = new LinkedList<>();
     }
 
     public Item copy() {
-        Item ret = new Item(id, position, quantity, petid);
+        Item ret = new Item(id, position, quantity, getPetId().orElse(-1));
         ret.flag = flag;
         ret.owner = owner;
         ret.expiration = expiration;
@@ -111,10 +106,7 @@ public class Item implements Comparable<Item> {
     }
 
     public byte getItemType() { // 1: equip, 3: pet, 2: other
-        if (getPetId() > -1) {
-            return 3;
-        }
-        return 2;
+        return getPetId().map(id -> (byte) 3).orElse((byte) 2);
     }
 
     public String getOwner() {
@@ -125,8 +117,16 @@ public class Item implements Comparable<Item> {
         this.owner = owner;
     }
 
-    public int getPetId() {
-        return petid;
+    public Optional<MaplePet> getPet() {
+        return Optional.ofNullable(pet);
+    }
+
+    public Optional<Integer> getPetId() {
+        return getPet().flatMap(Item::getPetId);
+    }
+
+    public boolean isPet() {
+        return getPet().isPresent();
     }
 
     @Override
@@ -183,10 +183,6 @@ public class Item implements Comparable<Item> {
 
     public void setGiftFrom(String giftFrom) {
         this.giftFrom = giftFrom;
-    }
-
-    public MaplePet getPet() {
-        return pet;
     }
 
     public boolean isUntradeable() {

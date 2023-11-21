@@ -455,7 +455,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public Optional<MapleAlliance> createAlliance(String name) {
-        return getParty().map(party -> MapleAlliance.createAlliance(party, name));
+        return getParty().flatMap(party -> MapleAlliance.createAlliance(party, name));
     }
 
     public int getAllianceCapacity() {

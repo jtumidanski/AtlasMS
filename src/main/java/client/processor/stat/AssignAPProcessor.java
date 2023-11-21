@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author RonanLana - synchronization of AP transaction modules
@@ -406,7 +407,8 @@ public class AssignAPProcessor {
                         return;
                     }
 
-                    gainStatByType(MapleStat.getBy5ByteEncoding(type), statGain, tempVal, statUpdate);
+                    MapleStat stat = MapleStat.getBy5ByteEncoding(type).orElseThrow();
+                    gainStatByType(stat, statGain, tempVal, statUpdate);
                 }
 
                 chr.assignStrDexIntLuk(statGain[0], statGain[1], statGain[3], statGain[2]);

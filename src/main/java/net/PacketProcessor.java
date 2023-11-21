@@ -194,6 +194,7 @@ import net.server.handlers.login.ViewAllCharSelectedWithPicHandler;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class PacketProcessor {
 
@@ -219,15 +220,11 @@ public final class PacketProcessor {
         return processor;
     }
 
-    public MaplePacketHandler getHandler(short packetId) {
+    public Optional<MaplePacketHandler> getHandler(short packetId) {
         if (packetId > handlers.length) {
-            return null;
+            return Optional.empty();
         }
-        MaplePacketHandler handler = handlers[packetId];
-        if (handler != null) {
-            return handler;
-        }
-        return null;
+        return Optional.ofNullable(handlers[packetId]);
     }
 
     public void registerHandler(RecvOpcode code, MaplePacketHandler handler) {

@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicLong;
@@ -186,11 +187,11 @@ public class MapleServerHandler extends IoHandlerAdapter {
         if (YamlConfig.config.server.USE_DEBUG_SHOW_RCVD_PACKET && !ignoredDebugRecvPackets.contains(packetId)) {
             System.out.println("Received packet id " + packetId);
         }
-        final MaplePacketHandler packetHandler = processor.getHandler(packetId);
-        if (packetHandler != null && packetHandler.validateState(client)) {
+        Optional<MaplePacketHandler> packetHandler = processor.getHandler(packetId);
+        if (packetHandler.isPresent() && packetHandler.get().validateState(client)) {
             try {
                 MapleLogger.logRecv(client, packetId, message);
-                packetHandler.handlePacket(slea, client);
+                packetHandler.get().handlePacket(slea, client);
             } catch (final Throwable t) {
                 FilePrinter.printError(FilePrinter.PACKET_HANDLER + packetHandler.getClass().getName() + ".txt", t, "Error for " + (client.getPlayer() == null ? "" : "player ; " + client.getPlayer() + " on map ; " + client.getPlayer().getMapId() + " - ") + "account ; " + client.getAccountName() + "\r\n" + slea);
                 //client.announce(MaplePacketCreator.enableActions());//bugs sometimes

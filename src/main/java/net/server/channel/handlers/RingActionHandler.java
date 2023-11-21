@@ -287,14 +287,14 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
         Item ringObj = ii.getEquipById(marriageRingId);
         Equip ringEqp = (Equip) ringObj;
         ringEqp.setRingId(rings.getLeft());
-        player.addMarriageRing(MapleRing.loadFromDb(rings.getLeft()));
+        player.addMarriageRing(MapleRing.loadFromDb(rings.getLeft()).orElseThrow());
         MapleInventoryManipulator.addFromDrop(player.getClient(), ringEqp, false, -1);
         player.broadcastMarriageMessage();
 
         ringObj = ii.getEquipById(marriageRingId);
         ringEqp = (Equip) ringObj;
         ringEqp.setRingId(rings.getRight());
-        partner.addMarriageRing(MapleRing.loadFromDb(rings.getRight()));
+        partner.addMarriageRing(MapleRing.loadFromDb(rings.getRight()).orElseThrow());
         MapleInventoryManipulator.addFromDrop(partner.getClient(), ringEqp, false, -1);
         partner.broadcastMarriageMessage();
     }

@@ -192,7 +192,7 @@ public class CashShop {
                 isRing = false;
             }
 
-            if ((item.getPetId() > -1 ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId()) == cashId) {
+            if ((item.isPet() ? item.getPetId().orElseThrow() : isRing ? equip.getRingId() : item.getCashId()) == cashId) {
                 return Optional.of(item);
             }
         }

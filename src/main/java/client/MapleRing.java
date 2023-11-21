@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * @author Danny
@@ -49,7 +50,7 @@ public class MapleRing implements Comparable<MapleRing> {
         this.partnerName = partnername;
     }
 
-    public static MapleRing loadFromDb(int ringId) {
+    public static Optional<MapleRing> loadFromDb(int ringId) {
         try {
             MapleRing ret = null;
             Connection con = DatabaseConnection.getConnection();
@@ -62,10 +63,10 @@ public class MapleRing implements Comparable<MapleRing> {
             rs.close();
             ps.close();
             con.close();
-            return ret;
+            return Optional.ofNullable(ret);
         } catch (SQLException ex) {
             ex.printStackTrace();
-            return null;
+            return Optional.empty();
         }
     }
 

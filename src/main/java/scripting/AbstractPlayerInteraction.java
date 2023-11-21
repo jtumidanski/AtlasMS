@@ -53,6 +53,7 @@ import tools.Pair;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AbstractPlayerInteraction {
 
@@ -561,7 +562,6 @@ public class AbstractPlayerInteraction {
 
     public Item gainItem(int id, short quantity, boolean randomStats, boolean showMessage, long expires, MaplePet from) {
         Item item = null;
-        MaplePet evolved;
         int petId = -1;
 
         if (quantity >= 0) {
@@ -569,7 +569,7 @@ public class AbstractPlayerInteraction {
                 petId = MaplePet.createPet(id);
 
                 if (from != null) {
-                    evolved = MaplePet.loadFromDb(id, (short) 0, petId);
+                    MaplePet evolved = MaplePet.loadFromDb(id, (short) 0, petId).orElseThrow();
 
                     Point pos = getPlayer().getPosition();
                     pos.y -= 12;
@@ -1112,19 +1112,13 @@ public class AbstractPlayerInteraction {
     }
 
     public List<MaplePet> getDriedPets() {
-        List<MaplePet> list = new LinkedList<>();
-
         long curTime = System.currentTimeMillis();
-        for (Item it : getPlayer().getInventory(MapleInventoryType.CASH).list()) {
-            if (ItemConstants.isPet(it.getItemId()) && it.getExpiration() < curTime) {
-                MaplePet pet = it.getPet();
-                if (pet != null) {
-                    list.add(pet);
-                }
-            }
-        }
-
-        return list;
+        return getPlayer().getInventory(MapleInventoryType.CASH).list().stream()
+                .filter(i -> ItemConstants.isPet(i.getItemId()))
+                .filter(i -> i.getExpiration() < curTime)
+                .map(Item::getPet)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
     }
 
     public List<Item> getUnclaimedMarriageGifts() {

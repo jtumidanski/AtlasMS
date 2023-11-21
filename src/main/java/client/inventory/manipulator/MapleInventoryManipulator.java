@@ -173,7 +173,7 @@ public class MapleInventoryManipulator {
     }
 
     public static boolean addFromDrop(MapleClient c, Item item, boolean show) {
-        return addFromDrop(c, item, show, item.getPetId());
+        return addFromDrop(c, item, show, item.getPetId().orElse(-1));
     }
 
     public static boolean addFromDrop(MapleClient c, Item item, boolean show, int petId) {
@@ -421,24 +421,22 @@ public class MapleInventoryManipulator {
 
             announceModifyInventory(c, item, fromDrop, allowZero);
         } else {
-            int petid = item.getPetId();
-            if (petid > -1) { // thanks Vcoc for finding a d/c issue with equipped pets and pets remaining on DB here
-                int petIdx = chr.getPetIndex(petid);
-                if (petIdx > -1) {
-                    chr.getPet(petIdx).ifPresent(p -> chr.unequipPet(p, true));
-                }
-
+            if (!item.isPet()) {
                 inv.removeItem(slot, quantity, allowZero);
                 if (type != MapleInventoryType.CANHOLD) {
                     announceModifyInventory(c, item, fromDrop, allowZero);
                 }
+                return;
+            }
 
-                // thanks Robin Schulz for noticing pet issues when moving pets out of inventory
-            } else {
-                inv.removeItem(slot, quantity, allowZero);
-                if (type != MapleInventoryType.CANHOLD) {
-                    announceModifyInventory(c, item, fromDrop, allowZero);
-                }
+            int petIdx = chr.getPetIndex(item.getPetId().orElseThrow());
+            if (petIdx > -1) {
+                chr.getPet(petIdx).ifPresent(p -> chr.unequipPet(p, true));
+            }
+
+            inv.removeItem(slot, quantity, allowZero);
+            if (type != MapleInventoryType.CANHOLD) {
+                announceModifyInventory(c, item, fromDrop, allowZero);
             }
         }
     }
@@ -713,9 +711,8 @@ public class MapleInventoryManipulator {
             return;
         }
 
-        int petid = source.getPetId();
-        if (petid > -1) {
-            int petIdx = chr.getPetIndex(petid);
+        if (source.isPet()) {
+            int petIdx = chr.getPetIndex(source.getPetId().orElseThrow());
             if (petIdx > -1) {
                 chr.getPet(petIdx).ifPresent(p -> chr.unequipPet(p, true));
             }

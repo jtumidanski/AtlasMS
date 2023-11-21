@@ -58,18 +58,14 @@ public enum MapleStat {
                 .findFirst();
     }
 
-    public static MapleStat getBy5ByteEncoding(int encoded) {
-        switch (encoded) {
-            case 64:
-                return STR;
-            case 128:
-                return DEX;
-            case 256:
-                return INT;
-            case 512:
-                return LUK;
-        }
-        return null;
+    public static Optional<MapleStat> getBy5ByteEncoding(int encoded) {
+        return switch (encoded) {
+            case 64 -> Optional.of(STR);
+            case 128 -> Optional.of(DEX);
+            case 256 -> Optional.of(INT);
+            case 512 -> Optional.of(LUK);
+            default -> Optional.empty();
+        };
     }
 
     public static MapleStat getByString(String type) {

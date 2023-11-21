@@ -382,7 +382,6 @@ public class MaplePacketCreator {
     protected static void addItemInfo(final MaplePacketLittleEndianWriter mplew, Item item, boolean zeroPosition) {
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
         boolean isCash = ii.isCash(item.getItemId());
-        boolean isPet = item.getPetId() > -1;
         boolean isRing = false;
         Equip equip = null;
         short pos = item.getPosition();
@@ -405,11 +404,11 @@ public class MaplePacketCreator {
         mplew.writeInt(item.getItemId());
         mplew.writeBool(isCash);
         if (isCash) {
-            mplew.writeLong(isPet ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId());
+            mplew.writeLong(item.isPet() ? item.getPetId().orElse(-1) : isRing ? equip.getRingId() : item.getCashId());
         }
         addExpirationTime(mplew, item.getExpiration());
-        if (isPet) {
-            MaplePet pet = item.getPet();
+        if (item.isPet()) {
+            MaplePet pet = item.getPet().orElseThrow();
             mplew.writeAsciiString(StringUtil.getRightPaddedStr(pet.getName(), '\0', 13));
             mplew.write(pet.getLevel());
             mplew.writeShort(pet.getCloseness());
@@ -7868,7 +7867,7 @@ public class MaplePacketCreator {
             equip = (Equip) item;
             isRing = equip.getRingId() > -1;
         }
-        mplew.writeLong(item.getPetId() > -1 ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId());
+        mplew.writeLong(item.isPet() ? item.getPetId().orElseThrow() : isRing ? equip.getRingId() : item.getCashId());
         if (!isGift) {
             mplew.writeInt(accountId);
             mplew.writeInt(0);

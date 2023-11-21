@@ -28,9 +28,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Conrad
@@ -137,21 +139,21 @@ public class MapleExpeditionBossLog {
             return true;
         }
 
-        BossLogEntry boss = BossLogEntry.getBossEntryByName(exped.getType().name());
-        if (boss == null) {
+        Optional<BossLogEntry> boss = BossLogEntry.getBossEntryByName(exped.getType().name());
+        if (boss.isEmpty()) {
             return true;
         }
 
-        if (channel < boss.minChannel || channel > boss.maxChannel) {
+        if (channel < boss.get().minChannel || channel > boss.get().maxChannel) {
             return false;
         }
 
-        if (countPlayerEntries(cid, boss) >= boss.entries) {
+        if (countPlayerEntries(cid, boss.get()) >= boss.get().entries) {
             return false;
         }
 
         if (log) {
-            insertPlayerEntry(cid, boss);
+            insertPlayerEntry(cid, boss.get());
         }
         return true;
     }
@@ -193,15 +195,10 @@ public class MapleExpeditionBossLog {
             return resetTimestamps;
         }
 
-        private static BossLogEntry getBossEntryByName(String name) {
-            for (BossLogEntry b : BossLogEntry.values()) {
-                if (name.contentEquals(b.name())) {
-                    return b;
-                }
-            }
-
-            return null;
+        private static Optional<BossLogEntry> getBossEntryByName(String name) {
+            return Arrays.stream(BossLogEntry.values())
+                    .filter(ble -> name.contentEquals(ble.name()))
+                    .findFirst();
         }
-
     }
 }

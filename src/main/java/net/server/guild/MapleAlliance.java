@@ -110,21 +110,21 @@ public class MapleAlliance {
         return mcl;
     }
 
-    public static MapleAlliance createAlliance(MapleParty party, String name) {
+    public static Optional<MapleAlliance> createAlliance(MapleParty party, String name) {
         List<MapleCharacter> guildMasters = getPartyGuildMasters(party);
         if (guildMasters.size() != 2) {
-            return null;
+            return Optional.empty();
         }
 
         List<Integer> guilds = new LinkedList<>();
         for (MapleCharacter mc : guildMasters) guilds.add(mc.getGuildId());
-        MapleAlliance alliance = MapleAlliance.createAllianceOnDb(guilds, name);
-        if (alliance != null) {
-            alliance.setCapacity(guilds.size());
+        Optional<MapleAlliance> alliance = MapleAlliance.createAllianceOnDb(guilds, name);
+        if (alliance.isPresent()) {
+            alliance.get().setCapacity(guilds.size());
             for (Integer g : guilds)
-                alliance.addGuild(g);
+                alliance.get().addGuild(g);
 
-            int id = alliance.getId();
+            int id = alliance.get().getId();
             try {
                 for (int i = 0; i < guildMasters.size(); i++) {
                     Server.getInstance().setGuildAllianceId(guilds.get(i), id);
@@ -139,21 +139,21 @@ public class MapleAlliance {
                     chr.saveGuildStatus();
                 }
 
-                Server.getInstance().addAlliance(id, alliance);
+                Server.getInstance().addAlliance(id, alliance.get());
 
                 int worldid = guildMasters.get(0).getWorld();
-                Server.getInstance().allianceMessage(id, MaplePacketCreator.updateAllianceInfo(alliance, worldid), -1, -1);
-                Server.getInstance().allianceMessage(id, MaplePacketCreator.getGuildAlliances(alliance, worldid), -1, -1);  // thanks Vcoc for noticing guilds from other alliances being visually stacked here due to this not being updated
+                Server.getInstance().allianceMessage(id, MaplePacketCreator.updateAllianceInfo(alliance.get(), worldid), -1, -1);
+                Server.getInstance().allianceMessage(id, MaplePacketCreator.getGuildAlliances(alliance.get(), worldid), -1, -1);  // thanks Vcoc for noticing guilds from other alliances being visually stacked here due to this not being updated
             } catch (Exception e) {
                 e.printStackTrace();
-                return null;
+                return Optional.empty();
             }
         }
 
         return alliance;
     }
 
-    public static MapleAlliance createAllianceOnDb(List<Integer> guilds, String name) {
+    public static Optional<MapleAlliance> createAllianceOnDb(List<Integer> guilds, String name) {
         // will create an alliance, where the first guild listed is the leader and the alliance name MUST BE already checked for unicity.
 
         int id;
@@ -182,15 +182,15 @@ public class MapleAlliance {
             con.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
+            return Optional.empty();
         }
 
-        return (new MapleAlliance(name, id));
+        return Optional.of(new MapleAlliance(name, id));
     }
 
-    public static MapleAlliance loadAlliance(int id) {
+    public static Optional<MapleAlliance> loadAlliance(int id) {
         if (id <= 0) {
-            return null;
+            return Optional.empty();
         }
         MapleAlliance alliance = new MapleAlliance(null, -1);
         try {
@@ -202,7 +202,7 @@ public class MapleAlliance {
                 rs.close();
                 ps.close();
                 con.close();
-                return null;
+                return Optional.empty();
             }
             alliance.allianceId = id;
             alliance.capacity = rs.getInt("capacity");
@@ -234,7 +234,7 @@ public class MapleAlliance {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return alliance;
+        return Optional.of(alliance);
     }
 
     public static void disbandAlliance(int allianceId) {

@@ -240,7 +240,7 @@ public enum ItemFactory {
                     ps.setInt(6, item.getPosition());
                     ps.setInt(7, item.getQuantity());
                     ps.setString(8, item.getOwner());
-                    ps.setInt(9, item.getPetId());      // thanks Daddy Egg for alerting a case of unique petid constraint breach getting raised
+                    ps.setInt(9, item.getPetId().orElse(-1));      // thanks Daddy Egg for alerting a case of unique petid constraint breach getting raised
                     ps.setInt(10, item.getFlag());
                     ps.setLong(11, item.getExpiration());
                     ps.setString(12, item.getGiftFrom());
@@ -420,7 +420,7 @@ public enum ItemFactory {
                     ps.setInt(6, item.getPosition());
                     ps.setInt(7, item.getQuantity());
                     ps.setString(8, item.getOwner());
-                    ps.setInt(9, item.getPetId());
+                    ps.setInt(9, item.getPetId().orElse(-1));
                     ps.setInt(10, item.getFlag());
                     ps.setLong(11, item.getExpiration());
                     ps.setString(12, item.getGiftFrom());

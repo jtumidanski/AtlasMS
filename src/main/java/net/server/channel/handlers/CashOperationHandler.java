@@ -283,8 +283,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                         if (item.get() instanceof Equip) {
                             Equip equip = (Equip) item.get();
                             if (equip.getRingId() >= 0) {
-                                MapleRing ring = MapleRing.loadFromDb(equip.getRingId());
-                                chr.addPlayerRing(ring);
+                                MapleRing.loadFromDb(equip.getRingId()).ifPresent(chr::addPlayerRing);
                             }
                         }
                     }
@@ -308,7 +307,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                     if (item.isEmpty()) {
                         c.enableCSActions();
                         return;
-                    } else if (c.getPlayer().getPetIndex(item.get().getPetId()) > -1) {
+                    } else if (c.getPlayer().getPetIndex(item.get().getPetId().orElse(-1)) > -1) {
                         chr.announce(MaplePacketCreator.serverNotice(1, "You cannot put the pet you currently equip into the Cash Shop inventory."));
                         c.enableCSActions();
                         return;
@@ -347,7 +346,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                                 c.announce(MaplePacketCreator.showBoughtCashItem(eqp, c.getAccID()));
                                 cs.gainCash(toCharge, itemRing, chr.getWorld());
                                 cs.gift(partner.getId(), chr.getName(), text, eqp.getSN(), rings.getRight());
-                                chr.addCrushRing(MapleRing.loadFromDb(rings.getLeft()));
+                                chr.addCrushRing(MapleRing.loadFromDb(rings.getLeft()).orElseThrow());
                                 chr.sendNote(partner.getName(), text, (byte) 1);
                                 partner.showNote();
                             }
@@ -409,7 +408,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                                 c.announce(MaplePacketCreator.showBoughtCashRing(eqp, partner.getName(), c.getAccID()));
                                 cs.gainCash(payment, -itemRing.getPrice());
                                 cs.gift(partner.getId(), chr.getName(), text, eqp.getSN(), rings.getRight());
-                                chr.addFriendshipRing(MapleRing.loadFromDb(rings.getLeft()));
+                                chr.addFriendshipRing(MapleRing.loadFromDb(rings.getLeft()).orElseThrow());
                                 chr.sendNote(partner.getName(), text, (byte) 1);
                                 partner.showNote();
                             }

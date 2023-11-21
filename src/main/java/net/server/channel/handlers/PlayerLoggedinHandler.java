@@ -372,7 +372,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                         if (allianceId > 0) {
                             Optional<MapleAlliance> newAlliance = server.getAlliance(allianceId);
                             if (newAlliance.isEmpty()) {
-                                newAlliance = Optional.ofNullable(MapleAlliance.loadAlliance(allianceId));
+                                newAlliance = MapleAlliance.loadAlliance(allianceId);
                                 if (newAlliance.isPresent()) {
                                     server.addAlliance(allianceId, newAlliance.get());
                                 } else {
