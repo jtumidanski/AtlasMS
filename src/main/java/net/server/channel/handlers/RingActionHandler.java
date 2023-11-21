@@ -193,7 +193,7 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
         } else {
             partner.dropMessage(5, chr.getName() + " has decided to break up the marriage.");
 
-            //partner.announce(Wedding.OnMarriageResult((byte) 0)); ok, how to gracefully unengage someone without the need to cc?
+            //partner.announce(Wedding.OnMarriageResult((byte) 0)); ok, how to gracefully break engagement with someone without the need to cc?
             partner.announce(Wedding.OnNotifyWeddingPartnerTransfer(0, 0));
             resetRingId(partner);
             partner.setPartnerId(-1);
@@ -201,7 +201,8 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
             partner.addMarriageRing(null);
         }
 
-        chr.dropMessage(5, "You have successfully break the marriage with " + MapleCharacter.getNameById(partnerid) + ".");
+        String spouse = MapleCharacter.getNameById(partnerid).orElseThrow();
+        chr.dropMessage(5, "You have successfully ended the marriage with " + spouse + ".");
 
         //chr.announce(Wedding.OnMarriageResult((byte) 0));
         chr.announce(Wedding.OnNotifyWeddingPartnerTransfer(0, 0));
@@ -245,7 +246,8 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
         if (chr.haveItem(marriageitemid)) {
             MapleInventoryManipulator.removeById(chr.getClient(), MapleInventoryType.ETC, marriageitemid, (short) 1, false, false);
         }
-        chr.dropMessage(5, "You have successfully break the engagement with " + MapleCharacter.getNameById(partnerid) + ".");
+        String spouse = MapleCharacter.getNameById(partnerid).orElseThrow();
+        chr.dropMessage(5, "You have successfully ended the engagement with " + spouse + ".");
 
         //chr.announce(Wedding.OnMarriageResult((byte) 0));
         chr.announce(Wedding.OnNotifyWeddingPartnerTransfer(0, 0));
@@ -390,9 +392,10 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                     return;
                 }
 
-                String groom = c.getPlayer().getName(), bride = MapleCharacter.getNameById(c.getPlayer().getPartnerId());
+                String groom = c.getPlayer().getName();
+                String bride = MapleCharacter.getNameById(c.getPlayer().getPartnerId()).orElseThrow();
                 int guest = MapleCharacter.getIdByName(name);
-                if (groom == null || bride == null || groom.equals("") || bride.equals("") || guest <= 0) {
+                if (bride.isEmpty() || guest <= 0) {
                     c.getPlayer().dropMessage(5, "Unable to find " + name + "!");
                     return;
                 }
@@ -453,7 +456,9 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                     Pair<Integer, Integer> coupleId = c.getWorldServer().getWeddingCoupleForGuest(c.getPlayer().getId(), invitationid == 4031407);
                     if (coupleId != null) {
                         int groomId = coupleId.getLeft(), brideId = coupleId.getRight();
-                        c.announce(Wedding.sendWeddingInvitation(MapleCharacter.getNameById(groomId), MapleCharacter.getNameById(brideId)));
+                        String spouse1 = MapleCharacter.getNameById(groomId).orElseThrow();
+                        String spouse2 = MapleCharacter.getNameById(brideId).orElseThrow();
+                        c.announce(Wedding.sendWeddingInvitation(spouse1, spouse2));
                     }
                 }
 

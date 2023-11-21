@@ -29,31 +29,33 @@ import server.maps.MapleHiredMerchant;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 /**
  * @author kevintjuh93 - :3
  */
 public class RemoteStoreHandler extends AbstractMaplePacketHandler {
-    private static MapleHiredMerchant getMerchant(MapleClient c) {
+    private static Optional<MapleHiredMerchant> getMerchant(MapleClient c) {
         if (c.getPlayer().hasMerchant()) {
             return c.getWorldServer().getHiredMerchant(c.getPlayer().getId());
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getPlayer();
-        MapleHiredMerchant hm = getMerchant(c);
-        if (hm != null && hm.isOwner(chr)) {
-            if (hm.getChannel() == chr.getClient().getChannel()) {
-                hm.visitShop(chr);
-            } else {
-                c.announce(MaplePacketCreator.remoteChannelChange((byte) (hm.getChannel() - 1)));
-            }
-            return;
-        } else {
+        Optional<MapleHiredMerchant> hm = getMerchant(c);
+        if (hm.isEmpty() || !hm.get().isOwner(chr)) {
             chr.dropMessage(1, "You don't have a Merchant open.");
+            c.announce(MaplePacketCreator.enableActions());
+            return;
         }
-        c.announce(MaplePacketCreator.enableActions());
+
+        if (hm.get().getChannel() == chr.getClient().getChannel()) {
+            hm.get().visitShop(chr);
+        } else {
+            c.announce(MaplePacketCreator.remoteChannelChange((byte) (hm.get().getChannel() - 1)));
+        }
     }
 }

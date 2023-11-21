@@ -1184,7 +1184,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         return -1;
     }
 
-    public static String getNameById(int id) {
+    public static Optional<String> getNameById(int id) {
         try {
             String name;
             Connection con = DatabaseConnection.getConnection();
@@ -1194,18 +1194,18 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                     if (!rs.next()) {
                         rs.close();
                         ps.close();
-                        return null;
+                        return Optional.empty();
                     }
                     name = rs.getString("name");
                 }
             } finally {
                 con.close();
             }
-            return name;
+            return Optional.of(name);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 
     private static String getTimeRemaining(long timeLeft) {

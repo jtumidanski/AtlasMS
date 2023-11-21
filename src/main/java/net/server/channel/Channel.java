@@ -754,8 +754,10 @@ public final class Channel {
         Pair<Integer, Integer> coupleId = wserv.getMarriageQueuedCouple(ret);
         Pair<Boolean, Set<Integer>> typeGuests = wserv.removeMarriageQueued(ret);
 
-        Pair<String, String> couple = new Pair<>(MapleCharacter.getNameById(coupleId.getLeft()), MapleCharacter.getNameById(coupleId.getRight()));
-        wserv.dropMessage(6, couple.getLeft() + " and " + couple.getRight() + "'s wedding is going to be started at " + (cathedral ? "Cathedral" : "Chapel") + " on Channel " + channel + ".");
+        String spouse1 = MapleCharacter.getNameById(coupleId.getLeft()).orElseThrow();
+        String spouse2 = MapleCharacter.getNameById(coupleId.getRight()).orElseThrow();
+
+        wserv.dropMessage(6, spouse1 + " and " + spouse2 + "'s wedding is going to be started at " + (cathedral ? "Cathedral" : "Chapel") + " on Channel " + channel + ".");
 
         return new Pair<>(typeGuests.getLeft(), new Pair<>(ret, typeGuests.getRight()));
     }

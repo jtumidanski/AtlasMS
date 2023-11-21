@@ -47,6 +47,8 @@ import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author RonanLana - synchronization of Fredrick modules and operation results
@@ -138,13 +140,11 @@ public class FredrickProcessor {
     }
 
     private static void removeFredrickReminders(List<Pair<Integer, Integer>> expiredCids) {
-        List<String> expiredCnames = new LinkedList<>();
-        for (Pair<Integer, Integer> id : expiredCids) {
-            String name = MapleCharacter.getNameById(id.getLeft());
-            if (name != null) {
-                expiredCnames.add(name);
-            }
-        }
+        List<String> expiredCnames = expiredCids.stream()
+                .map(Pair::getLeft)
+                .map(MapleCharacter::getNameById)
+                .flatMap(Optional::stream)
+                .toList();
 
         try {
             Connection con = DatabaseConnection.getConnection();

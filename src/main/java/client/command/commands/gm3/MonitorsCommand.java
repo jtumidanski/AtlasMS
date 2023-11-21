@@ -35,9 +35,6 @@ public class MonitorsCommand extends Command {
 
     @Override
     public void execute(MapleClient c, String[] params) {
-        MapleCharacter player = c.getPlayer();
-        for (Integer cid : MapleLogger.monitored) {
-            player.yellowMessage(MapleCharacter.getNameById(cid) + " is being monitored.");
-        }
+        MapleLogger.monitored.stream().map(MapleCharacter::getNameById).forEach(n -> c.getPlayer().yellowMessage(String.format("%s is being monitored.", n)));
     }
 }

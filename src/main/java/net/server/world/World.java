@@ -1652,10 +1652,10 @@ public class World {
         }
     }
 
-    public MaplePlayerShop getPlayerShop(int ownerid) {
+    public Optional<MaplePlayerShop> getPlayerShop(int ownerid) {
         activePlayerShopsLock.lock();
         try {
-            return activePlayerShops.get(ownerid);
+            return Optional.ofNullable(activePlayerShops.get(ownerid));
         } finally {
             activePlayerShopsLock.unlock();
         }
@@ -1723,14 +1723,14 @@ public class World {
         }
     }
 
-    public MapleHiredMerchant getHiredMerchant(int ownerId) {
+    public Optional<MapleHiredMerchant> getHiredMerchant(int ownerId) {
         activeMerchantsLock.lock();
         try {
             if (activeMerchants.containsKey(ownerId)) {
-                return activeMerchants.get(ownerId).getLeft();
+                return Optional.ofNullable(activeMerchants.get(ownerId).getLeft());
             }
 
-            return null;
+            return Optional.empty();
         } finally {
             activeMerchantsLock.unlock();
         }

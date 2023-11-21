@@ -7697,8 +7697,9 @@ public class MaplePacketCreator {
             mplew.writeShort((marriageRing.isPresent()) ? 3 : 1);
             mplew.writeInt(marriageRing.map(MapleRing::getItemId).orElse(1112803));
             mplew.writeInt(marriageRing.map(MapleRing::getItemId).orElse(1112803));
-            mplew.writeAsciiString(StringUtil.getRightPaddedStr(chr.getGender() == 0 ? chr.getName() : MapleCharacter.getNameById(chr.getPartnerId()), '\0', 13));
-            mplew.writeAsciiString(StringUtil.getRightPaddedStr(chr.getGender() == 0 ? MapleCharacter.getNameById(chr.getPartnerId()) : chr.getName(), '\0', 13));
+            String spouse = MapleCharacter.getNameById(chr.getPartnerId()).orElseThrow();
+            mplew.writeAsciiString(StringUtil.getRightPaddedStr(chr.getGender() == 0 ? chr.getName() : spouse, '\0', 13));
+            mplew.writeAsciiString(StringUtil.getRightPaddedStr(chr.getGender() == 0 ? spouse : chr.getName(), '\0', 13));
         } else {
             mplew.writeShort(0);
         }
