@@ -140,7 +140,7 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
                 return;
             }
 
-            if (chr.getMGC().getAllianceRank() > 2 || !alliance.get().getGuilds().contains(chr.getGuildId())) {
+            if (chr.getMGC().orElseThrow().getAllianceRank() > 2 || !alliance.get().getGuilds().contains(chr.getGuildId())) {
                 client.announce(MaplePacketCreator.enableActions());
                 return;
             }
@@ -194,8 +194,8 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
                 Server.getInstance().addGuildtoAlliance(alliance.get().getId(), guildid);
                 Server.getInstance().resetAllianceGuildPlayersRank(guildid);
 
-                chr.getMGC().setAllianceRank(2);
-                Server.getInstance().getGuild(chr.getGuildId()).ifPresent(g -> g.getMGC(chr.getId()).setAllianceRank(2));
+                chr.getMGC().orElseThrow().setAllianceRank(2);
+                Server.getInstance().getGuild(chr.getGuildId()).ifPresent(g -> g.getMGC(chr.getId()).orElseThrow().setAllianceRank(2));
 
                 chr.saveGuildStatus();
 
@@ -272,10 +272,10 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        oldLeader.get().getMGC().setAllianceRank(2);
+        oldLeader.get().getMGC().orElseThrow().setAllianceRank(2);
         oldLeader.get().saveGuildStatus();
 
-        newLeader.getMGC().setAllianceRank(1);
+        newLeader.getMGC().orElseThrow().setAllianceRank(1);
         newLeader.saveGuildStatus();
 
         Server.getInstance().allianceMessage(alliance.getId(), MaplePacketCreator.getGuildAlliances(alliance, newLeader.getWorld()), -1, -1);
@@ -288,7 +288,7 @@ public final class AllianceOperationHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        chr.getMGC().setAllianceRank(newRank);
+        chr.getMGC().orElseThrow().setAllianceRank(newRank);
         chr.saveGuildStatus();
 
         Server.getInstance().allianceMessage(alliance.getId(), MaplePacketCreator.getGuildAlliances(alliance, chr.getWorld()), -1, -1);

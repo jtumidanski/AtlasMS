@@ -1257,10 +1257,10 @@ public class Server {
             }
 
             if (mc != null) {
-                MapleGuildCharacter mgc = g.getMGC(mc.getId());
-                if (mgc != null) {
-                    mc.setMGC(mgc);
-                    mgc.setCharacter(mc);
+                Optional<MapleGuildCharacter> mgc = g.getMGC(mc.getId());
+                if (mgc.isPresent()) {
+                    mc.setMGC(mgc.get());
+                    mgc.get().setCharacter(mc);
                 } else {
                     FilePrinter.printError(FilePrinter.GUILD_CHAR_ERROR, "Could not find " + mc.getName() + " when loading guild " + id + ".");
                 }
@@ -1360,15 +1360,6 @@ public class Server {
         return buffStorage;
     }
 
-    public void deleteGuildCharacter(MapleCharacter mc) {
-        setGuildMemberOnline(mc, false, (byte) -1);
-        if (mc.getMGC().getGuildRank() > 1) {
-            leaveGuild(mc.getMGC());
-        } else {
-            disbandGuild(mc.getMGC().getGuildId());
-        }
-    }
-
     public void deleteGuildCharacter(MapleGuildCharacter mgc) {
         if (mgc.getCharacter() != null) {
             setGuildMemberOnline(mgc.getCharacter(), false, (byte) -1);
@@ -1388,7 +1379,7 @@ public class Server {
         for (MapleCharacter mc : world.getPlayerStorage().getAllCharacters()) {
             if (mc.getGuildId() > 0) {
                 setGuildMemberOnline(mc, true, world.getId());
-                memberLevelJobUpdate(mc.getMGC());
+                mc.getMGC().ifPresent(this::memberLevelJobUpdate);
             }
         }
         world.reloadGuildSummary();

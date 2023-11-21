@@ -793,11 +793,11 @@ public class World {
             bDifferentGuild = true;
         } else {
             bDifferentGuild = guildId != character.getGuildId();
-            character.getMGC().setGuildId(guildId);
-            character.getMGC().setGuildRank(rank);
+            character.getMGC().ifPresent(mgc -> mgc.setGuildId(guildId));
+            character.getMGC().ifPresent(mgc -> mgc.setGuildRank(rank));
 
             if (bDifferentGuild) {
-                character.getMGC().setAllianceRank(5);
+                character.getMGC().ifPresent(mgc -> mgc.setAllianceRank(5));
             }
 
             character.saveGuildStatus();

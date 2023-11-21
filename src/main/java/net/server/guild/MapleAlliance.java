@@ -132,9 +132,9 @@ public class MapleAlliance {
 
                     MapleCharacter chr = guildMasters.get(i);
                     int rank = (i == 0) ? 1 : 2;
-                    chr.getMGC().setAllianceRank(rank);
+                    chr.getMGC().ifPresent(mgc -> mgc.setAllianceRank(rank));
                     Server.getInstance().getGuild(chr.getGuildId())
-                            .map(g -> g.getMGC(chr.getId()))
+                            .flatMap(g -> g.getMGC(chr.getId()))
                             .ifPresent(mgc -> mgc.setAllianceRank(rank));
                     chr.saveGuildStatus();
                 }
@@ -328,21 +328,32 @@ public class MapleAlliance {
         Optional<MapleGuild> mg = Server.getInstance().getGuildByName(targetGuildName);
         if (mg.isEmpty()) {
             c.getPlayer().dropMessage(5, "The entered guild does not exist.");
+            return;
+        }
+
+        sendInvitation(c, allianceId, mg.get());
+    }
+
+    private static void sendInvitation(MapleClient c, int allianceId, MapleGuild mg) {
+        if (mg.getAllianceId() > 0) {
+            c.getPlayer().dropMessage(5, "The entered guild is already registered on a guild alliance.");
+            return;
+        }
+
+        Optional<MapleGuildCharacter> victim = mg.getMGC(mg.getLeaderId());
+        if (victim.isEmpty()) {
+            c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently not online.");
+            return;
+        }
+
+        sendInvitation(c, allianceId, victim.get().getCharacter());
+    }
+
+    private static void sendInvitation(MapleClient c, int allianceId, MapleCharacter victim) {
+        if (MapleInviteCoordinator.createInvite(InviteType.ALLIANCE, c.getPlayer(), allianceId, victim.getId())) {
+            victim.announce(MaplePacketCreator.allianceInvite(allianceId, c.getPlayer()));
         } else {
-            if (mg.get().getAllianceId() > 0) {
-                c.getPlayer().dropMessage(5, "The entered guild is already registered on a guild alliance.");
-            } else {
-                MapleCharacter victim = mg.get().getMGC(mg.get().getLeaderId()).getCharacter();
-                if (victim == null) {
-                    c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently not online.");
-                } else {
-                    if (MapleInviteCoordinator.createInvite(InviteType.ALLIANCE, c.getPlayer(), allianceId, victim.getId())) {
-                        victim.announce(MaplePacketCreator.allianceInvite(allianceId, c.getPlayer()));
-                    } else {
-                        c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently managing another invite.");
-                    }
-                }
-            }
+            c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently managing another invite.");
         }
     }
 
@@ -507,6 +518,7 @@ public class MapleAlliance {
                     .map(id -> Server.getInstance().getGuild(id))
                     .flatMap(Optional::stream)
                     .map(g -> g.getMGC(g.getLeaderId()))
+                    .flatMap(Optional::stream)
                     .filter(mgc -> mgc.getAllianceRank() == 1)
                     .findFirst();
         }

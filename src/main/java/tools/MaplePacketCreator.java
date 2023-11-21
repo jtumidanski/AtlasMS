@@ -4501,7 +4501,7 @@ public class MaplePacketCreator {
             mplew.write(0);
             return mplew.getPacket();
         }
-        Optional<MapleGuild> g = chr.getClient().getWorldServer().getGuild(chr.getMGC());
+        Optional<MapleGuild> g = chr.getMGC().flatMap(mgc -> chr.getClient().getWorldServer().getGuild(mgc));
         if (g.isEmpty()) { //failed to read from DB - don't show a guild
             mplew.write(0);
             return mplew.getPacket();

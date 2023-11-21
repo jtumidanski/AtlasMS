@@ -967,7 +967,6 @@ public class MapleClient {
             int messengerId = player.getMessenger().map(MapleMessenger::getId).orElse(0);
             //final int fid = player.getFamilyId();
             final BuddyList bl = player.getBuddylist();
-            final MapleGuildCharacter chrg = player.getMGC();
 
             player.cancelMagicDoor();
 
@@ -1011,9 +1010,8 @@ public class MapleClient {
                 FilePrinter.printError(FilePrinter.ACCOUNT_STUCK, e);
             } finally {
                 if (!this.serverTransition) {
-                    if (chrg != null) {
-                        chrg.setCharacter(null);
-                    }
+                    player.getMGC().ifPresent(mgc -> mgc.setCharacter(null));
+
                     wserv.removePlayer(player);
                     //getChannelServer().removePlayer(player); already being done
 

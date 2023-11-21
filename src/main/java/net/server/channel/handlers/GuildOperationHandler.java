@@ -129,14 +129,14 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                     return;
                 }
 
-                mc.getMGC().setGuildId(gid); // joins the guild
-                mc.getMGC().setGuildRank(5); // start at lowest rank
-                mc.getMGC().setAllianceRank(5);
+                mc.getMGC().orElseThrow().setGuildId(gid); // joins the guild
+                mc.getMGC().orElseThrow().setGuildRank(5); // start at lowest rank
+                mc.getMGC().orElseThrow().setAllianceRank(5);
 
-                int s = Server.getInstance().addGuildMember(mc.getMGC(), mc);
+                int s = Server.getInstance().addGuildMember(mc.getMGC().orElseThrow(), mc);
                 if (s == 0) {
                     mc.dropMessage(1, "The guild you are trying to join is already full.");
-                    mc.getMGC().setGuildId(0);
+                    mc.getMGC().ifPresent(mgc -> mgc.setGuildId(0));
                     return;
                 }
 
@@ -162,15 +162,15 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                 allianceId = mc.getGuild().map(MapleGuild::getAllianceId).orElse(0);
 
                 c.announce(MaplePacketCreator.updateGP(mc.getGuildId(), 0));
-                Server.getInstance().leaveGuild(mc.getMGC());
+                Server.getInstance().leaveGuild(mc.getMGC().orElseThrow());
 
                 c.announce(MaplePacketCreator.showGuildInfo(null));
                 if (allianceId > 0) {
                     Server.getInstance().getAlliance(allianceId).ifPresent(a -> a.updateAlliancePackets(mc));
                 }
 
-                mc.getMGC().setGuildId(0);
-                mc.getMGC().setGuildRank(5);
+                mc.getMGC().orElseThrow().setGuildId(0);
+                mc.getMGC().orElseThrow().setGuildRank(5);
                 mc.saveGuildStatus();
                 mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildNameChanged(mc.getId(), ""));
                 break;
@@ -184,7 +184,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                     return;
                 }
 
-                Server.getInstance().expelMember(mc.getMGC(), name, cid);
+                Server.getInstance().expelMember(mc.getMGC().orElseThrow(), name, cid);
                 if (allianceId > 0) {
                     Server.getInstance().getAlliance(allianceId).ifPresent(a -> a.updateAlliancePackets(mc));
                 }

@@ -755,15 +755,10 @@ public class MapleGuild {
         }
     }
 
-    public MapleGuildCharacter getMGC(int cid) {
+    public Optional<MapleGuildCharacter> getMGC(int cid) {
         membersLock.lock();
         try {
-            for (MapleGuildCharacter mgc : members) {
-                if (mgc.getId() == cid) {
-                    return mgc;
-                }
-            }
-            return null;
+            return members.stream().filter(mgc -> mgc.getId() == cid).findFirst();
         } finally {
             membersLock.unlock();
         }
@@ -823,11 +818,7 @@ public class MapleGuild {
         try {
             membersLock.lock();
             try {
-                for (MapleGuildCharacter mgc : members) {
-                    if (mgc.isOnline()) {
-                        mgc.setAllianceRank(5);
-                    }
-                }
+                members.stream().filter(MapleGuildCharacter::isOnline).forEach(mgc -> mgc.setAllianceRank(5));
             } finally {
                 membersLock.unlock();
             }

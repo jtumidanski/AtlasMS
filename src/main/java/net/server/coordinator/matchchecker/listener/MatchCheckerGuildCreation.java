@@ -118,7 +118,7 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                 }
                 leader.gainMeso(-YamlConfig.config.server.CREATE_GUILD_COST, true, false, true);
 
-                leader.getMGC().setGuildId(gid);
+                leader.getMGC().ifPresent(mgc -> mgc.setGuildId(gid));
                 Optional<MapleGuild> guild = Server.getInstance().getGuild(leader.getGuildId(), leader.getWorld(), leader);  // initialize guild structure
                 Server.getInstance().changeRank(gid, leader.getId(), 1);
 
@@ -127,25 +127,25 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
 
                 for (MapleCharacter chr : matchPlayers) {
                     boolean cofounder = chr.getPartyId().orElse(-1).equals(partyId.get());
+                    chr.getMGC().ifPresent(mgc -> {
+                        mgc.setGuildId(gid);
+                        mgc.setGuildRank(cofounder ? 2 : 5);
+                        mgc.setAllianceRank(5);
 
-                    MapleGuildCharacter mgc = chr.getMGC();
-                    mgc.setGuildId(gid);
-                    mgc.setGuildRank(cofounder ? 2 : 5);
-                    mgc.setAllianceRank(5);
+                        Server.getInstance().addGuildMember(mgc, chr);
 
-                    Server.getInstance().addGuildMember(mgc, chr);
+                        if (chr.isLoggedinWorld()) {
+                            chr.announce(MaplePacketCreator.showGuildInfo(chr));
 
-                    if (chr.isLoggedinWorld()) {
-                        chr.announce(MaplePacketCreator.showGuildInfo(chr));
-
-                        if (cofounder) {
-                            chr.dropMessage(1, "You have successfully cofounded a Guild.");
-                        } else {
-                            chr.dropMessage(1, "You have successfully joined the new Guild.");
+                            if (cofounder) {
+                                chr.dropMessage(1, "You have successfully cofounded a Guild.");
+                            } else {
+                                chr.dropMessage(1, "You have successfully joined the new Guild.");
+                            }
                         }
-                    }
 
-                    chr.saveGuildStatus(); // update database
+                        chr.saveGuildStatus(); // update database
+                    });
                 }
 
                 guild.ifPresent(MapleGuild::broadcastNameChanged);

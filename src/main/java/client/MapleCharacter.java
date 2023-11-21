@@ -6234,8 +6234,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         this.messengerposition = position;
     }
 
-    public MapleGuildCharacter getMGC() {
-        return mgc;
+    public Optional<MapleGuildCharacter> getMGC() {
+        return Optional.ofNullable(mgc);
     }
 
     public void setMGC(MapleGuildCharacter mgc) {
@@ -6377,6 +6377,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     public boolean hasParty() {
         return getParty().isPresent();
     }
+
     public Optional<MapleParty> getParty() {
         prtLock.lock();
         try {
@@ -6933,23 +6934,21 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     }
 
     private void guildUpdate() {
-        mgc.setLevel(level);
-        mgc.setJobId(job.getId());
+        getMGC().ifPresent(mgc -> {
+            mgc.setLevel(level);
+            mgc.setJobId(job.getId());
 
-        if (this.guildid < 1) {
-            return;
-        }
+            if (this.guildid < 1) {
+                return;
+            }
 
-        try {
             Server.getInstance().memberLevelJobUpdate(this.mgc);
             //Server.getInstance().getGuild(guildid, world, mgc).gainGP(40);
             getGuild()
                     .map(MapleGuild::getAllianceId)
                     .filter(id -> id > 0)
                     .ifPresent(id -> Server.getInstance().allianceMessage(id, MaplePacketCreator.updateAllianceJobLevel(this), getId(), -1));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public void handleEnergyChargeGain() { // to get here energychargelevel has to be > 0
