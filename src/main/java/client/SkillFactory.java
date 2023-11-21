@@ -391,24 +391,4 @@ public class SkillFactory {
         }
         return new Skill(id, animationTime, element, effects, action);
     }
-
-    public static String getSkillName(int skillId) {
-        MapleData data = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("wzpath") + "/" + "String.wz")).getData("Skill.img");
-        StringBuilder skill = new StringBuilder();
-        skill.append(skillId);
-        if (skill.length() == 4) {
-            skill.delete(0, 4);
-            skill.append("000").append(skillId);
-        }
-
-        if (data.getChildByPath(skill.toString()) != null) {
-            for (MapleData skillData : data.getChildByPath(skill.toString()).getChildren()) {
-                if (skillData.getName().equals("name")) {
-                    return MapleDataTool.getString(skillData, null);
-                }
-            }
-        }
-
-        return null;
-    }
 }

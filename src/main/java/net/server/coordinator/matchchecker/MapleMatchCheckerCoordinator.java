@@ -106,12 +106,12 @@ public class MapleMatchCheckerCoordinator {
         }
     }
 
-    public MatchCheckerType getMatchConfirmationType(int cid) {
+    public Optional<MatchCheckerType> getMatchConfirmationType(int cid) {
         MapleMatchCheckingElement mmce = matchEntries.get(cid);
         if (mmce != null) {
-            return mmce.matchType;
+            return Optional.of(mmce.matchType);
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 

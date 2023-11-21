@@ -264,8 +264,7 @@ public final class GuildOperationHandler extends AbstractMaplePacketHandler {
                     if (result && wserv.getMatchCheckerCoordinator().isMatchConfirmationActive(mc.getId())) {
                         wserv.getPlayerStorage()
                                 .getCharacterById(leaderid)
-                                .map(MapleCharacter::getPartyId)
-                                .filter(id -> id != -1)
+                                .flatMap(MapleCharacter::getPartyId)
                                 .ifPresent(id -> MapleParty.joinParty(mc, id, true));
                     }
 

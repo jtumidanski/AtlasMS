@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
+import java.util.function.Supplier;
 
 /**
  * @author Ronan - credits to Eric for showing the New Year opcodes and handler layout
@@ -118,30 +119,31 @@ public class NewYearCardRecord {
         }
     }
 
-    public static NewYearCardRecord loadNewYearCard(int cardid) {
-        NewYearCardRecord nyc = Server.getInstance().getNewYearCard(cardid);
-        if (nyc != null) {
-            return nyc;
-        }
+    private static Supplier<Optional<NewYearCardRecord>> loadNewYearCardFromDatabase(int cardId) {
+        return () -> {
+            try (Connection con = DatabaseConnection.getConnection()) {
+                try (PreparedStatement ps = con.prepareStatement("SELECT * FROM newyear WHERE id = ?")) {
+                    ps.setInt(1, cardId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            NewYearCardRecord newyear = new NewYearCardRecord(rs.getInt("senderid"), rs.getString("sendername"), rs.getInt("receiverid"), rs.getString("receivername"), rs.getString("message"));
+                            newyear.setExtraNewYearCardRecord(rs.getInt("id"), rs.getBoolean("senderdiscard"), rs.getBoolean("receiverdiscard"), rs.getBoolean("received"), rs.getLong("timesent"), rs.getLong("timereceived"));
 
-        try (Connection con = DatabaseConnection.getConnection()) {
-            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM newyear WHERE id = ?")) {
-                ps.setInt(1, cardid);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        NewYearCardRecord newyear = new NewYearCardRecord(rs.getInt("senderid"), rs.getString("sendername"), rs.getInt("receiverid"), rs.getString("receivername"), rs.getString("message"));
-                        newyear.setExtraNewYearCardRecord(rs.getInt("id"), rs.getBoolean("senderdiscard"), rs.getBoolean("receiverdiscard"), rs.getBoolean("received"), rs.getLong("timesent"), rs.getLong("timereceived"));
-
-                        Server.getInstance().setNewYearCard(newyear);
-                        return newyear;
+                            Server.getInstance().setNewYearCard(newyear);
+                            return Optional.of(newyear);
+                        }
                     }
                 }
+            } catch (SQLException sqle) {
+                sqle.printStackTrace();
             }
-        } catch (SQLException sqle) {
-            sqle.printStackTrace();
-        }
 
-        return null;
+            return Optional.empty();
+        };
+    }
+
+    public static Optional<NewYearCardRecord> loadNewYearCard(int cardId) {
+        return Server.getInstance().getNewYearCard(cardId).or(loadNewYearCardFromDatabase(cardId));
     }
 
     public static void loadPlayerNewYearCards(MapleCharacter chr) {

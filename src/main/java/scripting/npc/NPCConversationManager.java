@@ -311,7 +311,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void setSkin(int color) {
-        getPlayer().setSkinColor(MapleSkinColor.getById(color));
+        getPlayer().setSkinColor(MapleSkinColor.getById(color).orElseThrow());
         getPlayer().updateSingleStat(MapleStat.SKIN, color);
         getPlayer().equipChanged();
     }
@@ -417,7 +417,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     public void doGachapon() {
         int[] maps = {100000000, 101000000, 102000000, 103000000, 105040300, 800000000, 809000101, 809000201, 600000000, 120000000};
 
-        MapleGachaponItem item = MapleGachapon.getInstance().process(npc);
+        MapleGachaponItem item = MapleGachapon.getInstance().process(npc).orElseThrow();
 
         Item itemGained = gainItem(item.getId(), (short) (item.getId() / 10000 == 200 ? 100 : 1), true, true); // For normal potions, make it give 100.
 

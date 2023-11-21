@@ -1223,7 +1223,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             ret.id = rs.getInt("id");
             ret.name = rs.getString("name");
             ret.gender = rs.getInt("gender");
-            ret.skinColor = MapleSkinColor.getById(rs.getInt("skincolor"));
+            ret.skinColor = MapleSkinColor.getById(rs.getInt("skincolor")).orElseThrow();
             ret.face = rs.getInt("face");
             ret.hair = rs.getInt("hair");
 
@@ -1300,7 +1300,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             ret.meso.set(rs.getInt("meso"));
             ret.merchantmeso = rs.getInt("MerchantMesos");
             ret.setGMLevel(rs.getInt("gm"));
-            ret.skinColor = MapleSkinColor.getById(rs.getInt("skincolor"));
+            ret.skinColor = MapleSkinColor.getById(rs.getInt("skincolor")).orElseThrow();
             ret.gender = rs.getInt("gender");
             ret.job = MapleJob.getById(rs.getInt("job")).orElseThrow();
             ret.finishedDojoTutorial = rs.getInt("finishedDojoTutorial") == 1;
@@ -3069,7 +3069,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         MapleMap map = this.getMap();
         List<MapleMapItem> partyItems = null;
 
-        int partyId = exPartyMembers != null ? -1 : this.getPartyId();
+        int partyId = exPartyMembers != null ? -1 : this.getPartyId().orElse(-1);
         for (WeakReference<MapleMap> mapRef : mapids) {
             MapleMap mapObj = mapRef.get();
 
@@ -6375,6 +6375,9 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         }
     }
 
+    public boolean hasParty() {
+        return getParty().isPresent();
+    }
     public Optional<MapleParty> getParty() {
         prtLock.lock();
         try {
@@ -6400,10 +6403,13 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         }
     }
 
-    public int getPartyId() {
+    public Optional<Integer> getPartyId() {
         prtLock.lock();
         try {
-            return (party != null ? party.getId() : -1);
+            if (party == null) {
+                return Optional.empty();
+            }
+            return Optional.of(party.getId());
         } finally {
             prtLock.unlock();
         }

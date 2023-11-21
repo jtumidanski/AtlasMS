@@ -45,7 +45,7 @@ public class MapleMapItem extends AbstractMapleMapObject {
         this.item = item;
         this.dropper = dropper;
         this.character_ownerid = owner.getId();
-        this.party_ownerid = owner.getPartyId();
+        this.party_ownerid = owner.getPartyId().orElse(-1);
         this.partyDrop = this.party_ownerid != -1;
         this.ownerClient = owner.getClient();
         this.meso = 0;
@@ -58,7 +58,7 @@ public class MapleMapItem extends AbstractMapleMapObject {
         this.item = item;
         this.dropper = dropper;
         this.character_ownerid = owner.getId();
-        this.party_ownerid = owner.getPartyId();
+        this.party_ownerid = owner.getPartyId().orElse(-1);
         this.partyDrop = this.party_ownerid != -1;
         this.ownerClient = owner.getClient();
         this.meso = 0;
@@ -72,7 +72,7 @@ public class MapleMapItem extends AbstractMapleMapObject {
         this.item = null;
         this.dropper = dropper;
         this.character_ownerid = owner.getId();
-        this.party_ownerid = owner.getPartyId();
+        this.party_ownerid = owner.getPartyId().orElse(-1);
         this.partyDrop = this.party_ownerid != -1;
         this.ownerClient = owner.getClient();
         this.meso = meso;
@@ -120,7 +120,7 @@ public class MapleMapItem extends AbstractMapleMapObject {
     }
 
     public final boolean hasClientsideOwnership(MapleCharacter player) {
-        return this.character_ownerid == player.getId() || this.party_ownerid == player.getPartyId() || hasExpiredOwnershipTime();
+        return this.character_ownerid == player.getId() || this.party_ownerid == player.getPartyId().orElse(-1) || hasExpiredOwnershipTime();
     }
 
     public final boolean isFFADrop() {
@@ -140,14 +140,14 @@ public class MapleMapItem extends AbstractMapleMapObject {
             if (chr.getId() == character_ownerid) {
                 return true;
             } else if (chr.isPartyMember(character_ownerid)) {
-                party_ownerid = chr.getPartyId();
+                party_ownerid = chr.getPartyId().orElse(-1);
                 return true;
             }
         } else {
-            if (chr.getPartyId() == party_ownerid) {
+            if (chr.getPartyId().orElse(-1) == party_ownerid) {
                 return true;
             } else if (chr.getId() == character_ownerid) {
-                party_ownerid = chr.getPartyId();
+                party_ownerid = chr.getPartyId().orElse(-1);
                 return true;
             }
         }

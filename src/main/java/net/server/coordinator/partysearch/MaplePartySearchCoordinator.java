@@ -253,12 +253,12 @@ public class MaplePartySearchCoordinator {
             return false;
         }
 
-        int partyid = leader.getPartyId();
-        if (partyid < 0) {
+        Optional<Integer> partyId = leader.getPartyId();
+        if (partyId.isEmpty()) {
             return false;
         }
 
-        if (MapleInviteCoordinator.createInvite(InviteType.PARTY, leader, partyid, chr.getId())) {
+        if (MapleInviteCoordinator.createInvite(InviteType.PARTY, leader, partyId.get(), chr.getId())) {
             chr.disablePartySearchInvite(leader.getId());
             chr.announce(MaplePacketCreator.partySearchInvite(leader));
             return true;

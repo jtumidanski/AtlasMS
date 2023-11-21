@@ -449,15 +449,6 @@ public class MapleMap {
         return true;
     }
 
-    public int getCurrentPartyId() {
-        for (MapleCharacter chr : this.getCharacters()) {
-            if (chr.getPartyId() != -1) {
-                return chr.getPartyId();
-            }
-        }
-        return -1;
-    }
-
     public void addPlayerNPCMapObject(MaplePlayerNPC pnpcobject) {
         objectWLock.lock();
         try {
@@ -2356,16 +2347,6 @@ public class MapleMap {
         };
 
         registerMapSchedule(r, time);
-    }
-
-    public MapleCharacter getAnyCharacterFromParty(int partyid) {
-        for (MapleCharacter chr : this.getAllPlayers()) {
-            if (chr.getPartyId() == partyid) {
-                return chr;
-            }
-        }
-
-        return null;
     }
 
     private void addPartyMemberInternal(MapleCharacter chr, int partyid) {

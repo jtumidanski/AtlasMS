@@ -451,8 +451,8 @@ public class Server {
         newyears.put(nyc.getId(), nyc);
     }
 
-    public NewYearCardRecord getNewYearCard(int cardid) {
-        return newyears.get(cardid);
+    public Optional<NewYearCardRecord> getNewYearCard(int cardid) {
+        return Optional.ofNullable(newyears.get(cardid));
     }
 
     public NewYearCardRecord removeNewYearCard(int cardid) {

@@ -48,7 +48,7 @@ public class GachaCommand extends Command {
                 .filter(i -> search.equalsIgnoreCase(names[i]))
                 .boxed()
                 .findFirst();
-        Optional<MapleGachapon.Gachapon> gachapon = index.map(i -> ids[i]).map(MapleGachapon.Gachapon::getByNpcId);
+        Optional<MapleGachapon.Gachapon> gachapon = index.map(i -> ids[i]).flatMap(MapleGachapon.Gachapon::getByNpcId);
         Optional<String> gachaponName = index.map(i -> names[i]);
 
         if (gachapon.isEmpty()) {

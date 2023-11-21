@@ -304,22 +304,22 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                         return;
                     }
                     MapleInventory mi = chr.getInventory(type.get());
-                    Item item = mi.findByCashId(cashId);
-                    if (item == null) {
+                    Optional<Item> item = mi.findByCashId(cashId);
+                    if (item.isEmpty()) {
                         c.enableCSActions();
                         return;
-                    } else if (c.getPlayer().getPetIndex(item.getPetId()) > -1) {
+                    } else if (c.getPlayer().getPetIndex(item.get().getPetId()) > -1) {
                         chr.announce(MaplePacketCreator.serverNotice(1, "You cannot put the pet you currently equip into the Cash Shop inventory."));
                         c.enableCSActions();
                         return;
-                    } else if (ItemConstants.isWeddingRing(item.getItemId()) || ItemConstants.isWeddingToken(item.getItemId())) {
+                    } else if (ItemConstants.isWeddingRing(item.get().getItemId()) || ItemConstants.isWeddingToken(item.get().getItemId())) {
                         chr.announce(MaplePacketCreator.serverNotice(1, "You cannot put relationship items into the Cash Shop inventory."));
                         c.enableCSActions();
                         return;
                     }
-                    cs.addToInventory(item);
-                    mi.removeSlot(item.getPosition());
-                    c.announce(MaplePacketCreator.putIntoCashInventory(item, c.getAccID()));
+                    cs.addToInventory(item.get());
+                    mi.removeSlot(item.get().getPosition());
+                    c.announce(MaplePacketCreator.putIntoCashInventory(item.get(), c.getAccID()));
                 } else if (action == 0x1D) { //crush ring (action 28)
                     int birthday = slea.readInt();
                     if (checkBirthday(c, birthday)) {

@@ -42,7 +42,7 @@ public class LootCommand extends Command {
         List<MapleMapObject> items = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.ITEM));
         for (MapleMapObject item : items) {
             MapleMapItem mapItem = (MapleMapItem) item;
-            if (mapItem.getOwnerId() == c.getPlayer().getId() || mapItem.getOwnerId() == c.getPlayer().getPartyId()) {
+            if (mapItem.getOwnerId() == c.getPlayer().getId() || mapItem.getOwnerId() == c.getPlayer().getPartyId().orElse(-1)) {
                 c.getPlayer().pickupItem(mapItem);
             }
         }

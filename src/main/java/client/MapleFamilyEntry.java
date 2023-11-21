@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Ubaware
@@ -408,13 +409,13 @@ public class MapleFamilyEntry {
         return List.of(juniors);
     }
 
-    public MapleFamilyEntry getOtherJunior(MapleFamilyEntry junior) {
+    public Optional<MapleFamilyEntry> getOtherJunior(MapleFamilyEntry junior) {
         if (juniors[0] == junior) {
-            return juniors[1];
+            return Optional.of(juniors[1]);
         } else if (juniors[1] == junior) {
-            return juniors[0];
+            return Optional.of(juniors[0]);
         }
-        return null;
+        return Optional.empty();
     }
 
     public int getJuniorCount() { //close enough to be relatively consistent to multiple threads (and the result is not vital)

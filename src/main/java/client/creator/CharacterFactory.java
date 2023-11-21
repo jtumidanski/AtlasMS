@@ -47,7 +47,7 @@ public abstract class CharacterFactory {
 
         MapleCharacter newchar = MapleCharacter.getDefault(c);
         newchar.setWorld(c.getWorld());
-        newchar.setSkinColor(MapleSkinColor.getById(skin));
+        newchar.setSkinColor(MapleSkinColor.getById(skin).orElseThrow());
         newchar.setGender(gender);
         newchar.setName(name);
         newchar.setHair(hair);

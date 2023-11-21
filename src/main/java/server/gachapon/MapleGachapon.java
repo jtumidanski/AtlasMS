@@ -24,6 +24,9 @@ package server.gachapon;
 import server.ItemInformationProvider;
 import tools.Randomizer;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * @author Alan (SharpAceX)
  */
@@ -35,11 +38,8 @@ public class MapleGachapon {
         return instance;
     }
 
-    public MapleGachaponItem process(int npcId) {
-        Gachapon gacha = Gachapon.getByNpcId(npcId);
-        int tier = gacha.getTier();
-        int item = gacha.getItem(tier);
-        return new MapleGachaponItem(tier, item);
+    public Optional<MapleGachaponItem> process(int npcId) {
+        return Gachapon.getByNpcId(npcId).map(g -> new MapleGachaponItem(g.getTier(), g.getItem(g.getTier())));
     }
 
     public enum Gachapon {
@@ -74,13 +74,8 @@ public class MapleGachapon {
             this.rare = r;
         }
 
-        public static Gachapon getByNpcId(int npcId) {
-            for (Gachapon gacha : values) {
-                if (npcId == gacha.npcId) {
-                    return gacha;
-                }
-            }
-            return null;
+        public static Optional<Gachapon> getByNpcId(int npcId) {
+            return Arrays.stream(values).filter(g ->  g.npcId == npcId).findFirst();
         }
 
         public static String[] getLootInfo() {

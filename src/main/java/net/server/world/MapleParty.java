@@ -167,7 +167,7 @@ public class MapleParty {
             player.setParty(null);
 
             MapleMatchCheckerCoordinator mmce = c.getWorldServer().getMatchCheckerCoordinator();
-            if (mmce.getMatchConfirmationLeaderid(player.getId()) == player.getId() && mmce.getMatchConfirmationType(player.getId()) == MatchCheckerType.GUILD_CREATION) {
+            if (mmce.getMatchConfirmationLeaderid(player.getId()) == player.getId() && mmce.getMatchConfirmationType(player.getId()).map(t -> t == MatchCheckerType.GUILD_CREATION).isPresent()) {
                 mmce.dismissMatchConfirmation(player.getId());
             }
         }

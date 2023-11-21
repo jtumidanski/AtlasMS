@@ -3948,7 +3948,7 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.PARTY_OPERATION.getValue());
         mplew.write(4);
-        mplew.writeInt(from.getPartyId());
+        mplew.writeInt(from.getPartyId().orElse(-1));
         mplew.writeMapleAsciiString(from.getName());
         mplew.write(0);
         return mplew.getPacket();
@@ -3958,7 +3958,7 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.PARTY_OPERATION.getValue());
         mplew.write(4);
-        mplew.writeInt(from.getPartyId());
+        mplew.writeInt(from.getPartyId().orElse(-1));
         mplew.writeMapleAsciiString("PS: " + from.getName());
         mplew.write(0);
         return mplew.getPacket();
@@ -6589,10 +6589,7 @@ public class MaplePacketCreator {
         }
         addPedigreeEntry(mplew, entry);
         if (hasOtherJunior) { //must be sent after own entry
-            MapleFamilyEntry otherJunior = entry.getSenior().getOtherJunior(entry);
-            if (otherJunior != null) {
-                addPedigreeEntry(mplew, otherJunior);
-            }
+            entry.getSenior().getOtherJunior(entry).ifPresent(oj -> addPedigreeEntry(mplew, oj));
         }
         if (missingEntries) {
             addPedigreeEntry(mplew, entry);

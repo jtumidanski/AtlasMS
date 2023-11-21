@@ -86,8 +86,8 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
-                int partyid = leader.getPartyId();
-                if (partyid == -1 || !leader.isPartyLeader()) {
+                Optional<Integer> partyId = leader.getPartyId();
+                if (partyId.isEmpty() || !leader.isPartyLeader()) {
                     leader.dropMessage(1, "You cannot establish the creation of a new Guild without leading a party.");
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
@@ -126,7 +126,7 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                 leader.dropMessage(1, "You have successfully created a Guild.");
 
                 for (MapleCharacter chr : matchPlayers) {
-                    boolean cofounder = chr.getPartyId() == partyid;
+                    boolean cofounder = chr.getPartyId().orElse(-1).equals(partyId.get());
 
                     MapleGuildCharacter mgc = chr.getMGC();
                     mgc.setGuildId(gid);

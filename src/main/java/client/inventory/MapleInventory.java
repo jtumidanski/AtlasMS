@@ -571,7 +571,7 @@ public class MapleInventory implements Iterable<Item> {
         return Collections.singletonList(this);
     }
 
-    public Item findByCashId(int cashId) {
+    public Optional<Item> findByCashId(int cashId) {
         boolean isRing = false;
         Equip equip = null;
         for (Item item : list()) {
@@ -580,11 +580,11 @@ public class MapleInventory implements Iterable<Item> {
                 isRing = equip.getRingId() > -1;
             }
             if ((item.getPetId() > -1 ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId()) == cashId) {
-                return item;
+                return Optional.of(item);
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public boolean checked() {
