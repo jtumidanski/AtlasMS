@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Ronan
@@ -120,9 +121,9 @@ public class PartySearchStorage {
         emptyIntervals.clear();
     }
 
-    public MapleCharacter callPlayer(int callerCid, int callerMapid, int minLevel, int maxLevel) {
+    public Optional<MapleCharacter> callPlayer(int callerCid, int callerMapid, int minLevel, int maxLevel) {
         if (emptyIntervals.inInterval(minLevel, maxLevel)) {
-            return null;
+            return Optional.empty();
         }
 
         List<PartySearchCharacter> pscList = getStorageList();
@@ -138,14 +139,14 @@ public class PartySearchStorage {
                 break;
             }
 
-            MapleCharacter chr = psc.callPlayer(callerCid, callerMapid);
-            if (chr != null) {
+            Optional<MapleCharacter> chr = psc.callPlayer(callerCid, callerMapid);
+            if (chr.isPresent()) {
                 return chr;
             }
         }
 
         emptyIntervals.addInterval(minLevel, maxLevel);
-        return null;
+        return Optional.empty();
     }
 
     public void detachPlayer(MapleCharacter chr) {

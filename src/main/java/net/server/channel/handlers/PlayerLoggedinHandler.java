@@ -196,18 +196,18 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                     }
                 }
 
-                MapleCharacter player = wserv.get().getPlayerStorage().getCharacterById(cid).orElse(null);
+                Optional<MapleCharacter> player = wserv.get().getPlayerStorage().getCharacterById(cid);
                 IoSession session = c.getSession();
 
                 String remoteHwid;
-                if (player == null) {
+                if (player.isEmpty()) {
                     remoteHwid = MapleSessionCoordinator.getInstance().pickLoginSessionHwid(session);
                     if (remoteHwid == null) {
                         c.disconnect(true, false);
                         return;
                     }
                 } else {
-                    remoteHwid = player.getClient().getHWID();
+                    remoteHwid = player.get().getClient().getHWID();
                 }
 
                 int hwidLen = remoteHwid.length();
@@ -221,39 +221,19 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 }
 
                 boolean newcomer = false;
-                if (player == null) {
-                    try {
-                        player = MapleCharacter.loadCharFromDB(cid, c, true);
-                        newcomer = true;
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                if (player.isEmpty()) {
+                    player = MapleCharacter.loadCharFromDB(cid, c, true);
+                    newcomer = true;
 
-                    if (player == null) { //If you are still getting null here then please just uninstall the game >.>, we dont need you fucking with the logs
+                    if (player.isEmpty()) {
                         c.disconnect(true, false);
                         return;
                     }
                 }
-                c.setPlayer(player);
-                c.setAccID(player.getAccountID());
+                c.setPlayer(player.get());
+                c.setAccID(player.get().getAccountID());
 
                 boolean allowLogin = true;
-
-                /*  is this check really necessary?
-                if (state == MapleClient.LOGIN_SERVER_TRANSITION || state == MapleClient.LOGIN_NOTLOGGEDIN) {
-                    List<String> charNames = c.loadCharacterNames(c.getWorld());
-                    if(!newcomer) {
-                        charNames.remove(player.getName());
-                    }
-
-                    for (String charName : charNames) {
-                        if(wserv.getPlayerStorage().getCharacterByName(charName) != null) {
-                            allowLogin = false;
-                            break;
-                        }
-                    }
-                }
-                */
 
                 int accId = c.getAccID();
                 if (tryAcquireAccount(accId)) { // Sync this to prevent wrong login state for double loggedin handling
@@ -283,52 +263,52 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 }
 
                 if (!newcomer) {
-                    c.setLanguage(player.getClient().getLanguage());
-                    c.setCharacterSlots((byte) player.getClient().getCharacterSlots());
-                    player.newClient(c);
+                    c.setLanguage(player.get().getClient().getLanguage());
+                    c.setCharacterSlots((byte) player.get().getClient().getCharacterSlots());
+                    player.get().newClient(c);
                 }
 
-                cserv.get().addPlayer(player);
-                wserv.get().addPlayer(player);
-                player.setEnteredChannelWorld();
+                cserv.get().addPlayer(player.get());
+                wserv.get().addPlayer(player.get());
+                player.get().setEnteredChannelWorld();
 
                 List<PlayerBuffValueHolder> buffs = server.getPlayerBuffStorage().getBuffsFromStorage(cid);
                 if (buffs != null) {
                     List<Pair<Long, PlayerBuffValueHolder>> timedBuffs = getLocalStartTimes(buffs);
-                    player.silentGiveBuffs(timedBuffs);
+                    player.get().silentGiveBuffs(timedBuffs);
                 }
 
                 Map<MapleDisease, Pair<Long, MobSkill>> diseases = server.getPlayerBuffStorage().getDiseasesFromStorage(cid);
                 if (diseases != null) {
-                    player.silentApplyDiseases(diseases);
+                    player.get().silentApplyDiseases(diseases);
                 }
 
-                c.announce(MaplePacketCreator.getCharInfo(player));
-                if (!player.isHidden()) {
-                    if (player.isGM() && YamlConfig.config.server.USE_AUTOHIDE_GM) {
-                        player.toggleHide(true);
+                c.announce(MaplePacketCreator.getCharInfo(player.get()));
+                if (!player.get().isHidden()) {
+                    if (player.get().isGM() && YamlConfig.config.server.USE_AUTOHIDE_GM) {
+                        player.get().toggleHide(true);
                     }
                 }
-                player.sendKeymap();
-                player.sendQuickmap();
-                player.sendMacros();
+                player.get().sendKeymap();
+                player.get().sendQuickmap();
+                player.get().sendMacros();
 
                 // pot bindings being passed through other characters on the account detected thanks to Croosade dev team
-                MapleKeyBinding autohpPot = player.getKeymap().get(91);
-                player.announce(MaplePacketCreator.sendAutoHpPot(autohpPot != null ? autohpPot.action() : 0));
+                MapleKeyBinding autohpPot = player.get().getKeymap().get(91);
+                player.get().announce(MaplePacketCreator.sendAutoHpPot(autohpPot != null ? autohpPot.action() : 0));
 
-                MapleKeyBinding autompPot = player.getKeymap().get(92);
-                player.announce(MaplePacketCreator.sendAutoMpPot(autompPot != null ? autompPot.action() : 0));
+                MapleKeyBinding autompPot = player.get().getKeymap().get(92);
+                player.get().announce(MaplePacketCreator.sendAutoMpPot(autompPot != null ? autompPot.action() : 0));
 
-                player.getMap().addPlayer(player);
-                player.visitMap(player.getMap());
+                player.get().getMap().addPlayer(player.get());
+                player.get().visitMap(player.get().getMap());
 
-                BuddyList bl = player.getBuddylist();
+                BuddyList bl = player.get().getBuddylist();
                 int[] buddyIds = bl.getBuddyIds();
-                wserv.get().loggedOn(player.getId(), c.getChannel(), buddyIds);
+                wserv.get().loggedOn(player.get().getId(), c.getChannel(), buddyIds);
 
                 //TODO clean this up
-                for (CharacterIdChannelPair onlineBuddy : wserv.get().multiBuddyFind(player.getId(), buddyIds)) {
+                for (CharacterIdChannelPair onlineBuddy : wserv.get().multiBuddyFind(player.get().getId(), buddyIds)) {
                     bl.get(onlineBuddy.getCharacterId()).ifPresent(buddy -> {
                         buddy.setChannel(onlineBuddy.getChannel());
                         bl.put(buddy);
@@ -336,39 +316,39 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 }
                 c.announce(MaplePacketCreator.updateBuddylist(bl.getBuddies()));
 
-                c.announce(MaplePacketCreator.loadFamily(player));
-                if (player.getFamilyId() > 0) {
-                    MapleFamily f = wserv.get().getFamily(player.getFamilyId());
+                c.announce(MaplePacketCreator.loadFamily(player.get()));
+                if (player.get().getFamilyId() > 0) {
+                    MapleFamily f = wserv.get().getFamily(player.get().getFamilyId());
                     if (f != null) {
-                        MapleFamilyEntry familyEntry = f.getEntryByID(player.getId());
+                        MapleFamilyEntry familyEntry = f.getEntryByID(player.get().getId());
                         if (familyEntry != null) {
-                            familyEntry.setCharacter(player);
-                            player.setFamilyEntry(familyEntry);
+                            familyEntry.setCharacter(player.get());
+                            player.get().setFamilyEntry(familyEntry);
 
                             c.announce(MaplePacketCreator.getFamilyInfo(familyEntry));
-                            familyEntry.announceToSenior(MaplePacketCreator.sendFamilyLoginNotice(player.getName(), true), true);
+                            familyEntry.announceToSenior(MaplePacketCreator.sendFamilyLoginNotice(player.get().getName(), true), true);
                         } else {
-                            FilePrinter.printError(FilePrinter.FAMILY_ERROR, "Player " + player.getName() + "'s family doesn't have an entry for them. (" + f.getID() + ")");
+                            FilePrinter.printError(FilePrinter.FAMILY_ERROR, "Player " + player.get().getName() + "'s family doesn't have an entry for them. (" + f.getID() + ")");
                         }
                     } else {
-                        FilePrinter.printError(FilePrinter.FAMILY_ERROR, "Player " + player.getName() + " has an invalid family ID. (" + player.getFamilyId() + ")");
+                        FilePrinter.printError(FilePrinter.FAMILY_ERROR, "Player " + player.get().getName() + " has an invalid family ID. (" + player.get().getFamilyId() + ")");
                         c.announce(MaplePacketCreator.getFamilyInfo(null));
                     }
                 } else {
                     c.announce(MaplePacketCreator.getFamilyInfo(null));
                 }
-                if (player.getGuildId() > 0) {
-                    Optional<MapleGuild> playerGuild = server.getGuild(player.getGuildId(), player.getWorld(), player);
+                if (player.get().getGuildId() > 0) {
+                    Optional<MapleGuild> playerGuild = server.getGuild(player.get().getGuildId(), player.get().getWorld(), player.get());
                     if (playerGuild.isEmpty()) {
-                        player.deleteGuild(player.getGuildId());
-                        player.getMGC().setGuildId(0);
-                        player.getMGC().setGuildRank(5);
+                        player.get().deleteGuild(player.get().getGuildId());
+                        player.get().getMGC().setGuildId(0);
+                        player.get().getMGC().setGuildRank(5);
                     } else {
-                        playerGuild.get().getMGC(player.getId()).setCharacter(player);
-                        player.setMGC(playerGuild.get().getMGC(player.getId()));
-                        server.setGuildMemberOnline(player, true, c.getChannel());
-                        c.announce(MaplePacketCreator.showGuildInfo(player));
-                        int allianceId = player.getGuild().map(MapleGuild::getAllianceId).orElse(0);
+                        playerGuild.get().getMGC(player.get().getId()).setCharacter(player.get());
+                        player.get().setMGC(playerGuild.get().getMGC(player.get().getId()));
+                        server.setGuildMemberOnline(player.get(), true, c.getChannel());
+                        c.announce(MaplePacketCreator.showGuildInfo(player.get()));
+                        int allianceId = player.get().getGuild().map(MapleGuild::getAllianceId).orElse(0);
                         if (allianceId > 0) {
                             Optional<MapleAlliance> newAlliance = server.getAlliance(allianceId);
                             if (newAlliance.isEmpty()) {
@@ -376,7 +356,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                                 if (newAlliance.isPresent()) {
                                     server.addAlliance(allianceId, newAlliance.get());
                                 } else {
-                                    player.getGuild().ifPresent(g -> g.setAllianceId(0));
+                                    player.get().getGuild().ifPresent(g -> g.setAllianceId(0));
                                 }
                             }
                             if (newAlliance.isPresent()) {
@@ -384,59 +364,54 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                                 c.announce(MaplePacketCreator.allianceNotice(newAlliance.get().getId(), newAlliance.get().getNotice()));
 
                                 if (newcomer) {
-                                    server.allianceMessage(allianceId, MaplePacketCreator.allianceMemberOnline(player, true), player.getId(), -1);
+                                    server.allianceMessage(allianceId, MaplePacketCreator.allianceMemberOnline(player.get(), true), player.get().getId(), -1);
                                 }
                             }
                         }
                     }
                 }
 
-                player.showNote();
-                player.getParty().ifPresent(p -> onLoginUpdatePartyStatus(c, p));
+                player.get().showNote();
+                player.get().getParty().ifPresent(p -> onLoginUpdatePartyStatus(c, p));
 
-                MapleInventory eqpInv = player.getInventory(MapleInventoryType.EQUIPPED);
+                MapleInventory eqpInv = player.get().getInventory(MapleInventoryType.EQUIPPED);
                 eqpInv.lockInventory();
                 try {
                     for (Item it : eqpInv.list()) {
-                        player.equippedItem((Equip) it);
+                        player.get().equippedItem((Equip) it);
                     }
                 } finally {
                     eqpInv.unlockInventory();
                 }
 
-                c.announce(MaplePacketCreator.updateBuddylist(player.getBuddylist().getBuddies()));
+                c.announce(MaplePacketCreator.updateBuddylist(player.get().getBuddylist().getBuddies()));
 
                 CharacterNameAndId pendingBuddyRequest = c.getPlayer().getBuddylist().pollPendingRequest();
                 if (pendingBuddyRequest != null) {
                     c.announce(MaplePacketCreator.requestBuddylistAdd(pendingBuddyRequest.id(), c.getPlayer().getId(), pendingBuddyRequest.name()));
                 }
 
-                c.announce(MaplePacketCreator.updateGender(player));
-                player.checkMessenger();
+                c.announce(MaplePacketCreator.updateGender(player.get()));
+                player.get().checkMessenger();
                 c.announce(MaplePacketCreator.enableReport());
-                player.changeSkillLevel(10000000 * player.getJobType() + 12, (byte) (player.getLinkedLevel() / 10), 20, -1);
-                player.checkBerserk(player.isHidden());
+                player.get().changeSkillLevel(10000000 * player.get().getJobType() + 12, (byte) (player.get().getLinkedLevel() / 10), 20, -1);
+                player.get().checkBerserk(player.get().isHidden());
 
                 if (newcomer) {
-                    for (MaplePet pet : player.getPets()) {
+                    for (MaplePet pet : player.get().getPets()) {
                         if (pet != null) {
-                            wserv.get().registerPetHunger(player, player.getPetIndex(pet));
+                            wserv.get().registerPetHunger(player.get(), player.get().getPetIndex(pet));
                         }
                     }
 
-                    MapleCharacter finalPlayer = player;
-                    player.getMount()
+                    MapleCharacter finalPlayer = player.get();
+                    player.get().getMount()
                             .filter(m -> m.getItemId() != 0)
                             .ifPresent(m -> finalPlayer.announce(MaplePacketCreator.updateMount(finalPlayer.getId(), m, false)));
-                    player.reloadQuestExpirations();
+                    player.get().reloadQuestExpirations();
 
-                    /*
-                    if (!c.hasVotedAlready()){
-                        player.announce(MaplePacketCreator.earnTitleMessage("You can vote now! Vote and earn a vote point!"));
-                    }
-                    */
-                    if (player.isGM()) {
-                        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.earnTitleMessage((player.gmLevel() < 6 ? "GM " : "Admin ") + player.getName() + " has logged in"));
+                    if (player.get().isGM()) {
+                        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.earnTitleMessage((player.get().gmLevel() < 6 ? "GM " : "Admin ") + player.get().getName() + " has logged in"));
                     }
 
                     if (diseases != null) {
@@ -446,39 +421,39 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                         }
                     }
                 } else {
-                    if (player.isRidingBattleship()) {
-                        player.announceBattleshipHp();
+                    if (player.get().isRidingBattleship()) {
+                        player.get().announceBattleshipHp();
                     }
                 }
 
-                player.buffExpireTask();
-                player.diseaseExpireTask();
-                player.skillCooldownTask();
-                player.expirationTask();
-                player.questExpirationTask();
-                if (GameConstants.hasSPTable(player.getJob()) && player.getJob().getId() != 2001) {
-                    player.createDragon();
+                player.get().buffExpireTask();
+                player.get().diseaseExpireTask();
+                player.get().skillCooldownTask();
+                player.get().expirationTask();
+                player.get().questExpirationTask();
+                if (GameConstants.hasSPTable(player.get().getJob()) && player.get().getJob().getId() != 2001) {
+                    player.get().createDragon();
                 }
 
-                player.commitExcludedItems();
-                showDueyNotification(c, player);
+                player.get().commitExcludedItems();
+                showDueyNotification(c, player.get());
 
-                if (player.getMap().getHPDec() > 0) {
-                    player.resetHpDecreaseTask();
+                if (player.get().getMap().getHPDec() > 0) {
+                    player.get().resetHpDecreaseTask();
                 }
 
-                player.resetPlayerRates();
+                player.get().resetPlayerRates();
                 if (YamlConfig.config.server.USE_ADD_RATES_BY_LEVEL == true) {
-                    player.setPlayerRates();
+                    player.get().setPlayerRates();
                 }
-                player.setWorldRates();
-                player.updateCouponRates();
+                player.get().setWorldRates();
+                player.get().updateCouponRates();
 
-                player.receivePartyMemberHP();
+                player.get().receivePartyMemberHP();
 
-                if (player.getPartnerId() > 0) {
-                    int partnerId = player.getPartnerId();
-                    final MapleCharacter finalPlayer = player;
+                if (player.get().getPartnerId() > 0) {
+                    int partnerId = player.get().getPartnerId();
+                    final MapleCharacter finalPlayer = player.get();
                     wserv.map(World::getPlayerStorage)
                             .flatMap(s -> s.getCharacterById(partnerId))
                             .filter(partner -> !partner.isAwayFromWorld())
@@ -491,7 +466,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 if (newcomer) {
                     EventInstanceManager eim = MapleEventRecallCoordinator.getInstance().recallEventInstance(cid);
                     if (eim != null) {
-                        eim.registerPlayer(player);
+                        eim.registerPlayer(player.get());
                     }
                 }
 
@@ -500,7 +475,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 }
 
                 if (newcomer) {
-                    player.setLoginTime(System.currentTimeMillis());
+                    player.get().setLoginTime(System.currentTimeMillis());
                 }
             } catch (Exception e) {
                 e.printStackTrace();

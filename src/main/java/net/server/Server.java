@@ -1729,16 +1729,16 @@ public class Server {
         }
     }
 
-    public Integer freeCharacteridInTransition(MapleClient client) {
+    public Optional<Integer> freeCharacteridInTransition(MapleClient client) {
         if (!YamlConfig.config.server.USE_IP_VALIDATION) {
-            return null;
+            return Optional.empty();
         }
 
         String remoteIp = getRemoteHost(client);
 
         lgnWLock.lock();
         try {
-            return transitioningChars.remove(remoteIp);
+            return Optional.of(transitioningChars.remove(remoteIp));
         } finally {
             lgnWLock.unlock();
         }

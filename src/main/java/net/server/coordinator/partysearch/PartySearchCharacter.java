@@ -22,6 +22,7 @@ package net.server.coordinator.partysearch;
 import client.MapleCharacter;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 
 /**
  * @author Ronan
@@ -44,21 +45,21 @@ public class PartySearchCharacter {
         return chr == null ? "[empty]" : chr.toString();
     }
 
-    public MapleCharacter callPlayer(int leaderid, int callerMapid) {
+    public Optional<MapleCharacter> callPlayer(int leaderId, int callerMapId) {
         MapleCharacter chr = player.get();
-        if (chr == null || !MaplePartySearchCoordinator.isInVicinity(callerMapid, chr.getMapId())) {
-            return null;
+        if (chr == null || !MaplePartySearchCoordinator.isInVicinity(callerMapId, chr.getMapId())) {
+            return Optional.empty();
         }
 
-        if (chr.hasDisabledPartySearchInvite(leaderid)) {
-            return null;
+        if (chr.hasDisabledPartySearchInvite(leaderId)) {
+            return Optional.empty();
         }
 
         queued = false;
         if (chr.isLoggedinWorld() && chr.getParty().isEmpty()) {
-            return chr;
+            return Optional.of(chr);
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 

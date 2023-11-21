@@ -84,6 +84,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 public class MapleClient {
 
@@ -204,23 +205,12 @@ public class MapleClient {
     }
 
     public List<MapleCharacter> loadCharacters(int serverId) {
-        List<MapleCharacter> chars = new ArrayList<>(15);
-        try {
-            for (CharNameAndId cni : loadCharactersInternal(serverId)) {
-                chars.add(MapleCharacter.loadCharFromDB(cni.id, this, false));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return chars;
-    }
-
-    public List<String> loadCharacterNames(int worldId) {
-        List<String> chars = new ArrayList<>(15);
-        for (CharNameAndId cni : loadCharactersInternal(worldId)) {
-            chars.add(cni.name);
-        }
-        return chars;
+        return loadCharactersInternal(serverId).stream()
+                .map(CharNameAndId::getId)
+                .map(id -> MapleCharacter.loadCharFromDB(id, this, false))
+                .flatMap(Optional::stream)
+                .limit(15)
+                .collect(Collectors.toList());
     }
 
     private List<CharNameAndId> loadCharactersInternal(int worldId) {
@@ -1111,25 +1101,23 @@ public class MapleClient {
     }
 
     public boolean deleteCharacter(int cid, int senderAccId) {
-        try {
-            MapleCharacter chr = MapleCharacter.loadCharFromDB(cid, this, false);
-
-            Integer partyid = chr.getWorldServer().getCharacterPartyid(cid);
-            if (partyid != null) {
-                this.setPlayer(chr);
-
-                chr.getWorldServer().getParty(partyid).ifPresent(chr::setParty);
-                chr.getMPC();
-                chr.leaveParty();
-
-                this.setPlayer(null);
-            }
-
-            return MapleCharacter.deleteCharFromDB(chr, senderAccId);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        Optional<MapleCharacter> chr = MapleCharacter.loadCharFromDB(cid, this, false);
+        if (chr.isEmpty()) {
             return false;
         }
+
+        Integer partyid = chr.get().getWorldServer().getCharacterPartyid(cid);
+        if (partyid != null) {
+            this.setPlayer(chr.get());
+
+            chr.get().getWorldServer().getParty(partyid).ifPresent(p -> chr.get().setParty(p));
+            chr.get().getMPC();
+            chr.get().leaveParty();
+
+            this.setPlayer(null);
+        }
+
+        return MapleCharacter.deleteCharFromDB(chr.get(), senderAccId);
     }
 
     public String getAccountName() {
@@ -1623,6 +1611,10 @@ public class MapleClient {
             super();
             this.name = name;
             this.id = id;
+        }
+
+        public int getId() {
+            return id;
         }
     }
 }

@@ -33,11 +33,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 /**
  * @author Ronan
@@ -209,37 +218,35 @@ public class MapleSessionCoordinator {
         }
     }
 
-    private static MapleClient getSessionClient(IoSession session) {
-        return (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
+    private static Optional<MapleClient> getSessionClient(IoSession session) {
+        return Optional.ofNullable((MapleClient) session.getAttribute(MapleClient.CLIENT_KEY));
     }
 
-    private static MapleClient fetchInTransitionSessionClient(IoSession session) {
-        String remoteHwid = MapleSessionCoordinator.getInstance().getGameSessionHwid(session);
-
-        if (remoteHwid != null) {   // maybe this session was currently in-transition?
-            int hwidLen = remoteHwid.length();
-            if (hwidLen <= 8) {
-                session.setAttribute(MapleClient.CLIENT_NIBBLEHWID, remoteHwid);
-            } else {
-                session.setAttribute(MapleClient.CLIENT_HWID, remoteHwid);
-                session.setAttribute(MapleClient.CLIENT_NIBBLEHWID, remoteHwid.substring(hwidLen - 8, hwidLen));
-            }
-
-            MapleClient client = new MapleClient(null, null, session);
-            Integer cid = Server.getInstance().freeCharacteridInTransition(client);
-            if (cid != null) {
-                try {
-                    client.setAccID(MapleCharacter.loadCharFromDB(cid, client, false).getAccountID());
-                } catch (SQLException sqle) {
-                    sqle.printStackTrace();
+    private static Supplier<Optional<MapleClient>> fetchInTransitionSessionClient(IoSession session) {
+        return () -> {
+            String remoteHwid = MapleSessionCoordinator.getInstance().getGameSessionHwid(session);
+            if (remoteHwid != null) {   // maybe this session was currently in-transition?
+                int hwidLen = remoteHwid.length();
+                if (hwidLen <= 8) {
+                    session.setAttribute(MapleClient.CLIENT_NIBBLEHWID, remoteHwid);
+                } else {
+                    session.setAttribute(MapleClient.CLIENT_HWID, remoteHwid);
+                    session.setAttribute(MapleClient.CLIENT_NIBBLEHWID, remoteHwid.substring(hwidLen - 8, hwidLen));
                 }
+
+                MapleClient client = new MapleClient(null, null, session);
+                Optional<Integer> cid = Server.getInstance().freeCharacteridInTransition(client);
+                if (cid.isPresent()) {
+                    int accountId = MapleCharacter.loadCharFromDB(cid.get(), client, false).map(MapleCharacter::getAccountID).orElseThrow();
+                    client.setAccID(accountId);
+                }
+
+                session.setAttribute(MapleClient.CLIENT_KEY, client);
+                return Optional.of(client);
             }
 
-            session.setAttribute(MapleClient.CLIENT_KEY, client);
-            return client;
-        }
-
-        return null;
+            return Optional.empty();
+        };
     }
 
     private Lock getCoodinatorLock(String remoteHost) {
@@ -247,16 +254,16 @@ public class MapleSessionCoordinator {
     }
 
     public void updateOnlineSession(IoSession session) {
-        MapleClient client = getSessionClient(session);
+        Optional<MapleClient> client = getSessionClient(session);
 
-        if (client != null) {
-            int accountId = client.getAccID();
+        if (client.isPresent()) {
+            int accountId = client.get().getAccID();
             MapleClient ingameClient = onlineClients.get(accountId);
             if (ingameClient != null) {     // thanks MedicOP for finding out a loss of loggedin account uniqueness when using the CMS "Unstuck" feature
                 ingameClient.forceDisconnect();
             }
 
-            onlineClients.put(accountId, client);
+            onlineClients.put(accountId, client.get());
         }
     }
 
@@ -339,13 +346,13 @@ public class MapleSessionCoordinator {
         if (nibbleHwid != null) {
             onlineRemoteHwids.remove(nibbleHwid);
 
-            MapleClient client = getSessionClient(session);
-            if (client != null) {
-                MapleClient loggedClient = onlineClients.get(client.getAccID());
+            Optional<MapleClient> client = getSessionClient(session);
+            if (client.isPresent()) {
+                MapleClient loggedClient = onlineClients.get(client.get().getAccID());
 
                 // do not remove an online game session here, only login session
-                if (loggedClient != null && loggedClient.getSessionId() == client.getSessionId()) {
-                    onlineClients.remove(client.getAccID());
+                if (loggedClient != null && loggedClient.getSessionId() == client.get().getSessionId()) {
+                    onlineClients.remove(client.get().getAccID());
                 }
             }
         }
@@ -496,10 +503,7 @@ public class MapleSessionCoordinator {
     }
 
     public void closeSession(IoSession session, Boolean immediately) {
-        MapleClient client = getSessionClient(session);
-        if (client == null) {
-            client = fetchInTransitionSessionClient(session);
-        }
+        Optional<MapleClient> client = getSessionClient(session).or(fetchInTransitionSessionClient(session));
 
         String hwid = (String) session.removeAttribute(MapleClient.CLIENT_NIBBLEHWID); // making sure to clean up calls to this function on login phase
         onlineRemoteHwids.remove(hwid);
@@ -507,15 +511,15 @@ public class MapleSessionCoordinator {
         hwid = (String) session.removeAttribute(MapleClient.CLIENT_HWID);
         onlineRemoteHwids.remove(hwid);
 
-        if (client != null) {
+        if (client.isPresent()) {
             if (hwid != null) { // is a game session
-                onlineClients.remove(client.getAccID());
+                onlineClients.remove(client.get().getAccID());
             } else {
-                MapleClient loggedClient = onlineClients.get(client.getAccID());
+                MapleClient loggedClient = onlineClients.get(client.get().getAccID());
 
                 // do not remove an online game session here, only login session
-                if (loggedClient != null && loggedClient.getSessionId() == client.getSessionId()) {
-                    onlineClients.remove(client.getAccID());
+                if (loggedClient != null && loggedClient.getSessionId() == client.get().getSessionId()) {
+                    onlineClients.remove(client.get().getAccID());
                 }
             }
         }

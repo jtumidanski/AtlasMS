@@ -1264,7 +1264,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         return ret;
     }
 
-    public static MapleCharacter loadCharFromDB(int charid, MapleClient client, boolean channelserver) throws SQLException {
+    public static Optional<MapleCharacter> loadCharFromDB(int charid, MapleClient client, boolean channelserver) {
         try {
             MapleCharacter ret = new MapleCharacter();
             ret.client = client;
@@ -1705,11 +1705,11 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             }
 
             con.close();
-            return ret;
+            return Optional.of(ret);
         } catch (SQLException | RuntimeException e) {
             e.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 
     public static String makeMapleReadable(String in) {

@@ -177,7 +177,7 @@ public class MaplePartySearchCoordinator {
         }
     }
 
-    private MapleCharacter fetchPlayer(int callerCid, int callerMapid, MapleJob job, int minLevel, int maxLevel) {
+    private Optional<MapleCharacter> fetchPlayer(int callerCid, int callerMapid, MapleJob job, int minLevel, int maxLevel) {
         return storage.get(getPartySearchJob(job)).callPlayer(callerCid, callerMapid, minLevel, maxLevel);
     }
 
@@ -229,7 +229,7 @@ public class MaplePartySearchCoordinator {
         }
     }
 
-    private MapleCharacter searchPlayer(MapleCharacter leader) {
+    private Optional<MapleCharacter> searchPlayer(MapleCharacter leader) {
         LeaderSearchMetadata settings = searchSettings.get(leader.getId());
         if (settings != null) {
             int minLevel = settings.minLevel, maxLevel = settings.maxLevel;
@@ -238,14 +238,14 @@ public class MaplePartySearchCoordinator {
             int leaderCid = leader.getId();
             int leaderMapid = leader.getMapId();
             for (MapleJob searchJob : settings.searchedJobs) {
-                MapleCharacter chr = fetchPlayer(leaderCid, leaderMapid, searchJob, minLevel, maxLevel);
-                if (chr != null) {
+                Optional<MapleCharacter> chr = fetchPlayer(leaderCid, leaderMapid, searchJob, minLevel, maxLevel);
+                if (chr.isPresent()) {
                     return chr;
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     private boolean sendPartyInviteFromSearch(MapleCharacter chr, MapleCharacter leader) {
@@ -326,18 +326,19 @@ public class MaplePartySearchCoordinator {
         List<MapleCharacter> expiredLeaders = new LinkedList<>();
 
         for (MapleCharacter leader : queuedLeaders.getLeft()) {
-            MapleCharacter chr = searchPlayer(leader);
-            if (sendPartyInviteFromSearch(chr, leader)) {
+            Optional<MapleCharacter> chr = searchPlayer(leader);
+            if (chr.isPresent() && sendPartyInviteFromSearch(chr.get(), leader)) {
                 searchedLeaders.add(leader);
-            } else {
-                LeaderSearchMetadata settings = searchSettings.get(leader.getId());
-                if (settings != null) {
-                    if (settings.reentryCount < YamlConfig.config.server.PARTY_SEARCH_REENTRY_LIMIT) {
-                        settings.reentryCount += 1;
-                        recalledLeaders.add(leader);
-                    } else {
-                        expiredLeaders.add(leader);
-                    }
+                return;
+            }
+
+            LeaderSearchMetadata settings = searchSettings.get(leader.getId());
+            if (settings != null) {
+                if (settings.reentryCount < YamlConfig.config.server.PARTY_SEARCH_REENTRY_LIMIT) {
+                    settings.reentryCount += 1;
+                    recalledLeaders.add(leader);
+                } else {
+                    expiredLeaders.add(leader);
                 }
             }
         }
