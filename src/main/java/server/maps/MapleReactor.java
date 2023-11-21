@@ -266,10 +266,8 @@ public class MapleReactor extends AbstractMapleMapObject {
                         if (!(reactorType == 2 && (stance == 0 || stance == 2))) { //get next state
                             for (byte b = 0; b < stats.getStateSize(state); b++) {//YAY?
                                 List<Integer> activeSkills = stats.getActiveSkills(state, b);
-                                if (activeSkills != null) {
-                                    if (!activeSkills.contains(skillid)) {
-                                        continue;
-                                    }
+                                if (!activeSkills.contains(skillid)) {
+                                    continue;
                                 }
                                 state = stats.getNextState(state, b);
                                 if (stats.getNextState(state, b) == -1) {//end of reactor

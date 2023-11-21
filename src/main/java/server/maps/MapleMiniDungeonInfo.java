@@ -21,6 +21,9 @@
  */
 package server.maps;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * @author Alan (SharpAceX)
  */
@@ -61,13 +64,11 @@ public enum MapleMiniDungeonInfo {
         return false;
     }
 
-    public static MapleMiniDungeonInfo getDungeon(int map) {
-        for (MapleMiniDungeonInfo dungeon : MapleMiniDungeonInfo.values()) {
-            if (map >= dungeon.getDungeonId() && map <= dungeon.getDungeonId() + dungeon.getDungeons()) {
-                return dungeon;
-            }
-        }
-        return null;
+    public static Optional<MapleMiniDungeonInfo> getDungeon(int map) {
+        return Arrays.stream(MapleMiniDungeonInfo.values())
+                .filter(d -> map >= d.getDungeonId())
+                .filter(d -> map <= d.getDungeonId() + d.getDungeons())
+                .findFirst();
     }
 
     public int getBase() {

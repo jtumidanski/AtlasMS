@@ -271,17 +271,17 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                         return;
                     }
                 } else if (action == 0x0D) { // Take from Cash Inventory
-                    Item item = cs.findByCashId(slea.readInt());
-                    if (item == null) {
+                    Optional<Item> item = cs.findByCashId(slea.readInt());
+                    if (item.isEmpty()) {
                         c.enableCSActions();
                         return;
                     }
-                    if (chr.getInventory(item.getInventoryType()).addItem(item) != -1) {
-                        cs.removeFromInventory(item);
-                        c.announce(MaplePacketCreator.takeFromCashInventory(item));
+                    if (chr.getInventory(item.get().getInventoryType()).addItem(item.get()) != -1) {
+                        cs.removeFromInventory(item.get());
+                        c.announce(MaplePacketCreator.takeFromCashInventory(item.get()));
 
-                        if (item instanceof Equip) {
-                            Equip equip = (Equip) item;
+                        if (item.get() instanceof Equip) {
+                            Equip equip = (Equip) item.get();
                             if (equip.getRingId() >= 0) {
                                 MapleRing ring = MapleRing.loadFromDb(equip.getRingId());
                                 chr.addPlayerRing(ring);

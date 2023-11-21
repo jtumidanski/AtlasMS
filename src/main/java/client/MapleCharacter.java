@@ -1438,8 +1438,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                 int partyid = rs.getInt("party");
                 Optional<MapleParty> party = wserv.flatMap(w -> w.getParty(partyid));
                 if (party.isPresent()) {
-                    ret.mpc = party.get().getMemberById(ret.id);
-                    if (ret.mpc != null) {
+                    Optional<MaplePartyCharacter> mpc = party.flatMap(p -> p.getMemberById(ret.id));
+                    if (mpc.isPresent()) {
                         ret.mpc = new MaplePartyCharacter(ret);
                         ret.party = party.get();
                     }
@@ -6455,14 +6455,10 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     public boolean isPartyMember(int cid) {
         prtLock.lock();
         try {
-            if (party != null) {
-                return party.getMemberById(cid) != null;
-            }
+            return getParty().flatMap(p -> p.getMemberById(cid)).isPresent();
         } finally {
             prtLock.unlock();
         }
-
-        return false;
     }
 
     public MaplePlayerShop getPlayerShop() {

@@ -43,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 public class MapleParty {
 
@@ -179,15 +180,15 @@ public class MapleParty {
 
         if (party != null && partyplayer != null) {
             if (partyplayer.equals(party.getLeader())) {
-                MaplePartyCharacter expelled = party.getMemberById(expelCid);
-                if (expelled != null) {
+                Optional<MaplePartyCharacter> expelled = party.getMemberById(expelCid);
+                if (expelled.isPresent()) {
 
-                    if (expelled.getPlayer().isEmpty()) {
-                        world.updateParty(party.getId(), PartyOperation.EXPEL, expelled);
+                    if (expelled.get().getPlayer().isEmpty()) {
+                        world.updateParty(party.getId(), PartyOperation.EXPEL, expelled.get());
                         return;
                     }
 
-                    MapleCharacter emc = expelled.getPlayer().get();
+                    MapleCharacter emc = expelled.get().getPlayer().get();
                     List<MapleCharacter> partyMembers = emc.getPartyMembersOnline();
 
                     MapleMap map = emc.getMap();
@@ -202,7 +203,7 @@ public class MapleParty {
 
                     emc.getEventInstance().ifPresent(ei -> ei.leftParty(emc));
                     emc.setParty(null);
-                    world.updateParty(party.getId(), PartyOperation.EXPEL, expelled);
+                    world.updateParty(party.getId(), PartyOperation.EXPEL, expelled.get());
 
                     emc.updatePartySearchAvailability(true);
                     emc.partyOperationUpdate(party, partyMembers);
@@ -256,15 +257,10 @@ public class MapleParty {
         }
     }
 
-    public MaplePartyCharacter getMemberById(int id) {
+    public Optional<MaplePartyCharacter> getMemberById(int id) {
         lock.lock();
         try {
-            for (MaplePartyCharacter chr : members) {
-                if (chr.getId() == id) {
-                    return chr;
-                }
-            }
-            return null;
+            return members.stream().filter(c -> c.getId() == id).findFirst();
         } finally {
             lock.unlock();
         }

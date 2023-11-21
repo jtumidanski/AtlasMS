@@ -25,6 +25,7 @@ import tools.Pair;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class MapleReactorStats {
         if (nextState != null) {
             return nextState.getActiveSkills();
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 

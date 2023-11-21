@@ -2440,7 +2440,7 @@ public class MapleMap {
             characters.add(chr);
             chrSize = characters.size();
 
-            if (party.isPresent() && party.map(p -> p.getMemberById(chr.getId())).isPresent()) {
+            if (party.isPresent() && party.flatMap(p -> p.getMemberById(chr.getId())).isPresent()) {
                 addPartyMemberInternal(chr, party.get().getId());
             }
             itemMonitorTimeout = 1;
@@ -2765,7 +2765,7 @@ public class MapleMap {
         Optional<MapleParty> party = chr.getParty();
         chrWLock.lock();
         try {
-            if (party.isPresent() && party.map(p -> p.getMemberById(chr.getId())).isPresent()) {
+            if (party.isPresent() && party.flatMap(p -> p.getMemberById(chr.getId())).isPresent()) {
                 removePartyMemberInternal(chr, party.get().getId());
             }
 

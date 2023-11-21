@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 
 /*
@@ -180,7 +181,7 @@ public class CashShop {
         }
     }
 
-    public Item findByCashId(int cashId) {
+    public Optional<Item> findByCashId(int cashId) {
         boolean isRing;
         Equip equip = null;
         for (Item item : getInventory()) {
@@ -192,11 +193,11 @@ public class CashShop {
             }
 
             if ((item.getPetId() > -1 ? item.getPetId() : isRing ? equip.getRingId() : item.getCashId()) == cashId) {
-                return item;
+                return Optional.of(item);
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public void addToInventory(Item item) {

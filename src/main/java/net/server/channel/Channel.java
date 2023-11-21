@@ -703,7 +703,7 @@ public final class Channel {
                 return false;
             }
 
-            MapleMiniDungeonInfo mmdi = MapleMiniDungeonInfo.getDungeon(dungeonid);
+            MapleMiniDungeonInfo mmdi = MapleMiniDungeonInfo.getDungeon(dungeonid).orElseThrow();
             MapleMiniDungeon mmd = new MapleMiniDungeon(mmdi.getBase(), this.getMapFactory().getMap(mmdi.getDungeonId()).getTimeLimit());   // thanks Conrad for noticing hardcoded time limit for minidungeons
 
             dungeons.put(dungeonid, mmd);

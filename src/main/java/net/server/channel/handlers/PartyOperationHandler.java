@@ -44,8 +44,7 @@ public final class PartyOperationHandler extends AbstractMaplePacketHandler {
     }
 
     private static void changePartyLeader(MapleClient client, MapleParty party, int characterId) {
-        MaplePartyCharacter newLeader = party.getMemberById(characterId);
-        client.getWorldServer().updateParty(party.getId(), PartyOperation.CHANGE_LEADER, newLeader);
+        party.getMemberById(characterId).ifPresent(l -> client.getWorldServer().updateParty(party.getId(), PartyOperation.CHANGE_LEADER, l));
     }
 
     private static void expelFromParty(MapleClient client, int characterId) {
