@@ -5983,8 +5983,12 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         this.hair = hair;
     }
 
-    public MapleHiredMerchant getHiredMerchant() {
-        return hiredMerchant;
+    public boolean hasHiredMerchant() {
+        return getHiredMerchant().isPresent();
+    }
+
+    public Optional<MapleHiredMerchant> getHiredMerchant() {
+        return Optional.ofNullable(hiredMerchant);
     }
 
     public void setHiredMerchant(MapleHiredMerchant merchant) {
@@ -6558,26 +6562,26 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     }
 
     public void closeHiredMerchant(boolean closeMerchant) {
-        MapleHiredMerchant merchant = this.getHiredMerchant();
-        if (merchant == null) {
+        Optional<MapleHiredMerchant> merchant = getHiredMerchant();
+        if (merchant.isEmpty()) {
             return;
         }
 
         if (closeMerchant) {
-            if (merchant.isOwner(this) && merchant.getItems().isEmpty()) {
-                merchant.forceClose();
+            if (merchant.get().isOwner(this) && merchant.get().getItems().isEmpty()) {
+                merchant.get().forceClose();
             } else {
-                merchant.removeVisitor(this);
+                merchant.get().removeVisitor(this);
                 this.setHiredMerchant(null);
             }
         } else {
-            if (merchant.isOwner(this)) {
-                merchant.setOpen(true);
+            if (merchant.get().isOwner(this)) {
+                merchant.get().setOpen(true);
             } else {
-                merchant.removeVisitor(this);
+                merchant.get().removeVisitor(this);
             }
             try {
-                merchant.saveItems(false);
+                merchant.get().saveItems(false);
             } catch (SQLException ex) {
                 ex.printStackTrace();
                 FilePrinter.printError(FilePrinter.EXCEPTION_CAUGHT, "Error while saving " + name + "'s Hired Merchant items.");

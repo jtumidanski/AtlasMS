@@ -214,7 +214,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
     }
 
     private void removeOwner(MapleCharacter owner) {
-        if (owner.getHiredMerchant() == this) {
+        if (owner.getHiredMerchant().filter(m -> m == this).isPresent()) {
             owner.announce(MaplePacketCreator.hiredMerchantOwnerLeave());
             owner.announce(MaplePacketCreator.leaveHiredMerchant(0x00, 0x03));
             owner.setHiredMerchant(null);
@@ -381,7 +381,8 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
                     .map(World::getPlayerStorage)
                     .flatMap(w -> w.getCharacterById(ownerId))
                     .filter(MapleCharacter::isLoggedinWorld)
-                    .filter(o -> o.getHiredMerchant() == this)
+                    .filter(MapleCharacter::hasHiredMerchant)
+                    .filter(o -> o.getHiredMerchant().orElseThrow() == this)
                     .ifPresent(this::closeOwnerMerchant);
         } finally {
             visitorLock.unlock();

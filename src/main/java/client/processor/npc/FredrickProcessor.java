@@ -296,11 +296,7 @@ public class FredrickProcessor {
                     chr.withdrawMerchantMesos();
 
                     if (deleteFredrickItems(chr.getId())) {
-                        MapleHiredMerchant merchant = chr.getHiredMerchant();
-
-                        if (merchant != null) {
-                            merchant.clearItems();
-                        }
+                        chr.getHiredMerchant().ifPresent(MapleHiredMerchant::clearItems);
 
                         for (Pair<Item, MapleInventoryType> it : items) {
                             Item item = it.getLeft();
