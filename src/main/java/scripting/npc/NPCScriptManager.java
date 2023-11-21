@@ -35,6 +35,7 @@ import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Matze
@@ -50,12 +51,10 @@ public class NPCScriptManager extends AbstractScriptManager {
     }
 
     public boolean isNpcScriptAvailable(MapleClient c, String fileName) {
-        ScriptEngine engine = null;
-        if (fileName != null) {
-            engine = getScriptEngine("npc/" + fileName + ".js", c);
+        if (fileName.isEmpty()) {
+            return false;
         }
-
-        return engine != null;
+        return getScriptEngine("npc/" + fileName + ".js", c).isPresent();
     }
 
     public boolean start(MapleClient c, int npc, MapleCharacter chr) {
@@ -86,15 +85,15 @@ public class NPCScriptManager extends AbstractScriptManager {
                 return;
             }
             cms.put(c, cm);
-            ScriptEngine engine = getScriptEngine("npc/" + filename + ".js", c);
+            Optional<ScriptEngine> engine = getScriptEngine("npc/" + filename + ".js", c);
 
-            if (engine == null) {
+            if (engine.isEmpty()) {
                 c.getPlayer().dropMessage(1, "NPC " + npc + " is uncoded.");
                 cm.dispose();
                 return;
             }
-            engine.put("cm", cm);
-            Invocable invocable = (Invocable) engine;
+            engine.get().put("cm", cm);
+            Invocable invocable = (Invocable) engine.get();
             scripts.put(c, invocable);
             try {
                 invocable.invokeFunction("start", chrs);
@@ -116,7 +115,7 @@ public class NPCScriptManager extends AbstractScriptManager {
             }
             if (c.canClickNPC()) {
                 cms.put(c, cm);
-                ScriptEngine engine = null;
+                Optional<ScriptEngine> engine = Optional.empty();
                 if (!itemScript) {
                     if (fileName != null) {
                         engine = getScriptEngine("npc/" + fileName + ".js", c);
@@ -126,16 +125,16 @@ public class NPCScriptManager extends AbstractScriptManager {
                         engine = getScriptEngine("item/" + fileName + ".js", c);
                     }
                 }
-                if (engine == null) {
+                if (engine.isEmpty()) {
                     engine = getScriptEngine("npc/" + npc + ".js", c);
                     cm.resetItemScript();
                 }
-                if (engine == null) {
+                if (engine.isEmpty()) {
                     dispose(c);
                     return false;
                 }
-                engine.put(engineName, cm);
-                Invocable iv = (Invocable) engine;
+                engine.get().put(engineName, cm);
+                Invocable iv = (Invocable) engine.get();
                 scripts.put(c, iv);
                 c.setClickedNPC();
                 try {

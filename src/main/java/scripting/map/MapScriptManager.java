@@ -27,11 +27,13 @@ import scripting.AbstractScriptManager;
 import tools.FilePrinter;
 
 import javax.script.Invocable;
+import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class MapScriptManager extends AbstractScriptManager {
 
@@ -63,10 +65,10 @@ public class MapScriptManager extends AbstractScriptManager {
             }
         }
 
-        Invocable iv = scripts.get(mapScriptPath);
-        if (iv != null) {
+        Optional<Invocable> iv = Optional.ofNullable(scripts.get(mapScriptPath));
+        if (iv.isPresent()) {
             try {
-                iv.invokeFunction("start", new MapScriptMethods(c));
+                iv.get().invokeFunction("start", new MapScriptMethods(c));
                 return true;
             } catch (final ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
@@ -74,13 +76,13 @@ public class MapScriptManager extends AbstractScriptManager {
         }
 
         try {
-            iv = (Invocable) getScriptEngine("map/" + mapScriptPath + ".js");
-            if (iv == null) {
+            Optional<ScriptEngine> engine = getScriptEngine("map/" + mapScriptPath + ".js");
+            if (engine.isEmpty()) {
                 return false;
             }
 
-            scripts.put(mapScriptPath, iv);
-            iv.invokeFunction("start", new MapScriptMethods(c));
+            scripts.put(mapScriptPath, (Invocable) engine.get());
+            ((Invocable) engine.get()).invokeFunction("start", new MapScriptMethods(c));
             return true;
         } catch (final Exception ute) {
             FilePrinter.printError(FilePrinter.MAP_SCRIPT + mapScriptPath + ".txt", ute);

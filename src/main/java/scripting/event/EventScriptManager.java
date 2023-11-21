@@ -95,7 +95,7 @@ public class EventScriptManager extends AbstractScriptManager {
     }
 
     private EventEntry initializeEventEntry(String script, Channel channel) {
-        ScriptEngine engine = getScriptEngine("event/" + script + ".js");
+        ScriptEngine engine = getScriptEngine("event/" + script + ".js").orElseThrow();
         Invocable iv = SynchronizedInvocable.of((Invocable) engine);
         EventManager eventManager = new EventManager(channel, iv, script);
         engine.put(INJECTED_VARIABLE_NAME, eventManager);

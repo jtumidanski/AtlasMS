@@ -33,6 +33,7 @@ import javax.script.ScriptEngine;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author RMZero213
@@ -47,12 +48,11 @@ public class QuestScriptManager extends AbstractScriptManager {
         return instance;
     }
 
-    private ScriptEngine getQuestScriptEngine(MapleClient c, short questid) {
-        ScriptEngine iv = getScriptEngine("quest/" + questid + ".js", c);
-        if (iv == null && GameConstants.isMedalQuest(questid)) {
+    private Optional<ScriptEngine> getQuestScriptEngine(MapleClient c, short questid) {
+        Optional<ScriptEngine> iv = getScriptEngine("quest/" + questid + ".js", c);
+        if (iv.isEmpty() && GameConstants.isMedalQuest(questid)) {
             iv = getScriptEngine("quest/medalQuest.js", c);   // start generic medal quest
         }
-
         return iv;
     }
 
@@ -71,15 +71,15 @@ public class QuestScriptManager extends AbstractScriptManager {
                     return;
                 }
 
-                ScriptEngine engine = getQuestScriptEngine(c, questid);
-                if (engine == null) {
+                Optional<ScriptEngine> engine = getQuestScriptEngine(c, questid);
+                if (engine.isEmpty()) {
                     FilePrinter.printError(FilePrinter.QUEST_UNCODED, "START Quest " + questid + " is uncoded.");
                     qm.dispose();
                     return;
                 }
 
-                engine.put("qm", qm);
-                Invocable iv = (Invocable) engine;
+                engine.get().put("qm", qm);
+                Invocable iv = (Invocable) engine.get();
                 scripts.put(c, iv);
                 c.setClickedNPC();
                 iv.invokeFunction("start", (byte) 1, (byte) 0, 0);
@@ -125,15 +125,15 @@ public class QuestScriptManager extends AbstractScriptManager {
                     return;
                 }
 
-                ScriptEngine engine = getQuestScriptEngine(c, questid);
-                if (engine == null) {
+                Optional<ScriptEngine> engine = getQuestScriptEngine(c, questid);
+                if (engine.isEmpty()) {
                     FilePrinter.printError(FilePrinter.QUEST_UNCODED, "END Quest " + questid + " is uncoded.");
                     qm.dispose();
                     return;
                 }
 
-                engine.put("qm", qm);
-                Invocable iv = (Invocable) engine;
+                engine.get().put("qm", qm);
+                Invocable iv = (Invocable) engine.get();
                 scripts.put(c, iv);
                 c.setClickedNPC();
                 iv.invokeFunction("end", (byte) 1, (byte) 0, 0);
@@ -169,15 +169,15 @@ public class QuestScriptManager extends AbstractScriptManager {
             if (c.canClickNPC()) {
                 qms.put(c, qm);
 
-                ScriptEngine engine = getQuestScriptEngine(c, questid);
-                if (engine == null) {
+                Optional<ScriptEngine> engine = getQuestScriptEngine(c, questid);
+                if (engine.isEmpty()) {
                     //FilePrinter.printError(FilePrinter.QUEST_UNCODED, "RAISE Quest " + questid + " is uncoded.");
                     qm.dispose();
                     return;
                 }
 
-                engine.put("qm", qm);
-                Invocable iv = (Invocable) engine;
+                engine.get().put("qm", qm);
+                Invocable iv = (Invocable) engine.get();
                 scripts.put(c, iv);
                 c.setClickedNPC();
                 iv.invokeFunction("raiseOpen");

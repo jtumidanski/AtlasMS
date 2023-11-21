@@ -27,10 +27,12 @@ import server.maps.MaplePortal;
 import tools.FilePrinter;
 
 import javax.script.Invocable;
+import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class PortalScriptManager extends AbstractScriptManager {
 
@@ -47,27 +49,27 @@ public class PortalScriptManager extends AbstractScriptManager {
         return instance;
     }
 
-    private Invocable getPortalScript(String scriptName) {
+    private Optional<Invocable> getPortalScript(String scriptName) {
         String scriptPath = "portal/" + scriptName + ".js";
-        Invocable iv = scripts.get(scriptPath);
-        if (iv != null) {
+        Optional<Invocable> iv = Optional.ofNullable(scripts.get(scriptPath));
+        if (iv.isPresent()) {
             return iv;
         }
 
-        iv = (Invocable) getScriptEngine(scriptPath);
-        if (iv == null) {
-            return null;
+        Optional<ScriptEngine> engine = getScriptEngine(scriptPath);
+        if (engine.isEmpty()) {
+            return Optional.empty();
         }
 
-        scripts.put(scriptPath, iv);
+        scripts.put(scriptPath, (Invocable) engine.get());
         return iv;
     }
 
     public boolean executePortalScript(MaplePortal portal, MapleClient c) {
         try {
-            Invocable iv = getPortalScript(portal.getScriptName());
-            if (iv != null) {
-                return (boolean) iv.invokeFunction("enter", new PortalPlayerInteraction(c, portal));
+            Optional<Invocable> iv = getPortalScript(portal.getScriptName());
+            if (iv.isPresent()) {
+                return (boolean) iv.get().invokeFunction("enter", new PortalPlayerInteraction(c, portal));
             }
         } catch (Exception ute) {
             FilePrinter.printError(FilePrinter.PORTAL + portal.getScriptName() + ".txt", ute);

@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * @author Matze
@@ -46,10 +47,10 @@ public abstract class AbstractScriptManager {
         sef = new ScriptEngineManager().getEngineByName("graal.js").getFactory();
     }
 
-    protected ScriptEngine getScriptEngine(String path) {
+    protected Optional<ScriptEngine> getScriptEngine(String path) {
         Path scriptFile = Path.of("scripts", path);
         if (!Files.exists(scriptFile)) {
-            return null;
+            return Optional.empty();
         }
 
         ScriptEngine engine = sef.getScriptEngine();
@@ -63,19 +64,15 @@ public abstract class AbstractScriptManager {
             engine.eval(br);
         } catch (final ScriptException | IOException t) {
             //log.warn("Exception during script eval for file: {}", path, t);
-            return null;
+            return Optional.empty();
         }
 
-        return graalScriptEngine;
+        return Optional.of(graalScriptEngine);
     }
 
-    protected ScriptEngine getScriptEngine(String path, MapleClient c) {
-        ScriptEngine engine = c.getScriptEngine("scripts/" + path);
-        if (engine == null) {
-            engine = getScriptEngine(path);
-            c.setScriptEngine(path, engine);
-        }
-
+    protected Optional<ScriptEngine> getScriptEngine(String path, MapleClient c) {
+        Optional<ScriptEngine> engine = c.getScriptEngine("scripts/" + path).or(() -> getScriptEngine(path));
+        engine.ifPresent(scriptEngine -> c.setScriptEngine(path, scriptEngine));
         return engine;
     }
 

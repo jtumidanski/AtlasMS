@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Lerk
@@ -53,13 +54,13 @@ public class ReactorScriptManager extends AbstractScriptManager {
 
     public void onHit(MapleClient c, MapleReactor reactor) {
         try {
-            Invocable iv = initializeInvocable(c, reactor);
-            if (iv == null) {
+            Optional<Invocable> iv = initializeInvocable(c, reactor);
+            if (iv.isEmpty()) {
                 return;
             }
 
-            ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
-            iv.invokeFunction("hit");
+            ReactorActionManager rm = new ReactorActionManager(c, reactor, iv.get());
+            iv.get().invokeFunction("hit");
         } catch (final NoSuchMethodException e) {
         } //do nothing, hit is OPTIONAL
 
@@ -70,13 +71,13 @@ public class ReactorScriptManager extends AbstractScriptManager {
 
     public void act(MapleClient c, MapleReactor reactor) {
         try {
-            Invocable iv = initializeInvocable(c, reactor);
-            if (iv == null) {
+            Optional<Invocable> iv = initializeInvocable(c, reactor);
+            if (iv.isEmpty()) {
                 return;
             }
 
-            ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
-            iv.invokeFunction("act");
+            ReactorActionManager rm = new ReactorActionManager(c, reactor, iv.get());
+            iv.get().invokeFunction("act");
         } catch (final ScriptException | NoSuchMethodException | NullPointerException e) {
             FilePrinter.printError(FilePrinter.REACTOR + reactor.getId() + ".txt", e);
         }
@@ -120,32 +121,32 @@ public class ReactorScriptManager extends AbstractScriptManager {
 
     private void touching(MapleClient c, MapleReactor reactor, boolean touching) {
         try {
-            Invocable iv = initializeInvocable(c, reactor);
-            if (iv == null) {
+            Optional<Invocable> iv = initializeInvocable(c, reactor);
+            if (iv.isEmpty()) {
                 return;
             }
 
-            ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
+            ReactorActionManager rm = new ReactorActionManager(c, reactor, iv.get());
             if (touching) {
-                iv.invokeFunction("touch");
+                iv.get().invokeFunction("touch");
             } else {
-                iv.invokeFunction("untouch");
+                iv.get().invokeFunction("untouch");
             }
         } catch (final ScriptException | NoSuchMethodException | NullPointerException ute) {
             FilePrinter.printError(FilePrinter.REACTOR + reactor.getId() + ".txt", ute);
         }
     }
 
-    private Invocable initializeInvocable(MapleClient c, MapleReactor reactor) {
-        ScriptEngine engine = getScriptEngine("reactor/" + reactor.getId() + ".js", c);
-        if (engine == null) {
-            return null;
+    private Optional<Invocable> initializeInvocable(MapleClient c, MapleReactor reactor) {
+        Optional<ScriptEngine> engine = getScriptEngine("reactor/" + reactor.getId() + ".js", c);
+        if (engine.isEmpty()) {
+            return Optional.empty();
         }
 
-        Invocable iv = (Invocable) engine;
+        Invocable iv = (Invocable) engine.get();
         ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
-        engine.put("rm", rm);
+        engine.get().put("rm", rm);
 
-        return iv;
+        return Optional.of(iv);
     }
 }

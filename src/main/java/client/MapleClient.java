@@ -1190,8 +1190,8 @@ public class MapleClient {
         engines.put(name, e);
     }
 
-    public ScriptEngine getScriptEngine(String name) {
-        return engines.get(name);
+    public Optional<ScriptEngine> getScriptEngine(String name) {
+        return Optional.of(engines.get(name));
     }
 
     public void removeScriptEngine(String name) {
