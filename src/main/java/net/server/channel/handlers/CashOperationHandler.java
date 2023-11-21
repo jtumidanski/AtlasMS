@@ -143,11 +143,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                     cs.gift(Integer.parseInt(recipient.get("id")), chr.getName(), message, cItem.getSN());
                     c.announce(MaplePacketCreator.showGiftSucceed(recipient.get("name"), cItem));
                     c.announce(MaplePacketCreator.showCash(chr));
-                    try {
-                        chr.sendNote(recipient.get("name"), chr.getName() + " has sent you a gift! Go check out the Cash Shop.", (byte) 0); //fame or not
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
+                    chr.sendNote(recipient.get("name"), chr.getName() + " has sent you a gift! Go check out the Cash Shop.", (byte) 0); //fame or not
                     c.getChannelServer()
                             .getPlayerStorage()
                             .getCharacterByName(recipient.get("name"))
@@ -352,11 +348,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                                 cs.gainCash(toCharge, itemRing, chr.getWorld());
                                 cs.gift(partner.getId(), chr.getName(), text, eqp.getSN(), rings.getRight());
                                 chr.addCrushRing(MapleRing.loadFromDb(rings.getLeft()));
-                                try {
-                                    chr.sendNote(partner.getName(), text, (byte) 1);
-                                } catch (SQLException ex) {
-                                    ex.printStackTrace();
-                                }
+                                chr.sendNote(partner.getName(), text, (byte) 1);
                                 partner.showNote();
                             }
                         }
@@ -418,11 +410,7 @@ public final class CashOperationHandler extends AbstractMaplePacketHandler {
                                 cs.gainCash(payment, -itemRing.getPrice());
                                 cs.gift(partner.getId(), chr.getName(), text, eqp.getSN(), rings.getRight());
                                 chr.addFriendshipRing(MapleRing.loadFromDb(rings.getLeft()));
-                                try {
-                                    chr.sendNote(partner.getName(), text, (byte) 1);
-                                } catch (SQLException ex) {
-                                    ex.printStackTrace();
-                                }
+                                chr.sendNote(partner.getName(), text, (byte) 1);
                                 partner.showNote();
                             }
                         }

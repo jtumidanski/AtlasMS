@@ -519,17 +519,17 @@ public class AbstractPlayerInteraction {
 
     public Item evolvePet(byte slot, int afterId) {
         MaplePet evolved = null;
-        MaplePet target;
+        Optional<MaplePet> target;
 
         long period = (long) 90 * 24 * 60 * 60 * 1000;    //refreshes expiration date: 90 days
 
         target = getPlayer().getPet(slot);
-        if (target == null) {
+        if (target.isEmpty()) {
             getPlayer().message("Pet could not be evolved...");
             return (null);
         }
 
-        Item tmp = gainItem(afterId, (short) 1, false, true, period, target);
+        Item tmp = gainItem(afterId, (short) 1, false, true, period, target.get());
             
             /*
             evolved = MaplePet.loadFromDb(tmp.getItemId(), tmp.getPosition(), tmp.getPetId());
@@ -552,7 +552,7 @@ public class AbstractPlayerInteraction {
             chr.getClient().getWorldServer().registerPetHunger(chr, chr.getPetIndex(evolved));
             */
 
-        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.CASH, target.getPosition(), (short) 1, false);
+        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.CASH, target.get().getPosition(), (short) 1, false);
 
         return evolved;
     }

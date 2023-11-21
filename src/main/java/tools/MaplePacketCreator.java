@@ -180,13 +180,7 @@ public class MaplePacketCreator {
         mplew.writeInt(chr.getHair()); // hair
 
         for (int i = 0; i < 3; i++) {
-            MaplePet pet = chr.getPet(i);
-            if (pet != null) //Checked GMS.. and your pets stay when going into the cash shop.
-            {
-                mplew.writeLong(pet.getUniqueId());
-            } else {
-                mplew.writeLong(0);
-            }
+            mplew.writeLong(chr.getPet(i).map(MaplePet::getUniqueId).orElse(0));
         }
 
         mplew.write(chr.getLevel()); // level
@@ -320,11 +314,7 @@ public class MaplePacketCreator {
         Item cWeapon = equip.getItem((short) -111);
         mplew.writeInt(cWeapon != null ? cWeapon.getItemId() : 0);
         for (int i = 0; i < 3; i++) {
-            if (chr.getPet(i) != null) {
-                mplew.writeInt(chr.getPet(i).getItemId());
-            } else {
-                mplew.writeInt(0);
-            }
+            mplew.writeInt(chr.getPet(i).map(Item::getItemId).orElse(0));
         }
     }
 

@@ -1447,7 +1447,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                 int messengerid = rs.getInt("messengerid");
                 int position = rs.getInt("messengerposition");
                 if (messengerid > 0 && position < 4 && position > -1) {
-                    Optional<MapleMessenger> messenger = wserv.flatMap(w ->w.getMessenger(messengerid));
+                    Optional<MapleMessenger> messenger = wserv.flatMap(w -> w.getMessenger(messengerid));
                     if (messenger.isPresent()) {
                         ret.messenger = messenger.get();
                         ret.messengerposition = position;
@@ -1727,17 +1727,22 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         ariantroomslot[room] = 0;
     }
 
-    public static void sendNote(String to, String from, String msg, byte fame) throws SQLException {
-        Connection con = DatabaseConnection.getConnection();
-        try (PreparedStatement ps = con.prepareStatement("INSERT INTO notes (`to`, `from`, `message`, `timestamp`, `fame`) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, to);
-            ps.setString(2, from);
-            ps.setString(3, msg);
-            ps.setLong(4, Server.getInstance().getCurrentTime());
-            ps.setByte(5, fame);
-            ps.executeUpdate();
-        } finally {
-            con.close();
+    public static void sendNote(String to, String from, String msg, byte fame) {
+        Connection con;
+        try {
+            con = DatabaseConnection.getConnection();
+            try (PreparedStatement ps = con.prepareStatement("INSERT INTO notes (`to`, `from`, `message`, `timestamp`, `fame`) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, to);
+                ps.setString(2, from);
+                ps.setString(3, msg);
+                ps.setLong(4, Server.getInstance().getCurrentTime());
+                ps.setByte(5, fame);
+                ps.executeUpdate();
+            } finally {
+                con.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -3000,7 +3005,9 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
                     if (value == 1 && ((returnMapid == 211000000 && thisMapid != 200082300) || returnMapid == 193000000)) {
                         return true;        //protection from cold
-                    } else return value == 2 && (returnMapid == 230000000 || thisMapid == 200082300);        //breathing underwater
+                    } else {
+                        return value == 2 && (returnMapid == 230000000 || thisMapid == 200082300);        //breathing underwater
+                    }
                 }
             }
         } finally {
@@ -3193,7 +3200,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             changeMap(temp);
         } else {
             // if this event map has a gate already opened, render it
-            getEventInstance().ifPresent(ei ->  ei.recoverOpenedGate(this, map.getId()));
+            getEventInstance().ifPresent(ei -> ei.recoverOpenedGate(this, map.getId()));
 
             // if this map has obstacle components moving, make it do so for this client
             announce(MaplePacketCreator.environmentMoveList(map.getEnvironment().entrySet()));
@@ -6597,14 +6604,14 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         }
     }
 
-    public MaplePet getPet(int index) {
+    public Optional<MaplePet> getPet(int index) {
         if (index < 0) {
-            return null;
+            return Optional.empty();
         }
 
         petLock.lock();
         try {
-            return pets[index];
+            return Optional.ofNullable(pets[index]);
         } finally {
             petLock.unlock();
         }
@@ -9128,6 +9135,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
                 FilePrinter.printError(FilePrinter.SAVE_CHAR, se, "Error trying to rollback " + name);
             }
         } finally {
+            FilePrinter.print(FilePrinter.SAVING_CHARACTER, "Saved " + name + " at " + c.getTime());
             try {
                 con.setAutoCommit(true);
                 con.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
@@ -9188,7 +9196,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         return skillMacros;
     }
 
-    public void sendNote(String to, String msg, byte fame) throws SQLException {
+    public void sendNote(String to, String msg, byte fame) {
         sendNote(to, this.getName(), msg, fame);
     }
 
@@ -9852,11 +9860,10 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     }
 
     public void runFullnessSchedule(int petSlot) {
-        MaplePet pet = getPet(petSlot);
-        if (pet == null) {
-            return;
-        }
+        getPet(petSlot).ifPresent(this::runFullnessSchedule);
+    }
 
+    private void runFullnessSchedule(MaplePet pet) {
         int newFullness = pet.getFullness() - PetDataFactory.getHunger(pet.getItemId());
         if (newFullness <= 5) {
             pet.setFullness(15);
@@ -9901,10 +9908,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
     public void unequipAllPets() {
         for (int i = 0; i < 3; i++) {
-            MaplePet pet = getPet(i);
-            if (pet != null) {
-                unequipPet(pet, true);
-            }
+            getPet(i).ifPresent(p -> unequipPet(p, true));
         }
     }
 
@@ -9914,11 +9918,11 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
     public void unequipPet(MaplePet pet, boolean shift_left, boolean hunger) {
         byte petIdx = this.getPetIndex(pet);
-        MaplePet chrPet = this.getPet(petIdx);
+        Optional<MaplePet> chrPet = this.getPet(petIdx);
 
-        if (chrPet != null) {
-            chrPet.setSummoned(false);
-            chrPet.saveToDb();
+        if (chrPet.isPresent()) {
+            chrPet.get().setSummoned(false);
+            chrPet.get().saveToDb();
         }
 
         this.getClient().getWorldServer().unregisterPetHunger(this, petIdx);

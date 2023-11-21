@@ -39,16 +39,12 @@ public final class NoteActionHandler extends AbstractMaplePacketHandler {
         if (action == 0 && c.getPlayer().getCashShop().getAvailableNotes() > 0) {
             String charname = slea.readMapleAsciiString();
             String message = slea.readMapleAsciiString();
-            try {
-                if (c.getPlayer().getCashShop().isOpened()) {
-                    c.announce(MaplePacketCreator.showCashInventory(c));
-                }
-
-                c.getPlayer().sendNote(charname, message, (byte) 1);
-                c.getPlayer().getCashShop().decreaseNotes();
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if (c.getPlayer().getCashShop().isOpened()) {
+                c.announce(MaplePacketCreator.showCashInventory(c));
             }
+
+            c.getPlayer().sendNote(charname, message, (byte) 1);
+            c.getPlayer().getCashShop().decreaseNotes();
         } else if (action == 1) {
             int num = slea.readByte();
             slea.readByte();

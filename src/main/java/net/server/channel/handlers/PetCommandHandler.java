@@ -10,6 +10,8 @@ import tools.MaplePacketCreator;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public final class PetCommandHandler extends AbstractMaplePacketHandler {
 
     @Override
@@ -17,18 +19,21 @@ public final class PetCommandHandler extends AbstractMaplePacketHandler {
         MapleCharacter chr = c.getPlayer();
         int petId = slea.readInt();
         byte petIndex = chr.getPetIndex(petId);
-        MaplePet pet;
         if (petIndex == -1) {
             return;
-        } else {
-            pet = chr.getPet(petIndex);
         }
+
+        Optional<MaplePet> pet = chr.getPet(petIndex);
+        if (pet.isEmpty()) {
+            return;
+        }
+
         slea.readInt();
         slea.readByte();
         byte command = slea.readByte();
-        PetCommand petCommand = PetDataFactory.getPetCommand(pet.getItemId(), command);
+        PetCommand petCommand = PetDataFactory.getPetCommand(pet.get().getItemId(), command);
         if (Randomizer.nextInt(100) < petCommand.probability()) {
-            pet.gainClosenessFullness(chr, petCommand.increase(), 0, command);
+            pet.get().gainClosenessFullness(chr, petCommand.increase(), 0, command);
             chr.getMap().broadcastMessage(MaplePacketCreator.commandResponse(chr.getId(), petIndex, false, command, false));
         } else {
             chr.getMap().broadcastMessage(MaplePacketCreator.commandResponse(chr.getId(), petIndex, true, command, false));

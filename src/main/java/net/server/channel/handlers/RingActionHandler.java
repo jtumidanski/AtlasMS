@@ -397,48 +397,42 @@ public final class RingActionHandler extends AbstractMaplePacketHandler {
                     return;
                 }
 
-                try {
-                    World wserv = c.getWorldServer();
-                    Pair<Boolean, Boolean> registration = wserv.getMarriageQueuedLocation(marriageId);
+                World wserv = c.getWorldServer();
+                Pair<Boolean, Boolean> registration = wserv.getMarriageQueuedLocation(marriageId);
 
-                    if (registration != null) {
-                        if (wserv.addMarriageGuest(marriageId, guest)) {
-                            boolean cathedral = registration.getLeft();
-                            int newItemId = cathedral ? 4031407 : 4031406;
+                if (registration != null) {
+                    if (wserv.addMarriageGuest(marriageId, guest)) {
+                        boolean cathedral = registration.getLeft();
+                        int newItemId = cathedral ? 4031407 : 4031406;
 
-                            Channel cserv = c.getChannelServer();
-                            int resStatus = cserv.getWeddingReservationStatus(marriageId, cathedral);
-                            if (resStatus > 0) {
-                                long expiration = cserv.getWeddingTicketExpireTime(resStatus + 1);
+                        Channel cserv = c.getChannelServer();
+                        int resStatus = cserv.getWeddingReservationStatus(marriageId, cathedral);
+                        if (resStatus > 0) {
+                            long expiration = cserv.getWeddingTicketExpireTime(resStatus + 1);
 
-                                MapleCharacter guestChr = c.getWorldServer().getPlayerStorage().getCharacterById(guest).orElse(null);
-                                if (guestChr != null && MapleInventoryManipulator.checkSpace(guestChr.getClient(), newItemId, 1, "") && MapleInventoryManipulator.addById(guestChr.getClient(), newItemId, (short) 1, expiration)) {
-                                    guestChr.dropMessage(6, "[Wedding] You've been invited to " + groom + " and " + bride + "'s Wedding!");
-                                } else {
-                                    if (guestChr != null && guestChr.isLoggedinWorld()) {
-                                        guestChr.dropMessage(6, "[Wedding] You've been invited to " + groom + " and " + bride + "'s Wedding! Receive your invitation from Duey!");
-                                    } else {
-                                        c.getPlayer().sendNote(name, "You've been invited to " + groom + " and " + bride + "'s Wedding! Receive your invitation from Duey!", (byte) 0);
-                                    }
-
-                                    Item weddingTicket = new Item(newItemId, (short) 0, (short) 1);
-                                    weddingTicket.setExpiration(expiration);
-
-                                    DueyProcessor.dueyCreatePackage(weddingTicket, 0, groom, guest);
-                                }
+                            MapleCharacter guestChr = c.getWorldServer().getPlayerStorage().getCharacterById(guest).orElse(null);
+                            if (guestChr != null && MapleInventoryManipulator.checkSpace(guestChr.getClient(), newItemId, 1, "") && MapleInventoryManipulator.addById(guestChr.getClient(), newItemId, (short) 1, expiration)) {
+                                guestChr.dropMessage(6, "[Wedding] You've been invited to " + groom + " and " + bride + "'s Wedding!");
                             } else {
-                                c.getPlayer().dropMessage(5, "Wedding is already under way. You cannot invite any more guests for the event.");
+                                if (guestChr != null && guestChr.isLoggedinWorld()) {
+                                    guestChr.dropMessage(6, "[Wedding] You've been invited to " + groom + " and " + bride + "'s Wedding! Receive your invitation from Duey!");
+                                } else {
+                                    c.getPlayer().sendNote(name, "You've been invited to " + groom + " and " + bride + "'s Wedding! Receive your invitation from Duey!", (byte) 0);
+                                }
+
+                                Item weddingTicket = new Item(newItemId, (short) 0, (short) 1);
+                                weddingTicket.setExpiration(expiration);
+
+                                DueyProcessor.dueyCreatePackage(weddingTicket, 0, groom, guest);
                             }
                         } else {
-                            c.getPlayer().dropMessage(5, "'" + name + "' is already invited for your marriage.");
+                            c.getPlayer().dropMessage(5, "Wedding is already under way. You cannot invite any more guests for the event.");
                         }
                     } else {
-                        c.getPlayer().dropMessage(5, "Invitation was not sent to '" + name + "'. Either the time for your marriage reservation already came or it was not found.");
+                        c.getPlayer().dropMessage(5, "'" + name + "' is already invited for your marriage.");
                     }
-
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                    return;
+                } else {
+                    c.getPlayer().dropMessage(5, "Invitation was not sent to '" + name + "'. Either the time for your marriage reservation already came or it was not found.");
                 }
 
                 c.getAbstractPlayerInteraction().gainItem(itemId, (short) -1);

@@ -30,6 +30,7 @@ import server.maps.MapleMapObject;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -42,8 +43,8 @@ public final class PetLootHandler extends AbstractMaplePacketHandler {
         MapleCharacter chr = c.getPlayer();
 
         int petIndex = chr.getPetIndex(slea.readInt());
-        MaplePet pet = chr.getPet(petIndex);
-        if (pet == null || !pet.isSummoned()) {
+        Optional<MaplePet> pet = chr.getPet(petIndex);
+        if (pet.isEmpty() || !pet.get().isSummoned()) {
             c.announce(MaplePacketCreator.enableActions());
             return;
         }

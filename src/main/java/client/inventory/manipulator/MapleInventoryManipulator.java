@@ -425,8 +425,7 @@ public class MapleInventoryManipulator {
             if (petid > -1) { // thanks Vcoc for finding a d/c issue with equipped pets and pets remaining on DB here
                 int petIdx = chr.getPetIndex(petid);
                 if (petIdx > -1) {
-                    MaplePet pet = chr.getPet(petIdx);
-                    chr.unequipPet(pet, true);
+                    chr.getPet(petIdx).ifPresent(p -> chr.unequipPet(p, true));
                 }
 
                 inv.removeItem(slot, quantity, allowZero);
@@ -718,8 +717,7 @@ public class MapleInventoryManipulator {
         if (petid > -1) {
             int petIdx = chr.getPetIndex(petid);
             if (petIdx > -1) {
-                MaplePet pet = chr.getPet(petIdx);
-                chr.unequipPet(pet, true);
+                chr.getPet(petIdx).ifPresent(p -> chr.unequipPet(p, true));
             }
         }
 

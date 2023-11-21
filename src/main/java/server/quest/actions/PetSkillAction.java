@@ -54,11 +54,11 @@ public class PetSkillAction extends MapleQuestAction {
             return false;
         }
 
-        return chr.getPet(0) != null;
+        return chr.getPet(0).isPresent();
     }
 
     @Override
     public void run(MapleCharacter chr, Integer extSelection) {
-        chr.getPet(0).setFlag((byte) ItemConstants.getFlagByInt(flag));
+        chr.getPet(0).ifPresent(p -> p.setFlag((byte) ItemConstants.getFlagByInt(flag)));
     }
 } 

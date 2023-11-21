@@ -34,6 +34,8 @@ import net.server.Server;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
+import java.util.Optional;
+
 public final class PetFoodHandler extends AbstractMaplePacketHandler {
 
     @Override
@@ -63,8 +65,8 @@ public final class PetFoodHandler extends AbstractMaplePacketHandler {
             }
         }
 
-        MaplePet pet = chr.getPet(slot);
-        if (pet == null) {
+        Optional<MaplePet> pet = chr.getPet(slot);
+        if (pet.isEmpty()) {
             return;
         }
 
@@ -81,7 +83,7 @@ public final class PetFoodHandler extends AbstractMaplePacketHandler {
                         return;
                     }
 
-                    pet.gainClosenessFullness(chr, (pet.getFullness() <= 75) ? 1 : 0, 30, 1);   // 25+ "emptyness" to get +1 closeness
+                    pet.get().gainClosenessFullness(chr, (pet.get().getFullness() <= 75) ? 1 : 0, 30, 1);   // 25+ "emptyness" to get +1 closeness
                     MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, pos, (short) 1, false);
                 } finally {
                     useInv.unlockInventory();

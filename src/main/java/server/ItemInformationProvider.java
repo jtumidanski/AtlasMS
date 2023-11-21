@@ -1624,13 +1624,17 @@ public class ItemInformationProvider {
         return bRestricted;
     }
 
-    public int getStateChangeItem(int itemId) {
+    public Optional<Integer> getStateChangeItemId(int itemId) {
         if (triggerItemCache.containsKey(itemId)) {
-            return triggerItemCache.get(itemId);
+            return Optional.ofNullable(triggerItemCache.get(itemId));
         }
-        Optional<MapleData> data = getItemData(itemId);
-        int triggerItem = data.map(d -> MapleDataTool.getIntConvert("info/stateChangeItem", d, 0)).orElse(0);
-        triggerItemCache.put(itemId, triggerItem);
+
+        Optional<Integer> triggerItem = getItemData(itemId)
+                .map(d -> MapleDataTool.getIntConvert("info/stateChangeItem", d, 0));
+        if (triggerItem.isEmpty()) {
+            return Optional.empty();
+        }
+        triggerItemCache.put(itemId, triggerItem.get());
         return triggerItem;
     }
 
