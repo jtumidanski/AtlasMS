@@ -1,0 +1,21 @@
+version: '3.5'
+services:
+  db:
+    image: mysql:8.0.32
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - /mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: the
+      MYSQL_DATABASE: atlas
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    networks:
+      - internal-net
+    container_name: atlas-db
+networks:
+  internal-net:
+    name: internal-net

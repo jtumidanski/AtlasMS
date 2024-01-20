@@ -69,7 +69,7 @@ public class DatabaseConnection {
         int denies = 0;
         while (true) {   // There is no way it can pass with a null out of here?
             try {
-                return DriverManager.getConnection(YamlConfig.config.server.DB_URL, YamlConfig.config.server.DB_USER, YamlConfig.config.server.DB_PASS);
+                return DriverManager.getConnection(System.getenv("DB_URL"), System.getenv("DB_USER"), System.getenv("DB_PASS"));
             } catch (SQLException sqle) {
                 denies++;
 

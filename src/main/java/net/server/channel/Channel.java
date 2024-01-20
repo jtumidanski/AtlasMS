@@ -63,7 +63,6 @@ import java.util.stream.Collectors;
 public final class Channel {
 
     private final Map<Integer, Integer> storedVars = new HashMap<>();
-    private int port = 7575;
     private PlayerStorage players = new PlayerStorage();
     private int world, channel;
     private IoAcceptor acceptor;
@@ -115,7 +114,7 @@ public final class Channel {
         this.ongoingStartTime = startTime + 10000;  // rude approach to a world's last channel boot time, placeholder for the 1st wedding reservation ever
         this.mapManager = new MapleMapManager(null, world, channel);
         try {
-            port = 7575 + this.channel - 1;
+            int port = Integer.parseInt(System.getenv("CH_PORT_BASE")) + this.channel - 1;
             port += (world * 100);
             ip = YamlConfig.config.server.HOST + ":" + port;
             IoBuffer.setUseDirectBuffer(false);

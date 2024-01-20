@@ -19,6 +19,10 @@ FROM openjdk:19-jdk-slim
 
 # Host the server in a location that won't have permissions issues.
 WORKDIR /opt/server
+
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait /wait
+RUN chmod +x /wait
+
 # Copy the wizet files first since they're so big and won't change often.
 COPY wz ./wz
 # Copy the JAR we build earlier.
@@ -31,4 +35,5 @@ COPY config.yaml ./
 # This exposes the login server, and channels.
 # Format for channels: WWCC, where WW is 75 plus the world number and CC is 75 plus the channel number (both zero indexed).
 EXPOSE 8484 7575 7576 7577
-ENTRYPOINT ["java", "-jar", "./Server.jar"]
+ENV WAIT_COMMAND="java -jar ./Server.jar"
+ENTRYPOINT ["/wait"]

@@ -1089,13 +1089,14 @@ public class Server {
         acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MapleCodecFactory()));
         acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 30);
         acceptor.setHandler(new MapleServerHandler());
+        int port = Integer.parseInt(System.getenv("LG_PORT_BASE"));
         try {
-            acceptor.bind(new InetSocketAddress(8484));
+            acceptor.bind(new InetSocketAddress(port));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
 
-        System.out.println("Listening on port 8484\r\n\r\n");
+        System.out.printf("Listening on port %d\r\n\r\n", port);
 
         System.out.println("HeavenMS is now online.\r\n");
         online = true;
