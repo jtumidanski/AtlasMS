@@ -136,6 +136,7 @@ import server.maps.MapleSummon;
 import server.maps.SavedLocation;
 import server.maps.SavedLocationType;
 import server.minigame.MapleRockPaperScissor;
+import server.movement.MovePath;
 import server.partyquest.AriantColiseum;
 import server.partyquest.MonsterCarnival;
 import server.partyquest.MonsterCarnivalParty;
@@ -2789,7 +2790,7 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     }
 
     public void broadcastStance() {
-        map.broadcastMessage(this, MaplePacketCreator.movePlayer(id, this.getIdleMovement(), getIdleMovementDataLength()), false);
+        map.broadcastMessage(this, MaplePacketCreator.movePlayer(id, MovePath.idle(getPosition(), (byte) getStance())), false);
     }
 
     public MapleMap getWarpMap(int mapId) {

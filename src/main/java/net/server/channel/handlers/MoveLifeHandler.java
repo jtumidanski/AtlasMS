@@ -23,7 +23,6 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
-import config.YamlConfig;
 import server.life.MapleMonster;
 import server.life.MapleMonsterInformationProvider;
 import server.life.MobSkill;
@@ -31,11 +30,12 @@ import server.life.MobSkillFactory;
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
+import server.movement.Elem;
+import server.movement.MovePath;
 import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
-import tools.exceptions.EmptyMovementException;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -64,7 +64,8 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
 
         int objectid = slea.readInt();
         Optional<MapleMapObject> mmo = map.getMapObject(objectid);
-        if (mmo.isEmpty() || mmo.get().getType() != MapleMapObjectType.MONSTER) {
+        if (mmo.isEmpty() || mmo.get()
+                .getType() != MapleMapObjectType.MONSTER) {
             return;
         }
         MapleMonster monster = (MapleMonster) mmo.get();
@@ -114,7 +115,8 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
                 toUse = MobSkillFactory.getMobSkill(useSkillId, useSkillLevel);
 
                 if (monster.canUseSkill(toUse, true)) {
-                    int animationTime = MapleMonsterInformationProvider.getInstance().getMobSkillAnimationTime(toUse);
+                    int animationTime = MapleMonsterInformationProvider.getInstance()
+                            .getMobSkillAnimationTime(toUse);
                     if (animationTime > 0 && toUse.getSkillId() != 129) {
                         toUse.applyDelayedEffect(player, monster, true, animationTime);
                     } else {
@@ -139,7 +141,8 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
             if (noSkills > 0) {
                 int rndSkill = Randomizer.nextInt(noSkills);
 
-                Pair<Integer, Integer> skillToUse = monster.getSkills().get(rndSkill);
+                Pair<Integer, Integer> skillToUse = monster.getSkills()
+                        .get(rndSkill);
                 nextSkillId = skillToUse.getLeft();
                 nextSkillLevel = skillToUse.getRight();
                 nextUse = MobSkillFactory.getMobSkill(nextSkillId, nextSkillLevel);
@@ -168,28 +171,35 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
             c.announce(MaplePacketCreator.moveMonsterResponse(objectid, moveid, mobMp, aggro));
         }
 
-        try {
-            long movementDataStart = slea.getPosition();
-            updatePosition(slea, monster, -2);
-            long movementDataLength = slea.getPosition() - movementDataStart; //how many bytes were read by updatePosition
-            slea.seek(movementDataStart);
+        final MovePath res = new MovePath();
+        res.decode(slea);
 
-            map.broadcastMessage(player, MaplePacketCreator.moveMonster(objectid, mobMoveStartResult, nActionAndDir, skillData, slea, movementDataLength), serverStartPos);
-            //updatePosition(res, monster, -2); //does this need to be done after the packet is broadcast?
-            map.moveMonster(monster, monster.getPosition());
+        res.Movement()
+                .stream()
+                .filter(m -> m.getType() == 0)
+                .map(m -> m.getPosition((short) -2))
+                .forEach(monster::setPosition);
+        res.Movement()
+                .stream()
+                .map(Elem::getBMoveAction)
+                .forEach(monster::setStance);
 
-            slea.readByte();
-            slea.readByte();
-            slea.readByte();
-            slea.readByte();
-            slea.readInt();
+        map.broadcastMessage(player, MaplePacketCreator.moveMonster(objectid, mobMoveStartResult, nActionAndDir, skillData, res), serverStartPos);
+        //updatePosition(res, monster, -2); //does this need to be done after the packet is broadcast?
+        map.moveMonster(monster, monster.getPosition());
 
-        } catch (EmptyMovementException e) {
-        }
+        slea.readByte();
+        slea.readByte();
+        slea.readByte();
+        slea.readByte();
+        slea.readInt();
 
         if (banishPlayers != null) {
             for (MapleCharacter chr : banishPlayers) {
-                chr.changeMapBanish(monster.getBanish().getMap(), monster.getBanish().getPortal(), monster.getBanish().getMsg());
+                chr.changeMapBanish(monster.getBanish()
+                        .getMap(), monster.getBanish()
+                        .getPortal(), monster.getBanish()
+                        .getMsg());
             }
         }
     }

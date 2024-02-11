@@ -97,6 +97,7 @@ import server.maps.MaplePlayerShopItem;
 import server.maps.MapleReactor;
 import server.maps.MapleSummon;
 import server.movement.LifeMovementFragment;
+import server.movement.MovePath;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.data.output.LittleEndianWriter;
 import tools.data.output.MaplePacketLittleEndianWriter;
@@ -2391,12 +2392,11 @@ public class MaplePacketCreator {
         }
     }
 
-    public static byte[] movePlayer(int cid, SeekableLittleEndianAccessor movementSlea, long movementDataLength) {
+    public static byte[] movePlayer(int cid, MovePath moves) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.MOVE_PLAYER.getValue());
         mplew.writeInt(cid);
-        mplew.writeInt(0);
-        rebroadcastMovementList(mplew, movementSlea, movementDataLength);
+        moves.encode(mplew);
         return mplew.getPacket();
     }
 
@@ -2410,7 +2410,7 @@ public class MaplePacketCreator {
         return mplew.getPacket();
     }
 
-    public static byte[] moveMonster(int mobID, boolean mobMoveStartResult, byte actionAndDir, int skillData, SeekableLittleEndianAccessor movementSlea, long movementDataLength) {
+    public static byte[] moveMonster(int mobID, boolean mobMoveStartResult, byte actionAndDir, int skillData, MovePath moves) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.MOVE_MONSTER.getValue());
         mplew.writeInt(mobID);
@@ -2433,7 +2433,7 @@ public class MaplePacketCreator {
             mplew.writeInt(0); // m_aRandTimeforAreaAttack
         }
 
-        rebroadcastMovementList(mplew, movementSlea, movementDataLength);
+        moves.encode(mplew);
         return mplew.getPacket();
     }
 

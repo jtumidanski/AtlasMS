@@ -22,9 +22,10 @@
 package net.server.channel.handlers;
 
 import client.MapleClient;
+import server.movement.Elem;
+import server.movement.MovePath;
 import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
-import tools.exceptions.EmptyMovementException;
 
 public final class MovePlayerHandler extends AbstractMovementPacketHandler {
     @Override
@@ -38,19 +39,36 @@ public final class MovePlayerHandler extends AbstractMovementPacketHandler {
         slea.readInt(); //dwKey
         slea.readInt(); //crc32
 
-        try {   // thanks Sa for noticing empty movement sequences crashing players
-            long movementDataStart = slea.getPosition();
-            updatePosition(slea, c.getPlayer(), 0);
-            long movementDataLength = slea.getPosition() - movementDataStart; //how many bytes were read by updatePosition
-            slea.seek(movementDataStart);
+        final MovePath res = new MovePath();
+        res.decode(slea);
 
-            c.getPlayer().getMap().movePlayer(c.getPlayer(), c.getPlayer().getPosition());
-            if (c.getPlayer().isHidden()) {
-                c.getPlayer().getMap().broadcastGMMessage(c.getPlayer(), MaplePacketCreator.movePlayer(c.getPlayer().getId(), slea, movementDataLength), false);
-            } else {
-                c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.movePlayer(c.getPlayer().getId(), slea, movementDataLength), false);
-            }
-        } catch (EmptyMovementException e) {
+        res.Movement()
+                .stream()
+                .filter(m -> m.getType() == 0)
+                .map(m -> m.getPosition((short) 0))
+                .forEach(p -> c.getPlayer()
+                        .setPosition(p));
+        res.Movement()
+                .stream()
+                .map(Elem::getBMoveAction)
+                .forEach(ma -> c.getPlayer()
+                        .setStance(ma));
+
+        c.getPlayer()
+                .getMap()
+                .movePlayer(c.getPlayer(), c.getPlayer()
+                        .getPosition());
+        if (c.getPlayer()
+                .isHidden()) {
+            c.getPlayer()
+                    .getMap()
+                    .broadcastGMMessage(c.getPlayer(), MaplePacketCreator.movePlayer(c.getPlayer()
+                            .getId(), res), false);
+        } else {
+            c.getPlayer()
+                    .getMap()
+                    .broadcastMessage(c.getPlayer(), MaplePacketCreator.movePlayer(c.getPlayer()
+                            .getId(), res), false);
         }
     }
 }
