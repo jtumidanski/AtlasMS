@@ -1177,7 +1177,7 @@ public class MapleClient {
     }
 
     public Optional<ScriptEngine> getScriptEngine(String name) {
-        return Optional.of(engines.get(name));
+        return Optional.ofNullable(engines.get(name));
     }
 
     public void removeScriptEngine(String name) {

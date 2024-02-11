@@ -54,6 +54,7 @@ public final class CreateCharHandler extends AbstractMaplePacketHandler {
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         String name = slea.readMapleAsciiString();
         int job = slea.readInt();
+        short nSubJob = slea.readShort();
         int face = slea.readInt();
 
         int hair = slea.readInt();

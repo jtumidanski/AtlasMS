@@ -1316,7 +1316,7 @@ public class MapleMonster extends AbstractLoadedMapleLife {
         aggroRemoveController();
 
         setPosition(newPoint);
-        map.broadcastMessage(MaplePacketCreator.moveMonster(this.getObjectId(), false, -1, 0, 0, 0, this.getPosition(), this.getIdleMovement(), getIdleMovementDataLength()));
+        map.broadcastMessage(MaplePacketCreator.moveMonster(this.getObjectId(), false, (byte) -1, 0, this.getIdleMovement(), getIdleMovementDataLength()));
         map.moveMonster(this, this.getPosition());
 
         aggroUpdateController();

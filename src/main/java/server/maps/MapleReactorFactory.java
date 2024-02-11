@@ -31,6 +31,7 @@ import tools.StringUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +138,7 @@ public class MapleReactorFactory {
                                         }
                                     }
                                     MapleData activeSkillID = fknexon.getChildByPath("activeSkillID");
-                                    List<Integer> skillids = null;
+                                    List<Integer> skillids = Collections.emptyList();
                                     if (activeSkillID != null) {
                                         skillids = new ArrayList<>();
                                         for (MapleData skill : activeSkillID.getChildren()) {

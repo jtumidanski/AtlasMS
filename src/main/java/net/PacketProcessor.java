@@ -170,6 +170,7 @@ import net.server.channel.handlers.WhisperHandler;
 import net.server.handlers.CustomPacketHandler;
 import net.server.handlers.KeepAliveHandler;
 import net.server.handlers.LoginRequiringNoOpHandler;
+import net.server.handlers.NoOpHandler;
 import net.server.handlers.login.AcceptToSHandler;
 import net.server.handlers.login.AfterLoginHandler;
 import net.server.handlers.login.CharSelectedHandler;
@@ -180,6 +181,7 @@ import net.server.handlers.login.CreateCharHandler;
 import net.server.handlers.login.DeleteCharHandler;
 import net.server.handlers.login.GuestLoginHandler;
 import net.server.handlers.login.LoginPasswordHandler;
+import net.server.handlers.login.PacketErrorHandler;
 import net.server.handlers.login.RegisterPicHandler;
 import net.server.handlers.login.RegisterPinHandler;
 import net.server.handlers.login.RelogRequestHandler;
@@ -240,7 +242,7 @@ public final class PacketProcessor {
         handlers = new MaplePacketHandler[handlers.length];
 
         registerHandler(RecvOpcode.PONG, new KeepAliveHandler());
-        registerHandler(RecvOpcode.CUSTOM_PACKET, new CustomPacketHandler());
+        registerHandler(RecvOpcode.PACKET_ERROR, new PacketErrorHandler());
         if (channel < 0) {
             //LOGIN HANDLERS
             registerHandler(RecvOpcode.ACCEPT_TOS, new AcceptToSHandler());
@@ -264,6 +266,7 @@ public final class PacketProcessor {
             registerHandler(RecvOpcode.SET_GENDER, new SetGenderHandler());
             registerHandler(RecvOpcode.VIEW_ALL_WITH_PIC, new ViewAllCharSelectedWithPicHandler());
             registerHandler(RecvOpcode.VIEW_ALL_PIC_REGISTER, new ViewAllCharRegisterPicHandler());
+            //registerHandler(RecvOpcode.UNKNOWN, new NoOpHandler());
         } else {
             //CHANNEL HANDLERS
             registerHandler(RecvOpcode.NAME_TRANSFER, new TransferNameHandler());
@@ -406,8 +409,8 @@ public final class PacketProcessor {
             registerHandler(RecvOpcode.MONSTER_CARNIVAL, new MonsterCarnivalHandler());
             registerHandler(RecvOpcode.REMOTE_STORE, new RemoteStoreHandler());
             registerHandler(RecvOpcode.WEDDING_ACTION, new WeddingHandler());
-            registerHandler(RecvOpcode.WEDDING_TALK, new WeddingTalkHandler());
-            registerHandler(RecvOpcode.WEDDING_TALK_MORE, new WeddingTalkMoreHandler());
+            //registerHandler(RecvOpcode.WEDDING_TALK, new WeddingTalkHandler());
+            //registerHandler(RecvOpcode.WEDDING_TALK_MORE, new WeddingTalkMoreHandler());
             registerHandler(RecvOpcode.WATER_OF_LIFE, new UseWaterOfLifeHandler());
             registerHandler(RecvOpcode.ADMIN_CHAT, new AdminChatHandler());
             registerHandler(RecvOpcode.MOVE_DRAGON, new MoveDragonHandler());

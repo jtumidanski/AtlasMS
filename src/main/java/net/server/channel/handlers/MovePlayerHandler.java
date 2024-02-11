@@ -29,7 +29,15 @@ import tools.exceptions.EmptyMovementException;
 public final class MovePlayerHandler extends AbstractMovementPacketHandler {
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        slea.skip(9);
+        slea.readInt(); // dr0
+        slea.readInt(); //dr1
+        slea.readByte(); //field key
+        slea.readInt(); //dr2
+        slea.readInt(); //dr3
+        slea.readInt(); //crc
+        slea.readInt(); //dwKey
+        slea.readInt(); //crc32
+
         try {   // thanks Sa for noticing empty movement sequences crashing players
             long movementDataStart = slea.getPosition();
             updatePosition(slea, c.getPlayer(), 0);

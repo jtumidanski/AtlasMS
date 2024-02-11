@@ -9,9 +9,13 @@ public final class ReactorHitHandler extends AbstractMaplePacketHandler {
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int oid = slea.readInt();
         int charPos = slea.readInt();
-        short stance = slea.readShort();
-        slea.skip(4);
+
+        int dwHitOption = slea.readInt();// bMoveAction & 1 | 2 * (m_pfh != 0), if on ground, left/right
+        short bMoveAction = (short) (dwHitOption & 1);
+        short m_pfh = (short) ((dwHitOption >> 1) & 1);
+
+        slea.readShort(); // tDelay
         int skillId = slea.readInt();
-        c.getPlayer().getMap().getReactorByOid(oid).ifPresent(r -> r.hitReactor(true, charPos, stance, skillId, c));
+        c.getPlayer().getMap().getReactorByOid(oid).ifPresent(r -> r.hitReactor(true, charPos, bMoveAction, skillId, c));
     }
 }

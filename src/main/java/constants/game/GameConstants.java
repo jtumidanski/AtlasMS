@@ -705,4 +705,7 @@ public class GameConstants {
         return maxMobDmg;
     }
 
+    public static boolean hasExtendedSPTable(MapleJob job){
+        return job.getId() / 1000 == 3 || job.getId() / 100 == 22 || job.getId() == 2001;
+    }
 }

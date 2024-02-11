@@ -63,28 +63,40 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         }
 
         int objectid = slea.readInt();
-        short moveid = slea.readShort();
         Optional<MapleMapObject> mmo = map.getMapObject(objectid);
         if (mmo.isEmpty() || mmo.get().getType() != MapleMapObjectType.MONSTER) {
             return;
         }
-
         MapleMonster monster = (MapleMonster) mmo.get();
         List<MapleCharacter> banishPlayers = null;
 
-        byte pNibbles = slea.readByte();
-        byte rawActivity = slea.readByte();
-        int skillId = slea.readByte() & 0xff;
-        int skillLv = slea.readByte() & 0xff;
-        short pOption = slea.readShort();
-        slea.skip(8);
 
-        if (rawActivity >= 0) {
-            rawActivity = (byte) (rawActivity & 0xFF >> 1);
+        short moveid = slea.readShort(); // move id
+        byte dwFlag = slea.readByte(); // bSomeRand | 8 * (bRushMove | 2 * (2 * nMobCtrlState));
+        boolean isNextAtkPossible = (dwFlag & 0xF0) != 0; // is mob should use skill? (saw chronos did 'dwFlag > 0')
+        boolean mobMoveStartResult = dwFlag > 0;
+        byte nActionAndDir = slea.readByte();
+
+        int skillData = slea.readInt(); // !CMob::DoSkill(v7, (unsigned __int8)dwData, BYTE1(dwData), dwData >> 16)
+        byte skillID = (byte) (skillData & 0xFF);
+        byte slv = (byte) (skillData >> 8 & 0xFF);
+        int delay = skillData >> 16;
+
+        int nMultiTargetSize = slea.readInt();
+        for (int i = 0; i < nMultiTargetSize; i++) {
+            slea.readInt(); // aMultiTargetForBall[i].x
+            slea.readInt(); // aMultiTargetForBall[i].y
+        }
+        int nRandTimeSize = slea.readInt();
+        for (int i = 0; i < nRandTimeSize; i++) {
+            slea.readInt(); // m_aRandTimeforAreaAttack[i]
         }
 
-        boolean isAttack = inRangeInclusive(rawActivity, 24, 41);
-        boolean isSkill = inRangeInclusive(rawActivity, 42, 59);
+        slea.readByte();
+        slea.readInt();
+        int start_x = slea.readInt(); // possibly x
+        int start_y = slea.readInt(); // possibly y
+        slea.readInt();
 
         MobSkill toUse;
         int useSkillId = 0, useSkillLevel = 0;
@@ -92,12 +104,10 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         MobSkill nextUse = null;
         int nextSkillId = 0, nextSkillLevel = 0;
 
-        boolean nextMovementCouldBeSkill = !(isSkill || (pNibbles != 0));
-
         int castPos;
-        if (isSkill) {
-            useSkillId = skillId;
-            useSkillLevel = skillLv;
+        if (skillID > 0) {
+            useSkillId = skillID;
+            useSkillLevel = slv;
 
             castPos = monster.getSkillPos(useSkillId, useSkillLevel);
             if (castPos != -1) {
@@ -114,17 +124,17 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
                 }
             }
         } else {
-            castPos = (rawActivity - 24) / 2;
+//            castPos = (rawActivity - 24) / 2;
 
-            int atkStatus = monster.canUseAttack(castPos, isSkill);
-            if (atkStatus < 1) {
-                rawActivity = -1;
-                pOption = 0;
-            }
+//            int atkStatus = monster.canUseAttack(castPos, isSkill);
+//            if (atkStatus < 1) {
+//                rawActivity = -1;
+//                pOption = 0;
+//            }
         }
 
         int mobMp = monster.getMp();
-        if (nextMovementCouldBeSkill) {
+        if (mobMoveStartResult) {
             int noSkills = monster.getNoSkills();
             if (noSkills > 0) {
                 int rndSkill = Randomizer.nextInt(noSkills);
@@ -144,10 +154,6 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
             }
         }
 
-        slea.readByte();
-        slea.readInt(); // whatever
-        short start_x = slea.readShort(); // hmm.. startpos?
-        short start_y = slea.readShort(); // hmm...
         Point startPos = new Point(start_x, start_y - 2);
         Point serverStartPos = new Point(monster.getPosition());
 
@@ -162,20 +168,22 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
             c.announce(MaplePacketCreator.moveMonsterResponse(objectid, moveid, mobMp, aggro));
         }
 
-
         try {
             long movementDataStart = slea.getPosition();
-            updatePosition(slea, monster, -2);  // Thanks Doodle & ZERO傑洛 for noticing sponge-based bosses moving out of stage in case of no-offset applied
+            updatePosition(slea, monster, -2);
             long movementDataLength = slea.getPosition() - movementDataStart; //how many bytes were read by updatePosition
             slea.seek(movementDataStart);
 
-            if (YamlConfig.config.server.USE_DEBUG_SHOW_RCVD_MVLIFE) {
-                System.out.println((isSkill ? "SKILL " : (isAttack ? "ATTCK " : " ")) + "castPos: " + castPos + " rawAct: " + rawActivity + " opt: " + pOption + " skillID: " + useSkillId + " skillLV: " + useSkillLevel + " " + "allowSkill: " + nextMovementCouldBeSkill + " mobMp: " + mobMp);
-            }
-
-            map.broadcastMessage(player, MaplePacketCreator.moveMonster(objectid, nextMovementCouldBeSkill, rawActivity, useSkillId, useSkillLevel, pOption, startPos, slea, movementDataLength), serverStartPos);
+            map.broadcastMessage(player, MaplePacketCreator.moveMonster(objectid, mobMoveStartResult, nActionAndDir, skillData, slea, movementDataLength), serverStartPos);
             //updatePosition(res, monster, -2); //does this need to be done after the packet is broadcast?
             map.moveMonster(monster, monster.getPosition());
+
+            slea.readByte();
+            slea.readByte();
+            slea.readByte();
+            slea.readByte();
+            slea.readInt();
+
         } catch (EmptyMovementException e) {
         }
 

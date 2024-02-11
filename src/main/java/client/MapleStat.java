@@ -24,11 +24,14 @@ package client;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static server.quest.MapleQuestRequirementType.PET;
+
 public enum MapleStat {
 
     SKIN(0x1),
     FACE(0x2),
     HAIR(0x4),
+    PETSN(0x8),
     LEVEL(0x10),
     JOB(0x20),
     STR(0x40),
@@ -44,7 +47,8 @@ public enum MapleStat {
     EXP(0x10000),
     FAME(0x20000),
     MESO(0x40000),
-    PET(0x180008),
+    PETSN2(0x80000),
+    PETSN3(0x100000),
     GACHAEXP(0x200000);
     private final int i;
 
@@ -88,7 +92,7 @@ public enum MapleStat {
             case "EXP" -> EXP;
             case "FAME" -> FAME;
             case "MESO" -> MESO;
-            case "PET" -> PET;
+            case "PET" -> PETSN;
             default -> null;
         };
     }
