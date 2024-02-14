@@ -144,3 +144,5 @@
 *.iml
 target
 wz_bak
+.env.prod
+.env.prod.87

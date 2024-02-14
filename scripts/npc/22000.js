@@ -33,9 +33,9 @@ function start() {
 function action(mode, type, selection) {
     status++;
     if (mode != 1) {
-        if (mode == 0 && type != 1)
+        if (mode == 0 && type != 2)
             status -= 2;
-        else if (type == 1 || (mode == -1 && type != 1)) {
+        else if (type == 2 || (mode == -1 && type != 1)) {
             if (mode == 0)
                 cm.sendOk("Hmm... I guess you still have things to do here?");
             cm.dispose();

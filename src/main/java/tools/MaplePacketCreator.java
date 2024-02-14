@@ -52,6 +52,7 @@ import config.YamlConfig;
 import constants.game.ExpTable;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
+import constants.net.NPCTalkMessageType;
 import constants.skills.Buccaneer;
 import constants.skills.Corsair;
 import constants.skills.ThunderBreaker;
@@ -3549,12 +3550,12 @@ public class MaplePacketCreator {
      * @param speaker
      * @return
      */
-    public static byte[] getNPCTalk(int npc, byte msgType, String talk, String endBytes, byte speaker) {
+    public static byte[] getNPCTalk(int npc, NPCTalkMessageType msgType, String talk, String endBytes, byte speaker) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(4); // ?
         mplew.writeInt(npc);
-        mplew.write(msgType);
+        mplew.write(msgType.getMessageType());
         mplew.write(speaker);
         mplew.writeMapleAsciiString(talk);
         mplew.write(HexTool.getByteArrayFromHexString(endBytes));
@@ -3566,7 +3567,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(4); // ?
         mplew.writeInt(9010022);
-        mplew.write(0x0E);
+        mplew.write(NPCTalkMessageType.ON_ASK_SLIDE_MENU.getMessageType());
         mplew.write(0);
         mplew.writeInt(0);
         mplew.writeMapleAsciiString(talk);
@@ -3578,7 +3579,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(4); // ?
         mplew.writeInt(npc);
-        mplew.write(7);
+        mplew.write(NPCTalkMessageType.ON_ASK_AVATAR.getMessageType());
         mplew.write(0); //speaker
         mplew.writeMapleAsciiString(talk);
         mplew.write(styles.length);
@@ -3593,7 +3594,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(4); // ?
         mplew.writeInt(npc);
-        mplew.write(3);
+        mplew.write(NPCTalkMessageType.ON_ASK_NUMBER.getMessageType());
         mplew.write(0); //speaker
         mplew.writeMapleAsciiString(talk);
         mplew.writeInt(def);
@@ -3608,7 +3609,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(4); // Doesn't matter
         mplew.writeInt(npc);
-        mplew.write(2);
+        mplew.write(NPCTalkMessageType.ON_ASK_TEXT.getMessageType());
         mplew.write(0); //speaker
         mplew.writeMapleAsciiString(talk);
         mplew.writeMapleAsciiString(def);//:D
@@ -3622,7 +3623,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(nSpeakerTypeID);
         mplew.writeInt(nSpeakerTemplateID);
-        mplew.write(0x6);
+        mplew.write(NPCTalkMessageType.ON_ASK_QUIZ.getMessageType());
         mplew.write(0);
         mplew.write(nResCode);
         if (nResCode == 0x0) {//fail has no bytes <3
@@ -3641,7 +3642,7 @@ public class MaplePacketCreator {
         mplew.writeShort(SendOpcode.NPC_TALK.getValue());
         mplew.write(nSpeakerTypeID);
         mplew.writeInt(nSpeakerTemplateID);
-        mplew.write(0x7);
+        mplew.write(NPCTalkMessageType.ON_ASK_SPEED_QUIZ.getMessageType());
         mplew.write(0);
         mplew.write(nResCode);
         if (nResCode == 0x0) {//fail has no bytes <3

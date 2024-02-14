@@ -28,6 +28,7 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import config.YamlConfig;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
+import constants.net.NPCTalkMessageType;
 import net.server.Server;
 import net.server.guild.MapleGuild;
 import net.server.world.MapleParty;
@@ -1175,7 +1176,7 @@ public class AbstractPlayerInteraction {
     }
 
     public void npcTalk(int npcid, String message) {
-        c.announce(MaplePacketCreator.getNPCTalk(npcid, (byte) 0, message, "00 00", (byte) 0));
+        c.announce(MaplePacketCreator.getNPCTalk(npcid, NPCTalkMessageType.ON_SAY, message, "00 00", (byte) 0));
     }
 
     public long getCurrentTime() {

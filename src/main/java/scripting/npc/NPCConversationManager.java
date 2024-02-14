@@ -33,6 +33,7 @@ import client.inventory.MaplePet;
 import config.YamlConfig;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
+import constants.net.NPCTalkMessageType;
 import constants.string.LanguageConstants;
 import net.server.Server;
 import net.server.channel.Channel;
@@ -154,19 +155,19 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void sendNext(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "00 01", (byte) 0));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 01", (byte) 0));
     }
 
     public void sendPrev(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "01 00", (byte) 0));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 00", (byte) 0));
     }
 
     public void sendNextPrev(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "01 01", (byte) 0));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 01", (byte) 0));
     }
 
     public void sendOk(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "00 00", (byte) 0));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 00", (byte) 0));
     }
 
     public void sendDefault() {
@@ -174,43 +175,43 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void sendYesNo(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 1, text, "", (byte) 0));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO, text, "", (byte) 0));
     }
 
     public void sendAcceptDecline(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0x0C, text, "", (byte) 0));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO_ALT, text, "", (byte) 0));
     }
 
     public void sendSimple(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 4, text, "", (byte) 0));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_MENU, text, "", (byte) 0));
     }
 
     public void sendNext(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "00 01", speaker));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 01", speaker));
     }
 
     public void sendPrev(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "01 00", speaker));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 00", speaker));
     }
 
     public void sendNextPrev(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "01 01", speaker));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 01", speaker));
     }
 
     public void sendOk(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0, text, "00 00", speaker));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 00", speaker));
     }
 
     public void sendYesNo(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 1, text, "", speaker));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO, text, "", speaker));
     }
 
     public void sendAcceptDecline(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 0x0C, text, "", speaker));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO_ALT, text, "", speaker));
     }
 
     public void sendSimple(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, (byte) 4, text, "", speaker));
+        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_MENU, text, "", speaker));
     }
 
     public void sendStyle(String text, int[] styles) {

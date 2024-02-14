@@ -27,6 +27,7 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
 import constants.game.GameConstants;
+import constants.net.NPCTalkMessageType;
 import tools.MaplePacketCreator;
 
 public class MusicCommand extends Command {
@@ -37,7 +38,9 @@ public class MusicCommand extends Command {
     private static String getSongList() {
         return GameConstants.GAME_SONGS.stream()
                 .reduce(new StringBuilder("Song:\r\n"),
-                        (sb, s) -> sb.append("  ").append(s).append("\r\n"),
+                        (sb, s) -> sb.append("  ")
+                                .append(s)
+                                .append("\r\n"),
                         StringBuilder::append)
                 .toString();
     }
@@ -52,14 +55,15 @@ public class MusicCommand extends Command {
             sendMsg += "Syntax: #r!music <song>#k\r\n\r\n";
             sendMsg += getSongList();
 
-            c.announce(MaplePacketCreator.getNPCTalk(1052015, (byte) 0, sendMsg, "00 00", (byte) 0));
+            c.announce(MaplePacketCreator.getNPCTalk(1052015, NPCTalkMessageType.ON_SAY, sendMsg, "00 00", (byte) 0));
             return;
         }
 
         String song = player.getLastCommandMessage();
         for (String s : GameConstants.GAME_SONGS) {
             if (s.equalsIgnoreCase(song)) {    // thanks Masterrulax for finding an issue here
-                player.getMap().broadcastMessage(MaplePacketCreator.musicChange(s));
+                player.getMap()
+                        .broadcastMessage(MaplePacketCreator.musicChange(s));
                 player.yellowMessage("Now playing song " + s + ".");
                 return;
             }
@@ -69,6 +73,6 @@ public class MusicCommand extends Command {
         sendMsg += "Song not found, please enter a song below.\r\n\r\n";
         sendMsg += getSongList();
 
-        c.announce(MaplePacketCreator.getNPCTalk(1052015, (byte) 0, sendMsg, "00 00", (byte) 0));
+        c.announce(MaplePacketCreator.getNPCTalk(1052015, NPCTalkMessageType.ON_SAY, sendMsg, "00 00", (byte) 0));
     }
 }
