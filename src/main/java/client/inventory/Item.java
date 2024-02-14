@@ -122,7 +122,7 @@ public class Item implements Comparable<Item> {
     }
 
     public Optional<Integer> getPetId() {
-        return getPet().flatMap(Item::getPetId);
+        return getPet().map(MaplePet::getUniqueId);
     }
 
     public boolean isPet() {
