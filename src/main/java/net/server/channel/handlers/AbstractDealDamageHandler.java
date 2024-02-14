@@ -688,12 +688,9 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         lea.readInt(); // dwKey
         lea.readInt(); // crc32
 
-        lea.readInt(); // 0 in CUserLocal::TryDoingNormalAttack
-        lea.readInt(); // 0 in CUserLocal::TryDoingNormalAttack
+        lea.readInt(); // SKILLLEVELDATA::GetCrc
+        lea.readInt(); // SKILLLEVELDATA::GetCrc
         lea.readByte(); // 0 in CUserLocal::TryDoingNormalAttack
-//        ret.display = lea.readByte();
-//        ret.direction = lea.readByte();
-//        ret.stance = lea.readByte();
 
         boolean mesoExplosion = ret.skill == ChiefBandit.MESO_EXPLOSION;
         if (mesoExplosion) {
@@ -733,21 +730,21 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             return ret;
         }
         if (ranged) {
-//            lea.readByte();
-//            ret.speed = lea.readByte();
-//            lea.readByte();
-//            ret.rangedirection = lea.readByte();
-//            lea.skip(7);
-            if (ret.skill == Bowmaster.HURRICANE || ret.skill == Marksman.PIERCING_ARROW || ret.skill == Corsair.RAPID_FIRE || ret.skill == WindArcher.HURRICANE) {
-                lea.skip(4);
-            }
-            /*byte unk = */lea.readByte();
-            ret.speed = lea.readByte();
-            lea.readInt(); // lastAttackTime
-            lea.readInt();
-            /*short usableSlot = */lea.readShort();
-            /*short cashSlot = */lea.readShort();
-            /*byte unk1 = */lea.readByte();
+            // COutPacket::Encode2(oPacket, nAttackAction & 0x7FFF | (bLeft << 15));
+            ret.display = lea.readByte();
+            ret.action = lea.readByte();
+
+            ret.stance = lea.readByte(); // nAttackActionType
+            ret.speed = lea.readByte(); // nAttackSpeed
+            lea.readInt(); // tAttackTime
+            lea.readShort(); // ProperBulletPosition
+            lea.readShort(); // pnCashItemPos
+            lea.readByte(); // nShootRange0a
+
+//            if (ret.skill == Bowmaster.HURRICANE || ret.skill == Marksman.PIERCING_ARROW || ret.skill == Corsair.RAPID_FIRE || ret.skill == WindArcher.HURRICANE) {
+//                lea.skip(4);
+//            }
+
         } else {
             short nAction = lea.readShort(); // nAction
             byte nActionDelay = lea.readByte(); // nActionDelay
@@ -929,23 +926,16 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         }
         for (int i = 0; i < ret.numAttacked; i++) {
             int oid = lea.readInt();
-            /*int nHitAction = */lea.readByte();
-            /*byte v35 = */lea.readByte();
-            // int nForeAction = v35 & 0x7F;
-            // byte bLeft = (byte) ((v35 >> 7) & 1);// facing left?
-            /*byte nFrameIdx = */lea.readByte();
-            /*int v36 = */lea.readByte();
-            // int nCalcDamageStatIndex = v36 & 0x7F;
-            // boolean doomed = ((v36 >> 7) & 1) > 0;// sick doom skill
-            //Point mobPosition = new Point(lea.readShort(), lea.readShort());
-            //Point mobPositionPrev = new Point(lea.readShort(), lea.readShort());
-//            ret.mobPositions.add(i, mobPosition);
-//            ret.mobPositionPrev.add(i, mobPositionPrev);
-            if(mesoExplosion){
-                lea.readByte();
-            }else{
-//                lea.readShort();// ?
-            }
+            lea.readByte(); // nHitAction
+            lea.readByte(); // v361->nForeAction & 0x7F | (CMob::IsLeft(v361->pMob) << 7));
+            lea.readByte(); // nFrameIdx
+
+            lea.readByte(); // CalcDamageStatIndex & 0x7F | CMob::GetCurTemplate(v361->pMob) && (v154 = CMob::GetTemplate(v361->pMob), v154 != CMob::GetCurTemplate(v361->pMob)) << 7
+            lea.readShort(); // mob x?
+            lea.readShort(); // mob y?
+            lea.readShort(); // mob prev x?
+            lea.readShort(); // mob prev y?
+            lea.readShort(); // tDelay
 
             List<Integer> allDamageNumbers = new ArrayList<>();
             MapleMonster monster = chr.getMap()
@@ -1101,7 +1091,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
 
     public static class AttackInfo {
 
-        public int numAttacked, numDamage, numAttackedAndDamage, skill, skilllevel, stance, direction, rangedirection, charge, display;
+        public int numAttacked, numDamage, numAttackedAndDamage, skill, skilllevel, action, stance, direction, rangedirection, charge, display;
         public Map<Integer, List<Integer>> allDamage;
         public boolean ranged, magic;
         public int speed = 4;
