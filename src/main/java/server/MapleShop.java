@@ -126,23 +126,24 @@ public class MapleShop {
                 con.close();
                 return null;
             }
+            //TODO track nDiscountRate in table
             ps = con.prepareStatement("SELECT itemid, price, pitch FROM shopitems WHERE shopid = ? ORDER BY position DESC");
             ps.setInt(1, shopId);
             rs = ps.executeQuery();
             List<Integer> recharges = new ArrayList<>(rechargeableItems);
             while (rs.next()) {
                 if (ItemConstants.isRechargeable(rs.getInt("itemid"))) {
-                    MapleShopItem starItem = new MapleShopItem((short) 1, rs.getInt("itemid"), rs.getInt("price"), rs.getInt("pitch"));
+                    MapleShopItem starItem = new MapleShopItem((short) 1, rs.getInt("itemid"), rs.getInt("price"), rs.getInt("pitch"), (byte) 0);
                     ret.addItem(starItem);
                     if (rechargeableItems.contains(starItem.getItemId())) {
                         recharges.remove(Integer.valueOf(starItem.getItemId()));
                     }
                 } else {
-                    ret.addItem(new MapleShopItem((short) 1000, rs.getInt("itemid"), rs.getInt("price"), rs.getInt("pitch")));
+                    ret.addItem(new MapleShopItem((short) 1000, rs.getInt("itemid"), rs.getInt("price"), rs.getInt("pitch"), (byte) 0));
                 }
             }
             for (Integer recharge : recharges) {
-                ret.addItem(new MapleShopItem((short) 1000, recharge, 0, 0));
+                ret.addItem(new MapleShopItem((short) 1000, recharge, 0, 0, (byte) 0));
             }
             rs.close();
             ps.close();

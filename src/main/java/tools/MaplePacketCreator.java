@@ -2647,26 +2647,27 @@ public class MaplePacketCreator {
         return (int) (Double.doubleToLongBits(d) >> 48);
     }
 
-    public static byte[] getNPCShop(MapleClient c, int sid, List<MapleShopItem> items) {
+    public static byte[] getNPCShop(MapleClient c, int npcTemplateId, List<MapleShopItem> items) {
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.OPEN_NPC_SHOP.getValue());
-        mplew.writeInt(sid);
-        mplew.writeShort(items.size()); // item count
+        mplew.writeInt(npcTemplateId); // dwNpcTemplateID
+        mplew.writeShort(items.size()); // nCount
         for (MapleShopItem item : items) {
-            mplew.writeInt(item.getItemId());
-            mplew.writeInt(item.getPrice());
+            mplew.writeInt(item.getItemId()); // nItemID
+            mplew.writeInt(item.getPrice()); // nTokenItemID
+            mplew.write(item.getDiscountRate()); // nDiscountRate
             mplew.writeInt(item.getPrice() == 0 ? item.getPitch() : 0); //Perfect Pitch
-            mplew.writeInt(0); //Can be used x minutes after purchase
-            mplew.writeInt(0); //Hmm
-            if (!ItemConstants.isRechargeable(item.getItemId())) {
-                mplew.writeShort(1); // stacksize o.o
-                mplew.writeShort(item.getBuyable());
-            } else {
+            mplew.writeInt(0); //nItemPeriod
+            mplew.writeInt(0); //nLevelLimited
+            if (ItemConstants.isRechargeable(item.getItemId())) {
                 mplew.writeShort(0);
                 mplew.writeInt(0);
                 mplew.writeShort(doubleToShortBits(ii.getUnitPrice(item.getItemId())));
                 mplew.writeShort(ii.getSlotMax(c, item.getItemId()));
+            } else {
+                mplew.writeShort(1); // nQuantity
+                mplew.writeShort(item.getBuyable()); // nMaxPerSlot
             }
         }
         return mplew.getPacket();
