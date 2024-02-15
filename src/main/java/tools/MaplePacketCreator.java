@@ -1154,18 +1154,36 @@ public class MaplePacketCreator {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.SET_FIELD.getValue());
         mplew.writeShort(0);// decode opt, loop with 2 decode 4s
+        for (int i = 0; i < 0; i++) {
+            mplew.writeInt(i + 1); // dwType
+            mplew.writeInt(0); // idk?
+        }
         mplew.writeInt(chr.getClient()
                 .getChannel() - 1);
         mplew.write(0); // sNotifierMessage
         mplew.write(0); // bCharacterData
         mplew.writeShort(0); // nNotifierCheck
-        mplew.write(0); // revive
-        mplew.writeInt(to.getId());
-        mplew.write(spawnPoint);
-        mplew.writeShort(chr.getHp());
-        mplew.writeBool(false);
+        if (0 > 0) {
+            mplew.writeMapleAsciiString("");
+            for (int j = 0; j < 0; j++) {
+                mplew.writeMapleAsciiString("");
+            }
+        }
+        if (0 != 0) { // bCharacterData
+
+        } else {
+            mplew.write(0); // revive
+            mplew.writeInt(to.getId());
+            mplew.write(spawnPoint);
+            mplew.writeShort(chr.getHp());
+            mplew.writeBool(false);
+            if (false) {
+                mplew.writeInt(0);
+                mplew.writeInt(0);
+            }
+        }
         mplew.writeLong(getTime(Server.getInstance()
-                .getCurrentTime()));
+                    .getCurrentTime()));
         return mplew.getPacket();
     }
 
@@ -1464,7 +1482,7 @@ public class MaplePacketCreator {
     }
 
     public static byte[] spawnNPC(MapleNPC life) {
-        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(24);
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(22);
         mplew.writeShort(SendOpcode.SPAWN_NPC.getValue());
         mplew.writeInt(life.getObjectId());
         mplew.writeInt(life.getId());
