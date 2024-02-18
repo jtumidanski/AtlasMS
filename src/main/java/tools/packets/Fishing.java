@@ -21,10 +21,10 @@ package tools.packets;
 
 import client.MapleCharacter;
 import config.YamlConfig;
+import connection.packets.CUser;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import server.ItemInformationProvider;
-import tools.MaplePacketCreator;
 
 import java.util.Calendar;
 
@@ -118,8 +118,8 @@ public class Fishing {
             chr.getMap().dropMessage(6, chr.getName() + " found " + rewardStr);
         }
 
-        chr.announce(MaplePacketCreator.showInfo(fishingEffect));
-        chr.getMap().broadcastMessage(chr, MaplePacketCreator.showForeignInfo(chr.getId(), fishingEffect), false);
+        chr.announce(CUser.showInfo(fishingEffect));
+        chr.getMap().broadcastMessage(chr, CUser.showForeignInfo(chr.getId(), fishingEffect), false);
     }
 
     public static int getRandomItem() {

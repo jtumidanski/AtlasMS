@@ -22,6 +22,7 @@
 package net.server.channel.handlers;
 
 import client.MapleClient;
+import connection.packets.CUserRemote;
 import constants.skills.Bishop;
 import constants.skills.Bowmaster;
 import constants.skills.Brawler;
@@ -40,7 +41,6 @@ import constants.skills.Paladin;
 import constants.skills.ThunderBreaker;
 import constants.skills.WindArcher;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class SkillEffectHandler extends AbstractMaplePacketHandler {
@@ -70,7 +70,7 @@ public final class SkillEffectHandler extends AbstractMaplePacketHandler {
             case Hero.MONSTER_MAGNET:
             case Evan.FIRE_BREATH:
             case Evan.ICE_BREATH:
-                c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.skillEffect(c.getPlayer(), skillId, level, flags, speed, aids), false);
+                c.getPlayer().getMap().broadcastMessage(c.getPlayer(), CUserRemote.skillEffect(c.getPlayer(), skillId, level, flags, speed, aids), false);
                 return;
             default:
                 System.out.println(c.getPlayer() + " entered SkillEffectHandler without being handled using " + skillId + ".");

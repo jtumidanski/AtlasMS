@@ -2,8 +2,8 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class CharInfoRequestHandler extends AbstractMaplePacketHandler {
@@ -19,6 +19,6 @@ public final class CharInfoRequestHandler extends AbstractMaplePacketHandler {
         if (c.getPlayer().getId() != target.getId()) {
             target.exportExcludedItems(c);
         }
-        c.announce(MaplePacketCreator.charInfo(target));
+        c.announce(CWvsContext.charInfo(target));
     }
 }

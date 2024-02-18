@@ -21,9 +21,9 @@
 */
 package client;
 
+import connection.packets.CWvsContext;
 import net.server.PlayerStorage;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -159,7 +159,7 @@ public class BuddyList {
     public void addBuddyRequest(MapleClient c, int cidFrom, String nameFrom, int channelFrom) {
         put(new BuddylistEntry(nameFrom, "Default Group", cidFrom, channelFrom, false));
         if (pendingRequests.isEmpty()) {
-            c.announce(MaplePacketCreator.requestBuddylistAdd(cidFrom, c.getPlayer().getId(), nameFrom));
+            c.announce(CWvsContext.requestBuddylistAdd(cidFrom, c.getPlayer().getId(), nameFrom));
         } else {
             pendingRequests.push(new CharacterNameAndId(cidFrom, nameFrom));
         }

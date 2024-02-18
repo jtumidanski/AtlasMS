@@ -26,9 +26,9 @@ package client.command.commands.gm0;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 
 public class ReportBugCommand extends Command {
     {
@@ -44,8 +44,8 @@ public class ReportBugCommand extends Command {
             return;
         }
         String message = player.getLastCommandMessage();
-        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.sendYellowTip("[Bug]:" + MapleCharacter.makeMapleReadable(player.getName()) + ": " + message));
-        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.serverNotice(1, message));
+        Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.sendYellowTip("[Bug]:" + MapleCharacter.makeMapleReadable(player.getName()) + ": " + message));
+        Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.serverNotice(1, message));
         FilePrinter.printError(FilePrinter.COMMAND_BUG, MapleCharacter.makeMapleReadable(player.getName()) + ": " + message);
         player.dropMessage(5, "Your bug '" + message + "' was submitted successfully to our developers. Thank you!");
 

@@ -23,11 +23,11 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.Item;
 import client.newyear.NewYearCardRecord;
+import connection.packets.CWvsContext;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.sql.Connection;
@@ -100,21 +100,21 @@ public final class NewYearCardHandler extends AbstractMaplePacketHandler {
 
                                 Server.getInstance().setNewYearCard(newyear);
                                 newyear.startNewYearCardTask();
-                                player.announce(MaplePacketCreator.onNewYearCardRes(player, newyear, 4, 0));    // successfully sent
+                                player.announce(CWvsContext.onNewYearCardRes(player, newyear, 4, 0));    // successfully sent
                             } else {
-                                player.announce(MaplePacketCreator.onNewYearCardRes(player, -1, 5, 0xF));   // cannot send to yourself
+                                player.announce(CWvsContext.onNewYearCardRes(player, -1, 5, 0xF));   // cannot send to yourself
                             }
                         } else {
-                            player.announce(MaplePacketCreator.onNewYearCardRes(player, -1, 5, 0x13));  // cannot find such character
+                            player.announce(CWvsContext.onNewYearCardRes(player, -1, 5, 0x13));  // cannot find such character
                         }
                     } else {
-                        player.announce(MaplePacketCreator.onNewYearCardRes(player, -1, 5, 0x10));  // inventory full
+                        player.announce(CWvsContext.onNewYearCardRes(player, -1, 5, 0x10));  // inventory full
                     }
                 } else {
-                    player.announce(MaplePacketCreator.onNewYearCardRes(player, -1, 5, status));  // item and inventory errors
+                    player.announce(CWvsContext.onNewYearCardRes(player, -1, 5, status));  // item and inventory errors
                 }
             } else {
-                player.announce(MaplePacketCreator.onNewYearCardRes(player, -1, 5, 0x11));  // have no card to send
+                player.announce(CWvsContext.onNewYearCardRes(player, -1, 5, 0x11));  // have no card to send
             }
         } else {    //receiver accepted the card
             int cardid = slea.readInt();
@@ -133,17 +133,17 @@ public final class NewYearCardHandler extends AbstractMaplePacketHandler {
                         }
 
                         player.addNewYearRecord(newyear.get());
-                        player.announce(MaplePacketCreator.onNewYearCardRes(player, newyear.get(), 6, 0));    // successfully rcvd
+                        player.announce(CWvsContext.onNewYearCardRes(player, newyear.get(), 6, 0));    // successfully rcvd
 
-                        player.getMap().broadcastMessage(MaplePacketCreator.onNewYearCardRes(player, newyear.get(), 0xD, 0));
+                        player.getMap().broadcastMessage(CWvsContext.onNewYearCardRes(player, newyear.get(), 0xD, 0));
 
                         Optional<MapleCharacter> sender = c.getWorldServer().getPlayerStorage().getCharacterById(newyear.get().getSenderId());
                         if (sender.isPresent() && sender.get().isLoggedinWorld()) {
-                            sender.get().getMap().broadcastMessage(MaplePacketCreator.onNewYearCardRes(sender.get(), newyear.get(), 0xD, 0));
+                            sender.get().getMap().broadcastMessage(CWvsContext.onNewYearCardRes(sender.get(), newyear.get(), 0xD, 0));
                             sender.get().dropMessage(6, "[New Year] Your addressee successfully received the New Year card.");
                         }
                     } else {
-                        player.announce(MaplePacketCreator.onNewYearCardRes(player, -1, 5, 0x10));  // inventory full
+                        player.announce(CWvsContext.onNewYearCardRes(player, -1, 5, 0x10));  // inventory full
                     }
                 } else {
                     player.dropMessage(6, "[New Year] The sender of the New Year card already dropped it. Nothing to receive.");

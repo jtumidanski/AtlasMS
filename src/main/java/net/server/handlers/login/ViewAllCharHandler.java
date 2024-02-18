@@ -24,9 +24,9 @@ package net.server.handlers.login;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -37,7 +37,7 @@ public final class ViewAllCharHandler extends AbstractMaplePacketHandler {
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         try {
             if (!c.canRequestCharlist()) {   // client breaks if the charlist request pops too soon
-                c.announce(MaplePacketCreator.showAllCharacter(0, 0));
+                c.announce(CLogin.showAllCharacter(0, 0));
                 return;
             }
 
@@ -62,10 +62,10 @@ public final class ViewAllCharHandler extends AbstractMaplePacketHandler {
 
             int charsSize = chrTotal;
             int unk = charsSize + (3 - charsSize % 3); //rowSize?
-            c.announce(MaplePacketCreator.showAllCharacter(charsSize, unk));
+            c.announce(CLogin.showAllCharacter(charsSize, unk));
 
             for (Pair<Integer, List<MapleCharacter>> wchars : worldChars) {
-                c.announce(MaplePacketCreator.showAllCharacterInfo(wchars.getLeft(), wchars.getRight(), YamlConfig.config.server.ENABLE_PIC && !c.canBypassPic()));
+                c.announce(CLogin.showAllCharacterInfo(wchars.getLeft(), wchars.getRight(), YamlConfig.config.server.ENABLE_PIC && !c.canBypassPic()));
             }
         } catch (Exception e) {
             e.printStackTrace();

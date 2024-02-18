@@ -21,6 +21,7 @@ package net.server.services.task.channel;
 
 import client.MapleCharacter;
 import config.YamlConfig;
+import connection.packets.CUserRemote;
 import net.server.audit.LockCollector;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.MonitoredReentrantLock;
@@ -28,7 +29,6 @@ import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
 import net.server.services.BaseScheduler;
 import net.server.services.BaseService;
 import server.maps.MapleMap;
-import tools.MaplePacketCreator;
 
 import java.util.Collections;
 
@@ -74,7 +74,7 @@ public class FaceExpressionService extends BaseService {
 
         Runnable cancelAction = () -> {
             if (chr.isLoggedinWorld()) {
-                map.broadcastMessage(chr, MaplePacketCreator.facialExpression(chr, 0), false);
+                map.broadcastMessage(chr, CUserRemote.facialExpression(chr, 0), false);
             }
         };
 
@@ -89,7 +89,7 @@ public class FaceExpressionService extends BaseService {
             faceLock[lockid].unlock();
         }
 
-        map.broadcastMessage(chr, MaplePacketCreator.facialExpression(chr, emote), false);
+        map.broadcastMessage(chr, CUserRemote.facialExpression(chr, emote), false);
     }
 
     public void unregisterFaceExpression(int mapid, MapleCharacter chr) {

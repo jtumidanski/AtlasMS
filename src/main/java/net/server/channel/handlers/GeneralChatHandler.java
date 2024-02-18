@@ -26,10 +26,11 @@ import client.MapleClient;
 import client.autoban.AutobanFactory;
 import client.command.CommandsExecutor;
 import config.YamlConfig;
+import connection.packets.CUser;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import tools.FilePrinter;
 import tools.LogHelper;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class GeneralChatHandler extends AbstractMaplePacketHandler {
@@ -38,7 +39,7 @@ public final class GeneralChatHandler extends AbstractMaplePacketHandler {
         String s = slea.readMapleAsciiString();
         MapleCharacter chr = c.getPlayer();
         if (chr.getAutobanManager().getLastSpam(7) + 200 > currentServerTime()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
         if (s.length() > Byte.MAX_VALUE && !chr.isGM()) {
@@ -58,12 +59,12 @@ public final class GeneralChatHandler extends AbstractMaplePacketHandler {
             }
 
             if (!chr.isHidden()) {
-                chr.getMap().broadcastMessage(MaplePacketCreator.getChatText(chr.getId(), s, chr.getWhiteChat(), show));
+                chr.getMap().broadcastMessage(CUser.getChatText(chr.getId(), s, chr.getWhiteChat(), show));
                 if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
                     LogHelper.logChat(c, "General", s);
                 }
             } else {
-                chr.getMap().broadcastGMMessage(MaplePacketCreator.getChatText(chr.getId(), s, chr.getWhiteChat(), show));
+                chr.getMap().broadcastGMMessage(CUser.getChatText(chr.getId(), s, chr.getWhiteChat(), show));
                 if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
                     LogHelper.logChat(c, "GM General", s);
                 }

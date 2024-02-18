@@ -26,9 +26,9 @@ package client.command.commands.gm3;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import server.events.gm.MapleEvent;
-import tools.MaplePacketCreator;
 
 public class StartEventCommand extends Command {
     {
@@ -43,14 +43,14 @@ public class StartEventCommand extends Command {
             players = Integer.parseInt(params[0]);
         }
         c.getChannelServer().setEvent(new MapleEvent(player.getMapId(), players));
-        Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.earnTitleMessage(
+        Server.getInstance().broadcastMessage(c.getWorld(), CWvsContext.earnTitleMessage(
                 "[Event] An event has started on "
                         + player.getMap().getMapName()
                         + " and will allow "
                         + players
                         + " players to join. Type @joinevent to participate."));
         Server.getInstance().broadcastMessage(c.getWorld(),
-                MaplePacketCreator.serverNotice(6, "[Event] An event has started on "
+                CWvsContext.serverNotice(6, "[Event] An event has started on "
                         + player.getMap().getMapName()
                         + " and will allow "
                         + players

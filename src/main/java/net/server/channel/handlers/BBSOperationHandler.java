@@ -23,9 +23,9 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.sql.Connection;
@@ -41,7 +41,7 @@ public final class BBSOperationHandler extends AbstractMaplePacketHandler {
             try (PreparedStatement ps = con.prepareStatement("SELECT * FROM bbs_threads WHERE guildid = ? ORDER BY localthreadid DESC")) {
                 ps.setInt(1, c.getPlayer().getGuildId());
                 try (ResultSet rs = ps.executeQuery()) {
-                    c.announce(MaplePacketCreator.BBSThreadList(rs, start));
+                    c.announce(CWvsContext.BBSThreadList(rs, start));
                 }
             }
 
@@ -257,7 +257,7 @@ public final class BBSOperationHandler extends AbstractMaplePacketHandler {
                     ps2.setInt(1, !bIsThreadIdLocal ? threadid : threadRS.getInt("threadid"));
                     repliesRS = ps2.executeQuery();
                 }
-                client.announce(MaplePacketCreator.showThread(bIsThreadIdLocal ? threadid : threadRS.getInt("localthreadid"), threadRS, repliesRS));
+                client.announce(CWvsContext.showThread(bIsThreadIdLocal ? threadid : threadRS.getInt("localthreadid"), threadRS, repliesRS));
                 repliesRS.close();
             }
             if (ps2 != null) {

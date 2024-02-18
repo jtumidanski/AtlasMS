@@ -22,11 +22,11 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import net.server.channel.Channel;
 import net.server.world.World;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -40,14 +40,14 @@ public final class CharlistRequestHandler extends AbstractMaplePacketHandler {
 
         Optional<World> wserv = Server.getInstance().getWorld(world);
         if (wserv.isEmpty() || wserv.get().isWorldCapacityFull()) {
-            c.announce(MaplePacketCreator.getServerStatus(2));
+            c.announce(CLogin.getServerStatus(2));
             return;
         }
 
         int channel = slea.readByte() + 1;
         Optional<Channel> ch = wserv.get().getChannel(channel);
         if (ch.isEmpty()) {
-            c.announce(MaplePacketCreator.getServerStatus(2));
+            c.announce(CLogin.getServerStatus(2));
             return;
         }
 

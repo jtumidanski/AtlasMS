@@ -26,6 +26,10 @@ import client.MapleClient;
 import client.Skill;
 import client.SkillFactory;
 import config.YamlConfig;
+import connection.packets.CMob;
+import connection.packets.CUser;
+import connection.packets.CUserLocal;
+import connection.packets.CWvsContext;
 import constants.skills.Brawler;
 import constants.skills.Corsair;
 import constants.skills.DarkKnight;
@@ -37,7 +41,6 @@ import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.MapleStatEffect;
 import server.life.MapleMonster;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.awt.*;
@@ -70,8 +73,8 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
             }
             skillLevel = 1;
             chr.setDojoEnergy(0);
-            c.announce(MaplePacketCreator.getEnergy("energy", chr.getDojoEnergy()));
-            c.announce(MaplePacketCreator.serverNotice(5, "As you used the secret skill, your energy bar has been reset."));
+            c.announce(CWvsContext.getEnergy("energy", chr.getDojoEnergy()));
+            c.announce(CWvsContext.serverNotice(5, "As you used the secret skill, your energy bar has been reset."));
         }
         if (skillLevel == 0 || skillLevel != __skillLevel) {
             return;
@@ -87,7 +90,7 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
                     cooldownTime /= 60;
                 }
 
-                c.announce(MaplePacketCreator.skillCooldown(skillid, cooldownTime));
+                c.announce(CUserLocal.skillCooldown(skillid, cooldownTime));
                 chr.addCooldown(skillid, currentServerTime(), cooldownTime * 1000L);
             }
         }
@@ -96,7 +99,7 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
             for (int i = 0; i < num; i++) {
                 int mobOid = slea.readInt();
                 byte success = slea.readByte();
-                chr.getMap().broadcastMessage(chr, MaplePacketCreator.catchMonster(mobOid, success), false);
+                chr.getMap().broadcastMessage(chr, CMob.catchMonster(mobOid, success), false);
                 MapleMonster monster = chr.getMap().getMonsterByOid(mobOid).orElse(null);
                 if (monster != null) {
                     if (!monster.isBoss()) {
@@ -107,8 +110,8 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
                 }
             }
             byte direction = slea.readByte();   // thanks MedicOP for pointing some 3rd-party related issues with Magnet
-            chr.getMap().broadcastMessage(chr, MaplePacketCreator.showBuffeffect(chr.getId(), skillid, chr.getSkillLevel(skillid), 1, direction), false);
-            c.announce(MaplePacketCreator.enableActions());
+            chr.getMap().broadcastMessage(chr, CUser.showBuffeffect(chr.getId(), skillid, chr.getSkillLevel(skillid), 1, direction), false);
+            c.announce(CWvsContext.enableActions());
             return;
         } else if (skillid == Brawler.MP_RECOVERY) {// MP Recovery
             Skill s = SkillFactory.getSkill(skillid).orElseThrow();
@@ -119,7 +122,7 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
             chr.addMP(gain);
         } else if (skillid == SuperGM.HEAL_PLUS_DISPEL) {
             slea.skip(11);
-            chr.getMap().broadcastMessage(chr, MaplePacketCreator.showBuffeffect(chr.getId(), skillid, chr.getSkillLevel(skillid)), false);
+            chr.getMap().broadcastMessage(chr, CUser.showBuffeffect(chr.getId(), skillid, chr.getSkillLevel(skillid)), false);
         } else if (skillid % 10000000 == 1004) {
             slea.readShort();
         }
@@ -148,10 +151,10 @@ public final class SpecialMoveHandler extends AbstractMaplePacketHandler {
                     }
                 }
 
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
             }
         } else {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
         }
     }
 }

@@ -24,8 +24,8 @@ package net.server.channel.handlers;
 import client.MapleClient;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -38,13 +38,13 @@ public final class ItemMoveHandler extends AbstractMaplePacketHandler {
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.skip(4);
         if (c.getPlayer().getAutobanManager().getLastSpam(6) + 300 > currentServerTime()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
         Optional<MapleInventoryType> type = MapleInventoryType.getByType(slea.readByte());
         if (type.isEmpty()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 

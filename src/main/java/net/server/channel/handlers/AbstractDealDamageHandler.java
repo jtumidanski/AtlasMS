@@ -30,6 +30,10 @@ import client.autoban.AutobanFactory;
 import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import config.YamlConfig;
+import connection.packets.CDropPool;
+import connection.packets.CMob;
+import connection.packets.CUserRemote;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import constants.skills.Aran;
 import constants.skills.Assassin;
@@ -92,7 +96,6 @@ import server.maps.MapleMap;
 import server.maps.MapleMapItem;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
 import tools.data.input.LittleEndianAccessor;
@@ -122,11 +125,11 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         if (animationTime > 0) { // be sure to only use LIMITED ATTACKS with animation time here
             TimerManager.getInstance()
                     .schedule(() -> {
-                        map.broadcastMessage(MaplePacketCreator.damageMonster(monster.getObjectId(), damage), monster.getPosition());
+                        map.broadcastMessage(CMob.damageMonster(monster.getObjectId(), damage), monster.getPosition());
                         map.damageMonster(attacker, monster, damage);
                     }, animationTime);
         } else {
-            map.broadcastMessage(MaplePacketCreator.damageMonster(monster.getObjectId(), damage), monster.getPosition());
+            map.broadcastMessage(CMob.damageMonster(monster.getObjectId(), damage), monster.getPosition());
             map.damageMonster(attacker, monster, damage);
         }
     }
@@ -152,13 +155,13 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             if (attack.skill != 0) {
                 theSkill = SkillFactory.getSkill(attack.skill); // thanks Conrad for noticing some Aran skills not consuming MP
                 if (theSkill.isEmpty()) {
-                    player.announce(MaplePacketCreator.enableActions());
+                    player.announce(CWvsContext.enableActions());
                     return;
                 }
 
                 attackEffect = attack.getAttackEffect(player, theSkill.get()); //returns back the player's attack effect so we are gucci
                 if (attackEffect.isEmpty()) {
-                    player.announce(MaplePacketCreator.enableActions());
+                    player.announce(CWvsContext.enableActions());
                     return;
                 }
 
@@ -194,7 +197,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                             }
                         }
                     } else {
-                        player.announce(MaplePacketCreator.enableActions());
+                        player.announce(CWvsContext.enableActions());
                     }
                 }
 
@@ -238,7 +241,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                                             if (mapitem.isPickedUp()) {
                                                 return;
                                             }
-                                            map.pickItemDrop(MaplePacketCreator.removeItemFromMap(mapitem.getObjectId(), 4, 0), mapitem);
+                                            map.pickItemDrop(CDropPool.removeItemFromMap(mapitem.getObjectId(), 4, 0), mapitem);
                                         } finally {
                                             mapitem.unlockItem();
                                         }
@@ -617,7 +620,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                         }
                     } else {
                         if (attack.skill == Aran.BODY_PRESSURE) {
-                            map.broadcastMessage(MaplePacketCreator.damageMonster(monster.getObjectId(), totDamageToOneMonster));
+                            map.broadcastMessage(CMob.damageMonster(monster.getObjectId(), totDamageToOneMonster));
                         }
 
                         map.damageMonster(player, monster, totDamageToOneMonster);
@@ -629,7 +632,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                             if (ms.left == 145) {
                                 MobSkill toUse = MobSkillFactory.getMobSkill(ms.left, ms.right);
                                 player.addHP(-toUse.getX());
-                                map.broadcastMessage(player, MaplePacketCreator.damagePlayer(0, monster.getId(), player.getId(), toUse.getX(), 0, 0, false, 0, true, monster.getObjectId(), 0, 0), true);
+                                map.broadcastMessage(player, CUserRemote.damagePlayer(0, monster.getId(), player.getId(), toUse.getX(), 0, 0, false, 0, true, monster.getObjectId(), 0, 0), true);
                             }
                         }
                     }
@@ -640,7 +643,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                             if (ms.left == 145) {
                                 MobSkill toUse = MobSkillFactory.getMobSkill(ms.left, ms.right);
                                 player.addHP(-toUse.getY());
-                                map.broadcastMessage(player, MaplePacketCreator.damagePlayer(0, monster.getId(), player.getId(), toUse.getY(), 0, 0, false, 0, true, monster.getObjectId(), 0, 0), true);
+                                map.broadcastMessage(player, CUserRemote.damagePlayer(0, monster.getId(), player.getId(), toUse.getY(), 0, 0, false, 0, true, monster.getObjectId(), 0, 0), true);
                             }
                         }
                     }

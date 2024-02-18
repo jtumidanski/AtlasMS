@@ -26,10 +26,11 @@ package client.command.commands.gm3;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CField;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import server.TimerManager;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -77,15 +78,15 @@ public class BanCommand extends Command {
             target.ban(reason);
             target.yellowMessage("You have been banned by #b" + c.getPlayer().getName() + " #k.");
             target.yellowMessage("Reason: " + reason);
-            c.announce(MaplePacketCreator.getGMEffect(4, (byte) 0));
+            c.announce(CField.getGMEffect(4, (byte) 0));
             final MapleCharacter rip = target;
             TimerManager.getInstance().schedule(() -> rip.getClient().disconnect(false, false), 5000);
-            Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.serverNotice(6, "[RIP]: " + ign + " has been banned."));
+            Server.getInstance().broadcastMessage(c.getWorld(), CWvsContext.serverNotice(6, "[RIP]: " + ign + " has been banned."));
         } else if (MapleCharacter.ban(ign, reason, false)) {
-            c.announce(MaplePacketCreator.getGMEffect(4, (byte) 0));
-            Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.serverNotice(6, "[RIP]: " + ign + " has been banned."));
+            c.announce(CField.getGMEffect(4, (byte) 0));
+            Server.getInstance().broadcastMessage(c.getWorld(), CWvsContext.serverNotice(6, "[RIP]: " + ign + " has been banned."));
         } else {
-            c.announce(MaplePacketCreator.getGMEffect(6, (byte) 1));
+            c.announce(CField.getGMEffect(6, (byte) 1));
         }
     }
 }

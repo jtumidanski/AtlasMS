@@ -23,8 +23,8 @@ import client.MapleClient;
 import client.MapleFamily;
 import client.MapleFamilyEntry;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -73,7 +73,7 @@ public class FamilySeparateHandler extends AbstractMaplePacketHandler {
         int cost = 2500 * levelDiff;
         cost += levelDiff * levelDiff;
         if (c.getPlayer().getMeso() < cost) {
-            c.announce(MaplePacketCreator.sendFamilyMessage(isSenior ? 81 : 80, cost));
+            c.announce(CWvsContext.sendFamilyMessage(isSenior ? 81 : 80, cost));
             return;
         }
         c.getPlayer().gainMeso(-cost);
@@ -82,10 +82,10 @@ public class FamilySeparateHandler extends AbstractMaplePacketHandler {
         if (senior.getSenior() != null) {
             senior.getSenior().gainReputation(-(repCost / 2), false);
         }
-        forkOn.announceToSenior(MaplePacketCreator.serverNotice(5, forkOn.getName() + " has left the family."), true);
+        forkOn.announceToSenior(CWvsContext.serverNotice(5, forkOn.getName() + " has left the family."), true);
         forkOn.fork();
-        c.announce(MaplePacketCreator.getFamilyInfo(forkOn)); //pedigree info will be requested from the client if the window is open
+        c.announce(CWvsContext.getFamilyInfo(forkOn)); //pedigree info will be requested from the client if the window is open
         forkOn.updateSeniorFamilyInfo(true);
-        c.announce(MaplePacketCreator.sendFamilyMessage(1, 0));
+        c.announce(CWvsContext.sendFamilyMessage(1, 0));
     }
 }

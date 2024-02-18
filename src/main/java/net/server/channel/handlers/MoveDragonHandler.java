@@ -23,8 +23,8 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CUser;
 import server.maps.MapleDragon;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.exceptions.EmptyMovementException;
 
@@ -45,9 +45,9 @@ public class MoveDragonHandler extends AbstractMovementPacketHandler {
                 slea.seek(movementDataStart);
 
                 if (chr.isHidden()) {
-                    chr.getMap().broadcastGMMessage(chr, MaplePacketCreator.moveDragon(dragon, startPos, slea, movementDataLength));
+                    chr.getMap().broadcastGMMessage(chr, CUser.moveDragon(dragon, startPos, slea, movementDataLength));
                 } else {
-                    chr.getMap().broadcastMessage(chr, MaplePacketCreator.moveDragon(dragon, startPos, slea, movementDataLength), dragon.getPosition());
+                    chr.getMap().broadcastMessage(chr, CUser.moveDragon(dragon, startPos, slea, movementDataLength), dragon.getPosition());
                 }
             } catch (EmptyMovementException e) {
             }

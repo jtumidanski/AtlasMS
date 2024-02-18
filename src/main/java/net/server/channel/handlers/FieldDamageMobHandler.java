@@ -2,13 +2,13 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CMob;
 import constants.game.GameConstants;
 import net.AbstractMaplePacketHandler;
 import server.life.MapleMonster;
 import server.life.MapleMonsterInformationProvider;
 import server.maps.MapleMap;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public class FieldDamageMobHandler extends AbstractMaplePacketHandler {
@@ -36,7 +36,7 @@ public class FieldDamageMobHandler extends AbstractMaplePacketHandler {
             return;
         }
 
-        map.broadcastMessage(c.getPlayer(), MaplePacketCreator.damageMonster(mob.getObjectId(), dmg), true);
+        map.broadcastMessage(c.getPlayer(), CMob.damageMonster(mob.getObjectId(), dmg), true);
         map.damageMonster(c.getPlayer(), mob, dmg);
     }
 }

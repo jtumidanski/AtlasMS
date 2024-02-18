@@ -35,6 +35,12 @@ import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
 import client.keybind.MapleKeyBinding;
 import config.YamlConfig;
+import connection.packets.CFuncKeyMappedMan;
+import connection.packets.CLogin;
+import connection.packets.CNpcTemplate;
+import connection.packets.CParcelDlg;
+import connection.packets.CStage;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import constants.game.ScriptableNPCConstants;
 import net.AbstractMaplePacketHandler;
@@ -55,7 +61,6 @@ import scripting.event.EventInstanceManager;
 import server.life.MobSkill;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.packets.Wedding;
@@ -97,7 +102,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                     pss.close();
                     con2.close();
 
-                    c.announce(MaplePacketCreator.sendDueyParcelNotification(rs.getInt("Type") == 1));
+                    c.announce(CParcelDlg.sendDueyParcelNotification(rs.getInt("Type") == 1));
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -246,7 +251,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                             if (state == MapleClient.LOGIN_LOGGEDIN) {
                                 c.disconnect(true, false);
                             } else {
-                                c.announce(MaplePacketCreator.getAfterLoginError(7));
+                                c.announce(CLogin.getAfterLoginError(7));
                             }
 
                             return;
@@ -258,7 +263,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 } else {
                     c.setPlayer(null);
                     c.setAccID(0);
-                    c.announce(MaplePacketCreator.getAfterLoginError(10));
+                    c.announce(CLogin.getAfterLoginError(10));
                     return;
                 }
 
@@ -283,7 +288,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                     player.get().silentApplyDiseases(diseases);
                 }
 
-                c.announce(MaplePacketCreator.getCharInfo(player.get()));
+                c.announce(CStage.getCharInfo(player.get()));
                 if (!player.get().isHidden()) {
                     if (player.get().isGM() && YamlConfig.config.server.USE_AUTOHIDE_GM) {
                         player.get().toggleHide(true);
@@ -295,10 +300,10 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
 
                 // pot bindings being passed through other characters on the account detected thanks to Croosade dev team
                 MapleKeyBinding autohpPot = player.get().getKeymap().get(91);
-                player.get().announce(MaplePacketCreator.sendAutoHpPot(autohpPot != null ? autohpPot.action() : 0));
+                player.get().announce(CFuncKeyMappedMan.sendAutoHpPot(autohpPot != null ? autohpPot.action() : 0));
 
                 MapleKeyBinding autompPot = player.get().getKeymap().get(92);
-                player.get().announce(MaplePacketCreator.sendAutoMpPot(autompPot != null ? autompPot.action() : 0));
+                player.get().announce(CFuncKeyMappedMan.sendAutoMpPot(autompPot != null ? autompPot.action() : 0));
 
                 player.get().getMap().addPlayer(player.get());
                 player.get().visitMap(player.get().getMap());
@@ -314,9 +319,9 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                         bl.put(buddy);
                     });
                 }
-                c.announce(MaplePacketCreator.updateBuddylist(bl.getBuddies()));
+                c.announce(CWvsContext.updateBuddylist(bl.getBuddies()));
 
-                c.announce(MaplePacketCreator.loadFamily(player.get()));
+                c.announce(CWvsContext.loadFamily(player.get()));
                 if (player.get().getFamilyId() > 0) {
                     MapleFamily f = wserv.get().getFamily(player.get().getFamilyId());
                     if (f != null) {
@@ -325,17 +330,17 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                             familyEntry.setCharacter(player.get());
                             player.get().setFamilyEntry(familyEntry);
 
-                            c.announce(MaplePacketCreator.getFamilyInfo(familyEntry));
-                            familyEntry.announceToSenior(MaplePacketCreator.sendFamilyLoginNotice(player.get().getName(), true), true);
+                            c.announce(CWvsContext.getFamilyInfo(familyEntry));
+                            familyEntry.announceToSenior(CWvsContext.sendFamilyLoginNotice(player.get().getName(), true), true);
                         } else {
                             FilePrinter.printError(FilePrinter.FAMILY_ERROR, "Player " + player.get().getName() + "'s family doesn't have an entry for them. (" + f.getID() + ")");
                         }
                     } else {
                         FilePrinter.printError(FilePrinter.FAMILY_ERROR, "Player " + player.get().getName() + " has an invalid family ID. (" + player.get().getFamilyId() + ")");
-                        c.announce(MaplePacketCreator.getFamilyInfo(null));
+                        c.announce(CWvsContext.getFamilyInfo(null));
                     }
                 } else {
-                    c.announce(MaplePacketCreator.getFamilyInfo(null));
+                    c.announce(CWvsContext.getFamilyInfo(null));
                 }
                 if (player.get().getGuildId() > 0) {
                     Optional<MapleGuild> playerGuild = server.getGuild(player.get().getGuildId(), player.get().getWorld(), player.get());
@@ -348,7 +353,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                         playerGuild.flatMap(g -> g.getMGC(finalPlayer.getId())).ifPresent(mgc -> mgc.setCharacter(finalPlayer));
                         player.get().setMGC(playerGuild.flatMap(g -> g.getMGC(finalPlayer.getId())).orElseThrow());
                         server.setGuildMemberOnline(player.get(), true, c.getChannel());
-                        c.announce(MaplePacketCreator.showGuildInfo(player.get()));
+                        c.announce(CWvsContext.showGuildInfo(player.get()));
                         int allianceId = player.get().getGuild().map(MapleGuild::getAllianceId).orElse(0);
                         if (allianceId > 0) {
                             Optional<MapleAlliance> newAlliance = server.getAlliance(allianceId);
@@ -361,11 +366,11 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                                 }
                             }
                             if (newAlliance.isPresent()) {
-                                c.announce(MaplePacketCreator.updateAllianceInfo(newAlliance.get(), c.getWorld()));
-                                c.announce(MaplePacketCreator.allianceNotice(newAlliance.get().getId(), newAlliance.get().getNotice()));
+                                c.announce(CWvsContext.updateAllianceInfo(newAlliance.get(), c.getWorld()));
+                                c.announce(CWvsContext.allianceNotice(newAlliance.get().getId(), newAlliance.get().getNotice()));
 
                                 if (newcomer) {
-                                    server.allianceMessage(allianceId, MaplePacketCreator.allianceMemberOnline(player.get(), true), player.get().getId(), -1);
+                                    server.allianceMessage(allianceId, CWvsContext.allianceMemberOnline(player.get(), true), player.get().getId(), -1);
                                 }
                             }
                         }
@@ -385,16 +390,16 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                     eqpInv.unlockInventory();
                 }
 
-                c.announce(MaplePacketCreator.updateBuddylist(player.get().getBuddylist().getBuddies()));
+                c.announce(CWvsContext.updateBuddylist(player.get().getBuddylist().getBuddies()));
 
                 CharacterNameAndId pendingBuddyRequest = c.getPlayer().getBuddylist().pollPendingRequest();
                 if (pendingBuddyRequest != null) {
-                    c.announce(MaplePacketCreator.requestBuddylistAdd(pendingBuddyRequest.id(), c.getPlayer().getId(), pendingBuddyRequest.name()));
+                    c.announce(CWvsContext.requestBuddylistAdd(pendingBuddyRequest.id(), c.getPlayer().getId(), pendingBuddyRequest.name()));
                 }
 
-                c.announce(MaplePacketCreator.updateGender(player.get()));
+                c.announce(CWvsContext.updateGender(player.get()));
                 player.get().checkMessenger();
-                c.announce(MaplePacketCreator.enableReport());
+                c.announce(CWvsContext.enableReport());
                 player.get().changeSkillLevel(10000000 * player.get().getJobType() + 12, (byte) (player.get().getLinkedLevel() / 10), 20, -1);
                 player.get().checkBerserk(player.get().isHidden());
 
@@ -408,17 +413,17 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                     MapleCharacter finalPlayer = player.get();
                     player.get().getMount()
                             .filter(m -> m.getItemId() != 0)
-                            .ifPresent(m -> finalPlayer.announce(MaplePacketCreator.updateMount(finalPlayer.getId(), m, false)));
+                            .ifPresent(m -> finalPlayer.announce(CWvsContext.updateMount(finalPlayer.getId(), m, false)));
                     player.get().reloadQuestExpirations();
 
                     if (player.get().isGM()) {
-                        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.earnTitleMessage((player.get().gmLevel() < 6 ? "GM " : "Admin ") + player.get().getName() + " has logged in"));
+                        Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.earnTitleMessage((player.get().gmLevel() < 6 ? "GM " : "Admin ") + player.get().getName() + " has logged in"));
                     }
 
                     if (diseases != null) {
                         for (Entry<MapleDisease, Pair<Long, MobSkill>> e : diseases.entrySet()) {
                             final List<Pair<MapleDisease, Integer>> debuff = Collections.singletonList(new Pair<>(e.getKey(), e.getValue().getRight().getX()));
-                            c.announce(MaplePacketCreator.giveDebuff(debuff, e.getValue().getRight()));
+                            c.announce(CWvsContext.giveDebuff(debuff, e.getValue().getRight()));
                         }
                     }
                 } else {
@@ -472,7 +477,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 }
 
                 if (YamlConfig.config.server.USE_NPCS_SCRIPTABLE) {
-                    c.announce(MaplePacketCreator.setNPCScriptable(ScriptableNPCConstants.SCRIPTABLE_NPCS));
+                    c.announce(CNpcTemplate.setNPCScriptable(ScriptableNPCConstants.SCRIPTABLE_NPCS));
                 }
 
                 if (newcomer) {
@@ -484,7 +489,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 c.releaseClient();
             }
         } else {
-            c.announce(MaplePacketCreator.getAfterLoginError(10));
+            c.announce(CLogin.getAfterLoginError(10));
         }
     }
 }

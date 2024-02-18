@@ -28,9 +28,9 @@ import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import server.ItemInformationProvider;
 import server.MapleStatEffect;
-import tools.MaplePacketCreator;
 
 import java.util.List;
 
@@ -87,7 +87,7 @@ public class PetAutopotProcessor {
             MapleClient c = this.c;
             MapleCharacter chr = c.getPlayer();
             if (!chr.isAlive()) {
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
@@ -106,7 +106,7 @@ public class PetAutopotProcessor {
                 toUse = useInv.getItem(slot);
                 if (toUse != null) {
                     if (toUse.getItemId() != itemId) {
-                        c.announce(MaplePacketCreator.enableActions());
+                        c.announce(CWvsContext.enableActions());
                         return;
                     }
 
@@ -115,7 +115,7 @@ public class PetAutopotProcessor {
                     // from now on, toUse becomes the "cursor" for the current pot being used
                     if (toUse.getQuantity() <= 0) {
                         if (!cursorOnNextAvailablePot(chr)) {
-                            c.announce(MaplePacketCreator.enableActions());
+                            c.announce(CWvsContext.enableActions());
                             return;
                         }
                     }
@@ -187,7 +187,7 @@ public class PetAutopotProcessor {
                 }
             }
 
-            chr.announce(MaplePacketCreator.enableActions());
+            chr.announce(CWvsContext.enableActions());
         }
     }
 

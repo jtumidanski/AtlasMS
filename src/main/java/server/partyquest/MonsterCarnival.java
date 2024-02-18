@@ -2,6 +2,7 @@ package server.partyquest;
 
 import client.MapleCharacter;
 import config.YamlConfig;
+import connection.packets.CField;
 import constants.string.LanguageConstants;
 import net.server.Server;
 import net.server.channel.Channel;
@@ -10,7 +11,6 @@ import net.server.world.MaplePartyCharacter;
 import server.TimerManager;
 import server.maps.MapleMap;
 import server.maps.MapleReactor;
-import tools.MaplePacketCreator;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -347,7 +347,7 @@ public class MonsterCarnival {
         }
         startTime = System.currentTimeMillis() + 3 * 60 * 1000;
 
-        map.broadcastMessage(MaplePacketCreator.getClock(3 * 60));
+        map.broadcastMessage(CField.getClock(3 * 60));
 
         timer = TimerManager.getInstance().schedule(this::timeUp, map.getTimeExpand() * 1000L);
         effectTimer = TimerManager.getInstance().schedule(this::complete, map.getTimeExpand() * 1000L - 10 * 1000); // thanks Vcoc for noticing a time set issue here
@@ -378,12 +378,12 @@ public class MonsterCarnival {
 
             MapleCharacter mc = mpc.getPlayer().get();
             if (redWin) {
-                mc.announce(MaplePacketCreator.showEffect("quest/carnival/win"));
-                mc.announce(MaplePacketCreator.playSound("MobCarnival/Win"));
+                mc.announce(CField.showEffect("quest/carnival/win"));
+                mc.announce(CField.playSound("MobCarnival/Win"));
                 mc.dispelDebuffs();
             } else {
-                mc.announce(MaplePacketCreator.showEffect("quest/carnival/lose"));
-                mc.announce(MaplePacketCreator.playSound("MobCarnival/Lose"));
+                mc.announce(CField.showEffect("quest/carnival/lose"));
+                mc.announce(CField.playSound("MobCarnival/Lose"));
                 mc.dispelDebuffs();
             }
         }
@@ -394,12 +394,12 @@ public class MonsterCarnival {
 
             MapleCharacter mc = mpc.getPlayer().get();
             if (!redWin) {
-                mc.announce(MaplePacketCreator.showEffect("quest/carnival/win"));
-                mc.announce(MaplePacketCreator.playSound("MobCarnival/Win"));
+                mc.announce(CField.showEffect("quest/carnival/win"));
+                mc.announce(CField.playSound("MobCarnival/Win"));
                 mc.dispelDebuffs();
             } else {
-                mc.announce(MaplePacketCreator.showEffect("quest/carnival/lose"));
-                mc.announce(MaplePacketCreator.playSound("MobCarnival/Lose"));
+                mc.announce(CField.showEffect("quest/carnival/lose"));
+                mc.announce(CField.playSound("MobCarnival/Lose"));
                 mc.dispelDebuffs();
             }
         }

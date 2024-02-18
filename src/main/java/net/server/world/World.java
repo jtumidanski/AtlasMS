@@ -30,6 +30,10 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.MapleFamily;
 import config.YamlConfig;
+import connection.packets.CField;
+import connection.packets.CUIMessenger;
+import connection.packets.CUserRemote;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import net.server.PlayerStorage;
 import net.server.Server;
@@ -77,7 +81,6 @@ import server.maps.MapleMiniDungeonInfo;
 import server.maps.MaplePlayerShop;
 import server.maps.MaplePlayerShopItem;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.packets.Fishing;
 
@@ -806,10 +809,10 @@ public class World {
             if (character.isLoggedinWorld()) {
                 Optional<MapleGuild> guild = Server.getInstance().getGuild(guildId);
                 if (guild.isPresent()) {
-                    character.getMap().broadcastMessage(character, MaplePacketCreator.guildNameChanged(character.getId(), guild.get().getName()));
-                    character.getMap().broadcastMessage(character, MaplePacketCreator.guildMarkChanged(character.getId(), guild.get()));
+                    character.getMap().broadcastMessage(character, CUserRemote.guildNameChanged(character.getId(), guild.get().getName()));
+                    character.getMap().broadcastMessage(character, CUserRemote.guildMarkChanged(character.getId(), guild.get()));
                 } else {
-                    character.getMap().broadcastMessage(character, MaplePacketCreator.guildNameChanged(character.getId(), ""));
+                    character.getMap().broadcastMessage(character, CUserRemote.guildNameChanged(character.getId(), ""));
                 }
             }
         }
@@ -817,7 +820,7 @@ public class World {
 
     public void changeEmblem(int gid, List<Integer> affectedPlayers, MapleGuildSummary mgs) {
         updateGuildSummary(gid, mgs);
-        sendPacket(affectedPlayers, MaplePacketCreator.guildEmblemChange(gid, mgs.getLogoBG(), mgs.getLogoBGColor(), mgs.getLogo(), mgs.getLogoColor()), -1);
+        sendPacket(affectedPlayers, CWvsContext.guildEmblemChange(gid, mgs.getLogoBG(), mgs.getLogoBGColor(), mgs.getLogo(), mgs.getLogoColor()), -1);
         setGuildAndRank(affectedPlayers, -1, -1, -1);    //respawn player
     }
 
@@ -1031,7 +1034,7 @@ public class World {
                     chr.get().setParty(party);
                     chr.get().setMPC(partychar);
                 }
-                chr.get().announce(MaplePacketCreator.updateParty(chr.get().getClient().getChannel(), party, operation, target));
+                chr.get().announce(CWvsContext.updateParty(chr.get().getClient().getChannel(), party, operation, target));
             }
         }
         switch (operation) {
@@ -1039,7 +1042,7 @@ public class World {
             case EXPEL:
                 Optional<MapleCharacter> chr = getPlayerStorage().getCharacterById(target.getId());
                 if (chr.isPresent()) {
-                    chr.get().announce(MaplePacketCreator.updateParty(chr.get().getClient().getChannel(), party, operation, target));
+                    chr.get().announce(CWvsContext.updateParty(chr.get().getClient().getChannel(), party, operation, target));
                     chr.get().setParty(null);
                     chr.get().setMPC(null);
                 }
@@ -1126,7 +1129,7 @@ public class World {
     }
 
     public void partyChat(MapleParty party, String chatText, String nameFrom) {
-        byte[] packet = MaplePacketCreator.multiChat(nameFrom, chatText, 1);
+        byte[] packet = CField.multiChat(nameFrom, chatText, 1);
         party.getMembers().stream()
                 .map(MaplePartyCharacter::getName)
                 .filter(name -> !name.equals(nameFrom))
@@ -1136,7 +1139,7 @@ public class World {
     }
 
     public void buddyChat(int[] recipientCharacterIds, int cidFrom, String nameFrom, String chatText) {
-        byte[] packet = MaplePacketCreator.multiChat(nameFrom, chatText, 0);
+        byte[] packet = CField.multiChat(nameFrom, chatText, 0);
         Arrays.stream(recipientCharacterIds)
                 .mapToObj(id -> getPlayerStorage().getCharacterById(id))
                 .flatMap(Optional::stream)
@@ -1181,14 +1184,14 @@ public class World {
                 if (messenger.isEmpty()) {
                     if (from.isPresent()) {
                         if (MapleInviteCoordinator.createInvite(InviteType.MESSENGER, from.get(), messengerId, targetChr.get().getId())) {
-                            targetChr.get().announce(MaplePacketCreator.messengerInvite(sender, messengerId));
-                            from.get().announce(MaplePacketCreator.messengerNote(target, 4, 1));
+                            targetChr.get().announce(CUIMessenger.messengerInvite(sender, messengerId));
+                            from.get().announce(CUIMessenger.messengerNote(target, 4, 1));
                         } else {
-                            from.get().announce(MaplePacketCreator.messengerChat(sender + " : " + target + " is already managing a Maple Messenger invitation"));
+                            from.get().announce(CUIMessenger.messengerChat(sender + " : " + target + " is already managing a Maple Messenger invitation"));
                         }
                     }
                 } else {
-                    from.ifPresent(character -> character.announce(MaplePacketCreator.messengerChat(sender + " : " + target + " is already using Maple Messenger")));
+                    from.ifPresent(character -> character.announce(CUIMessenger.messengerChat(sender + " : " + target + " is already using Maple Messenger")));
                 }
             }
         }
@@ -1202,16 +1205,16 @@ public class World {
             }
             if (!messengerchar.name().equals(namefrom)) {
                 Optional<MapleCharacter> from = getChannel(fromchannel).flatMap(c -> c.getPlayerStorage().getCharacterByName(namefrom));
-                chr.get().announce(MaplePacketCreator.addMessengerPlayer(namefrom, from.get(), position, (byte) (fromchannel - 1)));
-                from.get().announce(MaplePacketCreator.addMessengerPlayer(chr.get().getName(), chr.get(), messengerchar.position(), (byte) (messengerchar.channelId() - 1)));
+                chr.get().announce(CUIMessenger.addMessengerPlayer(namefrom, from.get(), position, (byte) (fromchannel - 1)));
+                from.get().announce(CUIMessenger.addMessengerPlayer(chr.get().getName(), chr.get(), messengerchar.position(), (byte) (messengerchar.channelId() - 1)));
             } else {
-                chr.get().announce(MaplePacketCreator.joinMessenger(messengerchar.position()));
+                chr.get().announce(CUIMessenger.joinMessenger(messengerchar.position()));
             }
         }
     }
 
     public void removeMessengerPlayer(MapleMessenger messenger, int position) {
-        byte[] packet = MaplePacketCreator.removeMessengerPlayer(position);
+        byte[] packet = CUIMessenger.removeMessengerPlayer(position);
         messenger.getMembersStream()
                 .map(MapleMessengerCharacter::name)
                 .map(name -> getPlayerStorage().getCharacterByName(name))
@@ -1220,7 +1223,7 @@ public class World {
     }
 
     public void messengerChat(MapleMessenger messenger, String text, String nameFrom) {
-        byte[] packet = MaplePacketCreator.messengerChat(text);
+        byte[] packet = CUIMessenger.messengerChat(text);
         messenger.getOtherMembersStream(nameFrom)
                 .map(MapleMessengerCharacter::name)
                 .map(name -> getPlayerStorage().getCharacterByName(name))
@@ -1234,7 +1237,7 @@ public class World {
             Optional<MapleMessenger> messenger = senderChr.flatMap(MapleCharacter::getMessenger);
             if (senderChr.isPresent() && messenger.isPresent()) {
                 if (MapleInviteCoordinator.answerInvite(InviteType.MESSENGER, player.getId(), messenger.get().getId(), false).result == InviteResult.DENIED) {
-                    senderChr.get().announce(MaplePacketCreator.messengerNote(player.getName(), 5, 0));
+                    senderChr.get().announce(CUIMessenger.messengerNote(player.getName(), 5, 0));
                 }
             }
         }
@@ -1260,7 +1263,7 @@ public class World {
             return;
         }
 
-        byte[] packet = MaplePacketCreator.updateMessengerPlayer(nameFrom, fromCharacter.get(), position, (byte) (fromChannelId - 1));
+        byte[] packet = CUIMessenger.updateMessengerPlayer(nameFrom, fromCharacter.get(), position, (byte) (fromChannelId - 1));
         messenger.getOtherMembersStream(nameFrom)
                 .map(MapleMessengerCharacter::name)
                 .map(n -> fromChannel.flatMap(c -> c.getPlayerStorage().getCharacterByName(n)))
@@ -1301,7 +1304,7 @@ public class World {
     public void whisper(String sender, String target, int channel, String message) {
         if (isConnected(target)) {
             getPlayerStorage().getCharacterByName(target)
-                    .ifPresent(c -> c.announce(MaplePacketCreator.getWhisper(sender, channel, message)));
+                    .ifPresent(c -> c.announce(CField.getWhisper(sender, channel, message)));
         }
     }
 
@@ -1343,14 +1346,14 @@ public class World {
         if (addChar.getBuddylist().contains(cidFrom)) {
             Optional<BuddylistEntry> entry = addChar.getBuddylist().get(cidFrom);
             addChar.getBuddylist().put(new BuddylistEntry(name, "Default Group", cidFrom, (byte) -1, entry.map(BuddylistEntry::isVisible).orElse(false)));
-            addChar.announce(MaplePacketCreator.updateBuddyChannel(cidFrom, (byte) -1));
+            addChar.announce(CWvsContext.updateBuddyChannel(cidFrom, (byte) -1));
         }
     }
 
     private static void buddyAdded(int cidFrom, String name, int channel, MapleCharacter addChar) {
         if (addChar.getBuddylist().contains(cidFrom)) {
             addChar.getBuddylist().put(new BuddylistEntry(name, "Default Group", cidFrom, channel, true));
-            addChar.announce(MaplePacketCreator.updateBuddyChannel(cidFrom, (byte) (channel - 1)));
+            addChar.announce(CWvsContext.updateBuddyChannel(cidFrom, (byte) (channel - 1)));
         }
     }
 
@@ -1380,7 +1383,7 @@ public class World {
                     mcChannel = (byte) (channel - 1);
                 }
                 chr.get().getBuddylist().put(ble.get());
-                chr.get().announce(MaplePacketCreator.updateBuddyChannel(ble.get().getCharacterId(), mcChannel));
+                chr.get().announce(CWvsContext.updateBuddyChannel(ble.get().getCharacterId(), mcChannel));
             }
         }
     }
@@ -1820,7 +1823,7 @@ public class World {
                     .map(id -> players.getCharacterById(id))
                     .flatMap(Optional::stream)
                     .filter(MapleCharacter::isLoggedinWorld)
-                    .forEach(c -> c.announce(MaplePacketCreator.serverMessage(c.getClient().getChannelServer().getServerMessage())));
+                    .forEach(c -> c.announce(CWvsContext.serverMessage(c.getClient().getChannelServer().getServerMessage())));
         }
     }
 

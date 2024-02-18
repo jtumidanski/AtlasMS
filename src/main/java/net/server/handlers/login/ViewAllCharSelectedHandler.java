@@ -22,13 +22,13 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import net.server.coordinator.session.MapleSessionCoordinator;
 import net.server.coordinator.session.MapleSessionCoordinator.AntiMulticlientResult;
 import net.server.world.World;
 import org.apache.mina.core.session.IoSession;
-import tools.MaplePacketCreator;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -65,7 +65,7 @@ public final class ViewAllCharSelectedHandler extends AbstractMaplePacketHandler
         String hwid = slea.readMapleAsciiString();
 
         if (!hwid.matches("[0-9A-F]{12}_[0-9A-F]{8}")) {
-            c.announce(MaplePacketCreator.getAfterLoginError(17));
+            c.announce(CLogin.getAfterLoginError(17));
             return;
         }
 
@@ -80,7 +80,7 @@ public final class ViewAllCharSelectedHandler extends AbstractMaplePacketHandler
         IoSession session = c.getSession();
         AntiMulticlientResult res = MapleSessionCoordinator.getInstance().attemptGameSession(session, c.getAccID(), hwid);
         if (res != AntiMulticlientResult.SUCCESS) {
-            c.announce(MaplePacketCreator.getAfterLoginError(parseAntiMulticlientError(res)));
+            c.announce(CLogin.getAfterLoginError(parseAntiMulticlientError(res)));
             return;
         }
 
@@ -94,7 +94,7 @@ public final class ViewAllCharSelectedHandler extends AbstractMaplePacketHandler
 
         World wserv = c.getWorldServer();
         if (wserv == null || wserv.isWorldCapacityFull()) {
-            c.announce(MaplePacketCreator.getAfterLoginError(10));
+            c.announce(CLogin.getAfterLoginError(10));
             return;
         }
 
@@ -108,7 +108,7 @@ public final class ViewAllCharSelectedHandler extends AbstractMaplePacketHandler
 
         String[] socket = server.getInetSocket(c.getWorld(), c.getChannel());
         if (socket == null) {
-            c.announce(MaplePacketCreator.getAfterLoginError(10));
+            c.announce(CLogin.getAfterLoginError(10));
             return;
         }
 
@@ -116,7 +116,7 @@ public final class ViewAllCharSelectedHandler extends AbstractMaplePacketHandler
         c.setCharacterOnSessionTransitionState(charId);
 
         try {
-            c.announce(MaplePacketCreator.getServerIP(InetAddress.getByName(socket[0]), Integer.parseInt(socket[1]), charId));
+            c.announce(CLogin.getServerIP(InetAddress.getByName(socket[0]), Integer.parseInt(socket[1]), charId));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

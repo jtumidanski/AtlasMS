@@ -28,9 +28,9 @@ import client.inventory.Item;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CWvsContext;
 import constants.game.ExpTable;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -82,7 +82,7 @@ public final class UseMountFoodHandler extends AbstractMaplePacketHandler {
                 }
 
                 if (mountLevelup != null) {
-                    chr.getMap().broadcastMessage(MaplePacketCreator.updateMount(chr.getId(), mount.get(), mountLevelup));
+                    chr.getMap().broadcastMessage(CWvsContext.updateMount(chr.getId(), mount.get(), mountLevelup));
                 }
             } finally {
                 c.releaseClient();

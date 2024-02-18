@@ -24,13 +24,14 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.ItemFactory;
+import connection.packets.CMiniRoomBaseDlg;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import net.AbstractMaplePacketHandler;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 import server.maps.MaplePlayerShop;
 import server.maps.MaplePortal;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.awt.*;
@@ -52,11 +53,11 @@ public final class HiredMerchantRequest extends AbstractMaplePacketHandler {
 
                     MaplePlayerShop shop = mc.getPlayerShop();
                     if (shop != null && shop.isOwner(mc)) {
-                        chr.announce(MaplePacketCreator.getMiniRoomError(13));
+                        chr.announce(CMiniRoomBaseDlg.getMiniRoomError(13));
                         return;
                     }
                 } else {
-                    chr.announce(MaplePacketCreator.getMiniRoomError(13));
+                    chr.announce(CMiniRoomBaseDlg.getMiniRoomError(13));
                     return;
                 }
             }
@@ -64,7 +65,7 @@ public final class HiredMerchantRequest extends AbstractMaplePacketHandler {
             Point cpos = chr.getPosition();
             MaplePortal portal = chr.getMap().findClosestTeleportPortal(cpos);
             if (portal != null && portal.getPosition().distance(cpos) < 120.0) {
-                chr.announce(MaplePacketCreator.getMiniRoomError(10));
+                chr.announce(CMiniRoomBaseDlg.getMiniRoomError(10));
                 return;
             }
         } catch (Exception e) {
@@ -75,9 +76,9 @@ public final class HiredMerchantRequest extends AbstractMaplePacketHandler {
             if (!chr.hasMerchant()) {
                 try {
                     if (ItemFactory.MERCHANT.loadItems(chr.getId(), false).isEmpty() && chr.getMerchantMeso() == 0) {
-                        c.announce(MaplePacketCreator.hiredMerchantBox());
+                        c.announce(CWvsContext.hiredMerchantBox());
                     } else {
-                        chr.announce(MaplePacketCreator.retrieveFirstMessage());
+                        chr.announce(CWvsContext.retrieveFirstMessage());
                     }
                 } catch (SQLException ex) {
                     ex.printStackTrace();

@@ -23,11 +23,11 @@ package scripting.npc;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.server.world.MaplePartyCharacter;
 import scripting.AbstractScriptManager;
 import server.ScriptedItem;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -147,7 +147,7 @@ public class NPCScriptManager extends AbstractScriptManager {
                     }
                 }
             } else {
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
             }
             return true;
         } catch (final Exception ute) {

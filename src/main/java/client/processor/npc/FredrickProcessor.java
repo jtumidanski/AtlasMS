@@ -30,13 +30,13 @@ import client.inventory.ItemFactory;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CStoreBankDlg;
 import net.server.Server;
 import net.server.world.World;
 import server.ItemInformationProvider;
 import server.maps.MapleHiredMerchant;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.sql.Connection;
@@ -48,7 +48,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author RonanLana - synchronization of Fredrick modules and operation results
@@ -289,7 +288,7 @@ public class FredrickProcessor {
 
                     byte response = canRetrieveFromFredrick(chr, items);
                     if (response != 0) {
-                        chr.announce(MaplePacketCreator.fredrickMessage(response));
+                        chr.announce(CStoreBankDlg.fredrickMessage(response));
                         return;
                     }
 
@@ -305,7 +304,7 @@ public class FredrickProcessor {
                             FilePrinter.print(FilePrinter.FREDRICK + chr.getName() + ".txt", chr.getName() + " gained " + item.getQuantity() + " " + itemName + " (" + item.getItemId() + ")");
                         }
 
-                        chr.announce(MaplePacketCreator.fredrickMessage((byte) 0x1E));
+                        chr.announce(CStoreBankDlg.fredrickMessage((byte) 0x1E));
                         removeFredrickLog(chr.getId());
                     } else {
                         chr.message("An unknown error has occured.");

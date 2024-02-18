@@ -26,8 +26,8 @@ package client.command.commands.gm0;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CWvsContext;
 import net.server.Server;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.util.List;
@@ -42,6 +42,6 @@ public class RanksCommand extends Command {
         MapleCharacter player = c.getPlayer();
 
         List<Pair<String, Integer>> worldRanking = Server.getInstance().getWorldPlayerRanking(player.getWorld());
-        player.announce(MaplePacketCreator.showPlayerRanks(9010000, worldRanking));
+        player.announce(CWvsContext.showPlayerRanks(9010000, worldRanking));
     }
 }

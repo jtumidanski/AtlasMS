@@ -23,10 +23,11 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CCashShop;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.sql.Connection;
@@ -46,18 +47,18 @@ public final class TransferWorldHandler extends AbstractMaplePacketHandler {
         slea.readInt(); //cid
         int birthday = slea.readInt();
         if (!CashOperationHandler.checkBirthday(c, birthday)) {
-            c.announce(MaplePacketCreator.showCashShopMessage((byte) 0xC4));
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CCashShop.showCashShopMessage((byte) 0xC4));
+            c.announce(CWvsContext.enableActions());
             return;
         }
         MapleCharacter chr = c.getPlayer();
         if (!YamlConfig.config.server.ALLOW_CASHSHOP_WORLD_TRANSFER || Server.getInstance().getWorldsSize() <= 1) {
-            c.announce(MaplePacketCreator.sendWorldTransferRules(9, c));
+            c.announce(CCashShop.sendWorldTransferRules(9, c));
             return;
         }
         int worldTransferError = chr.checkWorldTransferEligibility();
         if (worldTransferError != 0) {
-            c.announce(MaplePacketCreator.sendWorldTransferRules(worldTransferError, c));
+            c.announce(CCashShop.sendWorldTransferRules(worldTransferError, c));
             return;
         }
         try (Connection con = DatabaseConnection.getConnection();
@@ -67,10 +68,10 @@ public final class TransferWorldHandler extends AbstractMaplePacketHandler {
             while (rs.next()) {
                 Timestamp completedTimestamp = rs.getTimestamp("completionTime");
                 if (completedTimestamp == null) { //has pending world transfer
-                    c.announce(MaplePacketCreator.sendWorldTransferRules(6, c));
+                    c.announce(CCashShop.sendWorldTransferRules(6, c));
                     return;
                 } else if (completedTimestamp.getTime() + YamlConfig.config.server.WORLD_TRANSFER_COOLDOWN > System.currentTimeMillis()) {
-                    c.announce(MaplePacketCreator.sendWorldTransferRules(7, c));
+                    c.announce(CCashShop.sendWorldTransferRules(7, c));
                     return;
                 }
             }
@@ -78,6 +79,6 @@ public final class TransferWorldHandler extends AbstractMaplePacketHandler {
             e.printStackTrace();
             return;
         }
-        c.announce(MaplePacketCreator.sendWorldTransferRules(0, c));
+        c.announce(CCashShop.sendWorldTransferRules(0, c));
     }
 }

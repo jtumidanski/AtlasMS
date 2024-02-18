@@ -26,6 +26,13 @@ import client.MapleCharacter.DelayedQuestUpdate;
 import client.inventory.*;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import config.YamlConfig;
+import connection.packets.CDropPool;
+import connection.packets.CField;
+import connection.packets.CNpcPool;
+import connection.packets.CScriptMan;
+import connection.packets.CUser;
+import connection.packets.CUserLocal;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import constants.net.NPCTalkMessageType;
@@ -48,7 +55,6 @@ import server.maps.MapleMapObjectType;
 import server.partyquest.PartyQuest;
 import server.partyquest.Pyramid;
 import server.quest.MapleQuest;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.awt.*;
@@ -634,7 +640,7 @@ public class AbstractPlayerInteraction {
             MapleInventoryManipulator.removeById(c, ItemConstants.getInventoryType(id), id, -quantity, true, false);
         }
         if (showMessage) {
-            c.announce(MaplePacketCreator.getShowItemGain(id, quantity, true));
+            c.announce(CWvsContext.getShowItemGain(id, quantity, true));
         }
 
         return item;
@@ -645,11 +651,11 @@ public class AbstractPlayerInteraction {
     }
 
     public void changeMusic(String songName) {
-        getPlayer().getMap().broadcastMessage(MaplePacketCreator.musicChange(songName));
+        getPlayer().getMap().broadcastMessage(CField.musicChange(songName));
     }
 
     public void playerMessage(int type, String message) {
-        c.announce(MaplePacketCreator.serverNotice(type, message));
+        c.announce(CWvsContext.serverNotice(type, message));
     }
 
     public void message(String message) {
@@ -661,15 +667,15 @@ public class AbstractPlayerInteraction {
     }
 
     public void mapMessage(int type, String message) {
-        getPlayer().getMap().broadcastMessage(MaplePacketCreator.serverNotice(type, message));
+        getPlayer().getMap().broadcastMessage(CWvsContext.serverNotice(type, message));
     }
 
     public void mapEffect(String path) {
-        c.announce(MaplePacketCreator.mapEffect(path));
+        c.announce(CField.mapEffect(path));
     }
 
     public void mapSound(String path) {
-        c.announce(MaplePacketCreator.mapSound(path));
+        c.announce(CField.mapSound(path));
     }
 
     public void displayAranIntro() {
@@ -698,16 +704,16 @@ public class AbstractPlayerInteraction {
     }
 
     public void showIntro(String path) {
-        c.announce(MaplePacketCreator.showIntro(path));
+        c.announce(CUser.showIntro(path));
     }
 
     public void showInfo(String path) {
-        c.announce(MaplePacketCreator.showInfo(path));
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CUser.showInfo(path));
+        c.announce(CWvsContext.enableActions());
     }
 
     public void guildMessage(int type, String message) {
-        getGuild().ifPresent(g -> g.guildMessage(MaplePacketCreator.serverNotice(type, message)));
+        getGuild().ifPresent(g -> g.guildMessage(CWvsContext.serverNotice(type, message)));
     }
 
     public Optional<MapleGuild> getGuild() {
@@ -745,7 +751,7 @@ public class AbstractPlayerInteraction {
             } else {
                 MapleInventoryManipulator.removeById(cl, ItemConstants.getInventoryType(id), id, -quantity, true, false);
             }
-            cl.announce(MaplePacketCreator.getShowItemGain(id, quantity, true));
+            cl.announce(CWvsContext.getShowItemGain(id, quantity, true));
         }
     }
 
@@ -846,7 +852,7 @@ public class AbstractPlayerInteraction {
             int possesed = iv.countById(id);
             if (possesed > 0) {
                 MapleInventoryManipulator.removeById(c, ItemConstants.getInventoryType(id), id, possesed, true, false);
-                chr.announce(MaplePacketCreator.getShowItemGain(id, (short) -possesed, true));
+                chr.announce(CWvsContext.getShowItemGain(id, (short) -possesed, true));
             }
         }
     }
@@ -860,13 +866,13 @@ public class AbstractPlayerInteraction {
         int possessed = cl.getPlayer().getInventory(invType).countById(id);
         if (possessed > 0) {
             MapleInventoryManipulator.removeById(cl, ItemConstants.getInventoryType(id), id, possessed, true, false);
-            cl.announce(MaplePacketCreator.getShowItemGain(id, (short) -possessed, true));
+            cl.announce(CWvsContext.getShowItemGain(id, (short) -possessed, true));
         }
 
         if (invType == MapleInventoryType.EQUIP) {
             if (cl.getPlayer().getInventory(MapleInventoryType.EQUIPPED).countById(id) > 0) {
                 MapleInventoryManipulator.removeById(cl, MapleInventoryType.EQUIPPED, id, 1, true, false);
-                cl.announce(MaplePacketCreator.getShowItemGain(id, (short) -1, true));
+                cl.announce(CWvsContext.getShowItemGain(id, (short) -1, true));
             }
         }
     }
@@ -880,12 +886,12 @@ public class AbstractPlayerInteraction {
     }
 
     public void showInstruction(String msg, int width, int height) {
-        c.announce(MaplePacketCreator.sendHint(msg, width, height));
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CUserLocal.sendHint(msg, width, height));
+        c.announce(CWvsContext.enableActions());
     }
 
     public void disableMinimap() {
-        c.announce(MaplePacketCreator.disableMinimap());
+        c.announce(CField.disableMinimap());
     }
 
     public boolean isAllReactorState(final int reactorId, final int state) {
@@ -897,13 +903,13 @@ public class AbstractPlayerInteraction {
         getMap(mapid).killAllMonsters();
         for (MapleMapObject i : getMap(mapid).getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.ITEM))) {
             getMap(mapid).removeMapObject(i);
-            getMap(mapid).broadcastMessage(MaplePacketCreator.removeItemFromMap(i.getObjectId(), 0, c.getPlayer().getId()));
+            getMap(mapid).broadcastMessage(CDropPool.removeItemFromMap(i.getObjectId(), 0, c.getPlayer().getId()));
         }
     }
 
     public void useItem(int id) {
         ItemInformationProvider.getInstance().getItemEffect(id).applyTo(c.getPlayer());
-        c.announce(MaplePacketCreator.getItemMessage(id));//Useful shet :3
+        c.announce(CWvsContext.getItemMessage(id));//Useful shet :3
     }
 
     public void cancelItem(final int id) {
@@ -926,7 +932,7 @@ public class AbstractPlayerInteraction {
                 return;
             }
         } else if (GameConstants.isAranSkills(skill.id())) {
-            c.announce(MaplePacketCreator.showInfo("Effect/BasicEff.img/AranGetSkill"));
+            c.announce(CUser.showInfo("Effect/BasicEff.img/AranGetSkill"));
         }
 
         getPlayer().changeSkillLevel(skill, level, masterLevel, expiration);
@@ -945,7 +951,7 @@ public class AbstractPlayerInteraction {
         final Item newItem = ItemInformationProvider.getInstance().getEquipById(itemid);
         newItem.setPosition(slot);
         c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).addItemFromDB(newItem);
-        c.announce(MaplePacketCreator.modifyInventory(false, Collections.singletonList(new ModifyInventory(0, newItem))));
+        c.announce(CWvsContext.modifyInventory(false, Collections.singletonList(new ModifyInventory(0, newItem))));
     }
 
     public void spawnNpc(int npcId, Point pos, MapleMap map) {
@@ -956,7 +962,7 @@ public class AbstractPlayerInteraction {
         npc.setRx1(pos.x - 50);
         npc.setFh(map.getFootholds().findBelow(pos).getId());
         map.addMapObject(npc);
-        map.broadcastMessage(MaplePacketCreator.spawnNPC(npc));
+        map.broadcastMessage(CNpcPool.spawnNPC(npc));
     }
 
     public void spawnMonster(int id, int x, int y) {
@@ -974,19 +980,19 @@ public class AbstractPlayerInteraction {
     }
 
     public void spawnGuide() {
-        c.announce(MaplePacketCreator.spawnGuide(true));
+        c.announce(CUserLocal.spawnGuide(true));
     }
 
     public void removeGuide() {
-        c.announce(MaplePacketCreator.spawnGuide(false));
+        c.announce(CUserLocal.spawnGuide(false));
     }
 
     public void displayGuide(int num) {
-        c.announce(MaplePacketCreator.showInfo("UI/tutorial.img/" + num));
+        c.announce(CUser.showInfo("UI/tutorial.img/" + num));
     }
 
     public void goDojoUp() {
-        c.announce(MaplePacketCreator.dojoWarpUp());
+        c.announce(CUserLocal.dojoWarpUp());
     }
 
     public void resetDojoEnergy() {
@@ -1000,28 +1006,28 @@ public class AbstractPlayerInteraction {
     }
 
     public void enableActions() {
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CWvsContext.enableActions());
     }
 
     public void showEffect(String effect) {
-        c.announce(MaplePacketCreator.showEffect(effect));
+        c.announce(CField.showEffect(effect));
     }
 
     public void dojoEnergy() {
-        c.announce(MaplePacketCreator.getEnergy("energy", getPlayer().getDojoEnergy()));
+        c.announce(CWvsContext.getEnergy("energy", getPlayer().getDojoEnergy()));
     }
 
     public void talkGuide(String message) {
-        c.announce(MaplePacketCreator.talkGuide(message));
+        c.announce(CUserLocal.talkGuide(message));
     }
 
     public void guideHint(int hint) {
-        c.announce(MaplePacketCreator.guideHint(hint));
+        c.announce(CUserLocal.guideHint(hint));
     }
 
     public void updateAreaInfo(Short area, String info) {
         c.getPlayer().updateAreaInfo(area, info);
-        c.announce(MaplePacketCreator.enableActions());//idk, nexon does the same :P
+        c.announce(CWvsContext.enableActions());//idk, nexon does the same :P
     }
 
     public boolean containsAreaInfo(short area, String info) {
@@ -1029,33 +1035,33 @@ public class AbstractPlayerInteraction {
     }
 
     public void earnTitle(String msg) {
-        c.announce(MaplePacketCreator.earnTitleMessage(msg));
+        c.announce(CWvsContext.earnTitleMessage(msg));
     }
 
     public void showInfoText(String msg) {
-        c.announce(MaplePacketCreator.showInfoText(msg));
+        c.announce(CWvsContext.showInfoText(msg));
     }
 
     public void openUI(byte ui) {
-        c.announce(MaplePacketCreator.openUI(ui));
+        c.announce(CUserLocal.openUI(ui));
     }
 
     public void lockUI() {
-        c.announce(MaplePacketCreator.disableUI(true));
-        c.announce(MaplePacketCreator.lockUI(true));
+        c.announce(CUserLocal.disableUI(true));
+        c.announce(CUserLocal.lockUI(true));
     }
 
     public void unlockUI() {
-        c.announce(MaplePacketCreator.disableUI(false));
-        c.announce(MaplePacketCreator.lockUI(false));
+        c.announce(CUserLocal.disableUI(false));
+        c.announce(CUserLocal.lockUI(false));
     }
 
     public void playSound(String sound) {
-        getPlayer().getMap().broadcastMessage(MaplePacketCreator.environmentChange(sound, 4));
+        getPlayer().getMap().broadcastMessage(CField.environmentChange(sound, 4));
     }
 
     public void environmentChange(String env, int mode) {
-        getPlayer().getMap().broadcastMessage(MaplePacketCreator.environmentChange(env, mode));
+        getPlayer().getMap().broadcastMessage(CField.environmentChange(env, mode));
     }
 
     public String numberWithCommas(int number) {
@@ -1176,7 +1182,7 @@ public class AbstractPlayerInteraction {
     }
 
     public void npcTalk(int npcid, String message) {
-        c.announce(MaplePacketCreator.getNPCTalk(npcid, NPCTalkMessageType.ON_SAY, message, "00 00", (byte) 0));
+        c.announce(CScriptMan.getNPCTalk(npcid, NPCTalkMessageType.ON_SAY, message, "00 00", (byte) 0));
     }
 
     public long getCurrentTime() {

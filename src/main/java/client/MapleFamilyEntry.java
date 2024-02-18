@@ -19,10 +19,10 @@
 */
 package client;
 
+import connection.packets.CWvsContext;
 import net.server.Server;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.sql.Connection;
@@ -338,7 +338,7 @@ public class MapleFamilyEntry {
         }
         MapleCharacter chr = getChr();
         if (chr != null) {
-            chr.announce(MaplePacketCreator.sendGainRep(gain, from != null ? from.getName() : ""));
+            chr.announce(CWvsContext.sendGainRep(gain, from != null ? from.getName() : ""));
         }
     }
 
@@ -498,13 +498,13 @@ public class MapleFamilyEntry {
         if (senior != null) {
             MapleCharacter seniorChr = senior.getChr();
             if (seniorChr != null) {
-                seniorChr.announce(MaplePacketCreator.getFamilyInfo(senior));
+                seniorChr.announce(CWvsContext.getFamilyInfo(senior));
             }
             senior = senior.getSenior();
             if (includeSuperSenior && senior != null) {
                 seniorChr = senior.getChr();
                 if (seniorChr != null) {
-                    seniorChr.announce(MaplePacketCreator.getFamilyInfo(senior));
+                    seniorChr.announce(CWvsContext.getFamilyInfo(senior));
                 }
             }
         }

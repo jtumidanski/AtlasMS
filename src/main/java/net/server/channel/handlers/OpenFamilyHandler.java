@@ -22,8 +22,8 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -36,7 +36,7 @@ public final class OpenFamilyHandler extends AbstractMaplePacketHandler {
             return;
         }
         MapleCharacter chr = c.getPlayer();
-        c.announce(MaplePacketCreator.getFamilyInfo(chr.getFamilyEntry()));
+        c.announce(CWvsContext.getFamilyInfo(chr.getFamilyEntry()));
     }
 }
 

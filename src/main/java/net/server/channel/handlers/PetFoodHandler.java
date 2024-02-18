@@ -29,9 +29,9 @@ import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -43,14 +43,14 @@ public final class PetFoodHandler extends AbstractMaplePacketHandler {
         MapleCharacter chr = c.getPlayer();
         AutobanManager abm = chr.getAutobanManager();
         if (abm.getLastSpam(2) + 500 > currentServerTime()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
         abm.spam(2);
         slea.readInt(); // timestamp issue detected thanks to Masterrulax
         abm.setTimestamp(1, Server.getInstance().getCurrentTimestamp(), 3);
         if (chr.getNoPets() == 0) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
         int previousFullness = 100;

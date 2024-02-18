@@ -24,9 +24,9 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import server.maps.MapleHiredMerchant;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -48,14 +48,14 @@ public class RemoteStoreHandler extends AbstractMaplePacketHandler {
         Optional<MapleHiredMerchant> hm = getMerchant(c);
         if (hm.isEmpty() || !hm.get().isOwner(chr)) {
             chr.dropMessage(1, "You don't have a Merchant open.");
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
         if (hm.get().getChannel() == chr.getClient().getChannel()) {
             hm.get().visitShop(chr);
         } else {
-            c.announce(MaplePacketCreator.remoteChannelChange((byte) (hm.get().getChannel() - 1)));
+            c.announce(CWvsContext.remoteChannelChange((byte) (hm.get().getChannel() - 1)));
         }
     }
 }

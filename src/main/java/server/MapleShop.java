@@ -26,9 +26,9 @@ import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CShopDlg;
 import constants.inventory.ItemConstants;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -160,7 +160,7 @@ public class MapleShop {
 
     public void sendShop(MapleClient c) {
         c.getPlayer().setShop(this);
-        c.announce(MaplePacketCreator.getNPCShop(c, getNpcId(), items));
+        c.announce(CShopDlg.getNPCShop(c, getNpcId(), items));
     }
 
     public void buy(MapleClient c, short slot, int itemId, short quantity) {
@@ -186,13 +186,13 @@ public class MapleShop {
                         MapleInventoryManipulator.addById(c, itemId, quantity, "", -1);
                         c.getPlayer().gainMeso(-item.getPrice(), false);
                     }
-                    c.announce(MaplePacketCreator.shopTransaction((byte) 0));
+                    c.announce(CShopDlg.shopTransaction((byte) 0));
                 } else {
-                    c.announce(MaplePacketCreator.shopTransaction((byte) 3));
+                    c.announce(CShopDlg.shopTransaction((byte) 3));
                 }
 
             } else {
-                c.announce(MaplePacketCreator.shopTransaction((byte) 2));
+                c.announce(CShopDlg.shopTransaction((byte) 2));
             }
 
         } else if (item.getPitch() > 0) {
@@ -208,9 +208,9 @@ public class MapleShop {
                         MapleInventoryManipulator.addById(c, itemId, quantity, "", -1);
                         MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, 4310000, amount, false, false);
                     }
-                    c.announce(MaplePacketCreator.shopTransaction((byte) 0));
+                    c.announce(CShopDlg.shopTransaction((byte) 0));
                 } else {
-                    c.announce(MaplePacketCreator.shopTransaction((byte) 3));
+                    c.announce(CShopDlg.shopTransaction((byte) 3));
                 }
             }
 
@@ -230,11 +230,11 @@ public class MapleShop {
                     }
                     c.getPlayer().gainMeso(diff, false);
                 } else {
-                    c.announce(MaplePacketCreator.shopTransaction((byte) 3));
+                    c.announce(CShopDlg.shopTransaction((byte) 3));
                 }
-                c.announce(MaplePacketCreator.shopTransaction((byte) 0));
+                c.announce(CShopDlg.shopTransaction((byte) 0));
             } else {
-                c.announce(MaplePacketCreator.shopTransaction((byte) 2));
+                c.announce(CShopDlg.shopTransaction((byte) 2));
             }
         }
     }
@@ -256,9 +256,9 @@ public class MapleShop {
             if (recvMesos > 0) {
                 c.getPlayer().gainMeso(recvMesos, false);
             }
-            c.announce(MaplePacketCreator.shopTransaction((byte) 0x8));
+            c.announce(CShopDlg.shopTransaction((byte) 0x8));
         } else {
-            c.announce(MaplePacketCreator.shopTransaction((byte) 0x5));
+            c.announce(CShopDlg.shopTransaction((byte) 0x5));
         }
     }
 
@@ -278,9 +278,9 @@ public class MapleShop {
                 item.setQuantity(slotMax);
                 c.getPlayer().forceUpdateItem(item);
                 c.getPlayer().gainMeso(-price, false, true, false);
-                c.announce(MaplePacketCreator.shopTransaction((byte) 0x8));
+                c.announce(CShopDlg.shopTransaction((byte) 0x8));
             } else {
-                c.announce(MaplePacketCreator.shopTransaction((byte) 0x2));
+                c.announce(CShopDlg.shopTransaction((byte) 0x2));
             }
         }
     }

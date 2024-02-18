@@ -23,13 +23,14 @@ package client.inventory;
 
 import client.MapleCharacter;
 import client.inventory.manipulator.MapleCashidGenerator;
+import connection.packets.CPet;
+import connection.packets.CUser;
 import constants.game.ExpTable;
 import server.ItemInformationProvider;
 import server.movement.AbsoluteLifeMovement;
 import server.movement.LifeMovement;
 import server.movement.LifeMovementFragment;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.awt.*;
@@ -212,8 +213,8 @@ public class MaplePet extends Item {
                 closeness = newCloseness;
                 while (newCloseness >= ExpTable.getClosenessNeededForLevel(level)) {
                     level += 1;
-                    owner.announce(MaplePacketCreator.showOwnPetLevelUp(slot));
-                    owner.getMap().broadcastMessage(MaplePacketCreator.showPetLevelUp(owner, slot));
+                    owner.announce(CUser.showOwnPetLevelUp(slot));
+                    owner.getMap().broadcastMessage(CUser.showPetLevelUp(owner, slot));
                 }
             }
 
@@ -232,7 +233,7 @@ public class MaplePet extends Item {
             enjoyed = false;
         }
 
-        owner.getMap().broadcastMessage(MaplePacketCreator.petFoodResponse(owner.getId(), slot, enjoyed, false));
+        owner.getMap().broadcastMessage(CPet.petFoodResponse(owner.getId(), slot, enjoyed, false));
         saveToDb();
 
         Item petz = owner.getInventory(MapleInventoryType.CASH).getItem(getPosition());

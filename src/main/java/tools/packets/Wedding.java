@@ -8,8 +8,8 @@ package tools.packets;
 
 import client.MapleCharacter;
 import client.inventory.Item;
+import connection.packets.CCommon;
 import net.server.guild.MapleGuild;
-import tools.MaplePacketCreator;
 import tools.StringUtil;
 import tools.data.output.MaplePacketLittleEndianWriter;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * <p>
  * Wishlists edited by Drago (Dragohe4rt)
  */
-public class Wedding extends MaplePacketCreator {
+public class Wedding {
     private static final short MARRIAGE_REQUEST = 0x48;
     private static final short MARRIAGE_RESULT = 0x49;
     private static final short WEDDING_GIFT_RESULT = 0x4A;
@@ -102,7 +102,7 @@ public class Wedding extends MaplePacketCreator {
 
         for (MapleCharacter guest : m_dwUsers) {
             // Begin Avatar Encoding
-            addCharLook(mplew, guest, false); // CUser::EncodeAvatar
+            CCommon.addCharLook(mplew, guest, false); // CUser::EncodeAvatar
             mplew.writeInt(30000); // v20 = *(_DWORD *)(v13 + 2192) -- new groom marriage ID??
             mplew.writeInt(30000); // v20 = *(_DWORD *)(v13 + 2192) -- new bride marriage ID??
             mplew.writeMapleAsciiString(guest.getName());
@@ -272,7 +272,7 @@ public class Wedding extends MaplePacketCreator {
                 mplew.writeLong(32);
                 mplew.write(items.size());
                 for (Item item : items) {
-                    addItemInfo(mplew, item, true);
+                    CCommon.addItemInfo(mplew, item, true);
                 }
                 break;
             }

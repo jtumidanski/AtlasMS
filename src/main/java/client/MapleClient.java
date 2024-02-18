@@ -23,6 +23,11 @@ package client;
 
 import client.inventory.MapleInventoryType;
 import config.YamlConfig;
+import connection.packets.CCashShop;
+import connection.packets.CClientSocket;
+import connection.packets.CLogin;
+import connection.packets.CUserLocal;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import net.server.Server;
 import net.server.audit.locks.MonitoredLockType;
@@ -32,7 +37,6 @@ import net.server.coordinator.login.MapleLoginBypassCoordinator;
 import net.server.coordinator.session.MapleSessionCoordinator;
 import net.server.coordinator.session.MapleSessionCoordinator.AntiMulticlientResult;
 import net.server.guild.MapleGuild;
-import net.server.guild.MapleGuildCharacter;
 import net.server.world.MapleMessenger;
 import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
@@ -56,7 +60,6 @@ import tools.FilePrinter;
 import tools.HexTool;
 import tools.LogHelper;
 import tools.MapleAESOFB;
-import tools.MaplePacketCreator;
 
 import javax.script.ScriptEngine;
 import java.io.IOException;
@@ -201,7 +204,7 @@ public class MapleClient {
     }
 
     public void sendCharList(int server) {
-        this.announce(MaplePacketCreator.getCharList(this, server, 0));
+        this.announce(CLogin.getCharList(this, server, 0));
     }
 
     public List<MapleCharacter> loadCharacters(int serverId) {
@@ -992,7 +995,7 @@ public class MapleClient {
                             Optional<MapleGuild> guild = player.getGuild();
                             if (guild.isPresent()) {
                                 Server.getInstance().setGuildMemberOnline(player, false, player.getClient().getChannel());
-                                player.announce(MaplePacketCreator.showGuildInfo(player));
+                                player.announce(CWvsContext.showGuildInfo(player));
                             }
                             if (bl != null) {
                                 wserv.loggedOff(player.getId(), channel, player.getBuddylist().getBuddyIds());
@@ -1425,12 +1428,12 @@ public class MapleClient {
 
     private void announceDisableServerMessage() {
         if (!this.getWorldServer().registerDisabledServerMessage(player.getId())) {
-            announce(MaplePacketCreator.serverMessage(""));
+            announce(CWvsContext.serverMessage(""));
         }
     }
 
     public void announceServerMessage() {
-        announce(MaplePacketCreator.serverMessage(this.getChannelServer().getServerMessage()));
+        announce(CWvsContext.serverMessage(this.getChannelServer().getServerMessage()));
     }
 
     public synchronized void announceBossHpBar(MapleMonster mm, final int mobHash, final byte[] packet) {
@@ -1464,8 +1467,8 @@ public class MapleClient {
     }
 
     public void announceHint(String msg, int length) {
-        announce(MaplePacketCreator.sendHint(msg, length, 10));
-        announce(MaplePacketCreator.enableActions());
+        announce(CUserLocal.sendHint(msg, length, 10));
+        announce(CWvsContext.enableActions());
     }
 
     public void changeChannel(int channel) {
@@ -1475,18 +1478,18 @@ public class MapleClient {
             return;
         }
         if (!player.isAlive() || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit())) {
-            announce(MaplePacketCreator.enableActions());
+            announce(CWvsContext.enableActions());
             return;
         } else if (MapleMiniDungeonInfo.isDungeonMap(player.getMapId())) {
-            announce(MaplePacketCreator.serverNotice(5, "Changing channels or entering Cash Shop or MTS are disabled when inside a Mini-Dungeon."));
-            announce(MaplePacketCreator.enableActions());
+            announce(CWvsContext.serverNotice(5, "Changing channels or entering Cash Shop or MTS are disabled when inside a Mini-Dungeon."));
+            announce(CWvsContext.enableActions());
             return;
         }
 
         String[] socket = Server.getInstance().getInetSocket(getWorld(), channel);
         if (socket == null) {
-            announce(MaplePacketCreator.serverNotice(1, "Channel " + channel + " is currently disabled. Try another channel."));
-            announce(MaplePacketCreator.enableActions());
+            announce(CWvsContext.serverNotice(1, "Channel " + channel + " is currently disabled. Try another channel."));
+            announce(CWvsContext.enableActions());
             return;
         }
 
@@ -1517,7 +1520,7 @@ public class MapleClient {
 
         player.setSessionTransitionState();
         try {
-            announce(MaplePacketCreator.getChannelChange(InetAddress.getByName(socket[0]), Integer.parseInt(socket[1])));
+            announce(CClientSocket.getChannelChange(InetAddress.getByName(socket[0]), Integer.parseInt(socket[1])));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1577,7 +1580,7 @@ public class MapleClient {
     }
 
     public void enableCSActions() {
-        announce(MaplePacketCreator.enableCSUse(player));
+        announce(CCashShop.enableCSUse(player));
     }
 
     public String getNibbleHWID() {

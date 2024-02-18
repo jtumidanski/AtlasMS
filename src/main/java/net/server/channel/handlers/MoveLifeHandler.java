@@ -23,6 +23,7 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CMob;
 import server.life.MapleMonster;
 import server.life.MapleMonsterInformationProvider;
 import server.life.MobSkill;
@@ -32,7 +33,6 @@ import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 import server.movement.Elem;
 import server.movement.MovePath;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
@@ -166,9 +166,9 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         }
 
         if (nextUse != null) {
-            c.announce(MaplePacketCreator.moveMonsterResponse(objectid, moveid, mobMp, aggro, nextSkillId, nextSkillLevel));
+            c.announce(CMob.moveMonsterResponse(objectid, moveid, mobMp, aggro, nextSkillId, nextSkillLevel));
         } else {
-            c.announce(MaplePacketCreator.moveMonsterResponse(objectid, moveid, mobMp, aggro));
+            c.announce(CMob.moveMonsterResponse(objectid, moveid, mobMp, aggro));
         }
 
         final MovePath res = new MovePath();
@@ -184,7 +184,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
                 .map(Elem::getBMoveAction)
                 .forEach(monster::setStance);
 
-        map.broadcastMessage(player, MaplePacketCreator.moveMonster(objectid, mobMoveStartResult, nActionAndDir, skillData, res), serverStartPos);
+        map.broadcastMessage(player, CMob.moveMonster(objectid, mobMoveStartResult, nActionAndDir, skillData, res), serverStartPos);
         //updatePosition(res, monster, -2); //does this need to be done after the packet is broadcast?
         map.moveMonster(monster, monster.getPosition());
 

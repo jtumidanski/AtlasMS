@@ -21,11 +21,11 @@
  */
 package client;
 
+import connection.packets.CWvsContext;
 import net.server.Server;
 import net.server.world.World;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.sql.Connection;
@@ -272,7 +272,7 @@ public class MapleFamily {
         for (MapleFamilyEntry entry : members.values()) {
             MapleCharacter chr = entry.getChr();
             if (chr != null) {
-                chr.announce(MaplePacketCreator.getFamilyInfo(entry));
+                chr.announce(CWvsContext.getFamilyInfo(entry));
             }
         }
     }

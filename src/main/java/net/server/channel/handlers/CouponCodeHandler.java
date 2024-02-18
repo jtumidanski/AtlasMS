@@ -27,13 +27,13 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.Item;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CCashShop;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.CashShop;
 import server.ItemInformationProvider;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -182,7 +182,7 @@ public final class CouponCodeHandler extends AbstractMaplePacketHandler {
                 Pair<Integer, List<Pair<Integer, Pair<Integer, Integer>>>> codeRes = getNXCodeResult(c.getPlayer(), code.toUpperCase());
                 int type = codeRes.getLeft();
                 if (type < 0) {
-                    c.announce(MaplePacketCreator.showCashShopMessage((byte) parseCouponResult(type)));
+                    c.announce(CCashShop.showCashShopMessage((byte) parseCouponResult(type)));
                 } else {
                     List<Item> cashItems = new LinkedList<>();
                     List<Pair<Integer, Integer>> items = new LinkedList<>();
@@ -254,9 +254,9 @@ public final class CouponCodeHandler extends AbstractMaplePacketHandler {
                         }
                     }
                     if (nxCredit != 0 || nxPrepaid != 0) { //coupon packet can only show maple points (afaik)
-                        c.announce(MaplePacketCreator.showBoughtQuestItem(0));
+                        c.announce(CCashShop.showBoughtQuestItem(0));
                     } else {
-                        c.announce(MaplePacketCreator.showCouponRedeemedItems(c.getAccID(), maplePoints, mesos, cashItems, items));
+                        c.announce(CCashShop.showCouponRedeemedItems(c.getAccID(), maplePoints, mesos, cashItems, items));
                     }
                     c.enableCSActions();
                 }

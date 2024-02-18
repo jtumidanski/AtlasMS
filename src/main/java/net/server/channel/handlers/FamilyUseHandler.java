@@ -26,12 +26,12 @@ import client.MapleClient;
 import client.MapleFamilyEntitlement;
 import client.MapleFamilyEntry;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import server.maps.FieldLimit;
 import server.maps.MapleMap;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -50,7 +50,7 @@ public final class FamilyUseHandler extends AbstractMaplePacketHandler {
         if (entry.getReputation() < cost || entry.isEntitlementUsed(type)) {
             return; // shouldn't even be able to request it
         }
-        c.announce(MaplePacketCreator.getFamilyInfo(entry));
+        c.announce(CWvsContext.getFamilyInfo(entry));
         MapleCharacter victim;
         if (type == MapleFamilyEntitlement.FAMILY_REUINION || type == MapleFamilyEntitlement.SUMMON_FAMILY) {
             victim = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString()).orElse(null);
@@ -66,7 +66,7 @@ public final class FamilyUseHandler extends AbstractMaplePacketHandler {
                                 c.getPlayer().changeMap(victim.getMap(), victim.getMap().getPortal(0));
                                 useEntitlement(entry, type);
                             } else {
-                                c.announce(MaplePacketCreator.sendFamilyMessage(75, 0)); // wrong message, but close enough. (client should check this first anyway)
+                                c.announce(CWvsContext.sendFamilyMessage(75, 0)); // wrong message, but close enough. (client should check this first anyway)
                                 return;
                             }
                         } else {
@@ -74,20 +74,20 @@ public final class FamilyUseHandler extends AbstractMaplePacketHandler {
                                     && (ownMap.getForcedReturnId() == 999999999 || ownMap.getId() < 100000000) && ownMap.getEventInstance().isEmpty()) {
 
                                 if (MapleInviteCoordinator.hasInvite(InviteType.FAMILY_SUMMON, victim.getId())) {
-                                    c.announce(MaplePacketCreator.sendFamilyMessage(74, 0));
+                                    c.announce(CWvsContext.sendFamilyMessage(74, 0));
                                     return;
                                 }
                                 MapleInviteCoordinator.createInvite(InviteType.FAMILY_SUMMON, c.getPlayer(), victim, victim.getId(), c.getPlayer().getMap());
-                                victim.announce(MaplePacketCreator.sendFamilySummonRequest(c.getPlayer().getFamily().orElseThrow().getName(), c.getPlayer().getName()));
+                                victim.announce(CWvsContext.sendFamilySummonRequest(c.getPlayer().getFamily().orElseThrow().getName(), c.getPlayer().getName()));
                                 useEntitlement(entry, type);
                             } else {
-                                c.announce(MaplePacketCreator.sendFamilyMessage(75, 0));
+                                c.announce(CWvsContext.sendFamilyMessage(75, 0));
                                 return;
                             }
                         }
                     }
                 } else {
-                    c.announce(MaplePacketCreator.sendFamilyMessage(67, 0));
+                    c.announce(CWvsContext.sendFamilyMessage(67, 0));
                 }
             }
         } else if (type == MapleFamilyEntitlement.FAMILY_BONDING) {
@@ -132,7 +132,7 @@ public final class FamilyUseHandler extends AbstractMaplePacketHandler {
     private boolean useEntitlement(MapleFamilyEntry entry, MapleFamilyEntitlement entitlement) {
         if (entry.useEntitlement(entitlement)) {
             entry.gainReputation(-entitlement.getRepCost(), false);
-            entry.getChr().announce(MaplePacketCreator.getFamilyInfo(entry));
+            entry.getChr().announce(CWvsContext.getFamilyInfo(entry));
             return true;
         }
         return false;

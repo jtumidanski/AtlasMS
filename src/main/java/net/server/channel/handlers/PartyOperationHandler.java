@@ -24,15 +24,14 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteResult;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import net.server.coordinator.world.MapleInviteCoordinator.MapleInviteResult;
 import net.server.world.MapleParty;
-import net.server.world.MaplePartyCharacter;
 import net.server.world.PartyOperation;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -55,21 +54,21 @@ public final class PartyOperationHandler extends AbstractMaplePacketHandler {
         MapleCharacter character = client.getPlayer();
         MapleCharacter invited = client.getWorldServer().getPlayerStorage().getCharacterByName(name).orElse(null);
         if (invited == null) {
-            client.announce(MaplePacketCreator.partyStatusMessage(19));
+            client.announce(CWvsContext.partyStatusMessage(19));
             return;
         }
 
         if (invited.getLevel() < 10 && (!YamlConfig.config.server.USE_PARTY_FOR_STARTERS || character.getLevel() >= 10)) { //min requirement is level 10
-            client.announce(MaplePacketCreator.serverNotice(5, "The player you have invited does not meet the requirements."));
+            client.announce(CWvsContext.serverNotice(5, "The player you have invited does not meet the requirements."));
             return;
         }
         if (YamlConfig.config.server.USE_PARTY_FOR_STARTERS && invited.getLevel() >= 10 && character.getLevel() < 10) {    //trying to invite high level
-            client.announce(MaplePacketCreator.serverNotice(5, "The player you have invited does not meet the requirements."));
+            client.announce(CWvsContext.serverNotice(5, "The player you have invited does not meet the requirements."));
             return;
         }
 
         if (invited.getParty().isPresent()) {
-            client.announce(MaplePacketCreator.partyStatusMessage(16));
+            client.announce(CWvsContext.partyStatusMessage(16));
             return;
         }
 
@@ -83,19 +82,19 @@ public final class PartyOperationHandler extends AbstractMaplePacketHandler {
         }
 
         if (party.isEmpty()) {
-            client.announce(MaplePacketCreator.partyStatusMessage(1));
+            client.announce(CWvsContext.partyStatusMessage(1));
             return;
         }
 
         if (party.get().getMembers().size() >= 6) {
-            client.announce(MaplePacketCreator.partyStatusMessage(17));
+            client.announce(CWvsContext.partyStatusMessage(17));
             return;
         }
 
         if (MapleInviteCoordinator.createInvite(InviteType.PARTY, character, party.get().getId(), invited.getId())) {
-            invited.announce(MaplePacketCreator.partyInvite(character));
+            invited.announce(CWvsContext.partyInvite(character));
         } else {
-            client.announce(MaplePacketCreator.partyStatusMessage(22, invited.getName()));
+            client.announce(CWvsContext.partyStatusMessage(22, invited.getName()));
         }
     }
 
@@ -106,7 +105,7 @@ public final class PartyOperationHandler extends AbstractMaplePacketHandler {
         if (res == InviteResult.ACCEPTED) {
             MapleParty.joinParty(character, partyId, false);
         } else {
-            client.announce(MaplePacketCreator.serverNotice(5, "You couldn't join the party due to an expired invitation request."));
+            client.announce(CWvsContext.serverNotice(5, "You couldn't join the party due to an expired invitation request."));
         }
     }
 

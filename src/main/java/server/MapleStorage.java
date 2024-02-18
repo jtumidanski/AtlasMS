@@ -22,6 +22,8 @@ import client.MapleClient;
 import client.inventory.Item;
 import client.inventory.ItemFactory;
 import client.inventory.MapleInventoryType;
+import connection.packets.CTrunkDlg;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
@@ -31,7 +33,6 @@ import provider.MapleDataProviderFactory;
 import provider.MapleDataTool;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.io.File;
@@ -236,7 +237,7 @@ public class MapleStorage {
     public void sendStorage(MapleClient c, int npcId) {
         if (c.getPlayer().getLevel() < 15) {
             c.getPlayer().dropMessage(1, "You may only use the storage once you have reached level 15.");
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
@@ -257,7 +258,7 @@ public class MapleStorage {
             }
 
             currentNpcid = npcId;
-            c.announce(MaplePacketCreator.getStorage(npcId, slots, storageItems, meso));
+            c.announce(CTrunkDlg.getStorage(npcId, slots, storageItems, meso));
         } finally {
             lock.unlock();
         }
@@ -266,7 +267,7 @@ public class MapleStorage {
     public void sendStored(MapleClient c, MapleInventoryType type) {
         lock.lock();
         try {
-            c.announce(MaplePacketCreator.storeStorage(slots, type, typeItems.get(type)));
+            c.announce(CTrunkDlg.storeStorage(slots, type, typeItems.get(type)));
         } finally {
             lock.unlock();
         }
@@ -275,7 +276,7 @@ public class MapleStorage {
     public void sendTakenOut(MapleClient c, MapleInventoryType type) {
         lock.lock();
         try {
-            c.announce(MaplePacketCreator.takeOutStorage(slots, type, typeItems.get(type)));
+            c.announce(CTrunkDlg.takeOutStorage(slots, type, typeItems.get(type)));
         } finally {
             lock.unlock();
         }
@@ -292,7 +293,7 @@ public class MapleStorage {
                 typeItems.put(type, new ArrayList<>(items));
             }
 
-            c.announce(MaplePacketCreator.arrangeStorage(slots, items));
+            c.announce(CTrunkDlg.arrangeStorage(slots, items));
         } finally {
             lock.unlock();
         }
@@ -310,7 +311,7 @@ public class MapleStorage {
     }
 
     public void sendMeso(MapleClient c) {
-        c.announce(MaplePacketCreator.mesoStorage(slots, meso));
+        c.announce(CTrunkDlg.mesoStorage(slots, meso));
     }
 
     public int getStoreFee() {  // thanks to GabrielSin

@@ -24,6 +24,8 @@ package scripting.event;
 import client.MapleCharacter;
 import client.SkillFactory;
 import config.YamlConfig;
+import connection.packets.CField;
+import connection.packets.CNpcPool;
 import constants.inventory.ItemConstants;
 import net.server.audit.LockCollector;
 import net.server.audit.locks.MonitoredLockType;
@@ -51,7 +53,6 @@ import server.maps.MapleMap;
 import server.maps.MapleMapManager;
 import server.maps.MaplePortal;
 import server.maps.MapleReactor;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import javax.script.ScriptException;
@@ -285,7 +286,7 @@ public class EventInstanceManager {
         eventTime = time;
 
         for (MapleCharacter chr : getPlayers()) {
-            chr.announce(MaplePacketCreator.getClock((int) (time / 1000)));
+            chr.announce(CField.getClock((int) (time / 1000)));
         }
 
         event_schedule = TimerManager.getInstance().schedule(() -> {
@@ -321,7 +322,7 @@ public class EventInstanceManager {
     }
 
     private void dismissEventTimer() {
-        byte[] packet = MaplePacketCreator.removeClock();
+        byte[] packet = CField.removeClock();
         getPlayers().forEach(MapleCharacter.announcePacket(packet));
         event_schedule = null;
         eventTime = 0;
@@ -869,7 +870,7 @@ public class EventInstanceManager {
             npc.setRx1(pos.x - 50);
             npc.setFh(map.getFootholds().findBelow(pos).getId());
             map.addMapObject(npc);
-            map.broadcastMessage(MaplePacketCreator.spawnNPC(npc));
+            map.broadcastMessage(CNpcPool.spawnNPC(npc));
         }
     }
 
@@ -1264,8 +1265,8 @@ public class EventInstanceManager {
 
     public final void showWrongEffect(int mapId) {
         MapleMap map = getMapInstance(mapId);
-        map.broadcastMessage(MaplePacketCreator.showEffect("quest/party/wrong_kor"));
-        map.broadcastMessage(MaplePacketCreator.playSound("Party1/Failed"));
+        map.broadcastMessage(CField.showEffect("quest/party/wrong_kor"));
+        map.broadcastMessage(CField.playSound("Party1/Failed"));
     }
 
     public final void showClearEffect() {
@@ -1293,10 +1294,10 @@ public class EventInstanceManager {
 
     public final void showClearEffect(boolean hasGate, int mapId, String mapObj, int newState) {
         MapleMap map = getMapInstance(mapId);
-        map.broadcastMessage(MaplePacketCreator.showEffect("quest/party/clear"));
-        map.broadcastMessage(MaplePacketCreator.playSound("Party1/Clear"));
+        map.broadcastMessage(CField.showEffect("quest/party/clear"));
+        map.broadcastMessage(CField.playSound("Party1/Clear"));
         if (hasGate) {
-            map.broadcastMessage(MaplePacketCreator.environmentChange(mapObj, newState));
+            map.broadcastMessage(CField.environmentChange(mapObj, newState));
             wL.lock();
             try {
                 openedGates.put(map.getId(), new Pair<>(mapObj, newState));
@@ -1319,7 +1320,7 @@ public class EventInstanceManager {
         }
 
         if (gateData != null) {
-            chr.announce(MaplePacketCreator.environmentChange(gateData.getLeft(), gateData.getRight()));
+            chr.announce(CField.environmentChange(gateData.getLeft(), gateData.getRight()));
         }
     }
 

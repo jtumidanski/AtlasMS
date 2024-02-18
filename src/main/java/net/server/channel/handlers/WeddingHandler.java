@@ -15,10 +15,10 @@ import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import client.inventory.manipulator.MapleKarmaManipulator;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import server.MapleMarriage;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.packets.Wedding;
 
@@ -101,7 +101,7 @@ public final class WeddingHandler extends AbstractMaplePacketHandler {
                         } catch (NumberFormatException nfe) {
                         }
                     } else {
-                        c.announce(MaplePacketCreator.enableActions());
+                        c.announce(CWvsContext.enableActions());
                     }
                 } else if (mode == 7) { // take items
                     slea.readByte();    // invType
@@ -149,7 +149,7 @@ public final class WeddingHandler extends AbstractMaplePacketHandler {
                         }
                     }
                 } else if (mode == 8) { // out of Wedding Registry
-                    c.announce(MaplePacketCreator.enableActions());
+                    c.announce(CWvsContext.enableActions());
                 } else {
                     System.out.println(mode);
                 }

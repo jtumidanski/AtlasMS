@@ -21,11 +21,11 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CUserRemote;
 import constants.skills.Gunslinger;
 import constants.skills.NightWalker;
 import net.AbstractMaplePacketHandler;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.awt.*;
@@ -47,7 +47,7 @@ public class GrenadeEffectHandler extends AbstractMaplePacketHandler {
             case Gunslinger.GRENADE:
                 int skillLevel = chr.getSkillLevel(skillId);
                 if (skillLevel > 0) {
-                    chr.getMap().broadcastMessage(chr, MaplePacketCreator.throwGrenade(chr.getId(), position, keyDown, skillId, skillLevel), position);
+                    chr.getMap().broadcastMessage(chr, CUserRemote.throwGrenade(chr.getId(), position, keyDown, skillId, skillLevel), position);
                 }
                 break;
             default:

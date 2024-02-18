@@ -23,10 +23,11 @@
 package server.partyquest;
 
 import client.MapleCharacter;
+import connection.packets.CField;
+import connection.packets.CWvsContext;
 import net.server.world.MapleParty;
 import server.ItemInformationProvider;
 import server.TimerManager;
-import tools.MaplePacketCreator;
 
 import java.util.concurrent.ScheduledFuture;
 
@@ -149,8 +150,8 @@ public class Pyramid extends PartyQuest {
 
     public void broadcastInfo(String info, int amount) {
         for (MapleCharacter chr : getParticipants()) {
-            chr.announce(MaplePacketCreator.getEnergy("massacre_" + info, amount));
-            chr.announce(MaplePacketCreator.pyramidGauge(count));
+            chr.announce(CWvsContext.getEnergy("massacre_" + info, amount));
+            chr.announce(CField.pyramidGauge(count));
         }
     }
 
@@ -177,7 +178,7 @@ public class Pyramid extends PartyQuest {
             skill++;
             ItemInformationProvider ii = ItemInformationProvider.getInstance();
             for (MapleCharacter chr : getParticipants()) {
-                chr.announce(MaplePacketCreator.getEnergy("massacre_skill", skill));
+                chr.announce(CWvsContext.getEnergy("massacre_skill", skill));
                 ii.getItemEffect(2022586).applyTo(chr);
             }
         } else if (buffcount == 2 && total >= 1000) {
@@ -185,7 +186,7 @@ public class Pyramid extends PartyQuest {
             skill++;
             ItemInformationProvider ii = ItemInformationProvider.getInstance();
             for (MapleCharacter chr : getParticipants()) {
-                chr.announce(MaplePacketCreator.getEnergy("massacre_skill", skill));
+                chr.announce(CWvsContext.getEnergy("massacre_skill", skill));
                 ii.getItemEffect(2022587).applyTo(chr);
             }
         } else if (buffcount == 3 && total >= 1500) {
@@ -196,7 +197,7 @@ public class Pyramid extends PartyQuest {
             skill++;
             ItemInformationProvider ii = ItemInformationProvider.getInstance();
             for (MapleCharacter chr : getParticipants()) {
-                chr.announce(MaplePacketCreator.getEnergy("massacre_skill", skill));
+                chr.announce(CWvsContext.getEnergy("massacre_skill", skill));
                 ii.getItemEffect(2022588).applyTo(chr);
             }
         } else if (buffcount == 5 && total >= 2500) {
@@ -243,7 +244,7 @@ public class Pyramid extends PartyQuest {
 
             exp += ((kill * 2) + (cool * 10));
         }
-        chr.announce(MaplePacketCreator.pyramidScore(rank, exp));
+        chr.announce(CField.pyramidScore(rank, exp));
         chr.gainExp(exp, true, true);
     }
 

@@ -12,6 +12,7 @@ import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.MapleWeaponType;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import constants.inventory.EquipSlot;
 import constants.inventory.ItemConstants;
 import constants.skills.Assassin;
@@ -29,7 +30,6 @@ import server.life.MapleLifeFactory;
 import server.life.MapleMonsterInformationProvider;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
 import tools.StringUtil;
@@ -1869,7 +1869,7 @@ public class ItemInformationProvider {
         if (!EquipSlot.getFromTextSlot(islot).isAllowed(dst, isCash(id))) {
             equip.wear(false);
             String itemName = ItemInformationProvider.getInstance().getName(equip.getItemId());
-            Server.getInstance().broadcastGMMessage(chr.getWorld(), MaplePacketCreator.sendYellowTip("[Warning]: " + chr.getName() + " tried to equip " + itemName + " into slot " + dst + "."));
+            Server.getInstance().broadcastGMMessage(chr.getWorld(), CWvsContext.sendYellowTip("[Warning]: " + chr.getName() + " tried to equip " + itemName + " into slot " + dst + "."));
             AutobanFactory.PACKET_EDIT.alert(chr, chr.getName() + " tried to forcibly equip an item.");
             FilePrinter.printError(FilePrinter.EXPLOITS + chr.getName() + ".txt", chr.getName() + " tried to equip " + itemName + " into " + dst + " slot.");
             return false;

@@ -26,7 +26,7 @@ package client.command.commands.gm3;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
-import tools.MaplePacketCreator;
+import connection.packets.CField;
 
 public class TimerCommand extends Command {
     {
@@ -35,10 +35,10 @@ public class TimerCommand extends Command {
 
     private static void setTimer(MapleCharacter player, String time, MapleCharacter victim) {
         if (time.equalsIgnoreCase("remove")) {
-            victim.announce(MaplePacketCreator.removeClock());
+            victim.announce(CField.removeClock());
         } else {
             try {
-                victim.announce(MaplePacketCreator.getClock(Integer.parseInt(time)));
+                victim.announce(CField.getClock(Integer.parseInt(time)));
             } catch (NumberFormatException e) {
                 player.yellowMessage("Syntax: !timer <playername> <seconds>|remove");
             }

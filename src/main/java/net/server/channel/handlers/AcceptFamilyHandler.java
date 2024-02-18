@@ -26,6 +26,7 @@ import client.MapleClient;
 import client.MapleFamily;
 import client.MapleFamilyEntry;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteResult;
@@ -33,7 +34,6 @@ import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import net.server.coordinator.world.MapleInviteCoordinator.MapleInviteResult;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.sql.Connection;
@@ -95,7 +95,7 @@ public final class AcceptFamilyHandler extends AbstractMaplePacketHandler {
                         MapleFamilyEntry newEntry = new MapleFamilyEntry(inviter.getFamily().get(), chr.getId(), chr.getName(), chr.getLevel(), chr.getJob());
                         newEntry.setCharacter(chr);
                         if (!newEntry.setSenior(inviter.getFamilyEntry(), true)) {
-                            inviter.announce(MaplePacketCreator.sendFamilyMessage(1, 0));
+                            inviter.announce(CWvsContext.sendFamilyMessage(1, 0));
                             return;
                         } else {
                             // save
@@ -111,15 +111,15 @@ public final class AcceptFamilyHandler extends AbstractMaplePacketHandler {
                         if (inviter.getFamily().get().getTotalGenerations() + targetFamily.getTotalGenerations() <= YamlConfig.config.server.FAMILY_MAX_GENERATIONS) {
                             targetEntry.join(inviter.getFamilyEntry());
                         } else {
-                            inviter.announce(MaplePacketCreator.sendFamilyMessage(76, 0));
-                            chr.announce(MaplePacketCreator.sendFamilyMessage(76, 0));
+                            inviter.announce(CWvsContext.sendFamilyMessage(76, 0));
+                            chr.announce(CWvsContext.sendFamilyMessage(76, 0));
                             return;
                         }
                     }
                 } else { // create new family
                     if (chr.getFamily().isPresent() && inviter.getFamily().isPresent() && chr.getFamily().get().getTotalGenerations() + inviter.getFamily().get().getTotalGenerations() >= YamlConfig.config.server.FAMILY_MAX_GENERATIONS) {
-                        inviter.announce(MaplePacketCreator.sendFamilyMessage(76, 0));
-                        chr.announce(MaplePacketCreator.sendFamilyMessage(76, 0));
+                        inviter.announce(CWvsContext.sendFamilyMessage(76, 0));
+                        chr.announce(CWvsContext.sendFamilyMessage(76, 0));
                         return;
                     }
                     MapleFamily newFamily = new MapleFamily(-1, c.getWorld());
@@ -142,14 +142,14 @@ public final class AcceptFamilyHandler extends AbstractMaplePacketHandler {
                         chr.getFamilyEntry().join(inviterEntry);
                     }
                 }
-                c.getPlayer().getFamily().get().broadcast(MaplePacketCreator.sendFamilyJoinResponse(true, c.getPlayer().getName()), c.getPlayer().getId());
-                c.announce(MaplePacketCreator.getSeniorMessage(inviter.getName()));
-                c.announce(MaplePacketCreator.getFamilyInfo(chr.getFamilyEntry()));
+                c.getPlayer().getFamily().get().broadcast(CWvsContext.sendFamilyJoinResponse(true, c.getPlayer().getName()), c.getPlayer().getId());
+                c.announce(CWvsContext.getSeniorMessage(inviter.getName()));
+                c.announce(CWvsContext.getFamilyInfo(chr.getFamilyEntry()));
                 chr.getFamilyEntry().updateSeniorFamilyInfo(true);
             } else {
-                inviter.announce(MaplePacketCreator.sendFamilyJoinResponse(false, c.getPlayer().getName()));
+                inviter.announce(CWvsContext.sendFamilyJoinResponse(false, c.getPlayer().getName()));
             }
         }
-        c.announce(MaplePacketCreator.sendFamilyMessage(0, 0));
+        c.announce(CWvsContext.sendFamilyMessage(0, 0));
     }
 }

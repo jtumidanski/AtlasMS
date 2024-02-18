@@ -23,10 +23,10 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import net.server.coordinator.session.MapleSessionCoordinator;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -39,7 +39,7 @@ public class SetGenderHandler extends AbstractMaplePacketHandler {
             byte confirmed = slea.readByte();
             if (confirmed == 0x01) {
                 c.setGender(slea.readByte());
-                c.announce(MaplePacketCreator.getAuthSuccess(c));
+                c.announce(CLogin.getAuthSuccess(c));
 
                 Server.getInstance().registerLoginState(c);
             } else {

@@ -25,6 +25,7 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.Skill;
 import client.SkillFactory;
+import connection.packets.CAffectedAreaPool;
 import constants.skills.BlazeWizard;
 import constants.skills.Evan;
 import constants.skills.FPMage;
@@ -33,7 +34,6 @@ import constants.skills.Shadower;
 import server.MapleStatEffect;
 import server.life.MapleMonster;
 import server.life.MobSkill;
-import tools.MaplePacketCreator;
 
 import java.awt.*;
 
@@ -132,21 +132,21 @@ public class MapleMist extends AbstractMapleMapObject {
     }
 
     public final byte[] makeDestroyData() {
-        return MaplePacketCreator.removeMist(getObjectId());
+        return CAffectedAreaPool.removeMist(getObjectId());
     }
 
     public final byte[] makeSpawnData() {
         if (owner != null) {
-            return MaplePacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().id(), owner.getSkillLevel(SkillFactory.getSkill(source.getSourceId()).orElseThrow()), this);
+            return CAffectedAreaPool.spawnMist(getObjectId(), owner.getId(), getSourceSkill().id(), owner.getSkillLevel(SkillFactory.getSkill(source.getSourceId()).orElseThrow()), this);
         }
-        return MaplePacketCreator.spawnMist(getObjectId(), mob.getId(), skill.getSkillId(), skill.getSkillLevel(), this);
+        return CAffectedAreaPool.spawnMist(getObjectId(), mob.getId(), skill.getSkillId(), skill.getSkillLevel(), this);
     }
 
     public final byte[] makeFakeSpawnData(int level) {
         if (owner != null) {
-            return MaplePacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().id(), level, this);
+            return CAffectedAreaPool.spawnMist(getObjectId(), owner.getId(), getSourceSkill().id(), level, this);
         }
-        return MaplePacketCreator.spawnMist(getObjectId(), mob.getId(), skill.getSkillId(), skill.getSkillLevel(), this);
+        return CAffectedAreaPool.spawnMist(getObjectId(), mob.getId(), skill.getSkillId(), skill.getSkillLevel(), this);
     }
 
     @Override

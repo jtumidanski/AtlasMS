@@ -24,10 +24,10 @@ package net.server.channel.handlers;
 import client.MapleBuffStat;
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CSummonedPool;
 import net.AbstractMaplePacketHandler;
 import server.maps.MapleMapObject;
 import server.maps.MapleSummon;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class DamageSummonHandler extends AbstractMaplePacketHandler {
@@ -48,7 +48,7 @@ public final class DamageSummonHandler extends AbstractMaplePacketHandler {
             if (summon.getHP() <= 0) {
                 player.cancelEffectFromBuffStat(MapleBuffStat.PUPPET);
             }
-            player.getMap().broadcastMessage(player, MaplePacketCreator.damageSummon(player.getId(), oid, damage, monsterIdFrom), summon.getPosition());
+            player.getMap().broadcastMessage(player, CSummonedPool.damageSummon(player.getId(), oid, damage, monsterIdFrom), summon.getPosition());
         }
     }
 }

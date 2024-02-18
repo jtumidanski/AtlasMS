@@ -21,10 +21,11 @@
 */
 package client;
 
+import connection.packets.CUser;
+import connection.packets.CWvsContext;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -120,7 +121,7 @@ public final class MonsterBook {
     }
 
     public void addCard(final MapleClient c, final int cardid) {
-        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.showForeignCardEffect(c.getPlayer().getId()), false);
+        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), CUser.showForeignCardEffect(c.getPlayer().getId()), false);
 
         Integer qty;
         lock.lock();
@@ -150,10 +151,10 @@ public final class MonsterBook {
                 calculateLevel();
             }
 
-            c.announce(MaplePacketCreator.addCard(false, cardid, qty + 1));
-            c.announce(MaplePacketCreator.showGainCard());
+            c.announce(CWvsContext.addCard(false, cardid, qty + 1));
+            c.announce(CUser.showGainCard());
         } else {
-            c.announce(MaplePacketCreator.addCard(true, cardid, 5));
+            c.announce(CWvsContext.addCard(true, cardid, 5));
         }
     }
 

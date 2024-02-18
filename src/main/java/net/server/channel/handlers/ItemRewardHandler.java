@@ -4,12 +4,12 @@ import client.MapleClient;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CWvsContext;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.ItemInformationProvider;
 import server.RewardItem;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
@@ -31,7 +31,7 @@ public final class ItemRewardHandler extends AbstractMaplePacketHandler {
         Pair<Integer, List<RewardItem>> rewards = ii.getItemReward(itemId);
         for (RewardItem reward : rewards.getRight()) {
             if (!MapleInventoryManipulator.checkSpace(c, reward.itemId(), reward.quantity(), "")) {
-                c.announce(MaplePacketCreator.getShowInventoryFull());
+                c.announce(CWvsContext.getShowInventoryFull());
                 break;
             }
             if (Randomizer.nextInt(rewards.getLeft()) < reward.probability()) {
@@ -49,11 +49,11 @@ public final class ItemRewardHandler extends AbstractMaplePacketHandler {
                     String msg = reward.worldMessage();
                     msg = msg.replaceAll("/name", c.getPlayer().getName());
                     msg = msg.replaceAll("/item", ii.getName(reward.itemId()));
-                    Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.serverNotice(6, msg));
+                    Server.getInstance().broadcastMessage(c.getWorld(), CWvsContext.serverNotice(6, msg));
                 }
                 break;
             }
         }
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CWvsContext.enableActions());
     }
 }

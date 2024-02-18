@@ -23,6 +23,7 @@ package net.server.guild;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
@@ -30,7 +31,6 @@ import net.server.coordinator.world.MapleInviteCoordinator.MapleInviteResult;
 import net.server.world.MapleParty;
 import net.server.world.MaplePartyCharacter;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -142,8 +142,8 @@ public class MapleAlliance {
                 Server.getInstance().addAlliance(id, alliance.get());
 
                 int worldid = guildMasters.get(0).getWorld();
-                Server.getInstance().allianceMessage(id, MaplePacketCreator.updateAllianceInfo(alliance.get(), worldid), -1, -1);
-                Server.getInstance().allianceMessage(id, MaplePacketCreator.getGuildAlliances(alliance.get(), worldid), -1, -1);  // thanks Vcoc for noticing guilds from other alliances being visually stacked here due to this not being updated
+                Server.getInstance().allianceMessage(id, CWvsContext.updateAllianceInfo(alliance.get(), worldid), -1, -1);
+                Server.getInstance().allianceMessage(id, CWvsContext.getGuildAlliances(alliance.get(), worldid), -1, -1);  // thanks Vcoc for noticing guilds from other alliances being visually stacked here due to this not being updated
             } catch (Exception e) {
                 e.printStackTrace();
                 return Optional.empty();
@@ -254,7 +254,7 @@ public class MapleAlliance {
             ps.close();
 
             con.close();
-            Server.getInstance().allianceMessage(allianceId, MaplePacketCreator.disbandAlliance(allianceId), -1, -1);
+            Server.getInstance().allianceMessage(allianceId, CWvsContext.disbandAlliance(allianceId), -1, -1);
             Server.getInstance().disbandAlliance(allianceId);
         } catch (SQLException sqle) {
             sqle.printStackTrace();
@@ -311,13 +311,13 @@ public class MapleAlliance {
             return false;
         }
 
-        srv.allianceMessage(alliance.get().getId(), MaplePacketCreator.removeGuildFromAlliance(alliance.get(), guildId, worldId), -1, -1);
+        srv.allianceMessage(alliance.get().getId(), CWvsContext.removeGuildFromAlliance(alliance.get(), guildId, worldId), -1, -1);
         srv.removeGuildFromAlliance(alliance.get().getId(), guildId);
         removeGuildFromAllianceOnDb(guildId);
 
-        srv.allianceMessage(alliance.get().getId(), MaplePacketCreator.getGuildAlliances(alliance.get(), worldId), -1, -1);
-        srv.allianceMessage(alliance.get().getId(), MaplePacketCreator.allianceNotice(alliance.get().getId(), alliance.get().getNotice()), -1, -1);
-        srv.guildMessage(guildId, MaplePacketCreator.disbandAlliance(alliance.get().getId()));
+        srv.allianceMessage(alliance.get().getId(), CWvsContext.getGuildAlliances(alliance.get(), worldId), -1, -1);
+        srv.allianceMessage(alliance.get().getId(), CWvsContext.allianceNotice(alliance.get().getId(), alliance.get().getNotice()), -1, -1);
+        srv.guildMessage(guildId, CWvsContext.disbandAlliance(alliance.get().getId()));
 
         String guildName = srv.getGuild(guildId, worldId).map(MapleGuild::getName).orElse("UNKNOWN");
         alliance.get().dropMessage("[" + guildName + "] guild has left the union.");
@@ -351,7 +351,7 @@ public class MapleAlliance {
 
     private static void sendInvitation(MapleClient c, int allianceId, MapleCharacter victim) {
         if (MapleInviteCoordinator.createInvite(InviteType.ALLIANCE, c.getPlayer(), allianceId, victim.getId())) {
-            victim.announce(MaplePacketCreator.allianceInvite(allianceId, c.getPlayer()));
+            victim.announce(CWvsContext.allianceInvite(allianceId, c.getPlayer()));
         } else {
             c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently managing another invite.");
         }
@@ -421,8 +421,8 @@ public class MapleAlliance {
 
     public void updateAlliancePackets(MapleCharacter chr) {
         if (allianceId > 0) {
-            this.broadcastMessage(MaplePacketCreator.updateAllianceInfo(this, chr.getWorld()));
-            this.broadcastMessage(MaplePacketCreator.allianceNotice(this.getId(), this.getNotice()));
+            this.broadcastMessage(CWvsContext.updateAllianceInfo(this, chr.getWorld()));
+            this.broadcastMessage(CWvsContext.allianceNotice(this.getId(), this.getNotice()));
         }
     }
 

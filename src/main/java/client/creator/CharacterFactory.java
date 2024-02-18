@@ -26,10 +26,11 @@ import client.inventory.Item;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import config.YamlConfig;
+import connection.packets.CLogin;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import server.ItemInformationProvider;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 
 /**
  * @author RonanLana
@@ -89,10 +90,10 @@ public abstract class CharacterFactory {
         if (!newchar.insertNewChar(recipe)) {
             return -2;
         }
-        c.announce(MaplePacketCreator.addNewCharEntry(newchar));
+        c.announce(CLogin.addNewCharEntry(newchar));
 
         Server.getInstance().createCharacterEntry(newchar);
-        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.sendYellowTip("[New Char]: " + c.getAccountName() + " has created a new character with IGN " + name));
+        Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.sendYellowTip("[New Char]: " + c.getAccountName() + " has created a new character with IGN " + name));
         FilePrinter.print(FilePrinter.CREATED_CHAR + c.getAccountName() + ".txt", c.getAccountName() + " created character with IGN " + name);
 
         return 0;

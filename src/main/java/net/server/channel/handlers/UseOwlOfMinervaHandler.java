@@ -1,10 +1,10 @@
 package net.server.channel.handlers;
 
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.world.OwlSearchResult;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Arrays;
@@ -30,6 +30,6 @@ public final class UseOwlOfMinervaHandler extends AbstractMaplePacketHandler {
                     .collect(Collectors.toList());
         }
 
-        c.announce(MaplePacketCreator.getOwlOpen(owlLeaderboards));
+        c.announce(CWvsContext.getOwlOpen(owlLeaderboards));
     }
 }

@@ -23,6 +23,7 @@ package net.server.channel.handlers;
 
 import client.MapleClient;
 import client.SkillFactory;
+import connection.packets.CUserRemote;
 import constants.skills.Bishop;
 import constants.skills.Bowmaster;
 import constants.skills.Corsair;
@@ -33,7 +34,6 @@ import constants.skills.Marksman;
 import constants.skills.WindArcher;
 import net.AbstractMaplePacketHandler;
 import net.MaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class CancelBuffHandler extends AbstractMaplePacketHandler implements MaplePacketHandler {
@@ -52,7 +52,7 @@ public final class CancelBuffHandler extends AbstractMaplePacketHandler implemen
             case WindArcher.HURRICANE:
             case Evan.FIRE_BREATH:
             case Evan.ICE_BREATH:
-                c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.skillCancel(c.getPlayer(), sourceid), false);
+                c.getPlayer().getMap().broadcastMessage(c.getPlayer(), CUserRemote.skillCancel(c.getPlayer(), sourceid), false);
                 break;
 
             default:

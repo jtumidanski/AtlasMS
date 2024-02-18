@@ -21,9 +21,9 @@ package net.server.channel.handlers;
 
 import client.MapleClient;
 import client.inventory.Item;
+import connection.packets.CCashShop;
 import net.AbstractMaplePacketHandler;
 import server.CashShop;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -40,9 +40,9 @@ public class CashShopSurpriseHandler extends AbstractMaplePacketHandler {
 
             if (cssResult != null) {
                 Item cssItem = cssResult.getLeft(), cssBox = cssResult.getRight();
-                c.announce(MaplePacketCreator.onCashGachaponOpenSuccess(c.getAccID(), cssBox.getSN(), cssBox.getQuantity(), cssItem, cssItem.getItemId(), cssItem.getQuantity(), true));
+                c.announce(CCashShop.onCashGachaponOpenSuccess(c.getAccID(), cssBox.getSN(), cssBox.getQuantity(), cssItem, cssItem.getItemId(), cssItem.getQuantity(), true));
             } else {
-                c.announce(MaplePacketCreator.onCashItemGachaponOpenFailed());
+                c.announce(CCashShop.onCashItemGachaponOpenFailed());
             }
         }
     }

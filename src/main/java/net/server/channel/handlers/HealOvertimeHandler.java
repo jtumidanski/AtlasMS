@@ -25,10 +25,10 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.autoban.AutobanFactory;
 import client.autoban.AutobanManager;
+import connection.packets.CUser;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.maps.MapleMap;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class HealOvertimeHandler extends AbstractMaplePacketHandler {
@@ -58,7 +58,7 @@ public final class HealOvertimeHandler extends AbstractMaplePacketHandler {
             }
 
             chr.addHP(healHP);
-            chr.getMap().broadcastMessage(chr, MaplePacketCreator.showHpHealed(chr.getId(), healHP), false);
+            chr.getMap().broadcastMessage(chr, CUser.showHpHealed(chr.getId(), healHP), false);
             abm.spam(0, timestamp);
         }
         short healMP = slea.readShort();

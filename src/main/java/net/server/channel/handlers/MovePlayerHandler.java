@@ -22,9 +22,9 @@
 package net.server.channel.handlers;
 
 import client.MapleClient;
+import connection.packets.CUserRemote;
 import server.movement.Elem;
 import server.movement.MovePath;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class MovePlayerHandler extends AbstractMovementPacketHandler {
@@ -62,12 +62,12 @@ public final class MovePlayerHandler extends AbstractMovementPacketHandler {
                 .isHidden()) {
             c.getPlayer()
                     .getMap()
-                    .broadcastGMMessage(c.getPlayer(), MaplePacketCreator.movePlayer(c.getPlayer()
+                    .broadcastGMMessage(c.getPlayer(), CUserRemote.movePlayer(c.getPlayer()
                             .getId(), res), false);
         } else {
             c.getPlayer()
                     .getMap()
-                    .broadcastMessage(c.getPlayer(), MaplePacketCreator.movePlayer(c.getPlayer()
+                    .broadcastMessage(c.getPlayer(), CUserRemote.movePlayer(c.getPlayer()
                             .getId(), res), false);
         }
     }

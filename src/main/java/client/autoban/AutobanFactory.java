@@ -24,10 +24,10 @@ package client.autoban;
 
 import client.MapleCharacter;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import tools.FilePrinter;
 import tools.MapleLogger;
-import tools.MaplePacketCreator;
 
 /**
  * @author kevintjuh93
@@ -87,7 +87,7 @@ public enum AutobanFactory {
             if (chr != null && MapleLogger.ignored.contains(chr.getId())) {
                 return;
             }
-            Server.getInstance().broadcastGMMessage((chr != null ? chr.getWorld() : 0), MaplePacketCreator.sendYellowTip((chr != null ? MapleCharacter.makeMapleReadable(chr.getName()) : "") + " caused " + this.name() + " " + reason));
+            Server.getInstance().broadcastGMMessage((chr != null ? chr.getWorld() : 0), CWvsContext.sendYellowTip((chr != null ? MapleCharacter.makeMapleReadable(chr.getName()) : "") + " caused " + this.name() + " " + reason));
         }
         if (YamlConfig.config.server.USE_AUTOBAN_LOG) {
             FilePrinter.print(FilePrinter.AUTOBAN_WARNING, (chr != null ? MapleCharacter.makeMapleReadable(chr.getName()) : "") + " caused " + this.name() + " " + reason);

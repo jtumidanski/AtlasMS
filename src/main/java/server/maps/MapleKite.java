@@ -2,7 +2,7 @@ package server.maps;
 
 import client.MapleCharacter;
 import client.MapleClient;
-import tools.MaplePacketCreator;
+import connection.packets.CMessageBoxPool;
 
 import java.awt.*;
 
@@ -52,10 +52,10 @@ public class MapleKite extends AbstractMapleMapObject {
     }
 
     public final byte[] makeSpawnData() {
-        return MaplePacketCreator.spawnKite(getObjectId(), itemid, owner.getName(), text, pos, ft);
+        return CMessageBoxPool.spawnKite(getObjectId(), itemid, owner.getName(), text, pos, ft);
     }
 
     public final byte[] makeDestroyData() {
-        return MaplePacketCreator.removeKite(getObjectId(), 0);
+        return CMessageBoxPool.removeKite(getObjectId(), 0);
     }
 }

@@ -22,8 +22,8 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CCashShop;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -34,6 +34,6 @@ public final class TransferNameResultHandler extends AbstractMaplePacketHandler 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         String name = slea.readMapleAsciiString();
-        c.announce(MaplePacketCreator.sendNameTransferCheck(name, MapleCharacter.canCreateChar(name)));
+        c.announce(CCashShop.sendNameTransferCheck(name, MapleCharacter.canCreateChar(name)));
     }
 }

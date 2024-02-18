@@ -22,11 +22,11 @@
 package scripting.portal;
 
 import client.MapleClient;
+import connection.packets.CUser;
 import scripting.AbstractPlayerInteraction;
 import scripting.map.MapScriptManager;
 import server.maps.MaplePortal;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -97,6 +97,6 @@ public class PortalPlayerInteraction extends AbstractPlayerInteraction {
     }
 
     public void playPortalSound() {
-        c.announce(MaplePacketCreator.playPortalSound());
+        c.announce(CUser.playPortalSound());
     }
 }

@@ -33,6 +33,10 @@ import client.inventory.manipulator.MapleInventoryManipulator;
 import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import config.YamlConfig;
+import connection.packets.CMob;
+import connection.packets.CUser;
+import connection.packets.CUserRemote;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import constants.skills.Aran;
@@ -47,7 +51,6 @@ import server.life.MobSkillFactory;
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -176,9 +179,9 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
                                 bouncedamage = attacker.getMaxHp() / 5;
                             }
                             map.damageMonster(chr, attacker, bouncedamage);
-                            map.broadcastMessage(chr, MaplePacketCreator.damageMonster(oid, bouncedamage), true);
-                            chr.announce(MaplePacketCreator.showOwnBuffEffect(id, 5));
-                            map.broadcastMessage(chr, MaplePacketCreator.showBuffeffect(chr.getId(), id, 5), false);
+                            map.broadcastMessage(chr, CMob.damageMonster(oid, bouncedamage), true);
+                            chr.announce(CUser.showOwnBuffEffect(id, 5));
+                            map.broadcastMessage(chr, CUser.showBuffeffect(chr.getId(), id, 5), false);
                         }
                     }
                 }
@@ -209,7 +212,7 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
                         bouncedamage = Math.min(bouncedamage, attacker.getMaxHp() / 10);
                         damage -= bouncedamage;
                         map.damageMonster(chr, attacker, bouncedamage);
-                        map.broadcastMessage(chr, MaplePacketCreator.damageMonster(oid, bouncedamage), false, true);
+                        map.broadcastMessage(chr, CMob.damageMonster(oid, bouncedamage), false, true);
                         attacker.aggroMonsterDamage(chr, bouncedamage);
                     }
                     MapleStatEffect bPressure = chr.getBuffEffect(MapleBuffStat.BODY_PRESSURE); // thanks Atoot for noticing an issue on Body Pressure neutralise
@@ -276,13 +279,13 @@ public final class TakeDamageHandler extends AbstractMaplePacketHandler {
             }
         }
         if (!chr.isHidden()) {
-            map.broadcastMessage(chr, MaplePacketCreator.damagePlayer(damagefrom, monsteridfrom, chr.getId(), damage, fake, direction, is_pgmr, pgmr, is_pg, oid, pos_x, pos_y), false);
+            map.broadcastMessage(chr, CUserRemote.damagePlayer(damagefrom, monsteridfrom, chr.getId(), damage, fake, direction, is_pgmr, pgmr, is_pg, oid, pos_x, pos_y), false);
         } else {
-            map.broadcastGMMessage(chr, MaplePacketCreator.damagePlayer(damagefrom, monsteridfrom, chr.getId(), damage, fake, direction, is_pgmr, pgmr, is_pg, oid, pos_x, pos_y), false);
+            map.broadcastGMMessage(chr, CUserRemote.damagePlayer(damagefrom, monsteridfrom, chr.getId(), damage, fake, direction, is_pgmr, pgmr, is_pg, oid, pos_x, pos_y), false);
         }
         if (GameConstants.isDojo(map.getId())) {
             chr.setDojoEnergy(chr.getDojoEnergy() + YamlConfig.config.server.DOJO_ENERGY_DMG);
-            c.announce(MaplePacketCreator.getEnergy("energy", chr.getDojoEnergy()));
+            c.announce(CWvsContext.getEnergy("energy", chr.getDojoEnergy()));
         }
 
         for (MapleCharacter player : banishPlayers) {  // chill, if this list ever gets non-empty an attacker does exist, trust me :)

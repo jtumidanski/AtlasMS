@@ -26,8 +26,8 @@ package client.command.commands.gm3;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CWvsContext;
 import net.server.Server;
-import tools.MaplePacketCreator;
 
 public class RipCommand extends Command {
     {
@@ -37,6 +37,6 @@ public class RipCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.serverNotice(6, "[RIP]: " + joinStringFrom(params, 1)));
+        Server.getInstance().broadcastMessage(c.getWorld(), CWvsContext.serverNotice(6, "[RIP]: " + joinStringFrom(params, 1)));
     }
 }

@@ -3,6 +3,7 @@ package net.server.channel;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import net.MapleServerHandler;
 import net.mina.MapleCodecFactory;
@@ -40,7 +41,6 @@ import server.maps.MapleMap;
 import server.maps.MapleMapManager;
 import server.maps.MapleMiniDungeon;
 import server.maps.MapleMiniDungeonInfo;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.io.File;
@@ -318,7 +318,7 @@ public final class Channel {
 
     public void addPlayer(MapleCharacter chr) {
         players.addPlayer(chr);
-        chr.announce(MaplePacketCreator.serverMessage(serverMessage));
+        chr.announce(CWvsContext.serverMessage(serverMessage));
     }
 
     public String getServerMessage() {
@@ -327,7 +327,7 @@ public final class Channel {
 
     public void setServerMessage(String message) {
         this.serverMessage = message;
-        broadcastPacket(MaplePacketCreator.serverMessage(message));
+        broadcastPacket(CWvsContext.serverMessage(message));
         getWorldServer().resetDisabledServerMessages();
     }
 

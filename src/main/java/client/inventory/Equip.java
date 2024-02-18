@@ -23,10 +23,10 @@ package client.inventory;
 
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CUser;
 import constants.game.ExpTable;
 import constants.inventory.ItemConstants;
 import server.ItemInformationProvider;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
 
@@ -602,8 +602,8 @@ public class Equip extends Item {
         showLevelupMessage(showStr, c); // thanks to Polaris dev team !
         c.getPlayer().dropMessage(6, lvupStr);
 
-        c.announce(MaplePacketCreator.showEquipmentLevelUp());
-        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.showForeignEffect(c.getPlayer().getId(), 15));
+        c.announce(CUser.showEquipmentLevelUp());
+        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), CUser.showForeignEffect(c.getPlayer().getId(), 15));
         c.getPlayer().forceUpdateItem(this);
     }
 

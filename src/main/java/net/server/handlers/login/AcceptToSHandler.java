@@ -1,8 +1,8 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -22,9 +22,9 @@ public final class AcceptToSHandler extends AbstractMaplePacketHandler {
             return;
         }
         if (c.finishLogin() == 0) {
-            c.announce(MaplePacketCreator.getAuthSuccess(c));
+            c.announce(CLogin.getAuthSuccess(c));
         } else {
-            c.announce(MaplePacketCreator.getLoginFailed(9));//shouldn't happen XD
+            c.announce(CLogin.getLoginFailed(9));//shouldn't happen XD
         }
     }
 }

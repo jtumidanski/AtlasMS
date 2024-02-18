@@ -23,9 +23,9 @@ package server.maps;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.Item;
+import connection.packets.CDropPool;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
-import tools.MaplePacketCreator;
 
 import java.awt.*;
 import java.util.concurrent.locks.Lock;
@@ -207,7 +207,7 @@ public class MapleMapItem extends AbstractMapleMapObject {
         if (chr.needQuestItem(questid, getItemId())) {
             this.lockItem();
             try {
-                client.announce(MaplePacketCreator.dropItemFromMapObject(chr, this, null, getPosition(), (byte) 2));
+                client.announce(CDropPool.dropItemFromMapObject(chr, this, null, getPosition(), (byte) 2));
             } finally {
                 this.unlockItem();
             }
@@ -216,6 +216,6 @@ public class MapleMapItem extends AbstractMapleMapObject {
 
     @Override
     public void sendDestroyData(final MapleClient client) {
-        client.announce(MaplePacketCreator.removeItemFromMap(getObjectId(), 1, 0));
+        client.announce(CDropPool.removeItemFromMap(getObjectId(), 1, 0));
     }
 }

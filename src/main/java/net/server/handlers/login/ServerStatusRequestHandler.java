@@ -22,10 +22,10 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import net.server.world.World;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -38,9 +38,9 @@ public final class ServerStatusRequestHandler extends AbstractMaplePacketHandler
         Optional<World> wserv = Server.getInstance().getWorld(worldId);
         if (wserv.isPresent()) {
             int status = wserv.get().getWorldCapacityStatus();
-            c.announce(MaplePacketCreator.getServerStatus(status));
+            c.announce(CLogin.getServerStatus(status));
         } else {
-            c.announce(MaplePacketCreator.getServerStatus(2));
+            c.announce(CLogin.getServerStatus(2));
         }
     }
 }

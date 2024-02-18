@@ -22,12 +22,13 @@
 package server.events.gm;
 
 import client.MapleCharacter;
+import connection.packets.CField;
+import connection.packets.CWvsContext;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
 import provider.MapleDataTool;
 import server.TimerManager;
 import server.maps.MapleMap;
-import tools.MaplePacketCreator;
 import tools.Randomizer;
 
 import java.io.File;
@@ -72,9 +73,9 @@ public final class MapleOxQuiz {
             }
         }
         final int number = gm;
-        map.broadcastMessage(MaplePacketCreator.showOXQuiz(round, question, true));
+        map.broadcastMessage(CField.showOXQuiz(round, question, true));
         TimerManager.getInstance().schedule(() -> {
-            map.broadcastMessage(MaplePacketCreator.showOXQuiz(round, question, true));
+            map.broadcastMessage(CField.showOXQuiz(round, question, true));
             List<MapleCharacter> chars = new ArrayList<>(map.getCharacters());
 
             for (MapleCharacter chr : chars) {
@@ -95,7 +96,7 @@ public final class MapleOxQuiz {
             }
             //send question
             if (map.getCharacters().size() - number <= 2) {
-                map.broadcastMessage(MaplePacketCreator.serverNotice(6, "The event has ended"));
+                map.broadcastMessage(CWvsContext.serverNotice(6, "The event has ended"));
                 map.getPortal("join00").setPortalStatus(true);
                 map.setOx(null);
                 map.setOxQuiz(false);

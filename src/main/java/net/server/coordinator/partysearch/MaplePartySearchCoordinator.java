@@ -22,6 +22,7 @@ package net.server.coordinator.partysearch;
 import client.MapleCharacter;
 import client.MapleJob;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.MonitoredReadLock;
 import net.server.audit.locks.MonitoredReentrantReadWriteLock;
@@ -34,7 +35,6 @@ import net.server.world.MapleParty;
 import provider.MapleData;
 import provider.MapleDataProviderFactory;
 import provider.MapleDataTool;
-import tools.MaplePacketCreator;
 import tools.Pair;
 
 import java.io.File;
@@ -260,7 +260,7 @@ public class MaplePartySearchCoordinator {
 
         if (MapleInviteCoordinator.createInvite(InviteType.PARTY, leader, partyId.get(), chr.getId())) {
             chr.disablePartySearchInvite(leader.getId());
-            chr.announce(MaplePacketCreator.partySearchInvite(leader));
+            chr.announce(CWvsContext.partySearchInvite(leader));
             return true;
         } else {
             return false;

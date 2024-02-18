@@ -24,25 +24,25 @@ package net.server.channel.handlers;
 import client.MapleClient;
 import client.processor.npc.DueyProcessor;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import scripting.npc.NPCScriptManager;
 import server.life.MapleNPC;
 import server.life.MaplePlayerNPC;
 import server.maps.MapleMapObject;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class NPCTalkHandler extends AbstractMaplePacketHandler {
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         if (!c.getPlayer().isAlive()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
         if (currentServerTime() - c.getPlayer().getNpcCooldown() < YamlConfig.config.server.BLOCK_NPC_RACE_CONDT) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
@@ -58,7 +58,7 @@ public final class NPCTalkHandler extends AbstractMaplePacketHandler {
                 DueyProcessor.dueySendTalk(c, false);
             } else {
                 if (c.getCM() != null || c.getQM() != null) {
-                    c.announce(MaplePacketCreator.enableActions());
+                    c.announce(CWvsContext.enableActions());
                     return;
                 }
 
@@ -74,7 +74,7 @@ public final class NPCTalkHandler extends AbstractMaplePacketHandler {
                             FilePrinter.printError(FilePrinter.NPC_UNCODED, "NPC " + npc.getName() + "(" + npc.getId() + ") is not coded.");
                             return;
                         } else if (c.getPlayer().getShop() != null) {
-                            c.announce(MaplePacketCreator.enableActions());
+                            c.announce(CWvsContext.enableActions());
                             return;
                         }
 

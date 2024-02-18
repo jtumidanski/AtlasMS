@@ -23,10 +23,11 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CMapLoadable;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import server.maps.MapleDoorObject;
 import server.maps.MapleMapObject;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -40,7 +41,7 @@ public final class DoorHandler extends AbstractMaplePacketHandler {
 
         MapleCharacter chr = c.getPlayer();
         if (chr.isChangingMaps() || chr.isBanned()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
@@ -54,7 +55,7 @@ public final class DoorHandler extends AbstractMaplePacketHandler {
             }
         }
 
-        c.announce(MaplePacketCreator.blockedMessage(6));
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CMapLoadable.blockedMessage(6));
+        c.announce(CWvsContext.enableActions());
     }
 }

@@ -27,9 +27,9 @@ import client.inventory.Item;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import server.ItemInformationProvider;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -74,6 +74,6 @@ public final class UseSolomonHandler extends AbstractMaplePacketHandler {
             }
         }
 
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CWvsContext.enableActions());
     }
 }

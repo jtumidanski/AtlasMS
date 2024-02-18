@@ -21,8 +21,10 @@ package client.processor.action;    // thanks Alex for pointing out some package
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CField;
+import connection.packets.CUser;
+import connection.packets.CWvsContext;
 import server.maps.MapleMap;
-import tools.MaplePacketCreator;
 
 /**
  * @author RonanLana
@@ -73,11 +75,11 @@ public class BuybackProcessor {
             chr.broadcastStance(chr.isFacingLeft() ? 5 : 4);
 
             MapleMap map = chr.getMap();
-            map.broadcastMessage(MaplePacketCreator.playSound("Buyback/" + jobString));
-            map.broadcastMessage(MaplePacketCreator.earnTitleMessage(chr.getName() + " just bought back into the game!"));
+            map.broadcastMessage(CField.playSound("Buyback/" + jobString));
+            map.broadcastMessage(CWvsContext.earnTitleMessage(chr.getName() + " just bought back into the game!"));
 
-            chr.announce(MaplePacketCreator.showBuybackEffect());
-            map.broadcastMessage(chr, MaplePacketCreator.showForeignBuybackEffect(chr.getId()), false);
+            chr.announce(CUser.showBuybackEffect());
+            map.broadcastMessage(chr, CUser.showForeignBuybackEffect(chr.getId()), false);
         }
     }
 }

@@ -27,6 +27,8 @@ import client.inventory.Equip;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CField;
+import connection.packets.CWvsContext;
 import constants.inventory.ItemConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
@@ -34,7 +36,6 @@ import net.server.channel.Channel;
 import server.MTSItemInfo;
 import server.ItemInformationProvider;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -125,7 +126,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return MaplePacketCreator.sendMTS(items, tab, type, page, pages); // resniff
+        return CField.sendMTS(items, tab, type, page, pages); // resniff
     }
 
     @Override
@@ -195,8 +196,8 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                             if (rs.getInt(1) > 10) { //They have more than 10 items up for sale already!
                                 c.getPlayer().dropMessage(1, "You already have 10 items up for auction!");
                                 c.announce(getMTS(1, 0, 0));
-                                c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                                c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                                c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                                c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
                                 rs.close();
                                 ps.close();
                                 return;
@@ -299,11 +300,11 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                         e.printStackTrace();
                     }
                     c.getPlayer().gainMeso(-5000, false);
-                    c.announce(MaplePacketCreator.MTSConfirmSell());
+                    c.announce(CField.MTSConfirmSell());
                     c.announce(getMTS(1, 0, 0));
                     c.enableCSActions();
-                    c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                    c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                    c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                    c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
                 }
             } else if (op == 3) { //send offer for wanted item
             } else if (op == 4) { //list wanted item
@@ -328,8 +329,8 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 c.getPlayer().changeTab(tab);
                 c.getPlayer().changeType(type);
                 c.enableCSActions();
-                c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
             } else if (op == 6) { //search
                 int tab = slea.readInt();
                 int type = slea.readInt();
@@ -341,11 +342,11 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 c.getPlayer().changeType(type);
                 c.getPlayer().changeCI(ci);
                 c.enableCSActions();
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
                 c.announce(getMTSSearch(tab, type, ci, search, c.getPlayer().getCurrentPage()));
-                c.announce(MaplePacketCreator.showMTSCash(c.getPlayer()));
-                c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                c.announce(CField.showMTSCash(c.getPlayer()));
+                c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
             } else if (op == 7) { //cancel sale
                 int id = slea.readInt(); //id of the item
                 Connection con;
@@ -366,8 +367,8 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 }
                 c.enableCSActions();
                 c.announce(getMTS(c.getPlayer().getCurrentTab(), c.getPlayer().getCurrentType(), c.getPlayer().getCurrentPage()));
-                c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
-                c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
+                c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
             } else if (op == 8) { //transfer item from transfer inv.
                 int id = slea.readInt(); //id of the item
                 Connection con;
@@ -426,8 +427,8 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                         c.enableCSActions();
                         c.announce(getCart(c.getPlayer().getId()));
                         c.announce(getMTS(c.getPlayer().getCurrentTab(), c.getPlayer().getCurrentType(), c.getPlayer().getCurrentPage()));
-                        c.announce(MaplePacketCreator.MTSConfirmTransfer(i.getQuantity(), i.getPosition()));
-                        c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
+                        c.announce(CField.MTSConfirmTransfer(i.getQuantity(), i.getPosition()));
+                        c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
                     }
                     rs.close();
                     ps.close();
@@ -467,9 +468,9 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 }
                 c.announce(getMTS(c.getPlayer().getCurrentTab(), c.getPlayer().getCurrentType(), c.getPlayer().getCurrentPage()));
                 c.enableCSActions();
-                c.announce(MaplePacketCreator.enableActions());
-                c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                c.announce(CWvsContext.enableActions());
+                c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
             } else if (op == 10) { //delete from cart
                 int id = slea.readInt(); //id of the item
                 Connection con;
@@ -486,8 +487,8 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                 }
                 c.announce(getCart(c.getPlayer().getId()));
                 c.enableCSActions();
-                c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
             } else if (op == 12) { //put item up for auction
             } else if (op == 13) { //cancel wanted cart thing
             } else if (op == 14) { //buy auction item now
@@ -539,13 +540,13 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                             c.getPlayer().getCashShop().gainCash(4, -price);
                             c.enableCSActions();
                             c.announce(getMTS(c.getPlayer().getCurrentTab(), c.getPlayer().getCurrentType(), c.getPlayer().getCurrentPage()));
-                            c.announce(MaplePacketCreator.MTSConfirmBuy());
-                            c.announce(MaplePacketCreator.showMTSCash(c.getPlayer()));
-                            c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                            c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
-                            c.announce(MaplePacketCreator.enableActions());
+                            c.announce(CField.MTSConfirmBuy());
+                            c.announce(CField.showMTSCash(c.getPlayer()));
+                            c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                            c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                            c.announce(CWvsContext.enableActions());
                         } else {
-                            c.announce(MaplePacketCreator.MTSFailBuy());
+                            c.announce(CField.MTSFailBuy());
                         }
                     }
                     rs.close();
@@ -553,7 +554,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                     con.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    c.announce(MaplePacketCreator.MTSFailBuy());
+                    c.announce(CField.MTSFailBuy());
                 }
             } else if (op == 17) { //buy from cart
                 int id = slea.readInt(); //id of the item
@@ -600,12 +601,12 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                             c.getPlayer().getCashShop().gainCash(4, -price);
                             c.announce(getCart(c.getPlayer().getId()));
                             c.enableCSActions();
-                            c.announce(MaplePacketCreator.MTSConfirmBuy());
-                            c.announce(MaplePacketCreator.showMTSCash(c.getPlayer()));
-                            c.announce(MaplePacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
-                            c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
+                            c.announce(CField.MTSConfirmBuy());
+                            c.announce(CField.showMTSCash(c.getPlayer()));
+                            c.announce(CField.transferInventory(getTransfer(c.getPlayer().getId())));
+                            c.announce(CField.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));
                         } else {
-                            c.announce(MaplePacketCreator.MTSFailBuy());
+                            c.announce(CField.MTSFailBuy());
                         }
                     }
                     rs.close();
@@ -613,13 +614,13 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
                     con.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    c.announce(MaplePacketCreator.MTSFailBuy());
+                    c.announce(CField.MTSFailBuy());
                 }
             } else {
                 System.out.println("Unhandled OP(MTS): " + op + " Packet: " + slea);
             }
         } else {
-            c.announce(MaplePacketCreator.showMTSCash(c.getPlayer()));
+            c.announce(CField.showMTSCash(c.getPlayer()));
         }
     }
 
@@ -748,7 +749,7 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return MaplePacketCreator.sendMTS(items, 4, 0, 0, pages);
+        return CField.sendMTS(items, 4, 0, 0, pages);
     }
 
     public List<MTSItemInfo> getTransfer(int cid) {
@@ -902,6 +903,6 @@ public final class MTSHandler extends AbstractMaplePacketHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return MaplePacketCreator.sendMTS(items, tab, type, page, pages);
+        return CField.sendMTS(items, tab, type, page, pages);
     }
 }

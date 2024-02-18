@@ -22,8 +22,8 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class RelogRequestHandler extends AbstractMaplePacketHandler {
@@ -34,6 +34,6 @@ public final class RelogRequestHandler extends AbstractMaplePacketHandler {
 
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        c.announce(MaplePacketCreator.getRelogResponse());
+        c.announce(CLogin.getRelogResponse());
     }
 }

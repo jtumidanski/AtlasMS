@@ -26,9 +26,9 @@ package client.command.commands.gm2;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import server.life.MapleLifeFactory;
-import tools.MaplePacketCreator;
 
 public class BombCommand extends Command {
     {
@@ -42,7 +42,7 @@ public class BombCommand extends Command {
             MapleCharacter victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]).orElse(null);
             if (victim != null) {
                 victim.getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9300166), victim.getPosition());
-                Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.serverNotice(5, player.getName() + " used !bomb on " + victim.getName()));
+                Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.serverNotice(5, player.getName() + " used !bomb on " + victim.getName()));
             } else {
                 player.message("Player '" + params[0] + "' could not be found on this world.");
             }

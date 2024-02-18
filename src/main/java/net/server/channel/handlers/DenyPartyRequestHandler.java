@@ -23,14 +23,12 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteResult;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
-
-import java.util.Optional;
 
 public final class DenyPartyRequestHandler extends AbstractMaplePacketHandler {
 
@@ -46,7 +44,7 @@ public final class DenyPartyRequestHandler extends AbstractMaplePacketHandler {
     private static void denyPartyRequest(MapleCharacter character, MapleCharacter characterFrom) {
         if (MapleInviteCoordinator.answerInvite(InviteType.PARTY, character.getId(), characterFrom.getPartyId().orElse(-1), false).result == InviteResult.DENIED) {
             character.updatePartySearchAvailability(!character.hasParty());
-            characterFrom.announce(MaplePacketCreator.partyStatusMessage(23, character.getName()));
+            characterFrom.announce(CWvsContext.partyStatusMessage(23, character.getName()));
         }
     }
 }

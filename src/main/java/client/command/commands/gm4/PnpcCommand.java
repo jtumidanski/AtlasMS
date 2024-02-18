@@ -26,12 +26,12 @@ package client.command.commands.gm4;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CNpcPool;
 import net.server.channel.Channel;
 import server.life.MapleLifeFactory;
 import server.life.MapleNPC;
 import server.maps.MapleMap;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 
 import java.awt.*;
 import java.sql.Connection;
@@ -97,7 +97,7 @@ public class PnpcCommand extends Command {
 
                     MapleMap map = ch.getMapFactory().getMap(mapId);
                     map.addMapObject(npc);
-                    map.broadcastMessage(MaplePacketCreator.spawnNPC(npc));
+                    map.broadcastMessage(CNpcPool.spawnNPC(npc));
                 }
 
                 player.yellowMessage("Pnpc created.");

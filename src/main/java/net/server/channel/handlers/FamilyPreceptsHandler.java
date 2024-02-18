@@ -2,8 +2,8 @@ package net.server.channel.handlers;
 
 import client.MapleClient;
 import client.MapleFamily;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class FamilyPreceptsHandler extends AbstractMaplePacketHandler {
         }
         family.get().setMessage(newPrecepts, true);
         //family.broadcastFamilyInfoUpdate(); //probably don't need to broadcast for this?
-        c.announce(MaplePacketCreator.getFamilyInfo(c.getPlayer().getFamilyEntry()));
+        c.announce(CWvsContext.getFamilyInfo(c.getPlayer().getFamilyEntry()));
     }
 
 }

@@ -2,13 +2,13 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CUIMessenger;
 import net.AbstractMaplePacketHandler;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteResult;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import net.server.coordinator.world.MapleInviteCoordinator.MapleInviteResult;
 import net.server.world.MapleMessenger;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -87,12 +87,12 @@ public final class MessengerHandler extends AbstractMaplePacketHandler {
         Optional<MapleMessenger> messenger = c.getMessenger();
 
         if (messenger.isEmpty()) {
-            c.announce(MaplePacketCreator.messengerChat(c.getName() + " : This Maple Messenger is currently unavailable. Please quit this chat."));
+            c.announce(CUIMessenger.messengerChat(c.getName() + " : This Maple Messenger is currently unavailable. Please quit this chat."));
             return;
         }
 
         if (messenger.get().getMembers().size() >= 3) {
-            c.announce(MaplePacketCreator.messengerChat(c.getName() + " : You cannot have more than 3 people in the Maple Messenger"));
+            c.announce(CUIMessenger.messengerChat(c.getName() + " : You cannot have more than 3 people in the Maple Messenger"));
             return;
         }
 
@@ -102,22 +102,22 @@ public final class MessengerHandler extends AbstractMaplePacketHandler {
                 c.getWorldServer().messengerInvite(c.getName(), messenger.get().getId(), name, c.getClient().getChannel());
                 return;
             }
-            c.announce(MaplePacketCreator.messengerNote(name, 4, 0));
+            c.announce(CUIMessenger.messengerNote(name, 4, 0));
             return;
         }
 
         if (target.get().getMessenger().isPresent()) {
-            c.announce(MaplePacketCreator.messengerChat(c.getName() + " : " + name + " is already using Maple Messenger"));
+            c.announce(CUIMessenger.messengerChat(c.getName() + " : " + name + " is already using Maple Messenger"));
             return;
         }
 
         if (!MapleInviteCoordinator.createInvite(InviteType.MESSENGER, c, messenger.get().getId(), target.get().getId())) {
-            c.announce(MaplePacketCreator.messengerChat(c.getName() + " : " + name + " is already managing a Maple Messenger invitation"));
+            c.announce(CUIMessenger.messengerChat(c.getName() + " : " + name + " is already managing a Maple Messenger invitation"));
             return;
         }
 
-        target.get().announce(MaplePacketCreator.messengerInvite(c.getName(), messenger.get().getId()));
-        c.announce(MaplePacketCreator.messengerNote(name, 4, 1));
+        target.get().announce(CUIMessenger.messengerInvite(c.getName(), messenger.get().getId()));
+        c.announce(CUIMessenger.messengerNote(name, 4, 1));
     }
 
     private static void chat(MapleCharacter character, String input) {

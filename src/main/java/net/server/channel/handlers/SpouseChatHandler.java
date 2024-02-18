@@ -24,15 +24,15 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CField;
 import net.AbstractMaplePacketHandler;
 import tools.LogHelper;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class SpouseChatHandler extends AbstractMaplePacketHandler {
     private static void spouseChat(MapleClient c, String msg, MapleCharacter spouse) {
-        spouse.announce(MaplePacketCreator.OnCoupleMessage(c.getPlayer().getName(), msg, true));
-        c.announce(MaplePacketCreator.OnCoupleMessage(c.getPlayer().getName(), msg, true));
+        spouse.announce(CField.OnCoupleMessage(c.getPlayer().getName(), msg, true));
+        c.announce(CField.OnCoupleMessage(c.getPlayer().getName(), msg, true));
         if (YamlConfig.config.server.USE_ENABLE_CHAT_LOG) {
             LogHelper.logChat(c, "Spouse", msg);
         }

@@ -5,6 +5,8 @@ import client.MapleClient;
 import client.autoban.AutobanManager;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CMob;
+import connection.packets.CWvsContext;
 import constants.MonsterId;
 import constants.UseItemId;
 import constants.inventory.ItemConstants;
@@ -12,7 +14,6 @@ import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.ItemInformationProvider;
 import server.life.MapleMonster;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
@@ -46,7 +47,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
             case UseItemId.FISH_NET -> useFishNet(c, itemId, mob);
             default -> defaultCatchItem(c, itemId, mob);
         }
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CWvsContext.enableActions());
     }
 
     private static void defaultCatchItem(MapleClient c, int itemId, MapleMonster mob) {
@@ -70,7 +71,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
         } else if (mob.getId() != MonsterId.P_JUNIOR) {
             if (mobHp != 0) {
                 c.getPlayer().getAutobanManager().spam(10);
-                c.announce(MaplePacketCreator.catchMessage(0));
+                c.announce(CWvsContext.catchMessage(0));
             }
         } else {
             c.getPlayer().message("You cannot use the Fishing Net yet.");
@@ -97,7 +98,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
         }
 
         if (isMobTooStrongToCatch(mob, 0.4)) {
-            c.announce(MaplePacketCreator.catchMessage(0));
+            c.announce(CWvsContext.catchMessage(0));
             return;
         }
 
@@ -110,7 +111,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
         }
 
         if (isMobTooStrongToCatch(mob, 0.3)) {
-            c.announce(MaplePacketCreator.catchMessage(0));
+            c.announce(CWvsContext.catchMessage(0));
             return;
         }
 
@@ -123,7 +124,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
         }
 
         if (isMobTooStrongToCatch(mob, 0.3)) {
-            c.announce(MaplePacketCreator.catchMessage(0));
+            c.announce(CWvsContext.catchMessage(0));
             return;
         }
 
@@ -136,7 +137,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
         }
 
         if (isMobTooStrongToCatch(mob, 0.3)) {
-            c.announce(MaplePacketCreator.catchMessage(0));
+            c.announce(CWvsContext.catchMessage(0));
             return;
         }
 
@@ -144,7 +145,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
     }
 
     private static void performCatch(MapleClient c, MapleMonster mob, int catchItemId, int rewardItemId) {
-        c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.catchMonster(mob.getObjectId(), catchItemId, (byte) 1));
+        c.getPlayer().getMap().broadcastMessage(CMob.catchMonster(mob.getObjectId(), catchItemId, (byte) 1));
         mob.getMap().killMonster(mob, null, false);
         MapleInventoryManipulator.removeById(c, MapleInventoryType.USE, catchItemId, 1, true, true);
         MapleInventoryManipulator.addById(c, rewardItemId, (short) 1, "", -1);
@@ -166,7 +167,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
         }
 
         if (isMobTooStrongToCatch(mob, 0.4)) {
-            c.announce(MaplePacketCreator.catchMessage(0));
+            c.announce(CWvsContext.catchMessage(0));
             return;
         }
 
@@ -183,7 +184,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
         }
 
         if (isMobTooStrongToCatch(mob, 0.4)) {
-            c.announce(MaplePacketCreator.catchMessage(0));
+            c.announce(CWvsContext.catchMessage(0));
             return;
         }
 
@@ -191,7 +192,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
             if (Math.random() < 0.5) { // 50% chance
                 performCatch(c, mob, itemId, 4031868);
             } else {
-                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.catchMonster(mob.getObjectId(), itemId, (byte) 0));
+                c.getPlayer().getMap().broadcastMessage(CMob.catchMonster(mob.getObjectId(), itemId, (byte) 0));
             }
         } else {
             c.getPlayer().dropMessage(5, "Make a ETC slot available before using this item.");
@@ -211,7 +212,7 @@ public final class UseCatchItemHandler extends AbstractMaplePacketHandler {
 
         if (isMobTooStrongToCatch(mob, 0.4)) {
             c.getPlayer().getAutobanManager().spam(10);
-            c.announce(MaplePacketCreator.catchMessage(0));
+            c.announce(CWvsContext.catchMessage(0));
             return;
         }
 

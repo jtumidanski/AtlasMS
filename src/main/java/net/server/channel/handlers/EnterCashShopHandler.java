@@ -23,10 +23,12 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CCashShop;
+import connection.packets.CStage;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.maps.MapleMiniDungeonInfo;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -39,19 +41,19 @@ public class EnterCashShopHandler extends AbstractMaplePacketHandler {
             MapleCharacter mc = c.getPlayer();
 
             if (mc.cannotEnterCashShop()) {
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
             if (mc.getEventInstance().isPresent()) {
-                c.announce(MaplePacketCreator.serverNotice(5, "Entering Cash Shop or MTS are disabled when registered on an event."));
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.serverNotice(5, "Entering Cash Shop or MTS are disabled when registered on an event."));
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
             if (MapleMiniDungeonInfo.isDungeonMap(mc.getMapId())) {
-                c.announce(MaplePacketCreator.serverNotice(5, "Changing channels or entering Cash Shop or MTS are disabled when inside a Mini-Dungeon."));
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.serverNotice(5, "Changing channels or entering Cash Shop or MTS are disabled when inside a Mini-Dungeon."));
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
@@ -78,11 +80,11 @@ public class EnterCashShopHandler extends AbstractMaplePacketHandler {
             mc.forfeitExpirableQuests();
             mc.cancelQuestExpirationTask();
 
-            c.announce(MaplePacketCreator.openCashShop(c, false));
-            c.announce(MaplePacketCreator.showCashInventory(c));
-            c.announce(MaplePacketCreator.showGifts(mc.getCashShop().loadGifts()));
-            c.announce(MaplePacketCreator.showWishList(mc, false));
-            c.announce(MaplePacketCreator.showCash(mc));
+            c.announce(CStage.openCashShop(c, false));
+            c.announce(CCashShop.showCashInventory(c));
+            c.announce(CCashShop.showGifts(mc.getCashShop().loadGifts()));
+            c.announce(CCashShop.showWishList(mc, false));
+            c.announce(CCashShop.showCash(mc));
 
             c.getChannelServer().removePlayer(mc);
             mc.getMap().removePlayer(mc);

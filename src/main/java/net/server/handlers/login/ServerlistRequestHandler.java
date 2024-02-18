@@ -22,11 +22,11 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import constants.game.GameConstants;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import net.server.world.World;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.List;
@@ -40,10 +40,10 @@ public final class ServerlistRequestHandler extends AbstractMaplePacketHandler {
         c.requestedServerlist(worlds.size());
 
         for (World world : worlds) {
-            c.announce(MaplePacketCreator.getServerList(world.getId(), GameConstants.WORLD_NAMES[world.getId()], world.getFlag(), world.getEventMessage(), world.getChannels()));
+            c.announce(CLogin.getServerList(world.getId(), GameConstants.WORLD_NAMES[world.getId()], world.getFlag(), world.getEventMessage(), world.getChannels()));
         }
-        c.announce(MaplePacketCreator.getEndOfServerList());
-        c.announce(MaplePacketCreator.selectWorld(0));//too lazy to make a check lol
-        c.announce(MaplePacketCreator.sendRecommended(server.worldRecommendedList()));
+        c.announce(CLogin.getEndOfServerList());
+        c.announce(CLogin.selectWorld(0));//too lazy to make a check lol
+        c.announce(CLogin.sendRecommended(server.worldRecommendedList()));
     }
 }

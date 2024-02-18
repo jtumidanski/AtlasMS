@@ -23,11 +23,11 @@ package net.server.handlers.login;
 
 import client.MapleClient;
 import client.MapleFamily;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import tools.DatabaseConnection;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.sql.Connection;
@@ -56,12 +56,12 @@ public final class DeleteCharHandler extends AbstractMaplePacketHandler {
                 int guildRank = rs.getInt("guildrank");
                 int familyId = rs.getInt("familyId");
                 if (guildId != 0 && guildRank <= 1) {
-                    c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x16));
+                    c.announce(CLogin.deleteCharResponse(cid, 0x16));
                     return;
                 } else if (familyId != -1) {
                     MapleFamily family = Server.getInstance().getWorld(world).orElseThrow().getFamily(familyId);
                     if (family != null && family.getTotalMembers() > 1) {
-                        c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x1D));
+                        c.announce(CLogin.deleteCharResponse(cid, 0x1D));
                         return;
                     }
                 }
@@ -70,22 +70,22 @@ public final class DeleteCharHandler extends AbstractMaplePacketHandler {
                 rs = ps2.executeQuery();
                 rs.next();
                 if (rs.getInt("rowcount") > 0) {
-                    c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x1A));
+                    c.announce(CLogin.deleteCharResponse(cid, 0x1A));
                     return;
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-                c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x09));
+                c.announce(CLogin.deleteCharResponse(cid, 0x09));
                 return;
             }
             if (c.deleteCharacter(cid, c.getAccID())) {
                 FilePrinter.print(FilePrinter.DELETED_CHAR + c.getAccountName() + ".txt", c.getAccountName() + " deleted CID: " + cid);
-                c.announce(MaplePacketCreator.deleteCharResponse(cid, 0));
+                c.announce(CLogin.deleteCharResponse(cid, 0));
             } else {
-                c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x09));
+                c.announce(CLogin.deleteCharResponse(cid, 0x09));
             }
         } else {
-            c.announce(MaplePacketCreator.deleteCharResponse(cid, 0x14));
+            c.announce(CLogin.deleteCharResponse(cid, 0x14));
         }
     }
 }

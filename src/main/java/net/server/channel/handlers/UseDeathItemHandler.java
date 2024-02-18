@@ -22,8 +22,8 @@
 package net.server.channel.handlers;
 
 import client.MapleClient;
+import connection.packets.CUserRemote;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public final class UseDeathItemHandler extends AbstractMaplePacketHandler {
@@ -31,6 +31,6 @@ public final class UseDeathItemHandler extends AbstractMaplePacketHandler {
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         int itemId = slea.readInt();
         c.getPlayer().setItemEffect(itemId);
-        c.announce(MaplePacketCreator.itemEffect(c.getPlayer().getId(), itemId));
+        c.announce(CUserRemote.itemEffect(c.getPlayer().getId(), itemId));
     }
 }

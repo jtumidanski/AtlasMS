@@ -26,9 +26,9 @@ package client.command.commands.gm0;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Randomizer;
 
 public class GmCommand extends Command {
@@ -51,8 +51,8 @@ public class GmCommand extends Command {
             return;
         }
         String message = player.getLastCommandMessage();
-        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.sendYellowTip("[GM Message]:" + MapleCharacter.makeMapleReadable(player.getName()) + ": " + message));
-        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.serverNotice(1, message));
+        Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.sendYellowTip("[GM Message]:" + MapleCharacter.makeMapleReadable(player.getName()) + ": " + message));
+        Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.serverNotice(1, message));
         FilePrinter.printError(FilePrinter.COMMAND_GM, MapleCharacter.makeMapleReadable(player.getName()) + ": " + message);
         player.dropMessage(5, "Your message '" + message + "' was sent to GMs.");
         player.dropMessage(5, tips[Randomizer.nextInt(tips.length)]);

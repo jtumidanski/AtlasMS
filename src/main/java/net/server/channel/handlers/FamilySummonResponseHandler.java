@@ -5,13 +5,13 @@ import client.MapleClient;
 import client.MapleFamilyEntitlement;
 import client.MapleFamilyEntry;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.coordinator.world.MapleInviteCoordinator;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteResult;
 import net.server.coordinator.world.MapleInviteCoordinator.InviteType;
 import net.server.coordinator.world.MapleInviteCoordinator.MapleInviteResult;
 import server.maps.MapleMap;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public class FamilySummonResponseHandler extends AbstractMaplePacketHandler {
@@ -38,7 +38,7 @@ public class FamilySummonResponseHandler extends AbstractMaplePacketHandler {
         } else {
             inviterEntry.refundEntitlement(MapleFamilyEntitlement.SUMMON_FAMILY);
             inviterEntry.gainReputation(MapleFamilyEntitlement.SUMMON_FAMILY.getRepCost(), false); //refund rep cost if declined
-            inviter.announce(MaplePacketCreator.getFamilyInfo(inviterEntry));
+            inviter.announce(CWvsContext.getFamilyInfo(inviterEntry));
             inviter.dropMessage(5, c.getPlayer().getName() + " has denied the summon request.");
         }
     }

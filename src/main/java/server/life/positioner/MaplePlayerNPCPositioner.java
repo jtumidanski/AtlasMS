@@ -20,13 +20,13 @@
 package server.life.positioner;
 
 import config.YamlConfig;
+import connection.packets.CNpcPool;
 import net.server.Server;
 import net.server.channel.Channel;
 import server.life.MaplePlayerNPC;
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
-import tools.MaplePacketCreator;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -150,8 +150,8 @@ public class MaplePlayerNPCPositioner {
 
                 for (MaplePlayerNPC pn : playerNpcs) {
                     m.removeMapObject(pn);
-                    m.broadcastMessage(MaplePacketCreator.removeNPCController(pn.getObjectId()));
-                    m.broadcastMessage(MaplePacketCreator.removePlayerNPC(pn.getObjectId()));
+                    m.broadcastMessage(CNpcPool.removeNPCController(pn.getObjectId()));
+                    m.broadcastMessage(CNpcPool.removePlayerNPC(pn.getObjectId()));
                 }
             }
 
@@ -162,8 +162,8 @@ public class MaplePlayerNPCPositioner {
 
                 for (MaplePlayerNPC pn : playerNpcs) {
                     m.addPlayerNPCMapObject(pn);
-                    m.broadcastMessage(MaplePacketCreator.spawnPlayerNPC(pn));
-                    m.broadcastMessage(MaplePacketCreator.getPlayerNPC(pn));
+                    m.broadcastMessage(CNpcPool.spawnPlayerNPC(pn));
+                    m.broadcastMessage(CNpcPool.getPlayerNPC(pn));
                 }
             }
 

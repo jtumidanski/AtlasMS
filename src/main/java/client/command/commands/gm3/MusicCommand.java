@@ -26,9 +26,10 @@ package client.command.commands.gm3;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CField;
+import connection.packets.CScriptMan;
 import constants.game.GameConstants;
 import constants.net.NPCTalkMessageType;
-import tools.MaplePacketCreator;
 
 public class MusicCommand extends Command {
     {
@@ -55,7 +56,7 @@ public class MusicCommand extends Command {
             sendMsg += "Syntax: #r!music <song>#k\r\n\r\n";
             sendMsg += getSongList();
 
-            c.announce(MaplePacketCreator.getNPCTalk(1052015, NPCTalkMessageType.ON_SAY, sendMsg, "00 00", (byte) 0));
+            c.announce(CScriptMan.getNPCTalk(1052015, NPCTalkMessageType.ON_SAY, sendMsg, "00 00", (byte) 0));
             return;
         }
 
@@ -63,7 +64,7 @@ public class MusicCommand extends Command {
         for (String s : GameConstants.GAME_SONGS) {
             if (s.equalsIgnoreCase(song)) {    // thanks Masterrulax for finding an issue here
                 player.getMap()
-                        .broadcastMessage(MaplePacketCreator.musicChange(s));
+                        .broadcastMessage(CField.musicChange(s));
                 player.yellowMessage("Now playing song " + s + ".");
                 return;
             }
@@ -73,6 +74,6 @@ public class MusicCommand extends Command {
         sendMsg += "Song not found, please enter a song below.\r\n\r\n";
         sendMsg += getSongList();
 
-        c.announce(MaplePacketCreator.getNPCTalk(1052015, NPCTalkMessageType.ON_SAY, sendMsg, "00 00", (byte) 0));
+        c.announce(CScriptMan.getNPCTalk(1052015, NPCTalkMessageType.ON_SAY, sendMsg, "00 00", (byte) 0));
     }
 }

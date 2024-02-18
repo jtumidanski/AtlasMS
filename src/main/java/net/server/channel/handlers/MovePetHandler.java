@@ -23,8 +23,8 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CPet;
 import server.movement.LifeMovementFragment;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.exceptions.EmptyMovementException;
 
@@ -49,6 +49,6 @@ public final class MovePetHandler extends AbstractMovementPacketHandler {
             return;
         }
         player.getPet(slot).ifPresent(p -> p.updatePosition(res));
-        player.getMap().broadcastMessage(player, MaplePacketCreator.movePet(player.getId(), petId, slot, res), false);
+        player.getMap().broadcastMessage(player, CPet.movePet(player.getId(), petId, slot, res), false);
     }
 }

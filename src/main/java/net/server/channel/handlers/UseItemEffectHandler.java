@@ -24,8 +24,8 @@ package net.server.channel.handlers;
 import client.MapleClient;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
+import connection.packets.CUserRemote;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -46,6 +46,6 @@ public final class UseItemEffectHandler extends AbstractMaplePacketHandler {
             }
         }
         c.getPlayer().setItemEffect(itemId);
-        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.itemEffect(c.getPlayer().getId(), itemId), false);
+        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), CUserRemote.itemEffect(c.getPlayer().getId(), itemId), false);
     }
 }

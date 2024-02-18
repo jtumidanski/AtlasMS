@@ -21,7 +21,7 @@
 */
 package net.server.guild;
 
-import tools.MaplePacketCreator;
+import connection.packets.CWvsContext;
 
 public enum MapleGuildResponse {
     NOT_IN_CHANNEL(0x2a),
@@ -39,9 +39,9 @@ public enum MapleGuildResponse {
 
     public final byte[] getPacket(String targetName) {
         if (value >= MANAGING_INVITE.value) {
-            return MaplePacketCreator.responseGuildMessage((byte) value, targetName);
+            return CWvsContext.responseGuildMessage((byte) value, targetName);
         } else {
-            return MaplePacketCreator.genericGuildMessage((byte) value);
+            return CWvsContext.genericGuildMessage((byte) value);
         }
     }
 }

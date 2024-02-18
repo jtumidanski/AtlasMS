@@ -22,8 +22,8 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -40,7 +40,7 @@ public final class OpenFamilyPedigreeHandler extends AbstractMaplePacketHandler 
                 .getCharacterByName(slea.readMapleAsciiString())
                 .filter(t -> t.getFamily().isPresent())
                 .map(MapleCharacter::getFamilyEntry)
-                .map(MaplePacketCreator::showPedigree)
+                .map(CWvsContext::showPedigree)
                 .ifPresent(c::announce);
     }
 }

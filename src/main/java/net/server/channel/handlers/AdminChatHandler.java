@@ -2,9 +2,9 @@ package net.server.channel.handlers;
 
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import tools.LogHelper;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 public class AdminChatHandler extends AbstractMaplePacketHandler {
@@ -16,7 +16,7 @@ public class AdminChatHandler extends AbstractMaplePacketHandler {
         }
         byte mode = slea.readByte();
         String message = slea.readMapleAsciiString();
-        byte[] packet = MaplePacketCreator.serverNotice(slea.readByte(), message);
+        byte[] packet = CWvsContext.serverNotice(slea.readByte(), message);
 
         switch (mode) {
             case 0:// /alertall, /noticeall, /slideall

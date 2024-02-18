@@ -31,6 +31,10 @@ import client.inventory.Item;
 import client.inventory.ItemFactory;
 import client.inventory.MaplePet;
 import config.YamlConfig;
+import connection.packets.CField;
+import connection.packets.CScriptMan;
+import connection.packets.CStoreBankDlg;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import constants.net.NPCTalkMessageType;
@@ -70,7 +74,6 @@ import server.partyquest.Pyramid;
 import server.partyquest.Pyramid.PyramidMode;
 import tools.FilePrinter;
 import tools.LogHelper;
-import tools.MaplePacketCreator;
 import tools.packets.Wedding;
 
 import java.awt.*;
@@ -151,23 +154,23 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void dispose() {
         NPCScriptManager.getInstance().dispose(this);
-        getClient().announce(MaplePacketCreator.enableActions());
+        getClient().announce(CWvsContext.enableActions());
     }
 
     public void sendNext(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 01", (byte) 0));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 01", (byte) 0));
     }
 
     public void sendPrev(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 00", (byte) 0));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 00", (byte) 0));
     }
 
     public void sendNextPrev(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 01", (byte) 0));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 01", (byte) 0));
     }
 
     public void sendOk(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 00", (byte) 0));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 00", (byte) 0));
     }
 
     public void sendDefault() {
@@ -175,48 +178,48 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void sendYesNo(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO, text, "", (byte) 0));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO, text, "", (byte) 0));
     }
 
     public void sendAcceptDecline(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO_ALT, text, "", (byte) 0));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO_ALT, text, "", (byte) 0));
     }
 
     public void sendSimple(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_MENU, text, "", (byte) 0));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_MENU, text, "", (byte) 0));
     }
 
     public void sendNext(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 01", speaker));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 01", speaker));
     }
 
     public void sendPrev(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 00", speaker));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 00", speaker));
     }
 
     public void sendNextPrev(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 01", speaker));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "01 01", speaker));
     }
 
     public void sendOk(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 00", speaker));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_SAY, text, "00 00", speaker));
     }
 
     public void sendYesNo(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO, text, "", speaker));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO, text, "", speaker));
     }
 
     public void sendAcceptDecline(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO_ALT, text, "", speaker));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_YES_NO_ALT, text, "", speaker));
     }
 
     public void sendSimple(String text, byte speaker) {
-        getClient().announce(MaplePacketCreator.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_MENU, text, "", speaker));
+        getClient().announce(CScriptMan.getNPCTalk(npc, NPCTalkMessageType.ON_ASK_MENU, text, "", speaker));
     }
 
     public void sendStyle(String text, int[] styles) {
         if (styles.length > 0) {
-            getClient().announce(MaplePacketCreator.getNPCTalkStyle(npc, text, styles));
+            getClient().announce(CScriptMan.getNPCTalkStyle(npc, text, styles));
         } else {    // thanks Conrad for noticing empty styles crashing players
             sendOk("Sorry, there are no options of cosmetics available for you here at the moment.");
             dispose();
@@ -224,11 +227,11 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void sendGetNumber(String text, int def, int min, int max) {
-        getClient().announce(MaplePacketCreator.getNPCTalkNum(npc, text, def, min, max));
+        getClient().announce(CScriptMan.getNPCTalkNum(npc, text, def, min, max));
     }
 
     public void sendGetText(String text) {
-        getClient().announce(MaplePacketCreator.getNPCTalkText(npc, text, ""));
+        getClient().announce(CScriptMan.getNPCTalkText(npc, text, ""));
     }
 
     /*
@@ -241,7 +244,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
      * 6 = Kerning Subway
      */
     public void sendDimensionalMirror(String text) {
-        getClient().announce(MaplePacketCreator.getDimensionalMirror(text));
+        getClient().announce(CScriptMan.getDimensionalMirror(text));
     }
 
     public void setGetText(String text) {
@@ -296,7 +299,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     @Override
     public void showEffect(String effect) {
-        getPlayer().getMap().broadcastMessage(MaplePacketCreator.environmentChange(effect, 3));
+        getPlayer().getMap().broadcastMessage(CField.environmentChange(effect, 3));
     }
 
     public void setHair(int hair) {
@@ -429,7 +432,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         LogHelper.logGacha(getPlayer(), item.getId(), map);
 
         if (item.getTier() > 0) { //Uncommon and Rare
-            Server.getInstance().broadcastMessage(c.getWorld(), MaplePacketCreator.gachaponMessage(itemGained, map, getPlayer()));
+            Server.getInstance().broadcastMessage(c.getWorld(), CWvsContext.gachaponMessage(itemGained, map, getPlayer()));
         }
     }
 
@@ -442,9 +445,9 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     private void upgradeAlliance(MapleAlliance alliance) {
         alliance.increaseCapacity(1);
-        Server.getInstance().allianceMessage(alliance.getId(), MaplePacketCreator.getGuildAlliances(alliance, c.getWorld()), -1, -1);
-        Server.getInstance().allianceMessage(alliance.getId(), MaplePacketCreator.allianceNotice(alliance.getId(), alliance.getNotice()), -1, -1);
-        c.announce(MaplePacketCreator.updateAllianceInfo(alliance, c.getWorld()));  // thanks Vcoc for finding an alliance update to leader issue
+        Server.getInstance().allianceMessage(alliance.getId(), CWvsContext.getGuildAlliances(alliance, c.getWorld()), -1, -1);
+        Server.getInstance().allianceMessage(alliance.getId(), CWvsContext.allianceNotice(alliance.getId(), alliance.getNotice()), -1, -1);
+        c.announce(CWvsContext.updateAllianceInfo(alliance, c.getWorld()));  // thanks Vcoc for finding an alliance update to leader issue
     }
 
     public void disbandAlliance(MapleClient c, int allianceId) {
@@ -488,7 +491,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void showFredrick() {
-        c.announce(MaplePacketCreator.getFredrick(getPlayer()));
+        c.announce(CStoreBankDlg.getFredrick(getPlayer()));
     }
 
     public int partyMembersInMap() {
@@ -709,7 +712,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
                 final MapleCharacter mc = mpc.getPlayer().get();
                 mc.setChallenged(false);
                 mc.changeMap(map, map.getPortal(0));
-                mc.announce(MaplePacketCreator.serverNotice(6, LanguageConstants.getMessage(mc, LanguageConstants.CPQEntryLobby)));
+                mc.announce(CWvsContext.serverNotice(6, LanguageConstants.getMessage(mc, LanguageConstants.CPQEntryLobby)));
                 TimerManager.getInstance().schedule(() -> mapClock(3 * 60), 1500);
                 mc.setCpqTimer(TimerManager.getInstance().schedule(() -> mc.changeMap(mapExit, mapExit.getPortal(0)), 3 * 60 * 1000));
             }
@@ -962,7 +965,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
                     .forEach(c -> {
                         c.setChallenged(false);
                         c.changeMap(map, map.getPortal(0));
-                        c.announce(MaplePacketCreator.serverNotice(6, LanguageConstants.getMessage(c, LanguageConstants.CPQEntryLobby)));
+                        c.announce(CWvsContext.serverNotice(6, LanguageConstants.getMessage(c, LanguageConstants.CPQEntryLobby)));
                         TimerManager.getInstance().schedule(() -> mapClock(3 * 60), 1500);
                         c.setCpqTimer(TimerManager.getInstance().schedule(() -> c.changeMap(mapExit, mapExit.getPortal(0)), 3 * 60 * 1000));
                     });
@@ -972,7 +975,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void mapClock(int time) {
-        getPlayer().getMap().broadcastMessage(MaplePacketCreator.getClock(time));
+        getPlayer().getMap().broadcastMessage(CField.getClock(time));
     }
 
     private boolean sendCPQChallenge(String cpqType, int leaderid) {

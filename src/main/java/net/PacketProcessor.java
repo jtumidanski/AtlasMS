@@ -21,7 +21,7 @@
  */
 package net;
 
-import net.opcodes.RecvOpcode;
+import connection.constants.RecvOpcode;
 import net.server.channel.handlers.AcceptFamilyHandler;
 import net.server.channel.handlers.AdminChatHandler;
 import net.server.channel.handlers.AdminCommandHandler;
@@ -164,13 +164,9 @@ import net.server.channel.handlers.UseSolomonHandler;
 import net.server.channel.handlers.UseSummonBagHandler;
 import net.server.channel.handlers.UseWaterOfLifeHandler;
 import net.server.channel.handlers.WeddingHandler;
-import net.server.channel.handlers.WeddingTalkHandler;
-import net.server.channel.handlers.WeddingTalkMoreHandler;
 import net.server.channel.handlers.WhisperHandler;
-import net.server.handlers.CustomPacketHandler;
 import net.server.handlers.KeepAliveHandler;
 import net.server.handlers.LoginRequiringNoOpHandler;
-import net.server.handlers.NoOpHandler;
 import net.server.handlers.login.AcceptToSHandler;
 import net.server.handlers.login.AfterLoginHandler;
 import net.server.handlers.login.CharSelectedHandler;

@@ -22,8 +22,8 @@
 package net.server.channel.handlers;
 
 import client.MapleClient;
+import connection.packets.CField;
 import net.AbstractMaplePacketHandler;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -31,6 +31,6 @@ import tools.data.input.SeekableLittleEndianAccessor;
  */
 public final class UseHammerHandler extends AbstractMaplePacketHandler {
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        c.announce(MaplePacketCreator.sendHammerMessage());
+        c.announce(CField.sendHammerMessage());
     }
 }

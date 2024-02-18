@@ -22,9 +22,9 @@
 package server.life;
 
 import client.MapleClient;
+import connection.packets.CNpcPool;
 import server.MapleShopFactory;
 import server.maps.MapleMapObjectType;
-import tools.MaplePacketCreator;
 
 public class MapleNPC extends AbstractLoadedMapleLife {
     private MapleNPCStats stats;
@@ -44,14 +44,14 @@ public class MapleNPC extends AbstractLoadedMapleLife {
 
     @Override
     public void sendSpawnData(MapleClient client) {
-        client.announce(MaplePacketCreator.spawnNPC(this));
-        client.announce(MaplePacketCreator.spawnNPCRequestController(this, true));
+        client.announce(CNpcPool.spawnNPC(this));
+        client.announce(CNpcPool.spawnNPCRequestController(this, true));
     }
 
     @Override
     public void sendDestroyData(MapleClient client) {
-        client.announce(MaplePacketCreator.removeNPCController(getObjectId()));
-        client.announce(MaplePacketCreator.removeNPC(getObjectId()));
+        client.announce(CNpcPool.removeNPCController(getObjectId()));
+        client.announce(CNpcPool.removeNPC(getObjectId()));
     }
 
     @Override

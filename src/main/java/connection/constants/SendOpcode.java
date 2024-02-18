@@ -19,7 +19,7 @@
  You should have received a copy of the GNU Affero General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.opcodes;
+package connection.constants;
 
 public enum SendOpcode {
 
@@ -41,8 +41,8 @@ public enum SendOpcode {
     CHAR_NAME_RESPONSE(0x0D), // CLogin::OnCheckDuplicatedIDResult
     ADD_NEW_CHAR_ENTRY(0x0E), // CLogin::OnCreateNewCharacterResult
     DELETE_CHAR_RESPONSE(0x0F), // CLogin::OnDeleteCharacterResult
-    CHANGE_CHANNEL(0x10),
-    PING(0x11),
+    CHANGE_CHANNEL(0x10), // CClientSocket::OnMigrateCommand
+    PING(0x11), // CClientSocket::OnAliveReq
     KOREAN_INTERNET_CAFE_SHIT(0x12),
     CHANNEL_SELECTED(0x14),
     HACKSHIELD_REQUEST(0x15),

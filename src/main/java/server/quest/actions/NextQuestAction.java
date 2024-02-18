@@ -23,11 +23,11 @@ package server.quest.actions;
 
 import client.MapleCharacter;
 import client.MapleQuestStatus;
+import connection.packets.CUserLocal;
 import provider.MapleData;
 import provider.MapleDataTool;
 import server.quest.MapleQuest;
 import server.quest.MapleQuestActionType;
-import tools.MaplePacketCreator;
 
 /**
  * @author Tyler (Twdtwd)
@@ -49,6 +49,6 @@ public class NextQuestAction extends MapleQuestAction {
     @Override
     public void run(MapleCharacter chr, Integer extSelection) {
         MapleQuestStatus status = chr.getQuest(MapleQuest.getInstance(questID));
-        chr.announce(MaplePacketCreator.updateQuestFinish((short) questID, status.getNpc(), (short) nextQuest));
+        chr.announce(CUserLocal.updateQuestFinish((short) questID, status.getNpc(), (short) nextQuest));
     }
 } 

@@ -25,10 +25,10 @@ import client.MapleClient;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import server.ItemInformationProvider;
 import server.life.MapleLifeFactory;
-import tools.MaplePacketCreator;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -41,7 +41,7 @@ public final class UseSummonBagHandler extends AbstractMaplePacketHandler {
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         //[4A 00][6C 4C F2 02][02 00][63 0B 20 00]
         if (!c.getPlayer().isAlive()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
         slea.readInt();
@@ -58,6 +58,6 @@ public final class UseSummonBagHandler extends AbstractMaplePacketHandler {
                 }
             }
         }
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CWvsContext.enableActions());
     }
 }

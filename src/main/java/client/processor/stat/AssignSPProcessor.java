@@ -28,10 +28,10 @@ import client.MapleClient;
 import client.Skill;
 import client.SkillFactory;
 import client.autoban.AutobanFactory;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import constants.skills.Aran;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 
 /**
  * @author RonanLana - synchronization of SP transaction modules
@@ -40,7 +40,7 @@ public class AssignSPProcessor {
 
     public static boolean canSPAssign(MapleClient c, int skillid) {
         if (skillid == Aran.HIDDEN_FULL_DOUBLE || skillid == Aran.HIDDEN_FULL_TRIPLE || skillid == Aran.HIDDEN_OVER_DOUBLE || skillid == Aran.HIDDEN_OVER_TRIPLE) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return false;
         }
 
@@ -81,7 +81,7 @@ public class AssignSPProcessor {
                 if (!isBeginnerSkill) {
                     player.gainSp(-1, GameConstants.getSkillBook(skillid / 10000), false);
                 } else {
-                    player.announce(MaplePacketCreator.enableActions());
+                    player.announce(CWvsContext.enableActions());
                 }
                 if (skill.id() == Aran.FULL_SWING) {
                     player.changeSkillLevel(skill, (byte) (curLevel + 1), player.getMasterLevel(skill), player.getSkillExpiration(skill));

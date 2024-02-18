@@ -30,11 +30,12 @@ import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import client.inventory.manipulator.MapleKarmaManipulator;
 import config.YamlConfig;
+import connection.packets.CTrunkDlg;
+import connection.packets.CWvsContext;
 import constants.inventory.ItemConstants;
 import server.ItemInformationProvider;
 import server.MapleStorage;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -53,7 +54,7 @@ public class StorageProcessor {
 
         if (chr.getLevel() < 15) {
             chr.dropMessage(1, "You may only use the storage once you have reached level 15.");
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
@@ -78,13 +79,13 @@ public class StorageProcessor {
                     Item item = storage.getItem(slot);
                     if (item != null) {
                         if (ii.isPickupRestricted(item.getItemId()) && chr.haveItemWithId(item.getItemId(), true)) {
-                            c.announce(MaplePacketCreator.getStorageError((byte) 0x0C));
+                            c.announce(CTrunkDlg.getStorageError((byte) 0x0C));
                             return;
                         }
 
                         int takeoutFee = storage.getTakeOutFee();
                         if (chr.getMeso() < takeoutFee) {
-                            c.announce(MaplePacketCreator.getStorageError((byte) 0x0B));
+                            c.announce(CTrunkDlg.getStorageError((byte) 0x0B));
                             return;
                         } else {
                             chr.gainMeso(-takeoutFee, false);
@@ -102,11 +103,11 @@ public class StorageProcessor {
 
                                 storage.sendTakenOut(c, item.getInventoryType());
                             } else {
-                                c.announce(MaplePacketCreator.enableActions());
+                                c.announce(CWvsContext.enableActions());
                                 return;
                             }
                         } else {
-                            c.announce(MaplePacketCreator.getStorageError((byte) 0x0A));
+                            c.announce(CTrunkDlg.getStorageError((byte) 0x0A));
                         }
                     }
                 } else if (mode == 5) { // store
@@ -122,17 +123,17 @@ public class StorageProcessor {
                         return;
                     }
                     if (quantity < 1) {
-                        c.announce(MaplePacketCreator.enableActions());
+                        c.announce(CWvsContext.enableActions());
                         return;
                     }
                     if (storage.isFull()) {
-                        c.announce(MaplePacketCreator.getStorageError((byte) 0x11));
+                        c.announce(CTrunkDlg.getStorageError((byte) 0x11));
                         return;
                     }
 
                     int storeFee = storage.getStoreFee();
                     if (chr.getMeso() < storeFee) {
-                        c.announce(MaplePacketCreator.getStorageError((byte) 0x0B));
+                        c.announce(CTrunkDlg.getStorageError((byte) 0x0B));
                     } else {
                         Item item;
 
@@ -141,7 +142,7 @@ public class StorageProcessor {
                             item = inv.getItem(slot);
                             if (item != null && item.getItemId() == itemId && (item.getQuantity() >= quantity || ItemConstants.isRechargeable(itemId))) {
                                 if (ItemConstants.isWeddingRing(itemId) || ItemConstants.isWeddingToken(itemId)) {
-                                    c.announce(MaplePacketCreator.enableActions());
+                                    c.announce(CWvsContext.enableActions());
                                     return;
                                 }
 
@@ -151,7 +152,7 @@ public class StorageProcessor {
 
                                 MapleInventoryManipulator.removeFromSlot(c, invType, slot, quantity, false);
                             } else {
-                                c.announce(MaplePacketCreator.enableActions());
+                                c.announce(CWvsContext.enableActions());
                                 return;
                             }
 
@@ -177,7 +178,7 @@ public class StorageProcessor {
                     if (YamlConfig.config.server.USE_STORAGE_ITEM_SORT) {
                         storage.arrangeItems(c);
                     }
-                    c.announce(MaplePacketCreator.enableActions());
+                    c.announce(CWvsContext.enableActions());
                 } else if (mode == 7) { // meso
                     int meso = slea.readInt();
                     int storageMesos = storage.getMeso();
@@ -186,13 +187,13 @@ public class StorageProcessor {
                         if (meso < 0 && (storageMesos - meso) < 0) {
                             meso = Integer.MIN_VALUE + storageMesos;
                             if (meso < playerMesos) {
-                                c.announce(MaplePacketCreator.enableActions());
+                                c.announce(CWvsContext.enableActions());
                                 return;
                             }
                         } else if (meso > 0 && (playerMesos + meso) < 0) {
                             meso = Integer.MAX_VALUE - playerMesos;
                             if (meso > storageMesos) {
-                                c.announce(MaplePacketCreator.enableActions());
+                                c.announce(CWvsContext.enableActions());
                                 return;
                             }
                         }
@@ -202,7 +203,7 @@ public class StorageProcessor {
                         FilePrinter.print(FilePrinter.STORAGE + c.getPlayer().getName() + ".txt", c.getPlayer().getName() + (meso > 0 ? " took out " : " stored ") + Math.abs(meso) + " mesos");
                         storage.sendMeso(c);
                     } else {
-                        c.announce(MaplePacketCreator.enableActions());
+                        c.announce(CWvsContext.enableActions());
                         return;
                     }
                 } else if (mode == 8) {// close... unless the player decides to enter cash shop!

@@ -22,9 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.events.gm;
 
 import client.MapleCharacter;
+import connection.packets.CField;
+import connection.packets.CFieldSnowBall;
 import server.TimerManager;
 import server.maps.MapleMap;
-import tools.MaplePacketCreator;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -60,8 +61,8 @@ public class MapleSnowball {
 
         for (MapleCharacter chr : characters) {
             if (chr != null) {
-                chr.announce(MaplePacketCreator.rollSnowBall(false, 1, map.getSnowball(0), map.getSnowball(1)));
-                chr.announce(MaplePacketCreator.getClock(600));
+                chr.announce(CFieldSnowBall.rollSnowBall(false, 1, map.getSnowball(0), map.getSnowball(1)));
+                chr.announce(CField.getClock(600));
             }
         }
         hittable = true;
@@ -69,14 +70,14 @@ public class MapleSnowball {
             if (map.getSnowball(team).getPosition() > map.getSnowball(team == 0 ? 1 : 0).getPosition()) {
                 for (MapleCharacter chr : characters) {
                     if (chr != null) {
-                        chr.announce(MaplePacketCreator.rollSnowBall(false, 3, map.getSnowball(0), map.getSnowball(0)));
+                        chr.announce(CFieldSnowBall.rollSnowBall(false, 3, map.getSnowball(0), map.getSnowball(0)));
                     }
                 }
                 winner = true;
             } else if (map.getSnowball(team == 0 ? 1 : 0).getPosition() > map.getSnowball(team).getPosition()) {
                 for (MapleCharacter chr : characters) {
                     if (chr != null) {
-                        chr.announce(MaplePacketCreator.rollSnowBall(false, 4, map.getSnowball(0), map.getSnowball(0)));
+                        chr.announce(CFieldSnowBall.rollSnowBall(false, 4, map.getSnowball(0), map.getSnowball(0)));
                     }
                 }
                 winner = true;
@@ -121,7 +122,7 @@ public class MapleSnowball {
                 } else {
                     this.snowmanhp -= damage;
                 }
-                map.broadcastMessage(MaplePacketCreator.rollSnowBall(false, 1, map.getSnowball(0), map.getSnowball(1)));
+                map.broadcastMessage(CFieldSnowBall.rollSnowBall(false, 1, map.getSnowball(0), map.getSnowball(1)));
             }
         }
 
@@ -136,16 +137,16 @@ public class MapleSnowball {
             }
 
             this.hits = 3;
-            map.broadcastMessage(MaplePacketCreator.rollSnowBall(false, 0, map.getSnowball(0), map.getSnowball(1)));
-            map.broadcastMessage(MaplePacketCreator.rollSnowBall(false, 1, map.getSnowball(0), map.getSnowball(1)));
+            map.broadcastMessage(CFieldSnowBall.rollSnowBall(false, 0, map.getSnowball(0), map.getSnowball(1)));
+            map.broadcastMessage(CFieldSnowBall.rollSnowBall(false, 1, map.getSnowball(0), map.getSnowball(1)));
         }
-        map.broadcastMessage(MaplePacketCreator.hitSnowBall(what, damage));
+        map.broadcastMessage(CFieldSnowBall.hitSnowBall(what, damage));
     }
 
     public void message(int message) {
         for (MapleCharacter chr : characters) {
             if (chr != null) {
-                chr.announce(MaplePacketCreator.snowballMessage(team, message));
+                chr.announce(CFieldSnowBall.snowballMessage(team, message));
             }
         }
     }

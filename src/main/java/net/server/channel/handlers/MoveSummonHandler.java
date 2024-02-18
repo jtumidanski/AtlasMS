@@ -23,8 +23,8 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CSummonedPool;
 import server.maps.MapleSummon;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.exceptions.EmptyMovementException;
 
@@ -52,7 +52,7 @@ public final class MoveSummonHandler extends AbstractMovementPacketHandler {
                 long movementDataLength = slea.getPosition() - movementDataStart; //how many bytes were read by updatePosition
                 slea.seek(movementDataStart);
 
-                player.getMap().broadcastMessage(player, MaplePacketCreator.moveSummon(player.getId(), oid, startPos, slea, movementDataLength), summon.getPosition());
+                player.getMap().broadcastMessage(player, CSummonedPool.moveSummon(player.getId(), oid, startPos, slea, movementDataLength), summon.getPosition());
             } catch (EmptyMovementException e) {
             }
         }

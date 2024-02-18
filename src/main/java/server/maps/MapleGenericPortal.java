@@ -23,12 +23,12 @@ package server.maps;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import net.server.audit.locks.MonitoredLockType;
 import net.server.audit.locks.MonitoredReentrantLock;
 import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
 import scripting.portal.PortalScriptManager;
-import tools.MaplePacketCreator;
 
 import java.awt.*;
 
@@ -156,7 +156,7 @@ public class MapleGenericPortal implements MaplePortal {
             }
         }
         if (!changed) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
         }
     }
 

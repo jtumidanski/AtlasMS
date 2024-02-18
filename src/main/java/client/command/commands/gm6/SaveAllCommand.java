@@ -26,9 +26,9 @@ package client.command.commands.gm6;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.command.Command;
+import connection.packets.CWvsContext;
 import net.server.Server;
 import net.server.world.World;
-import tools.MaplePacketCreator;
 
 public class SaveAllCommand extends Command {
     {
@@ -44,7 +44,7 @@ public class SaveAllCommand extends Command {
             }
         }
         String message = player.getName() + " used !saveall.";
-        Server.getInstance().broadcastGMMessage(c.getWorld(), MaplePacketCreator.serverNotice(5, message));
+        Server.getInstance().broadcastGMMessage(c.getWorld(), CWvsContext.serverNotice(5, message));
         player.message("All players saved successfully.");
     }
 }

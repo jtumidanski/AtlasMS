@@ -27,13 +27,15 @@ import client.inventory.Equip;
 import client.inventory.Item;
 import client.processor.action.BuybackProcessor;
 import config.YamlConfig;
+import connection.packets.CField;
+import connection.packets.CStage;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.MTSItemInfo;
 import server.maps.FieldLimit;
 import server.maps.MapleMiniDungeonInfo;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.sql.Connection;
@@ -51,38 +53,38 @@ public final class EnterMTSHandler extends AbstractMaplePacketHandler {
 
         if (!chr.isAlive() && YamlConfig.config.server.USE_BUYBACK_SYSTEM) {
             BuybackProcessor.processBuyback(c);
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
         } else {
             if (!YamlConfig.config.server.USE_MTS) {
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
             if (chr.getEventInstance().isPresent()) {
-                c.announce(MaplePacketCreator.serverNotice(5, "Entering Cash Shop or MTS are disabled when registered on an event."));
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.serverNotice(5, "Entering Cash Shop or MTS are disabled when registered on an event."));
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
             if (MapleMiniDungeonInfo.isDungeonMap(chr.getMapId())) {
-                c.announce(MaplePacketCreator.serverNotice(5, "Changing channels or entering Cash Shop or MTS are disabled when inside a Mini-Dungeon."));
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.serverNotice(5, "Changing channels or entering Cash Shop or MTS are disabled when inside a Mini-Dungeon."));
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
             if (FieldLimit.CANNOTMIGRATE.check(chr.getMap().getFieldLimit())) {
                 chr.dropMessage(1, "You can't do it here in this map.");
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
             if (!chr.isAlive()) {
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
                 return;
             }
             if (chr.getLevel() < 10) {
-                c.announce(MaplePacketCreator.blockedMessage2(5));
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CField.blockedMessage2(5));
+                c.announce(CWvsContext.enableActions());
                 return;
             }
 
@@ -110,14 +112,14 @@ public final class EnterMTSHandler extends AbstractMaplePacketHandler {
             c.getChannelServer().removePlayer(chr);
             chr.getMap().removePlayer(c.getPlayer());
             try {
-                c.announce(MaplePacketCreator.openCashShop(c, true));
+                c.announce(CStage.openCashShop(c, true));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
             chr.getCashShop().open(true);// xD
             c.enableCSActions();
-            c.announce(MaplePacketCreator.MTSWantedListingOver(0, 0));
-            c.announce(MaplePacketCreator.showMTSCash(c.getPlayer()));
+            c.announce(CField.MTSWantedListingOver(0, 0));
+            c.announce(CField.showMTSCash(c.getPlayer()));
             List<MTSItemInfo> items = new ArrayList<>();
             int pages = 0;
             try {
@@ -175,9 +177,9 @@ public final class EnterMTSHandler extends AbstractMaplePacketHandler {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            c.announce(MaplePacketCreator.sendMTS(items, 1, 0, 0, pages));
-            c.announce(MaplePacketCreator.transferInventory(getTransfer(chr.getId())));
-            c.announce(MaplePacketCreator.notYetSoldInv(getNotYetSold(chr.getId())));
+            c.announce(CField.sendMTS(items, 1, 0, 0, pages));
+            c.announce(CField.transferInventory(getTransfer(chr.getId())));
+            c.announce(CField.notYetSoldInv(getNotYetSold(chr.getId())));
         }
     }
 

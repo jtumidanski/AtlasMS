@@ -24,10 +24,10 @@ package net.server.channel.handlers;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.MaplePet;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import server.maps.MapleMapItem;
 import server.maps.MapleMapObject;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.Optional;
@@ -45,7 +45,7 @@ public final class PetLootHandler extends AbstractMaplePacketHandler {
         int petIndex = chr.getPetIndex(slea.readInt());
         Optional<MaplePet> pet = chr.getPet(petIndex);
         if (pet.isEmpty() || !pet.get().isSummoned()) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
@@ -56,27 +56,27 @@ public final class PetLootHandler extends AbstractMaplePacketHandler {
             MapleMapItem mapitem = (MapleMapItem) ob;
             if (mapitem.getMeso() > 0) {
                 if (!chr.isEquippedMesoMagnet()) {
-                    c.announce(MaplePacketCreator.enableActions());
+                    c.announce(CWvsContext.enableActions());
                     return;
                 }
 
                 if (chr.isEquippedPetItemIgnore()) {
                     final Set<Integer> petIgnore = chr.getExcludedItems();
                     if (!petIgnore.isEmpty() && petIgnore.contains(Integer.MAX_VALUE)) {
-                        c.announce(MaplePacketCreator.enableActions());
+                        c.announce(CWvsContext.enableActions());
                         return;
                     }
                 }
             } else {
                 if (!chr.isEquippedItemPouch()) {
-                    c.announce(MaplePacketCreator.enableActions());
+                    c.announce(CWvsContext.enableActions());
                     return;
                 }
 
                 if (chr.isEquippedPetItemIgnore()) {
                     final Set<Integer> petIgnore = chr.getExcludedItems();
                     if (!petIgnore.isEmpty() && petIgnore.contains(mapitem.getItem().getItemId())) {
-                        c.announce(MaplePacketCreator.enableActions());
+                        c.announce(CWvsContext.enableActions());
                         return;
                     }
                 }
@@ -84,7 +84,7 @@ public final class PetLootHandler extends AbstractMaplePacketHandler {
 
             chr.pickupItem(ob, petIndex);
         } catch (NullPointerException | ClassCastException e) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
         }
     }
 }

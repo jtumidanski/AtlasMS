@@ -27,6 +27,7 @@ import client.inventory.Equip;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import config.YamlConfig;
+import connection.packets.CMob;
 import constants.inventory.ItemConstants;
 import scripting.AbstractPlayerInteraction;
 import scripting.event.EventInstanceManager;
@@ -41,7 +42,6 @@ import server.maps.MapleReactor;
 import server.maps.ReactorDropEntry;
 import server.partyquest.MapleCarnivalFactory;
 import server.partyquest.MapleCarnivalFactory.MCSkill;
-import tools.MaplePacketCreator;
 
 import javax.script.Invocable;
 import javax.script.ScriptException;
@@ -303,7 +303,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
 
             if (chr != null) {
                 map.damageMonster(chr, mm, damage);
-                map.broadcastMessage(MaplePacketCreator.damageMonster(mm.getObjectId(), damage));
+                map.broadcastMessage(CMob.damageMonster(mm.getObjectId(), damage));
             }
         }
     }

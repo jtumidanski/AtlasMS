@@ -23,6 +23,7 @@ package net;
 
 import client.MapleClient;
 import config.YamlConfig;
+import connection.packets.CClientSocket;
 import constants.net.ServerConstants;
 import net.server.Server;
 import net.server.audit.LockCollector;
@@ -37,7 +38,6 @@ import server.TimerManager;
 import tools.FilePrinter;
 import tools.MapleAESOFB;
 import tools.MapleLogger;
-import tools.MaplePacketCreator;
 import tools.data.input.ByteArrayByteStream;
 import tools.data.input.GenericSeekableLittleEndianAccessor;
 import tools.data.input.SeekableLittleEndianAccessor;
@@ -143,7 +143,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
         client.setWorld(world);
         client.setChannel(channel);
         client.setSessionId(sessionId.getAndIncrement()); // Generates a reasonable session id.
-        session.write(MaplePacketCreator.getHello(ServerConstants.VERSION, ivSend, ivRecv));
+        session.write(CClientSocket.getHello(ServerConstants.VERSION, ivSend, ivRecv));
         session.setAttribute(MapleClient.CLIENT_KEY, client);
     }
 
@@ -220,7 +220,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
         if (idleLock.tryLock()) {
             try {
                 idleSessions.put(c, Server.getInstance().getCurrentTime());
-                c.announce(MaplePacketCreator.getPing());
+                c.announce(CClientSocket.getPing());
             } finally {
                 idleLock.unlock();
             }
@@ -228,7 +228,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
             tempLock.lock();
             try {
                 tempIdleSessions.put(c, Server.getInstance().getCurrentTime());
-                c.announce(MaplePacketCreator.getPing());
+                c.announce(CClientSocket.getPing());
             } finally {
                 tempLock.unlock();
             }

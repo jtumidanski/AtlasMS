@@ -29,10 +29,10 @@ import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.ModifyInventory;
 import config.YamlConfig;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
 import server.ItemInformationProvider;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.util.ArrayList;
@@ -277,7 +277,7 @@ public final class InventorySortHandler extends AbstractMaplePacketHandler {
         chr.getAutobanManager().setTimestamp(3, Server.getInstance().getCurrentTimestamp(), 4);
 
         if (!YamlConfig.config.server.USE_ITEM_SORT) {
-            c.announce(MaplePacketCreator.enableActions());
+            c.announce(CWvsContext.enableActions());
             return;
         }
 
@@ -324,8 +324,8 @@ public final class InventorySortHandler extends AbstractMaplePacketHandler {
             inventory.unlockInventory();
         }
 
-        c.announce(MaplePacketCreator.modifyInventory(true, mods));
-        c.announce(MaplePacketCreator.finishedSort2(invType));
-        c.announce(MaplePacketCreator.enableActions());
+        c.announce(CWvsContext.modifyInventory(true, mods));
+        c.announce(CWvsContext.finishedSort2(invType));
+        c.announce(CWvsContext.enableActions());
     }
 }

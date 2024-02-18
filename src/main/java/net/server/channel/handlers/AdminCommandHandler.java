@@ -26,6 +26,8 @@ import client.MapleClient;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import connection.packets.CField;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import server.ItemInformationProvider;
 import server.life.MapleLifeFactory;
@@ -33,7 +35,6 @@ import server.life.MapleMonster;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 import server.quest.MapleQuest;
-import tools.MaplePacketCreator;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -50,12 +51,12 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
     }
 
     private static void sendWarningMessage(MapleClient client, MapleCharacter target, String message) {
-        target.announce(MaplePacketCreator.serverNotice(1, message));
-        client.announce(MaplePacketCreator.getGMEffect(0x1E, (byte) 1));
+        target.announce(CWvsContext.serverNotice(1, message));
+        client.announce(CField.getGMEffect(0x1E, (byte) 1));
     }
 
     private static void sendWarningMessage(MapleClient c) {
-        c.announce(MaplePacketCreator.getGMEffect(0x1E, (byte) 0));
+        c.announce(CField.getGMEffect(0x1E, (byte) 0));
     }
 
     private static void performHide(MapleClient c, byte hide) {
@@ -96,7 +97,7 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
                         c.getPlayer().getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(toSpawnChild[0]), c.getPlayer().getPosition());
                     }
                 }
-                c.announce(MaplePacketCreator.enableActions());
+                c.announce(CWvsContext.enableActions());
                 break;
             case 0x01: { // /d (inv)
                 byte typeIndex = slea.readByte();
@@ -138,11 +139,11 @@ public final class AdminCommandHandler extends AbstractMaplePacketHandler {
                         target.get().block(type, duration, description);
                         target.get().sendPolice(duration, reason, 6000);
                     }
-                    c.announce(MaplePacketCreator.getGMEffect(4, (byte) 0));
+                    c.announce(CField.getGMEffect(4, (byte) 0));
                 } else if (MapleCharacter.ban(victim, reason, false)) {
-                    c.announce(MaplePacketCreator.getGMEffect(4, (byte) 0));
+                    c.announce(CField.getGMEffect(4, (byte) 0));
                 } else {
-                    c.announce(MaplePacketCreator.getGMEffect(6, (byte) 1));
+                    c.announce(CField.getGMEffect(6, (byte) 1));
                 }
                 break;
             case 0x10: // /h, information added by vana -- <and tele mode f1> ... hide ofcourse

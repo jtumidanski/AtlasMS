@@ -40,7 +40,7 @@ import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
 import provider.MapleDataTool;
 import tools.DatabaseConnection;
-//import tools.MaplePacketCreator;
+//import connection.packets.MaplePacketCreator;
 import tools.Pair;
 //import client.MapleCharacter;
 //import client.MapleClient;

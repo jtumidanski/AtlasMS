@@ -22,9 +22,9 @@
 package net.server.handlers.login;
 
 import client.MapleClient;
+import connection.packets.CLogin;
 import net.AbstractMaplePacketHandler;
 import net.server.coordinator.session.MapleSessionCoordinator;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /*
@@ -41,7 +41,7 @@ public final class RegisterPinHandler extends AbstractMaplePacketHandler {
             String pin = slea.readMapleAsciiString();
             if (pin != null) {
                 c.setPin(pin);
-                c.announce(MaplePacketCreator.pinRegistered());
+                c.announce(CLogin.pinRegistered());
 
                 MapleSessionCoordinator.getInstance().closeSession(c.getSession(), null);
                 c.updateLoginState(MapleClient.LOGIN_NOTLOGGEDIN);

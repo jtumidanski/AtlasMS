@@ -29,10 +29,10 @@ import client.CharacterIdNameBuddyCapacity;
 import client.CharacterNameAndId;
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import net.server.world.World;
 import tools.DatabaseConnection;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 import java.sql.Connection;
@@ -47,7 +47,7 @@ public class BuddylistModifyHandler extends AbstractMaplePacketHandler {
     private void nextPendingRequest(MapleClient c) {
         CharacterNameAndId pendingBuddyRequest = c.getPlayer().getBuddylist().pollPendingRequest();
         if (pendingBuddyRequest != null) {
-            c.announce(MaplePacketCreator.requestBuddylistAdd(pendingBuddyRequest.id(), c.getPlayer().getId(), pendingBuddyRequest.name()));
+            c.announce(CWvsContext.requestBuddylistAdd(pendingBuddyRequest.id(), c.getPlayer().getId(), pendingBuddyRequest.name()));
         }
     }
 
@@ -99,7 +99,7 @@ public class BuddylistModifyHandler extends AbstractMaplePacketHandler {
                     }
                     if (otherName != null) {
                         buddylist.put(new BuddylistEntry(otherName, "Default Group", otherCid, channel, true));
-                        c.announce(MaplePacketCreator.updateBuddylist(buddylist.getBuddies()));
+                        c.announce(CWvsContext.updateBuddylist(buddylist.getBuddies()));
                         notifyRemoteChannel(c, channel, otherCid, ADDED);
                     }
                 } catch (SQLException e) {
@@ -121,18 +121,18 @@ public class BuddylistModifyHandler extends AbstractMaplePacketHandler {
         Optional<BuddylistEntry> buddy = buddyList.get(addName);
         if (buddy.isPresent()) {
             if (!buddy.get().isVisible() && group.equals(buddy.get().getGroup())) {
-                c.announce(MaplePacketCreator.serverNotice(1, "You already have \"" + buddy.get().getName() + "\" on your Buddylist"));
+                c.announce(CWvsContext.serverNotice(1, "You already have \"" + buddy.get().getName() + "\" on your Buddylist"));
                 return;
             }
 
 
             buddy.get().changeGroup(group);
-            c.announce(MaplePacketCreator.updateBuddylist(buddyList.getBuddies()));
+            c.announce(CWvsContext.updateBuddylist(buddyList.getBuddies()));
             return;
         }
 
         if (buddyList.isFull()) {
-            c.announce(MaplePacketCreator.serverNotice(1, "Your buddylist is already full"));
+            c.announce(CWvsContext.serverNotice(1, "Your buddylist is already full"));
             return;
         }
 
@@ -176,7 +176,7 @@ public class BuddylistModifyHandler extends AbstractMaplePacketHandler {
                     con.close();
                 }
                 if (buddyAddResult == BuddyAddResult.BUDDYLIST_FULL) {
-                    c.announce(MaplePacketCreator.serverNotice(1, "\"" + addName + "\"'s Buddylist is full"));
+                    c.announce(CWvsContext.serverNotice(1, "\"" + addName + "\"'s Buddylist is full"));
                 } else {
                     int displayChannel;
                     displayChannel = -1;
@@ -194,10 +194,10 @@ public class BuddylistModifyHandler extends AbstractMaplePacketHandler {
                         con.close();
                     }
                     buddyList.put(new BuddylistEntry(charWithId.name(), group, otherCid, displayChannel, true));
-                    c.announce(MaplePacketCreator.updateBuddylist(buddyList.getBuddies()));
+                    c.announce(CWvsContext.updateBuddylist(buddyList.getBuddies()));
                 }
             } else {
-                c.announce(MaplePacketCreator.serverNotice(1, "A character called \"" + addName + "\" does not exist"));
+                c.announce(CWvsContext.serverNotice(1, "A character called \"" + addName + "\" does not exist"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -23,9 +23,9 @@ package net.server.channel.handlers;
 
 import client.MapleCharacter;
 import client.MapleClient;
+import connection.packets.CWvsContext;
 import net.AbstractMaplePacketHandler;
 import server.maps.FieldLimit;
-import tools.MaplePacketCreator;
 import tools.data.input.SeekableLittleEndianAccessor;
 
 /**
@@ -45,7 +45,7 @@ public final class TrockAddMapHandler extends AbstractMaplePacketHandler {
             } else {
                 chr.deleteFromTrocks(mapId);
             }
-            c.announce(MaplePacketCreator.trockRefreshMapList(chr, true, vip));
+            c.announce(CWvsContext.trockRefreshMapList(chr, true, vip));
         } else if (type == 0x01) {
             if (!FieldLimit.CANNOTVIPROCK.check(chr.getMap().getFieldLimit())) {
                 if (vip) {
@@ -54,7 +54,7 @@ public final class TrockAddMapHandler extends AbstractMaplePacketHandler {
                     chr.addTrockMap();
                 }
 
-                c.announce(MaplePacketCreator.trockRefreshMapList(chr, false, vip));
+                c.announce(CWvsContext.trockRefreshMapList(chr, false, vip));
             } else {
                 chr.message("You may not save this map.");
             }

@@ -26,13 +26,15 @@ import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import config.YamlConfig;
+import connection.packets.CUser;
+import connection.packets.CUserLocal;
+import connection.packets.CWvsContext;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
 import server.MakerItemFactory;
 import server.MakerItemFactory.MakerItemCreateEntry;
 import server.ItemInformationProvider;
 import tools.FilePrinter;
-import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.data.input.SeekableLittleEndianAccessor;
 
@@ -64,8 +66,8 @@ public class MakerProcessor {
                     int fromLeftover = toCreate;
                     toCreate = ii.getMakerCrystalFromLeftover(toCreate);
                     if (toCreate == -1) {
-                        c.announce(MaplePacketCreator.serverNotice(1, ii.getName(fromLeftover) + " is unavailable for Monster Crystal conversion."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, ii.getName(fromLeftover) + " is unavailable for Monster Crystal conversion."));
+                        c.announce(CUserLocal.makerEnableActions());
                         return;
                     }
 
@@ -82,13 +84,13 @@ public class MakerProcessor {
                         if (p != null) {
                             recipe = MakerItemFactory.generateDisassemblyCrystalEntry(toDisassemble, p.getLeft(), p.getRight());
                         } else {
-                            c.announce(MaplePacketCreator.serverNotice(1, ii.getName(toCreate) + " is unavailable for Monster Crystal disassembly."));
-                            c.announce(MaplePacketCreator.makerEnableActions());
+                            c.announce(CWvsContext.serverNotice(1, ii.getName(toCreate) + " is unavailable for Monster Crystal disassembly."));
+                            c.announce(CUserLocal.makerEnableActions());
                             return;
                         }
                     } else {
-                        c.announce(MaplePacketCreator.serverNotice(1, "An unknown error occurred when trying to apply that item for disassembly."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, "An unknown error occurred when trying to apply that item for disassembly."));
+                        c.announce(CUserLocal.makerEnableActions());
                         return;
                     }
                 } else {
@@ -135,8 +137,8 @@ public class MakerProcessor {
 
                         if (!reagentids.isEmpty()) {
                             if (!removeOddMakerReagents(toCreate, reagentids)) {
-                                c.announce(MaplePacketCreator.serverNotice(1, "You can only use WATK and MATK Strengthening Gems on weapon items."));
-                                c.announce(MaplePacketCreator.makerEnableActions());
+                                c.announce(CWvsContext.serverNotice(1, "You can only use WATK and MATK Strengthening Gems on weapon items."));
+                                c.announce(CUserLocal.makerEnableActions());
                                 return;
                             }
                         }
@@ -150,33 +152,33 @@ public class MakerProcessor {
                 switch (createStatus) {
                     case -1:// non-available for Maker itemid has been tried to forge
                         FilePrinter.printError(FilePrinter.EXPLOITS, "Player " + c.getPlayer().getName() + " tried to craft itemid " + toCreate + " using the Maker skill.");
-                        c.announce(MaplePacketCreator.serverNotice(1, "The requested item could not be crafted on this operation."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, "The requested item could not be crafted on this operation."));
+                        c.announce(CUserLocal.makerEnableActions());
                         break;
 
                     case 1: // no items
-                        c.announce(MaplePacketCreator.serverNotice(1, "You don't have all required items in your inventory to make " + ii.getName(toCreate) + "."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, "You don't have all required items in your inventory to make " + ii.getName(toCreate) + "."));
+                        c.announce(CUserLocal.makerEnableActions());
                         break;
 
                     case 2: // no meso
-                        c.announce(MaplePacketCreator.serverNotice(1, "You don't have enough mesos (" + GameConstants.numberWithCommas(recipe.getCost()) + ") to complete this operation."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, "You don't have enough mesos (" + GameConstants.numberWithCommas(recipe.getCost()) + ") to complete this operation."));
+                        c.announce(CUserLocal.makerEnableActions());
                         break;
 
                     case 3: // no req level
-                        c.announce(MaplePacketCreator.serverNotice(1, "You don't have enough level to complete this operation."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, "You don't have enough level to complete this operation."));
+                        c.announce(CUserLocal.makerEnableActions());
                         break;
 
                     case 4: // no req skill level
-                        c.announce(MaplePacketCreator.serverNotice(1, "You don't have enough Maker level to complete this operation."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, "You don't have enough Maker level to complete this operation."));
+                        c.announce(CUserLocal.makerEnableActions());
                         break;
 
                     case 5: // inventory full
-                        c.announce(MaplePacketCreator.serverNotice(1, "Your inventory is full."));
-                        c.announce(MaplePacketCreator.makerEnableActions());
+                        c.announce(CWvsContext.serverNotice(1, "Your inventory is full."));
+                        c.announce(CUserLocal.makerEnableActions());
                         break;
 
                     default:
@@ -215,15 +217,15 @@ public class MakerProcessor {
 
                         // thanks inhyuk for noticing missing MAKER_RESULT packets
                         if (type == 3) {
-                            c.announce(MaplePacketCreator.makerResultCrystal(recipe.getGainItems().get(0).getLeft(), recipe.getReqItems().get(0).getLeft()));
+                            c.announce(CUserLocal.makerResultCrystal(recipe.getGainItems().get(0).getLeft(), recipe.getReqItems().get(0).getLeft()));
                         } else if (type == 4) {
-                            c.announce(MaplePacketCreator.makerResultDesynth(recipe.getReqItems().get(0).getLeft(), recipe.getCost(), recipe.getGainItems()));
+                            c.announce(CUserLocal.makerResultDesynth(recipe.getReqItems().get(0).getLeft(), recipe.getCost(), recipe.getGainItems()));
                         } else {
-                            c.announce(MaplePacketCreator.makerResult(makerSucceeded, recipe.getGainItems().get(0).getLeft(), recipe.getGainItems().get(0).getRight(), recipe.getCost(), recipe.getReqItems(), stimulantid, new LinkedList<>(reagentids.keySet())));
+                            c.announce(CUserLocal.makerResult(makerSucceeded, recipe.getGainItems().get(0).getLeft(), recipe.getGainItems().get(0).getRight(), recipe.getCost(), recipe.getReqItems(), stimulantid, new LinkedList<>(reagentids.keySet())));
                         }
 
-                        c.announce(MaplePacketCreator.showMakerEffect(makerSucceeded));
-                        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.showForeignMakerEffect(c.getPlayer().getId(), makerSucceeded), false);
+                        c.announce(CUser.showMakerEffect(makerSucceeded));
+                        c.getPlayer().getMap().broadcastMessage(c.getPlayer(), CUser.showForeignMakerEffect(c.getPlayer().getId(), makerSucceeded), false);
 
                         if (toCreate == 4260003 && type == 3 && c.getPlayer().getQuestStatus(6033) == 1) {
                             c.getAbstractPlayerInteraction().setQuestProgress(6033, 1);
