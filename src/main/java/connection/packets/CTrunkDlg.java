@@ -8,7 +8,7 @@ import tools.data.output.MaplePacketLittleEndianWriter;
 import java.util.Collection;
 
 public class CTrunkDlg {
-    static byte[] getStorage(int npcId, byte slots, Collection<Item> items, int meso) {
+    public static byte[] getStorage(int npcId, byte slots, Collection<Item> items, int meso) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.STORAGE.getValue());
         mplew.write(0x16);
@@ -33,14 +33,14 @@ public class CTrunkDlg {
      * 0x0B = You do not have enough mesos
      * 0x0C = One-Of-A-Kind error
      */
-    static byte[] getStorageError(byte i) {
+    public static byte[] getStorageError(byte i) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.STORAGE.getValue());
         mplew.write(i);
         return mplew.getPacket();
     }
 
-    static byte[] mesoStorage(byte slots, int meso) {
+    public static byte[] mesoStorage(byte slots, int meso) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.STORAGE.getValue());
         mplew.write(0x13);
@@ -52,7 +52,7 @@ public class CTrunkDlg {
         return mplew.getPacket();
     }
 
-    static byte[] storeStorage(byte slots, MapleInventoryType type, Collection<Item> items) {
+    public static byte[] storeStorage(byte slots, MapleInventoryType type, Collection<Item> items) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.STORAGE.getValue());
         mplew.write(0xD);
@@ -67,7 +67,7 @@ public class CTrunkDlg {
         return mplew.getPacket();
     }
 
-    static byte[] takeOutStorage(byte slots, MapleInventoryType type, Collection<Item> items) {
+    public static byte[] takeOutStorage(byte slots, MapleInventoryType type, Collection<Item> items) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendOpcode.STORAGE.getValue());
         mplew.write(0x9);
@@ -82,7 +82,7 @@ public class CTrunkDlg {
         return mplew.getPacket();
     }
 
-    static byte[] arrangeStorage(byte slots, Collection<Item> items) {
+    public static byte[] arrangeStorage(byte slots, Collection<Item> items) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
         mplew.writeShort(SendOpcode.STORAGE.getValue());

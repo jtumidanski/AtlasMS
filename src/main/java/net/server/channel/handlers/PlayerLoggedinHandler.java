@@ -180,6 +180,7 @@ public final class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
     @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         final int cid = slea.readInt();
+        System.out.printf("PlayerLoggedInHandler cid=[%d].", cid);
         final Server server = Server.getInstance();
 
         if (c.tryacquireClient()) { // thanks MedicOP for assisting on concurrency protection here

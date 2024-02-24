@@ -47,8 +47,7 @@ public class CClientSocket
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(8);
         mplew.writeShort(0x0E);
         mplew.writeShort(mapleVersion);
-        mplew.writeShort(1);
-        mplew.write(49);
+        mplew.writeMapleAsciiString("1");
         mplew.write(recvIv);
         mplew.write(sendIv);
         mplew.write(8);
